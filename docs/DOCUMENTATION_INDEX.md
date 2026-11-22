@@ -6,6 +6,7 @@
 
 | Need | Canonical document | Status |
 | --- | --- | --- |
+| Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and P3 next step |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 22.8% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |

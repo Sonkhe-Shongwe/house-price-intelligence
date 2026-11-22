@@ -30,6 +30,10 @@ Prepare and review, in order:
 
 **P3 exits only when those contracts and decisions have been reviewed and accepted.** Then start P4: curated SQL ingestion and one real browser-to-database investigation path. Work on unresolved P0–P2 quality gates may continue in parallel.
 
+## Continuation protocol
+
+For future ChatGPT or coding sessions, start with the [Master Continuation Prompt](MASTER_CONTINUATION_PROMPT.md), using [AGENTS.md](../AGENTS.md) where supported. It restores the latest authoritative state, mandates evidence-checked work, distinguishes local from remote changes and respects approval boundaries. **This is a process/documentation improvement only:** P3 and the 22.8% weighted delivery baseline remain unchanged. This note does not establish the state of the owner's uninspected Windows clone.
+
 ## Where to continue
 
 - [Documentation index](DOCUMENTATION_INDEX.md)

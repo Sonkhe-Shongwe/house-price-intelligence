@@ -28,6 +28,7 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | --- | --- |
 | [Documentation index](docs/DOCUMENTATION_INDEX.md) | Which document to trust; current versus historical material |
 | [Current checkpoint](docs/CHECKPOINT.md) | Verified status, blockers and next engineering task |
+| [Master continuation prompt](docs/MASTER_CONTINUATION_PROMPT.md) | Reusable instructions for resuming this project in a new session |
 | [P0–P8 roadmap](docs/P_PHASE_ROADMAP.md) | Phase acceptance gates, weights and progress rules |
 | [Roadmap summary](docs/ROADMAP.md) | Concise percentage table |
 | [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
