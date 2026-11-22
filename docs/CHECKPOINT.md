@@ -1,15 +1,31 @@
-# Current project checkpoint
+# House Price Intelligence: current development checkpoint
 
-**As of 22 November 2026**
+**Last updated: 22 November 2026**
 
-**GitHub publication:** The standalone project repository is now at https://github.com/Sonkhe-Shongwe/house-price-intelligence on `main`. The initial 21 files were verified against the migration package; the seven offline tests also pass locally. The repository is currently **public**. See [GitHub setup](GITHUB_SETUP.md) for correct clone instructions. The live API extraction remains unverified.
+Project 2 has an independent repository and a verified real-data audit. The South African graduate-programme research repo is separate and has not been changed for these software development steps.
 
-**Objective:** Build House Price Intelligence as a functioning product, not just a machine-learning notebook. Preserve the pinnacle but prove the data and one bounded buyer journey first.
+## Completed
 
-**Migrated:** Project brief and pinnacle framing, dataset feasibility research and source register, phase 0 Python audit, seven unit tests, run instructions, audit checkpoint and implementation decision history. Original docs in the private SA Tech Graduate Playbook have not been deleted or modified.
+- Phase 0 official Cook County data extraction on user's Windows PC: 3,539 sales and 39,401 residential-characteristic records for the chosen area and period.
+- Phase 0 original audit uncovered an integral-decimal parsing defect, now fixed with tests.
+- Phase 0 v2: 2,583 screened sales, 1,285 accepted prior-year joins, of which 273 were Class 203.
+- Original 20-subject sample: 19 supported by 3+ township-wide comparisons across several classes; **not Class 203-only**.
+- See [the evidence and limitations](research/PHASE0_LIVE_AUDIT_RESULTS.md).
 
-**Verified locally:** Existing audit tests pass on fabricated records. **Not verified:** network download of live Cook County datasets, actual counts and coverage, publishing rights of each field, trained models, final app backend/frontend/database, deployment.
+## In progress
 
-**Immediate next step:** From `audit/phase0`, run the offline tests, then `python audit.py --township 17 --start 2022-01-01 --end 2025-01-01 --out output` on a computer that can reach the Cook County API. Inspect and return the generated report/errors. Do not commit `output/`.
+- Phase 1 targeted geographical and physical-property enrichment for those Class 203 PIN/year keys; script and offline unit tests prepared.
+- Historical matching: compare baseline township-wide and exact assessor-neighborhood results on the same 2024 subject sales.
+- Live Phase 1 API extraction and evaluation **have not yet been run**. No final technology stack chosen; no app or valuation model is implemented.
 
-**Decision gate:** The next substantive project decision depends on measured joins, real-data exclusions, geographical coverage, data terms and representative comparable examples.
+## Next user command
+
+From repository root after `git pull origin main`:
+
+```powershell
+cd audit\phase1
+python -m unittest discover -s tests -v
+python expand.py --phase0 ..\phase0\output --out output
+```
+
+Then share only `audit/phase1/output/phase1_summary.json` and `phase1_report.md`. Avoid uploading full raw property datasets and never commit output directories.
