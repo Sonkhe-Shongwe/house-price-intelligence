@@ -1,0 +1,73 @@
+{
+  "contract_version": "p3-draft-v0.2",
+  "status": "supported_neighbourhood",
+  "reason": "at_least_three_local_sales",
+  "tier": "same_neighborhood",
+  "analysis_date": "2024-07-01",
+  "subject": {
+    "pin": "00000000000001",
+    "building_area_sqft": 1600.0,
+    "asking_price_usd": "650000.00",
+    "label": "First option",
+    "asking_price_source": "user_reported"
+  },
+  "selected_count": 3,
+  "comparables": [
+    {
+      "pin": "00000000000002",
+      "document": "DOC00000000000002",
+      "sale_date": "2024-02-01",
+      "sale_price": 525000,
+      "size_difference_pct": 0.0,
+      "age_days": 151,
+      "distance_km": 0.0,
+      "same_neighborhood": true,
+      "explanation": "same assessor neighborhood; floor area differs by 0.0%; sale 151 days earlier",
+      "source_type": "recorded_sale",
+      "characteristics_year": 2023
+    },
+    {
+      "pin": "00000000000003",
+      "document": "DOC00000000000003",
+      "sale_date": "2024-02-01",
+      "sale_price": 525000,
+      "size_difference_pct": 0.0,
+      "age_days": 151,
+      "distance_km": 0.0,
+      "same_neighborhood": true,
+      "explanation": "same assessor neighborhood; floor area differs by 0.0%; sale 151 days earlier",
+      "source_type": "recorded_sale",
+      "characteristics_year": 2023
+    },
+    {
+      "pin": "00000000000004",
+      "document": "DOC00000000000004",
+      "sale_date": "2024-02-01",
+      "sale_price": 525000,
+      "size_difference_pct": 0.0,
+      "age_days": 151,
+      "distance_km": 0.0,
+      "same_neighborhood": true,
+      "explanation": "same assessor neighborhood; floor area differs by 0.0%; sale 151 days earlier",
+      "source_type": "recorded_sale",
+      "characteristics_year": 2023
+    }
+  ],
+  "evidence_details_redacted": false,
+  "data_build": {
+    "build_id": "fixture-build-2024-a",
+    "built_at_utc": "2026-11-22T16:00:00Z",
+    "source_kind": "synthetic_fixture",
+    "source_snapshot_ids": [
+      "fixture-sales",
+      "fixture-geography",
+      "fixture-buildings"
+    ],
+    "historical_as_of_verified": false,
+    "public_property_display_approved": false
+  },
+  "valuation": null,
+  "warnings": [
+    "Historical source records may have been revised or backfilled; recorded sale date is not publication date."
+  ]
+}

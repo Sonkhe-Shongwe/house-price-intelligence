@@ -1,0 +1,38 @@
+"""Run a LOCAL-only, disposable synthetic investigation HTTP demo.
+
+Invocation (explicit opt-in):
+  python -m backend.run_synthetic_api --fixture-only --port 8765
+
+No real data, user accounts, password, map/address search or production hardening.
+"""
+from __future__ import annotations
+
+import argparse
+from wsgiref.simple_server import make_server
+
+from backend.synthetic_demo import in_memory_demo
+from backend.synthetic_http import create_app
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fixture-only", action="store_true", help="Required; never serve real source data")
+    parser.add_argument("--port", type=int, default=8765)
+    args = parser.parse_args()
+    if not args.fixture_only:
+        parser.error("This demonstrator requires the explicit --fixture-only opt-in")
+    if not 1024 <= args.port <= 65535:
+        parser.error("Port must be between 1024 and 65535")
+    conn, store = in_memory_demo()
+    try:
+        # Deliberately no option to bind to 0.0.0.0 or a remote interface.
+        with make_server("127.0.0.1", args.port, create_app(store)) as server:
+            print(f"Fixture-only API at http://127.0.0.1:{args.port}/health")
+            print("WARNING: invented records, no auth, no CORS, NOT FOR DEPLOYMENT")
+            server.serve_forever()
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,9 +1,11 @@
-# Frontend: P3 interaction contract pending
+# Frontend: synthetic-only property investigation browser
 
-**Status (22 November 2026):** No buyer-facing browser UI exists. Phase 0–2 research produced historical comparable-selection evidence, not a finished product.
+**Status (22 November 2026):** A plain HTML/CSS/JavaScript *demonstration* is included with the P3 fixture-only HTTP service. It is not a deployed consumer product, validated address search or proof of browser graphical acceptance.
 
-The proposed first user journey is: enter a supported property and a **user-reported** asking price; inspect ranked historical sales and selection reasons; see neighbourhood versus exploratory-spatial support or an insufficient-evidence state; save and compare at least two property investigations.
+The page accepts an invented 14-digit parcel PIN, user-reported asking price and investigation date. It presents synthetic comparable-sale evidence, source-build details, neighbourhood versus exploratory fallback warnings, insufficient/out-of-coverage states, and reopens saved fixture results by investigation ID. No numeric property valuation is generated.
 
-The P3 input/response and data-rights decisions must be agreed before finalising a UI framework. Do not display experimental spatial-fallback medians as reliable valuations, imply live listings, or treat research data as approved public property content.
+Start with `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repository root, then visit `http://127.0.0.1:8765/`. The HTTP and asset tests have been exercised locally; a genuine graphical browser journey remains unverified because the prior Chromium environment was blocked.
 
-See [product brief](../docs/product/PRODUCT_BRIEF.md), [P0–P8 roadmap](../docs/P_PHASE_ROADMAP.md) and [current checkpoint](../docs/CHECKPOINT.md).
+**Not implemented:** trusted address search, map-based lookup, user accounts, shortlist/side-by-side user workflow, publisher-data display rights, current prices or production deployment.
+
+See the [P3 application contract](../docs/engineering/P3_APPLICATION_CONTRACT.md), [product brief](../docs/product/PRODUCT_BRIEF.md) and [current checkpoint](../docs/CHECKPOINT.md).

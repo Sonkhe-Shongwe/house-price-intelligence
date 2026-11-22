@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="House Price Intelligence synthetic property investigation workspace.">
+  <title>House Price Intelligence | Research Workspace</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="House Price Intelligence home">
+        <div class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="brand-name">house<span>price</span><strong>intelligence</strong></div>
+      </div>
+      <div class="header-right">
+        <span class="header-desc">PROPERTY RESEARCH WORKSPACE</span>
+        <span class="demo-badge"><span class="pulse" aria-hidden="true"></span> SYNTHETIC DEMO</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumb">RESEARCH LAB <span>/</span> PROPERTY INVESTIGATIONS <span>/</span> PILOT 01</div>
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow"><span class="eyebrow-mark"></span> EVIDENCE BEFORE ESTIMATES</div>
+        <h1>Explore a property.<br><em>Understand the evidence.</em></h1>
+        <p>Inspect relevant completed-sale records and see precisely why each comparison was selected. No unsupported price predictions.</p>
+      </div>
+      <div class="scope-card" aria-label="Data coverage information">
+        <div class="scope-label">TEST ENVIRONMENT</div>
+        <div class="scope-main">Evanston <span>↗</span></div>
+        <div class="scope-detail">Cook County, Illinois</div>
+        <div class="scope-divider"></div>
+        <div class="scope-footer"><span>Class 203</span><span>Invented records only</span></div>
+      </div>
+    </div>
+
+    <div class="safety-notice" role="note">
+      <div class="notice-icon" aria-hidden="true">i</div>
+      <div><strong>This is a synthetic engineering prototype.</strong> Every property and sale displayed here is invented. No live listings, current valuations, real addresses, or financial recommendations are provided. Saved investigations last only while this local server runs.</div>
+    </div>
+
+    <div class="workspace">
+      <section class="input-panel" aria-labelledby="form-heading">
+        <div class="section-topline"><span>01 / INVESTIGATION DETAILS</span><span class="stage-tag">P3 CONTRACT TEST</span></div>
+        <div class="panel-heading"><h2 id="form-heading">Start an investigation</h2><p>Use the supplied synthetic parcel identifier to test the complete enquiry workflow.</p></div>
+        <form id="investigation-form" novalidate>
+          <div class="field"><label for="pin">Parcel PIN <span class="required">*</span></label>
+            <input id="pin" name="pin" required maxlength="14" pattern="[0-9]{14}" value="00000000000001" autocomplete="off" inputmode="numeric" spellcheck="false" aria-describedby="pin-hint">
+            <div class="field-hint" id="pin-hint">14 digits. Technical lookup key, not an address search.</div>
+          </div>
+          <div class="field"><label for="label">Property label <span class="optional">OPTIONAL</span></label>
+            <input id="label" name="label" maxlength="120" value="My example property" autocomplete="off" placeholder="e.g. Property A">
+          </div>
+          <div class="two-fields">
+            <div class="field"><label for="area">Building area <span class="required">*</span></label>
+              <div class="input-with-suffix"><input id="area" name="area" type="number" min="1" max="100000" step="any" required value="1600"><span>sq ft</span></div>
+            </div>
+            <div class="field"><label for="price">Asking price</label>
+              <div class="input-with-prefix"><span>$</span><input id="price" name="price" inputmode="decimal" value="500000.00" autocomplete="off" placeholder="Optional"></div>
+            </div>
+          </div>
+          <div class="field"><label for="analysis-date">Analysis date <span class="required">*</span></label>
+            <input id="analysis-date" name="analysis-date" type="date" required value="2024-07-01">
+            <div class="field-hint">Comparisons must have sold before this date.</div>
+          </div>
+          <div class="locked-scope"><span>LOCKED RESEARCH SCOPE</span><strong>Township 17 <span class="mid-dot">·</span> Class 203</strong></div>
+          <button id="submit-button" class="primary-button" type="submit"><span>Investigate property</span><span aria-hidden="true">↗</span></button>
+          <p id="form-feedback" class="form-feedback" role="alert" aria-live="polite"></p>
+        </form>
+        <div class="example-links"><span>EXAMPLE INPUTS</span><button type="button" id="example-known">Known synthetic parcel</button><button type="button" id="example-unknown">Unknown parcel (abstain)</button></div>
+      </section>
+
+      <section class="result-panel" aria-labelledby="results-heading">
+        <div class="section-topline"><span>02 / RESEARCH EVIDENCE</span><span id="result-state" class="result-state">AWAITING INVESTIGATION</span></div>
+        <div id="result-empty" class="empty-result">
+          <div class="empty-illustration" aria-hidden="true"><span class="radar-ring radar-1"></span><span class="radar-ring radar-2"></span><span class="radar-ring radar-3"></span><span class="radar-center"></span><span class="radar-point rp1"></span><span class="radar-point rp2"></span><span class="radar-point rp3"></span></div>
+          <h2 id="results-heading">Evidence, not guesswork.</h2>
+          <p>Submit an investigation to see eligible earlier sales, selection explanations and data-quality warnings.</p>
+          <div class="empty-steps"><span>01 <strong>Identify</strong></span><span>02 <strong>Compare</strong></span><span>03 <strong>Verify</strong></span></div>
+        </div>
+        <div id="result-content" class="result-content" hidden>
+          <div class="result-head"><div><div class="mini-label">INVESTIGATION RESULT</div><h2 id="result-title">Property investigation</h2><p id="result-subtitle"></p></div><span id="status-pill" class="status-pill"></span></div>
+          <div class="result-stats"><div><span>Selected sales</span><strong id="stat-count">0</strong></div><div><span>Evidence tier</span><strong id="stat-tier">None</strong></div><div><span>As of</span><strong id="stat-date">—</strong></div></div>
+          <div id="warnings" class="warning-list"></div>
+          <div class="comps-header"><h3>Comparable sales</h3><span id="comps-count"></span></div>
+          <div id="comparables" class="comparables"></div>
+          <div id="unsupported" class="unsupported" hidden></div>
+          <details class="provenance"><summary>Source lineage and limitations <span aria-hidden="true">⌄</span></summary><div id="provenance-content"></div></details>
+          <div class="result-actions"><button type="button" class="secondary-button" id="copy-link">Copy investigation link</button><span class="save-note">Saved in temporary SQLite memory</span></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="reopen-panel" aria-labelledby="reopen-heading"><div><div class="mini-label">CONTINUE WHERE YOU LEFT OFF</div><h2 id="reopen-heading">Open an investigation</h2><p>Reopen a saved result using its ID. Results disappear when the local server stops.</p></div><form id="reopen-form"><label for="reopen-id" class="visually-hidden">Investigation ID</label><input id="reopen-id" name="reopen-id" type="text" placeholder="Paste investigation UUID" autocomplete="off" spellcheck="false" required><button type="submit" class="secondary-button">Open saved result</button></form></section>
+    <footer><div><strong>HOUSE PRICE INTELLIGENCE</strong><span>Experimental evidence workspace · 2026</span></div><span>Not an appraisal service. Synthetic demonstration only.</span></footer>
+  </main>
+</body>
+</html>

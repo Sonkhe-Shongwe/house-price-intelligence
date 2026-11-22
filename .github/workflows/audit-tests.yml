@@ -26,5 +26,7 @@ jobs:
       - name: Run artifact exporter offline unit tests
         working-directory: audit/cloud
         run: python -m unittest discover -s tests -v
+      - name: Run P3 fixture-only application tests
+        run: python -m unittest discover -s backend/tests -v
       - name: Validate documentation links and phase percentages
         run: python tools/check_docs.py

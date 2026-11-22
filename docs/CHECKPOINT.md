@@ -2,7 +2,7 @@
 
 **As of:** 22 November 2026  
 **Project:** [house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence), branch `main`  
-**Delivery-stage baseline:** P3 (architecture/contracts next); **22.8% estimated weighted MVP progress**, unchanged by the documentation cleanup. This percentage is a planning judgment, not measured development output.
+**Delivery-stage baseline:** P3 (synthetic vertical slice integrated; contract acceptance next); **22.8% estimated weighted MVP progress**, unchanged pending formal acceptance of the integrated candidate. This percentage is a planning judgment, not measured development output.
 
 ## Verified engineering evidence
 
@@ -13,30 +13,36 @@
 
 **Interpretation:** These are *historical feasibility and algorithm experiments*, not a live product. The Phase 2 fallback's retrospective median-price MAE was **$209,470.65** versus **$192,153.00** for the township baseline on the same 17 fallback cases. Its candidates may be explored as sales evidence; do not present a fallback-derived value as a reliable valuation.
 
+## P3 synthetic application integration (22 November 2026)
+
+The owner authorised integration of the consolidated P3 candidate. The repository now includes a **synthetic-only** Python/SQLite investigation service, local loopback HTTP API, HTML/CSS/JavaScript frontend, saved-investigation retrieval, a 15-table draft schema and **83 fixture-only application tests** alongside the 42 research tests. The code was tested locally (125/125 on Python 3.13). The GitHub Actions Python 3.12 result for this integration must be inspected independently; a committed test is not itself a successful CI run.
+
+The research Phase 2 matcher is preserved byte-for-byte. This is **not** a production database, authorised publisher data display, real property ingestion, trained price model, public API or deployed application. The browser-to-HTTP flow has been tested without a graphical browser; real Chromium graphical acceptance was blocked by administrator policy. Refer to the [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) and [fixture-only backend](../backend/README.md).
+
 ## Current blockers and pending approvals
 
 1. **Source policy (P0/P7):** Field-specific public display, attribution, redistribution and privacy rules have not been approved. This blocks public exposure of property-level records.
 2. **Time integrity (P1/P2):** Prior tax-year joins, late-reported sales and backfilled neighbourhood data do not establish what was available on each historical sale date. There is no untouched later holdout.
 3. **Product contract (P3):** Database schema, API response/evidence contract and exact buyer inputs are not yet accepted. Pilot geography/Class 203 are research choices, not the final product boundary.
-4. **Application (P4–P8):** No production database, API service, browser interface, shortlist persistence, end-to-end app test or deployed application exists.
+4. **Application (P4–P8):** The repository now has a local synthetic-only API, SQLite and browser candidate, but **no production database/API, approved real-source property UI, working shortlist user feature, graphical browser acceptance or deployment**.
 
-## Next milestone: P3 acceptance package
+## Next milestone: review and accept the integrated P3 contract
 
-Prepare and review, in order:
+The synthetic candidate is code-integrated, **not automatically accepted**. Review and verify, in order:
 1. **Domain model/ERD:** sale transaction, parcel, building and assessment-year source record as distinct entities; buyer-entered property inquiry; matching run; selected comparable evidence; saved investigation and shortlist. Keep source snapshot, rule version and enquiry time traceable.
 2. **API contract:** Validated subject input and statuses `supported_neighbourhood`, `exploratory_spatial`, `insufficient_data`, `out_of_coverage`; explicit error cases, provenance and date labels. No numeric valuation in exploratory/unsupported results.
 3. **Technical decisions:** Document evidence-based Python API, relational database, browser framework and hosting options without silently selecting a permanent stack.
 4. **Acceptance fixtures:** Supported enquiry, spatial fallback warning, insufficient evidence, out-of-area/class, future sale blocked, duplicate PIN, stale source and invalid asking price.
 
-**P3 exits only when those contracts and decisions have been reviewed and accepted.** Then start P4: curated SQL ingestion and one real browser-to-database investigation path. Work on unresolved P0–P2 quality gates may continue in parallel.
+**P3 exits only when those contracts and decisions have been reviewed and accepted.** Then complete production-oriented P4 ingestion/storage planning and a genuinely verified browser-to-database investigation path, without exposing unapproved publisher records. Work on unresolved P0–P2 quality gates may continue in parallel.
 
 ## Lean engineering process directive (22 November 2026)
 
-The owner adopted [Lean Engineering and Delivery Directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) for future development: consolidate the P3 v0.5 candidate into one authoritative codebase after approval, prioritise complete buyer workflows, reduce speculative abstractions and infrastructure, keep fast risk-focused tests, and preserve source/time/data correctness and release permissions. Framework and dependency options are **not yet binding stack choices**. This documentation-level process decision **does not constitute P3 acceptance** or change the 22.8% weighted MVP baseline. The unintegrated candidate and owner's Windows working tree remain outside current GitHub verification.
+The owner adopted [Lean Engineering and Delivery Directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) for future development: keep the authorised, integrated P3 candidate in one authoritative codebase, prioritise complete buyer workflows, reduce speculative abstractions and infrastructure, keep fast risk-focused tests, and preserve source/time/data correctness and release permissions. Framework and dependency options are **not yet binding stack choices**. The code integration does **not constitute P3 acceptance** or change the 22.8% weighted MVP baseline. The owner's Windows working tree remains outside current GitHub verification.
 
 ## Continuation protocol
 
-For future ChatGPT or coding sessions, start with the [Master Continuation Prompt](MASTER_CONTINUATION_PROMPT.md), using [AGENTS.md](../AGENTS.md) where supported. It restores the latest authoritative state, mandates evidence-checked work, distinguishes local from remote changes and respects approval boundaries. **This is a process/documentation improvement only:** P3 and the 22.8% weighted delivery baseline remain unchanged. This note does not establish the state of the owner's uninspected Windows clone.
+For future ChatGPT or coding sessions, start with the [Master Continuation Prompt](MASTER_CONTINUATION_PROMPT.md), using [AGENTS.md](../AGENTS.md) where supported. It restores the latest authoritative state, mandates evidence-checked work, distinguishes local from remote changes and respects approval boundaries. **P3 has an integrated synthetic code candidate, not a completed phase gate:** the 22.8% weighted delivery baseline remains unchanged. This note does not establish the state of the owner's uninspected Windows clone.
 
 ## Where to continue
 

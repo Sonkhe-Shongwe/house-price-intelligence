@@ -1,8 +1,8 @@
 # House Price Intelligence
 
-**Status (22 November 2026): research engines verified; buyer application not yet implemented.** Current planning stage: **P3, product architecture and API contracts**. The bounded portfolio-MVP progress baseline is **22.8%**, a subjective weighted estimate, not a measurement of code completion.
+**Status (22 November 2026): research engines verified; synthetic-only P3 application integrated for review, not yet accepted or deployed.** Current planning stage: **P3, product architecture and API contracts**. The bounded portfolio-MVP progress baseline is **22.8%**, a subjective weighted estimate, not a measurement of code completion.
 
-House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API, application database, frontend or deployed service exists.**
+House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API/database, approved public-data frontend or deployed service exists.** A local, invented-data HTTP/SQLite/browser investigation slice is included for engineering review.
 
 ## Verified evidence, not product claims
 
@@ -35,6 +35,7 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
 | [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Simplified architecture, feature workflow, testing and efficiency |
+| [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
 | [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
 | [Documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Reviewed inconsistencies and corrections |
 
@@ -42,7 +43,9 @@ The repository also retains the original [pinnacle vision](docs/product/PINNACLE
 
 ## Run and development workflows
 
-**Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline unit-test workflow](.github/workflows/audit-tests.yml) checks all four test suites on pushes and pull requests. Audits are not on a recurring time schedule.
+**Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline unit-test workflow](.github/workflows/audit-tests.yml) checks the four research suites and the P3 synthetic application suite on pushes and pull requests. Audits are not on a recurring time schedule.
+
+**Fixture-only demo:** `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repo root, then open `http://127.0.0.1:8765/`. Run `python tools/dev_check.py` for no-dependency checks. This is an in-memory local demonstration, not an authorised public service, and browser graphical acceptance is outstanding.
 
 Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.md), [Phase 1](audit/phase1/README.md), [Phase 2](audit/phase2/README.md) and [Windows Git setup](docs/GITHUB_SETUP.md). Never commit extracted datasets, private user data, personal names, API tokens or generated property-level output. See [data handling](data/README.md).
 
@@ -50,7 +53,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next (P3):** Specify the database entities and provenance, supported-input validation, investigation request/response schema and evidence-status contract. Then deliver a tested backend/database vertical slice in P4 and a browser interface in P5. The implementation stack is not yet decided.
+**Next (P3):** Review and accept the integrated fixture-only domain/API/evidence contract and PIN-first internal journey; verify a genuine graphical browser journey. The existing SQLite/HTTP/UI slice demonstrates feasibility but does not satisfy production P4/P5 or source-rights gates. Final public input/stack/deployment decisions remain open.
 
 **Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 

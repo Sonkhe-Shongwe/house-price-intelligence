@@ -13,6 +13,7 @@
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Apply quality/invariants | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) | **Binding engineering guardrails** |
 | Develop efficiently and consistently | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) | **Active delivery and technology-selection policy** |
+| Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | **Synthetic-only code/HTTP/SQL/UI review candidate; acceptance pending** |
 | Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
 | Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
 | Re-run research | [Cloud audit operations](AUTOMATED_DATA_AUDIT.md) | **Current operating guide** |
@@ -22,7 +23,7 @@
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.
-- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current overall weighted baseline is **22.8%**, with P3 contracts next. Passing the three audit experiments does not mean delivery P0/P1/P2 are accepted or finished.
+- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current overall weighted baseline is **22.8%**, with P3 integration review and acceptance next. Passing the three audit experiments does not mean delivery P0/P1/P2 are accepted or finished.
 
 ## Document precedence and maintenance
 
@@ -35,6 +36,6 @@
 
 ## Active engineering handoff
 
-**Next work is P3:** choose the bounded investigation journey and specify domain entities, request/response contract, evidence types, source/version lineage and acceptance fixtures. Then build the first SQL-backed investigation service. The full user app has not yet been built.
+**Next work remains P3 acceptance:** Review the now-integrated, fixture-only PIN-first domain contract, SQLite schema, API statuses and evidence/reopen flow; confirm the legitimate buyer input and public data rights, and verify the graphical browser journey. GitHub CI validates code, **not** final contract acceptance. There is no production API, permitted real-property display, deployed consumer application or shortlist user workflow.
 
 See [latest checkpoint](CHECKPOINT.md).

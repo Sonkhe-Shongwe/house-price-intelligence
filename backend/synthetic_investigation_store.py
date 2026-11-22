@@ -1,0 +1,262 @@
+"""Disposable, SQLite-backed P3 investigation vertical slice using synthetic fixtures.
+
+This is NOT an HTTP endpoint or a production data importer. A source selected by
+an untrusted caller cannot enable public property-level disclosure: this entire
+service refuses non-synthetic curated builds. PIN is an internal pilot lookup key,
+not an owner-approved consumer-facing identification method.
+
+Data selection is performed on one server-selected curated build. An individual
+assessment, geography, or sale is eligible only when its source snapshot belongs
+in that build with the required role. Missing/ambiguous historical rows abstain.
+"""
+from __future__ import annotations
+
+from collections import defaultdict
+from datetime import date, datetime, timezone
+import hashlib
+import json
+import sqlite3
+import uuid
+from typing import Any, Mapping
+
+from backend.investigation_contract import ContractError, build_investigation, validate_request
+
+
+class EvidenceStoreError(RuntimeError):
+    """Bad curated build, ambiguous evidence, inconsistent storage or unsafe access."""
+
+
+def _json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+
+
+def _utc(timestamp: datetime | None) -> str:
+    value = timestamp or datetime.now(timezone.utc)
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise EvidenceStoreError("recorded_at must be timezone aware")
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+class SyntheticInvestigationStore:
+    """Proof of database -> matcher -> persisted evidence, with no real source data."""
+
+    POLICY_VERSION = "phase2-research-v1"
+
+    def __init__(self, connection: sqlite3.Connection, *, build_id: str):
+        if not isinstance(build_id, str) or not build_id:
+            raise EvidenceStoreError("A trusted curated build ID is required")
+        self.connection = connection
+        self.build_id = build_id
+        if connection.execute("PRAGMA foreign_keys").fetchone()[0] != 1:
+            raise EvidenceStoreError("SQLite foreign key enforcement must be enabled")
+
+    def _build(self) -> dict[str, Any]:
+        row = self.connection.execute(
+            "SELECT build_id, built_at_utc, build_kind FROM curated_builds WHERE build_id = ?",
+            (self.build_id,),
+        ).fetchone()
+        if row is None:
+            raise EvidenceStoreError("Curated build not found")
+        build_id, built_at, kind = row
+        if kind != "synthetic_fixture":
+            raise EvidenceStoreError("Real-source builds are disabled in this candidate")
+        source_rows = self.connection.execute(
+            """SELECT bs.snapshot_id, bs.source_role, ss.dataset_id, ss.source_query
+               FROM curated_build_sources bs
+               JOIN source_snapshots ss ON ss.snapshot_id = bs.snapshot_id
+               WHERE bs.build_id = ? ORDER BY bs.snapshot_id, bs.source_role""",
+            (self.build_id,),
+        ).fetchall()
+        # A database build_kind assertion is not, by itself, evidence that the
+        # referenced publisher data were fabricated. This extra fixture-only
+        # marker rejects accidentally imported real source snapshots. It is
+        # still NOT a general proof that arbitrary data is synthetic.
+        if any(not dataset.startswith("synthetic-") or query != "fabricated"
+               for _, _, dataset, query in source_rows):
+            raise EvidenceStoreError("Build references a non-fixture source snapshot")
+        roles = {role for _, role, _, _ in source_rows}
+        if not {"sales", "assessment", "geography"}.issubset(roles):
+            raise EvidenceStoreError("Synthetic build is missing source role(s)")
+        snapshots = sorted({snapshot_id for snapshot_id, _, _, _ in source_rows})
+        return {"build_id": build_id, "built_at_utc": built_at,
+                "source_kind": kind, "source_snapshot_ids": snapshots}
+
+    def _assessment(self, pin: str, tax_year: int):
+        rows = self.connection.execute(
+            """SELECT a.assessor_class, a.building_area_sqft, a.tax_year
+               FROM assessment_records a
+               JOIN curated_build_sources bs ON bs.snapshot_id = a.snapshot_id
+               WHERE bs.build_id = ? AND bs.source_role = 'assessment'
+                 AND a.pin = ? AND a.tax_year = ?""",
+            (self.build_id, pin, tax_year),
+        ).fetchall()
+        # The research pipeline accepts only one prior-year building card.
+        # 0 or >1 is insufficient/ambiguous, not a licence to select randomly.
+        return rows[0] if len(rows) == 1 else None
+
+    def _geography(self, pin: str, tax_year: int):
+        rows = self.connection.execute(
+            """SELECT g.neighborhood_code, g.latitude, g.longitude
+               FROM parcel_geographies g
+               JOIN curated_build_sources bs ON bs.snapshot_id = g.snapshot_id
+               WHERE bs.build_id = ? AND bs.source_role = 'geography'
+                 AND g.pin = ? AND g.tax_year = ?""",
+            (self.build_id, pin, tax_year),
+        ).fetchall()
+        return rows[0] if len(rows) == 1 else None
+
+    def _resolved_subject(self, request: Mapping[str, Any]):
+        pin = request["subject"]["pin"]
+        if pin is None:
+            return None
+        parcel = self.connection.execute("SELECT township_code FROM parcels WHERE pin = ?", (pin,)).fetchone()
+        if parcel is None:
+            return None
+        tax_year = int(request["analysis_date"][:4]) - 1
+        assessment = self._assessment(pin, tax_year)
+        if assessment is None:
+            return None
+        cls, area, _ = assessment
+        if area is None or cls is None:
+            return None
+        geo = self._geography(pin, tax_year)
+        hood, lat, lon = geo if geo is not None else (None, None, None)
+        return {"build_id": self.build_id, "pin": pin, "township_code": parcel[0],
+                "class": cls, "sqft": area, "characteristics_year": tax_year,
+                "nbhd_code": hood, "lat": lat, "lon": lon}
+
+    def _candidates(self, request: Mapping[str, Any]):
+        if request["subject"]["pin"] is None:
+            return [], {}
+        # Query a build's imported transactions only when their actual sales
+        # snapshot has been registered with the sales role for this build.
+        records = self.connection.execute(
+            """SELECT t.transaction_id, t.document_number, t.sale_date,
+                      t.price_usd_cents, link.pin, p.township_code
+               FROM curated_build_transactions cb
+               JOIN sale_transactions t ON t.transaction_id = cb.transaction_id
+               JOIN curated_build_sources bs ON bs.build_id = cb.build_id
+                      AND bs.snapshot_id = t.snapshot_id AND bs.source_role = 'sales'
+               JOIN sale_transaction_parcels link ON link.transaction_id = t.transaction_id
+               JOIN parcels p ON p.pin = link.pin
+               WHERE cb.build_id = ?""",
+            (self.build_id,),
+        ).fetchall()
+        grouped = defaultdict(list)
+        for row in records:
+            grouped[row[0]].append(row)
+        candidates = []
+        transaction_ids = defaultdict(list)
+        for transaction_id, linked in grouped.items():
+            if len(linked) != 1:  # A multi-parcel sale is not a one-home priced comparable.
+                continue
+            txn, doc, when, cents, pin, township = linked[0]
+            if not isinstance(when, str) or len(when) != 10 or cents is None or cents <= 0:
+                continue
+            try:
+                year = date.fromisoformat(when).year
+            except ValueError:
+                continue
+            assessment = self._assessment(pin, year - 1)
+            if assessment is None:
+                continue
+            cls, sqft, _ = assessment
+            if cls is None or sqft is None or sqft <= 0:
+                continue
+            geo = self._geography(pin, year - 1)
+            hood, lat, lon = geo if geo is not None else (None, None, None)
+            row = {"build_id": self.build_id, "pin": pin, "doc_no": doc,
+                   "sale_date": when, "sale_price": cents / 100,
+                   "sqft": sqft, "class": cls, "township_code": township,
+                   "nbhd_code": hood, "lat": lat, "lon": lon,
+                   "characteristics_year": year - 1}
+            candidates.append(row)
+            transaction_ids[(pin, doc, when)].append(txn)
+        return candidates, transaction_ids
+
+    def create(self, payload: Mapping[str, Any], *, today: date | None = None,
+               investigation_id: str | None = None, recorded_at: datetime | None = None) -> dict[str, Any]:
+        # User-provided content cannot select build ID, sales, source data or demo mode.
+        request = validate_request(payload, today=today)
+        build = self._build()
+        resolved = self._resolved_subject(request)
+        candidates, transaction_ids = self._candidates(request)
+        response = build_investigation(request, resolved_subject=resolved,
+                                       candidate_sales=candidates, data_build=build,
+                                       synthetic_demo=True, today=today)
+        identifier = investigation_id or str(uuid.uuid4())
+        if not isinstance(identifier, str) or not identifier or len(identifier) > 120:
+            raise EvidenceStoreError("Invalid server-side investigation identifier")
+        text = _json(response)
+        digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        created = _utc(recorded_at)
+        parcel = request["subject"]["pin"]
+        if parcel is not None and not self.connection.execute(
+            "SELECT 1 FROM parcels WHERE pin = ?", (parcel,)
+        ).fetchone():
+            parcel = None
+        # One atomic transaction. On any ambiguous transaction identity or
+        # foreign key failure, no partial investigation or evidence is saved.
+        with self.connection:
+            self.connection.execute(
+                """INSERT INTO investigations
+                   (investigation_id, build_id, subject_pin, analysis_date, user_input_json,
+                    match_policy_version, evidence_status, created_at_utc)
+                   VALUES(?,?,?,?,?,?,?,?)""",
+                (identifier, self.build_id, parcel, request["analysis_date"], _json(request),
+                 self.POLICY_VERSION, response["status"], created),
+            )
+            self.connection.execute(
+                "INSERT INTO investigation_results VALUES(?,?,?,?)",
+                (identifier, text, digest, created),
+            )
+            for rank, comp in enumerate(response["comparables"], 1):
+                key = (comp["pin"], comp["document"], comp["sale_date"])
+                ids = transaction_ids.get(key, [])
+                if len(ids) != 1:
+                    raise EvidenceStoreError("Selected comparable has ambiguous source transaction")
+                self.connection.execute(
+                    """INSERT INTO comparable_evidence
+                       (investigation_id, build_id, rank, transaction_id, selection_tier, explanation)
+                       VALUES(?,?,?,?,?,?)""",
+                    (identifier, self.build_id, rank, ids[0], response["tier"], comp["explanation"]),
+                )
+        return {"investigation_id": identifier, **response}
+
+    def reopen(self, investigation_id: str) -> dict[str, Any]:
+        row = self.connection.execute(
+            """SELECT i.build_id, i.evidence_status, r.response_json, r.result_sha256
+               FROM investigations i JOIN investigation_results r
+                 ON r.investigation_id = i.investigation_id
+               WHERE i.investigation_id = ?""", (investigation_id,),
+        ).fetchone()
+        if row is None:
+            raise EvidenceStoreError("Investigation not found")
+        build, status, raw, expected = row
+        if build != self.build_id:
+            raise EvidenceStoreError("Investigation belongs to another curated build")
+        if hashlib.sha256(raw.encode("utf-8")).hexdigest() != expected:
+            raise EvidenceStoreError("Stored investigation response was modified")
+        result = json.loads(raw)
+        if result.get("status") != status or result.get("data_build", {}).get("build_id") != build:
+            raise EvidenceStoreError("Stored response conflicts with investigation record")
+        count = self.connection.execute("SELECT COUNT(*) FROM comparable_evidence WHERE investigation_id = ?",
+                                        (investigation_id,)).fetchone()[0]
+        if count != len(result.get("comparables", [])) or count != result.get("selected_count"):
+            raise EvidenceStoreError("Persisted selected evidence count does not match response")
+        evidence = self.connection.execute(
+            """SELECT ce.rank, ce.selection_tier, ce.explanation,
+                      t.document_number, t.sale_date, link.pin
+               FROM comparable_evidence ce
+               JOIN sale_transactions t ON t.transaction_id = ce.transaction_id
+               JOIN sale_transaction_parcels link ON link.transaction_id = ce.transaction_id
+               WHERE ce.investigation_id = ?
+               ORDER BY ce.rank, link.pin""", (investigation_id,),
+        ).fetchall()
+        if len(evidence) != count or any(
+            row != (rank, result["tier"], comp["explanation"],
+                    comp["document"], comp["sale_date"], comp["pin"])
+            for rank, (row, comp) in enumerate(zip(evidence, result["comparables"]), 1)
+        ):
+            raise EvidenceStoreError("Persisted comparable identities do not match saved evidence")
+        return {"investigation_id": investigation_id, **result}

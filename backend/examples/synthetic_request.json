@@ -1,0 +1,11 @@
+{
+  "township_code": "17",
+  "class_code": "203",
+  "analysis_date": "2024-07-01",
+  "subject": {
+    "pin": "00000000000001",
+    "building_area_sqft": 1600,
+    "asking_price_usd": "650000.00",
+    "label": "First option"
+  }
+}
