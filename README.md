@@ -1,68 +1,55 @@
 # House Price Intelligence
 
-**Status: Phase 2 comparable-selection experiment; browser application and long-term technology choices remain provisional.**
+**Status (22 November 2026): research engines verified; buyer application not yet implemented.** Current planning stage: **P3, product architecture and API contracts**. The bounded portfolio-MVP progress baseline is **22.8%**, a subjective weighted estimate, not a measurement of code completion.
 
-House Price Intelligence is a prospective homebuyer's evidence-based decision workspace. The user can eventually enter an asking price, investigate verified completed sales, understand which properties are comparable, save a shortlist and make an informed comparison. A statistical price estimate will be included **only if** source-quality and time-based model evaluation justify it.
+House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API, application database, frontend or deployed service exists.**
 
-This is a **software engineering project**, not merely a house-price notebook. The central challenge is to convert complex historical transaction and building records into a trustworthy, reproducible buyer workflow.
+## Verified evidence, not product claims
 
-## Current state (22 November 2026)
+The historical research pilot uses Cook County township 17 (Evanston, Illinois), 2022–2024 recorded sales and a Class 203 one-story residence segment.
 
-- Phase 0: actual Cook County township 17 extraction completed in GitHub Actions, with **1,285** accepted historical sale-to-building matches from 2022–2024.
-- Phase 1: 273 Class 203 records enriched with historical neighbourhood and building details; 66 of 83 historical 2024 subjects supported by at least three same-neighbourhood prior sales.
-- Phase 2: the **neighbourhood-first, bounded 2 km fallback and abstention** comparable-selection engine has been implemented and tested in the cloud. Across 83 historical 2024 Class 203 subjects, 66 had enough same-neighbourhood comparables and 17 required fallback. The fallback was less accurate than township-wide matching on those 17; treat its sales as exploratory evidence, not a reliable valuation. See [Phase 2 findings](docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md).
-- Routine source audits and aggregate report uploads run in [GitHub Actions](.github/workflows/data-audit.yml), without a local data extract or manual ZIP upload.
-- No production data store, public property API, browser interface or validated valuation model exists yet. This remains an engineering and feasibility project, not a live property price service.
+| Measurement | Verified result |
+| --- | ---: |
+| Downloaded sale rows / historical building rows | 3,539 / 39,401 |
+| Sales passing experimental screens / accepted historical joins | 2,583 / 1,285 |
+| Class 203 joined sales / distinct PIN-year lookup keys | 273 / 262 |
+| Historical 2024 Class 203 subjects evaluated | 83 |
+| Subjects with at least 3 same-neighbourhood comparisons | 66 |
+| Subjects requiring the exploratory 2 km fallback | 17 |
+| Automated offline tests in the last audited pipeline | 42 |
 
-## Quick start for the existing audit (Python 3.10+)
+In retrospective testing, the 2 km fallback covered all 17 thin-neighbourhood subjects but produced **worse** median-based price errors than the township baseline on those same 17. Fallback sales are **exploratory evidence, not validated valuation estimates**. The underlying historical fields may have been reported, revised or backfilled after the recorded sale dates. Source-specific public display rights remain unresolved.
 
-From a terminal in the repository root:
+Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md) and the [successful cloud audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782).
 
-```powershell
-cd audit/phase0
-python -m unittest discover -s tests -v
-python audit.py --township 17 --start 2022-01-01 --end 2025-01-01 --out output
-```
+## Start here
 
-The second command requires network access to the Cook County Open Data APIs and must be checked for schema mismatches, row caps and changes in field semantics. See [`audit/phase0/README.md`](audit/phase0/README.md).
-
-**Do not commit extracted sales, datasets, personal information, generated outputs or credentials.** See [data handling](data/README.md).
-
-## Documents
-
-| File | Purpose |
+| Document | Role |
 | --- | --- |
-| [`docs/product/PRODUCT_BRIEF.md`](docs/product/PRODUCT_BRIEF.md) | Buyer problem, original release concept, product rules |
-| [`docs/product/PINNACLE_VISION.md`](docs/product/PINNACLE_VISION.md) | Ultimate vision vs bounded flagship |
-| [`docs/research/DATA_FEASIBILITY.md`](docs/research/DATA_FEASIBILITY.md) | Dataset risks, source leads, research gates |
-| [`docs/research/SOURCE_REGISTER.md`](docs/research/SOURCE_REGISTER.md) | Primary URLs and provenance |
-| [`docs/engineering/ENGINEERING_CONTRACT.md`](docs/engineering/ENGINEERING_CONTRACT.md) | Engineering invariants and quality gates |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Current P0–P8 overview and weighted progress |
-| [`docs/P_PHASE_ROADMAP.md`](docs/P_PHASE_ROADMAP.md) | Full PilotODIN-style phase-gated process and acceptance criteria |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Settled vs open choices |
-| [`docs/CHECKPOINT.md`](docs/CHECKPOINT.md) | Current handoff and next action |
-| [`docs/MIGRATION_MANIFEST.md`](docs/MIGRATION_MANIFEST.md) | Origins and excluded materials |
+| [Documentation index](docs/DOCUMENTATION_INDEX.md) | Which document to trust; current versus historical material |
+| [Current checkpoint](docs/CHECKPOINT.md) | Verified status, blockers and next engineering task |
+| [P0–P8 roadmap](docs/P_PHASE_ROADMAP.md) | Phase acceptance gates, weights and progress rules |
+| [Roadmap summary](docs/ROADMAP.md) | Concise percentage table |
+| [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
+| [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
+| [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
+| [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
+| [Documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Reviewed inconsistencies and corrections |
 
-## Product boundaries
+The repository also retains the original [pinnacle vision](docs/product/PINNACLE_VISION.md), [data-feasibility research](docs/research/DATA_FEASIBILITY.md) and [migration history](docs/MIGRATION_MANIFEST.md). The older Phase 0–2 **audit experiment names are distinct from the overall P0–P8 delivery stages**.
 
-**Pinnacle (vision only):** Property dossiers, comparable-sales intelligence, validated estimates and uncertainty, neighbourhood context, shortlist comparisons, financial scenarios, saved decision reports and optional monitoring.
+## Run and development workflows
 
-**Candidate flagship:** One market, one validated property class, entering a home and asking price, trustworthy sales comparables with explanations and dates, shortlist comparison, persistence and insufficient-data handling. ML only after a chronological holdout evaluation.
+**Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline unit-test workflow](.github/workflows/audit-tests.yml) checks all four test suites on pushes and pull requests. Audits are not on a recurring time schedule.
 
-**First implementation slice:** Download and audit real sales/characteristic data, establish one-to-one historical property records, compute traceable prior-sale comparables, then expose the result in a saved user workflow.
+Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.md), [Phase 1](audit/phase1/README.md), [Phase 2](audit/phase2/README.md) and [Windows Git setup](docs/GITHUB_SETUP.md). Never commit extracted datasets, private user data, personal names, API tokens or generated property-level output. See [data handling](data/README.md).
 
-## Relationship to graduate preparation
+## Scope and next milestone
 
-The separate [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) remains the canonical graduate recruitment research repository. This repository contains the standalone application and only project-relevant context. Source documents in the playbook are preserved, not moved or deleted.
+**Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-## Contribution and development style
+**Next (P3):** Specify the database entities and provenance, supported-input validation, investigation request/response schema and evidence-status contract. Then deliver a tested backend/database vertical slice in P4 and a browser interface in P5. The implementation stack is not yet decided.
 
-Use small reviewed commits, document rejected assumptions and keep regression tests for data join errors, multi-parcel sales, missing attributes and future sales. Never claim to have tested live source records until an actual extract has been run and its report saved.
+**Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 
-## Automated data audit
-
-Phase 0 and Phase 1 can run in GitHub Actions without installing the audit locally. See [Automated Data Audit](docs/AUTOMATED_DATA_AUDIT.md) for triggers, report artifacts, failure handling and privacy limits. The end-to-end cloud extraction and report upload were verified in [the first successful run](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458). See the [saved Phase 1 findings](docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md).
-
-## Current comparable selection experiment
-
-The Phase 2 engine chooses same-assessor-neighbourhood sales first, then tries a disclosed 2 km location-based fallback and otherwise abstains. It does not use sale prices to rank properties. See [Phase 2 matching contract](audit/phase2/README.md) and the [latest project checkpoint](docs/CHECKPOINT.md).
+The [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) is a separate, preserved source of graduate recruitment research. This repository is the standalone software project.

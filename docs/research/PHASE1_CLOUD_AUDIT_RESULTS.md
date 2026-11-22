@@ -43,12 +43,14 @@ Additional unpaired township-only cohort (83 subjects) had MAE **$157,859.64** a
 ## Unresolved quality / product constraints
 
 - This audit does not establish availability of comparable sales on the relevant historical **analysis date**; late reports, revised data and backfilled parcel geography can leak later information into retrospective evaluations.
-- A neighbourhood requirement improves paired descriptive errors but loses comparison coverage for 17 subjects. We need a transparent, tested geographic fallback instead of either silently expanding scope or pretending those properties can be valued accurately.
+- A neighbourhood requirement improves paired descriptive errors but loses comparison coverage for 17 subjects. **Subsequent Phase 2** tested a transparent 2 km fallback; it recovered the 17 for exploratory sale evidence but had *worse* price errors than the township baseline on those cases. [See Phase 2 results](PHASE2_CLOUD_AUDIT_RESULTS.md).
 - Property condition, renovations, micro-location, sale circumstances and other relevant attributes remain unmodelled.
 - The selection sample is one township and one property class. Do not extrapolate coverage or errors to all Cook County or present-day houses.
 - The publisher's reuse/display terms and reliable public-facing fields still require a specific review before any deployed buyer product.
 - A validated valuation model, calibrated prediction interval, application database and buyer interface do not yet exist.
 
-## Next engineering decision
+## Subsequent implementation and next gate
 
-Prototype and test **neighbourhood-first comparable selection with an explicitly labelled fallback** (spatial distance or broader-area rule only when justified). Measure coverage and error on the same historical subjects, document failure and abstention states, and only then define an application-facing comparable evidence API.
+The neighbourhood-first comparator, bounded 2 km fallback, explanation and abstention states were **implemented and evaluated** in [Phase 2](PHASE2_CLOUD_AUDIT_RESULTS.md). This report remains the dated record of the Phase 1 baseline, not the current project plan.
+
+**Next:** Establish an application-facing evidence contract in delivery **P3**, keep spatial fallback prices clearly unsupported as valuations, and address field rights and historical as-of restrictions before public use. See the [current checkpoint](../CHECKPOINT.md).

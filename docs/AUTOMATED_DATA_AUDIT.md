@@ -19,6 +19,8 @@ No full source extracts or per-PIN case examples are uploaded as artifacts. The 
 
 The workflow automatically starts on `main` pushes changing audit code or its workflow, and it can be started using **Actions → Cook County data audit (Phases 0 to 2) → Run workflow**. There is **no recurring schedule** in the initial version to avoid repeated downloads. Do not trigger a second extraction while one is already running.
 
+**Documentation-only changes do not trigger a new live Cook County data download.** The separate [unit-test workflow](../.github/workflows/audit-tests.yml) also runs the [documentation consistency check](../tools/check_docs.py) on pushes and pull requests; this validates internal Markdown references and P0–P8 arithmetic without consuming external API requests.
+
 ## Checking results
 
 Open the workflow run page:

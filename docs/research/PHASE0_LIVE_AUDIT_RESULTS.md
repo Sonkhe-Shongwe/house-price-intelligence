@@ -24,9 +24,11 @@ The 19/20 result is for **multiple classes** using a township-wide match, 365-da
 - Card-count parsing error discovered in Phase 0 v1 has been corrected; 779 previously rejected records had a number formatted as `1.0`.
 - Historic source records can be backfilled or revised; prior tax-year data is **not equivalent to an archived point-in-time release**.
 
-## Next controlled experiment
+## Subsequent experiments completed
 
-Phase 1 isolates the **Class 203** segment, adds the official **Historical Parcel Universe** neighbourhood/centroid information and extra residential building attributes by `(PIN, prior tax year)`, and compares two out-of-time historical comparable-selection baselines on 2024 sales. It measures exact Class 203 coverage and matched error on comparable-supported subjects.
+This original Phase 0 report is retained as the record of the first successful extraction. The planned Class 203 enrichment was subsequently implemented in [Phase 1](PHASE1_CLOUD_AUDIT_RESULTS.md), and a neighbourhood-first selection engine with an exploratory 2 km fallback was evaluated in [Phase 2](PHASE2_CLOUD_AUDIT_RESULTS.md). The 19/20 multi-class sample from Phase 0 must not be confused with the later 83-subject Class 203 evaluation.
+
+**Current next step:** P3 product/domain and API contracts, while unresolved field rights and historical point-in-time validity remain blockers for public product claims. See [checkpoint](../CHECKPOINT.md).
 
 No current home-price prediction or live listing claims may be made until proper data feasibility, time-respecting validation, representativeness, disclosure and licence review are complete.
 

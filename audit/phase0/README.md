@@ -1,6 +1,6 @@
 # House Price Intelligence: Phase 0 data feasibility audit
 
-**Prepared 22 November 2026.** This is an executable feasibility instrument, **not** the completed audit or a valuation model. No Cook County data could be downloaded from the execution environment in which this instrument was prepared. It has been tested only against synthetic unit-test fixtures.
+**Originally prepared:** 22 November 2026 as a feasibility instrument. **Updated current status:** The raw extraction, corrected Phase 0 v2 reanalysis and Phase 1–2 downstream audits **succeeded** in the [cloud workflow](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782). Phase 0's 12 regression tests were passed as part of a 42-test pipeline. **It remains an experimental data audit, not a buyer application or valuation model.** See the [verified Phase 0 results](../../docs/research/PHASE0_LIVE_AUDIT_RESULTS.md).
 
 ## Purpose
 
@@ -17,14 +17,17 @@ Official source entries:
 Requires Python 3.10+ with network access to the Cook County Open Data portal. Uses only Python's standard library.
 
 ```powershell
-cd HousePriceIntelligence_Phase0_Audit
+cd audit/phase0
 python -m unittest discover -s tests -v
 python audit.py --township 17 --start 2022-01-01 --end 2025-01-01 --out output
+python reanalyze.py --out output
 ```
+
+These commands are **optional local diagnostics**, not an instruction to perform routine downloads. The [automated GitHub Actions pipeline](../../docs/AUTOMATED_DATA_AUDIT.md) runs Phase 0 through Phase 2 and collects aggregate-only reports.
 
 The program queries the API's published schema **before** requesting selected columns. It refuses to proceed if a required field name is absent. It selects no buyer or seller names, and downloads no personal financial account data.
 
-The run saves `output/field_inventory.json`, `output/sales_selected_fields.jsonl`, `output/buildings_selected_fields.jsonl`, `output/audit_summary.json`, and `output/audit_report.md`. Treat the raw extracts as local working data; do not commit them to a public repository.
+The run saves `output/field_inventory.json`, `output/sales_selected_fields.jsonl`, `output/buildings_selected_fields.jsonl`, `output/audit_summary.json`, and `output/audit_report.md`; the corrected offline reanalysis additionally writes `audit_summary_v2.json` and `audit_report_v2.md`. Treat the raw extracts as local working data; do not commit them to a public repository.
 
 **If API access, quotas or schema changes prevent downloading:** save the error message and field inventory. Do not fabricate a report or silently swap data sources. With paging, a data update while downloading could shift records, so verify repeated extracts and record your snapshot date. The script raises a cap warning if its per-dataset `--max-rows` value is reached; the capped results are not complete.
 
@@ -39,7 +42,9 @@ The run saves `output/field_inventory.json`, `output/sales_selected_fields.jsonl
 
 These filters **are provisional analyst-defined screens**. The pilot does not establish true arm's-length sale status or prove publication-time correctness. The code deliberately does **not** call all class-2 residential buildings detached single-family houses. First consult the official class-code dictionary and choose exact class types. A prior tax-year row might itself have been revised after the relevant sale.
 
-## Stop/go criteria before starting the real app
+## Original stop/go criteria (partly fulfilled, remaining gates still open)
+
+Real extraction and matched coverage have been measured. Representative source semantics, historical as-of evidence and rights to publicly expose property-level records remain unapproved. For current findings see [Phase 0](../../docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](../../docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md) and [Phase 2](../../docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md).
 
 - Confirm complete extracts and valid API schema.
 - Document sales and building row counts, exclusion reasons, joins, and repeated-sale handling.

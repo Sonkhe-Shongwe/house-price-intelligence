@@ -1,4 +1,8 @@
-# Project 2: House Price Intelligence, execution checkpoint
+# Historical checkpoint: initial Phase 0 research preparation
+
+> **Archived status, written 22 November 2026:** This is the original pre-extraction planning snapshot, **not the current project checkpoint**. Statements below that the live audit had not run, GitHub was unchanged, and seven tests existed describe this earlier point in the project. They have since been superseded by the successful live Phase 0–2 cloud audits and 42 tests. For current status use [docs/CHECKPOINT.md](../../docs/CHECKPOINT.md) and [current data findings](../../docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md). Preserved to document how the feasibility experiment began.
+
+# Project 2: House Price Intelligence, original execution checkpoint
 
 **Prepared:** 22 November 2026
 

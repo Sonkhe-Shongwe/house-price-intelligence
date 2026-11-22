@@ -31,6 +31,8 @@ House Price Intelligence has a different product, market, platform and release t
 
 Progress is deliberately conservative because **no production database, property API, buyer UI, saved buyer workflow or deployment exists**. A tested data/audit engine is not a completed application.
 
+The **22.8%** weighted progress is a subjective planning estimate derived from accepted evidence and unresolved phase gates. A documentation-only cleanup does **not** add delivered features and therefore does not change this estimate. The phases are delivery stages, distinct from the Phase 0–2 research experiments.
+
 ## Full process and phase exit gates
 
 ### P0: Discovery and feasibility — 6% weight; 85% estimated complete

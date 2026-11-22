@@ -1,6 +1,6 @@
 # Phase 1: Enrich historical Class 203 comparable sales
 
-**Status: experimental; no validated price-prediction model.**
+**Status (22 November 2026):** Phase 1 extraction and evaluation **completed** in [verified cloud run 45045580458](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458), followed by [Phase 2 comparable evaluation](../../docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md). The historical research is experimental; **no current price-prediction model is validated**.
 
 ## Why this phase exists
 
@@ -12,9 +12,9 @@ Data sources: [sales](https://datacatalog.cookcountyil.gov/d/wvhk-k5uv), [reside
 
 Class 203 is a *one-story residence of 1,000 to 1,800 square feet*. It does not certify a property's condition, interior quality, or exact market comparability. The property classes and taxonomy can change over time.
 
-## Run on Windows
+## Optional local execution
 
-From the project root (after `git pull origin main`):
+Routine audits already run in [GitHub Actions](../../docs/AUTOMATED_DATA_AUDIT.md); no local execution or ZIP uploads are necessary. For debugging from the project root (after `git pull origin main`):
 
 ```powershell
 cd audit\phase1
@@ -43,9 +43,8 @@ It writes:
 
 These baseline results are **research measurements, not user-facing valuations**. County sales can arrive late; historical geography may be backfilled and building records revised. This cannot establish what was observable on a historical decision date, nor does it prove price prediction accuracy for today's market.
 
-## Next decisions
+## Subsequent progress and open quality gates
 
-1. Confirm coverage of neighbourhood, coordinates, bedrooms/baths and year built, and measure class mismatches.
-2. Assess whether requiring an assessor neighbourhood destroys comparable coverage.
-3. Compare historical paired error without claiming the method is production-ready.
-4. Only then consider a spatial distance rule and an app-facing comparable explainability contract.
+- **Completed:** The 273 Class 203 joined sales yielded 262 matching historical parcel-universe keys; 66 of 83 retrospective 2024 subjects had at least three same-neighbourhood comparables. See [Phase 1 results](../../docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md).
+- **Completed:** Phase 2 tested a 2 km fallback on the remaining 17 subjects and found worse price errors than the township baseline on those 17. See [Phase 2 results](../../docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md).
+- **Still pending:** Repeatable historical data provenance, source-rights review, meaningful real-world buyer input mapping, independent holdout evaluation and an application evidence response contract. The current deliverable priority is delivery **P3**; see [checkpoint](../../docs/CHECKPOINT.md).
