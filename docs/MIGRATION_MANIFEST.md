@@ -16,4 +16,4 @@
 
 No unrelated graduate vacancy research, other software portfolio projects, CVs, personal data or source dataset dumps were migrated. The two primary research documents were **adapted rather than byte-for-byte duplicated**; originals remain available in the playbook. No source repository paths were deleted or overwritten.
 
-**Repository note:** The active GitHub connector can read and update existing repositories but has no remote repository-creation action. This initial project workspace must be pushed after an empty destination repository is created in GitHub.
+**GitHub migration completed (22 November 2026):** The user created `Sonkhe-Shongwe/house-price-intelligence`; the connected GitHub tools uploaded all 21 initial project files to `main` and verified their contents. The source playbook remains untouched. The initial standalone ZIP has different Git commit history from the published repository, so start ongoing local development by cloning the published repository. See [GitHub setup](GITHUB_SETUP.md).
