@@ -1,34 +1,47 @@
-# Publish this local Git repository to GitHub
+# Working with the hosted GitHub repository
 
-**The project already has an initialized `main` branch and initial local commit.** The GitHub repository has not been created automatically because the available connected GitHub tools cannot create a new repository.
+**Repository:** https://github.com/Sonkhe-Shongwe/house-price-intelligence  
+**Branch:** `main`  
+**Published:** 22 November 2026.
 
-## Create the remote
+The repository was created on GitHub and its 21 initial project files were migrated and verified. **Do not create another repository or repeat the initial upload instructions.**
 
-1. Go to https://github.com/new while signed in to your GitHub account.
-2. Set **Owner:** `Sonkhe-Shongwe`.
-3. Set **Repository name:** `house-price-intelligence`.
-4. Choose **Private** while we validate source use and public data display. It can be made public later after review.
-5. Leave **Add a README**, **Add .gitignore** and **Choose a license** **unchecked**, because this local repo already has an initial Git commit.
-6. Create the repository.
+## Set up a working copy on Windows
 
-## Push from Windows PowerShell
-
-Extract `HousePriceIntelligence_Repository.zip` and open a terminal at the `HousePriceIntelligence` folder (the folder containing `.git` and `README.md`). Git for Windows must be installed.
+Install Git for Windows and Python 3.10+ if needed. Open PowerShell in the folder where you keep development projects:
 
 ```powershell
+git clone https://github.com/Sonkhe-Shongwe/house-price-intelligence.git
+cd house-price-intelligence
 git status
-git remote add origin https://github.com/Sonkhe-Shongwe/house-price-intelligence.git
-git push -u origin main
+cd audit/phase0
+python -m unittest discover -s tests -v
 ```
 
-If a remote named `origin` already exists, check it with `git remote -v`; do not blindly overwrite it. Use Git Credential Manager's browser login if prompted, not a password pasted into a terminal.
+Then, with working internet access to the Cook County Open Data API, run:
 
-## Verify
+```powershell
+python audit.py --township 17 --start 2022-01-01 --end 2025-01-01 --out output
+```
 
-Open the newly created GitHub repo and confirm `README.md`, `audit/phase0/audit.py`, `audit/phase0/tests/test_audit.py`, `docs/` and `.github/workflows/audit-tests.yml` exist on `main`. GitHub Actions should run the offline tests after a push; if the repository blocks Actions, the local test command is sufficient initially.
+The live extract is **not yet verified**. Review the results and any errors before using the dataset to make valuation claims. Outputs and raw data remain ignored by Git.
 
-Do not upload `audit/phase0/output/`, raw sales files, `.env` or real user financial information.
+## Important: the earlier ZIP is not the GitHub clone
 
-## Connected-app alternative
+The `HousePriceIntelligence_Repository.zip` produced before publication contains an independent **local Git history**. The connected GitHub migration created new remote commits. These histories differ. If you extracted that old ZIP earlier, **clone the hosted repository afresh** instead of pushing its `main` branch into GitHub or force-pushing over the hosted history.
 
-After the empty repo is created, this assistant's connected GitHub tools can edit its files. However, they currently cannot create the repository itself, and the direct local Git push above preserves the existing initial commit and full project structure without re-entering every file.
+## Normal development workflow
+
+```powershell
+git pull --ff-only
+# make and test changes
+git add .
+git commit -m "Describe the change"
+git push
+```
+
+Verify the changes on GitHub after pushing. The `.github/workflows/audit-tests.yml` workflow runs the offline unit tests on pushes and pull requests, subject to GitHub Actions being enabled.
+
+## Data and security
+
+As published, this GitHub repository is **public**. Do not commit raw sales or property records, owner/buyer/seller personal information, generated audit reports, credentials, `.env` files or genuine user financial details. Review dataset-specific reuse and publication terms before adding live records or turning the source into a public demo. You can change the repository visibility in GitHub settings if you want private development.
