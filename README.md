@@ -56,3 +56,7 @@ The separate [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-te
 ## Contribution and development style
 
 Use small reviewed commits, document rejected assumptions and keep regression tests for data join errors, multi-parcel sales, missing attributes and future sales. Never claim to have tested live source records until an actual extract has been run and its report saved.
+
+## Automated data audit
+
+Phase 0 and Phase 1 can run in GitHub Actions without installing the audit locally. See [Automated Data Audit](docs/AUTOMATED_DATA_AUDIT.md) for triggers, report artifacts, failure handling and privacy limits. Live cloud extraction is separate from the offline unit tests and must be verified by a real workflow run.

@@ -1,0 +1,60 @@
+name: Cook County data audit (Phase 0 and 1)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/data-audit.yml'
+      - 'audit/phase0/**'
+      - 'audit/phase1/**'
+      - 'audit/cloud/**'
+
+# The audit reads public data and does not need write access to this repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: house-price-data-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  historical-data-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test Phase 0 code
+        working-directory: audit/phase0
+        run: python -m unittest discover -s tests -v
+      - name: Test Phase 1 code
+        working-directory: audit/phase1
+        run: python -m unittest discover -s tests -v
+      - name: Test cloud report exporter
+        working-directory: audit/cloud
+        run: python -m unittest discover -s tests -v
+      - name: Download and audit historical Cook County sales and buildings
+        working-directory: audit/phase0
+        run: python audit.py --township 17 --start 2022-01-01 --end 2025-01-01 --out output
+      - name: Generate corrected Phase 0 v2 report
+        working-directory: audit/phase0
+        run: python reanalyze.py --out output
+      - name: Enrich Class 203 records and compare neighbourhood baselines
+        working-directory: audit/phase1
+        run: python expand.py --phase0 ../phase0/output --out output
+      - name: Prepare privacy-conscious summary reports
+        if: always()
+        run: python audit/cloud/export_reports.py --phase0 audit/phase0/output --phase1 audit/phase1/output --out reports
+      - name: Upload summary reports (no raw extracts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: house-price-audit-summary-${{ github.run_number }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
