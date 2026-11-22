@@ -20,6 +20,7 @@ Audit **repository documentation**, not new property data: look for outdated sta
 | **Medium** | The [Phase 1 instructions](../../audit/phase1/README.md) and [backend placeholder](../../backend/README.md) treated subsequent completed phases or the initial evidence gate as pending. | Cross-linked verified research and put P3 contracts before implementing the production backend; frontend placeholder clarified the intended real workflow. |
 | **Medium** | [README](../../README.md), [checkpoint](../CHECKPOINT.md) and [decision register](../DECISIONS.md) mixed dated research labels and P0–P8 delivery statuses. | Established one consistent current handoff, unambiguous phase naming and canonical [documentation index](../DOCUMENTATION_INDEX.md). |
 | **Preventive** | No automated guard against broken local documentation links and divergent P-stage percentages. | Added `tools/check_docs.py` to the offline GitHub Actions test workflow. It checks Markdown local links, nine P-stage rows, total phase weights and cross-roadmap estimates. |
+| **Preventive** | A Markdown-only edit under `audit/` also triggered an expensive live data extraction through an overly broad path filter. | Limited the live GitHub Actions trigger to Python research files or its own workflow. Documentation-only edits still receive offline link and progress checks. |
 
 ## Invariants preserved
 

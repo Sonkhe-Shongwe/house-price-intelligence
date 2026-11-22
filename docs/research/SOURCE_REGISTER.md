@@ -21,7 +21,7 @@
 ## Provenance and control rules
 
 - Pilot dates: sales from **2022-01-01 inclusive to 2025-01-01 exclusive**, Cook County township code `17`; characteristics and geography are linked to the **prior tax year as a proxy**.
-- Verified source run: [22 Nov 2026 cloud audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782). See the detailed [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), and [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) findings for actual counts and limitations.
+- Verified source run: [22 Nov 2026 cloud audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782). See the detailed [Phase 0](PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](PHASE1_CLOUD_AUDIT_RESULTS.md), and [Phase 2](PHASE2_CLOUD_AUDIT_RESULTS.md) findings for actual counts and limitations.
 - Keep publisher URL, dataset ID, extraction timestamp, query, schema and source update timestamp in the internal research layer; raw records never go in Git or public audit artifacts.
 - Review data rights **by source and by displayed field** before storing/distributing property-level records in the buyer-facing app. An open-data catalogue listing alone does not settle permitted use.
 - Original fallback-source leads came from the separate SA Tech Graduate Playbook. No fallback dataset has been quietly substituted for Cook County.

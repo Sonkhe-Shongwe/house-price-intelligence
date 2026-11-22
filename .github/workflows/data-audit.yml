@@ -6,10 +6,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/data-audit.yml'
-      - 'audit/phase0/**'
-      - 'audit/phase1/**'
-      - 'audit/phase2/**'
-      - 'audit/cloud/**'
+      # Only Python research-pipeline changes trigger expensive source extraction.
+      # Markdown-only changes under audit/ are checked by audit-tests.yml instead.
+      - 'audit/**/*.py'
 
 # The audit reads public data and does not need write access to this repository.
 permissions:
