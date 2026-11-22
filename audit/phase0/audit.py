@@ -85,6 +85,23 @@ def bool_value(value):
     return None
 
 
+def whole_count(value):
+    """Parse Socrata numeric counts without truncation.
+
+    Socrata Number fields may arrive as strings like "1.0". A non-integral,
+    non-finite, empty, or boolean value is not a valid number of items.
+    """
+    if value is None or isinstance(value, bool) or str(value).strip() == "":
+        return None
+    try:
+        n = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    if not n.is_finite() or n != n.to_integral_value() or n < 0:
+        return None
+    return int(n)
+
+
 def positive_price(value):
     try:
         x = Decimal(str(value))
@@ -117,11 +134,11 @@ def sale_reject_reasons(sale):
         failures.append("missing_or_invalid_is_multisale")
     elif multi:
         failures.append("multi_parcel_sale")
-    try:
-        if int(sale["num_parcels_sale"]) != 1:
-            failures.append("not_one_parcel_sale")
-    except (KeyError, TypeError, ValueError):
+    parcels = whole_count(sale.get("num_parcels_sale"))
+    if parcels is None:
         failures.append("missing_num_parcels_sale")
+    elif parcels != 1:
+        failures.append("not_one_parcel_sale")
     return failures
 
 
@@ -148,12 +165,13 @@ def join_sale_to_prior_building(sale, building_lookup):
     b = building_rows[0]
     if bool_value(b.get("pin_is_multicard")) is True:
         return None, "multicard_flag"
-    try:
-        cards = b.get("pin_num_cards")
-        if cards not in (None, "") and int(cards) != 1:
+    cards = b.get("pin_num_cards")
+    if cards not in (None, ""):
+        count = whole_count(cards)
+        if count is None:
+            return None, "invalid_card_count"
+        if count != 1:
             return None, "multi_card_count"
-    except (ValueError, TypeError):
-        return None, "invalid_card_count"
     try:
         area = float(b["char_bldg_sf"])
         if not (250 <= area <= 20_000):
@@ -196,12 +214,35 @@ def run_analysis(sales, buildings, *, township, start, end):
         accepted.append(s)
     lookup = building_rows_by_key(buildings)
     joined, join_rejections = [], Counter()
+    screened_by_year = Counter(str(s["sale_date"])[:4] for s in accepted)
+    source_sales_by_year = Counter(str(s.get("sale_date", ""))[:4] for s in sales)
+    joined_by_year = Counter()
+    join_rejections_by_year = defaultdict(Counter)
+    one_record_card_values = Counter()
+    building_years_by_pin = defaultdict(set)
+    for (bpin, byear) in lookup:
+        building_years_by_pin[bpin].add(byear)
+    absent_prior_breakdown = Counter()
     for s in accepted:
+        year = str(s["sale_date"])[:4]
+        prior_key = (normalize_pin(s.get("pin")), int(year) - 1)
+        hits = lookup.get(prior_key, [])
+        if len(hits) == 1:
+            # Only distributions, not IDs, are kept in aggregate audit results.
+            value = hits[0].get("pin_num_cards")
+            one_record_card_values[str(value)] += 1
         record, error = join_sale_to_prior_building(s, lookup)
         if error:
             join_rejections[error] += 1
+            join_rejections_by_year[year][error] += 1
+            if error == "no_prior_building":
+                if building_years_by_pin.get(normalize_pin(s.get("pin"))):
+                    absent_prior_breakdown["pin_seen_in_other_selected_year"] += 1
+                else:
+                    absent_prior_breakdown["pin_not_seen_in_selected_building_records"] += 1
         else:
             joined.append(record)
+            joined_by_year[year] += 1
     # Existing class codes must be checked with the official code dictionary before calling this 'detached houses'.
     subject_pool = sorted([x for x in joined if x["sale_date"].startswith("2024-")],
                           key=lambda x: (x["sale_date"], x["pin"]))
@@ -221,6 +262,12 @@ def run_analysis(sales, buildings, *, township, start, end):
         "audited_township_code": township, "sale_start_inclusive": start, "sale_end_exclusive": end,
         "source_sale_rows": len(sales), "source_building_rows": len(buildings),
         "sales_after_screen": len(accepted), "joined_sale_candidates": len(joined),
+        "source_sales_by_year": dict(sorted(source_sales_by_year.items())),
+        "screened_sales_by_year": dict(sorted(screened_by_year.items())),
+        "joined_sales_by_year": dict(sorted(joined_by_year.items())),
+        "join_rejections_by_year": {year: dict(sorted(counts.items())) for year, counts in sorted(join_rejections_by_year.items())},
+        "single_prior_record_card_value_counts": dict(one_record_card_values.most_common(15)),
+        "no_prior_building_diagnostics": dict(sorted(absent_prior_breakdown.items())),
         "sale_reasons_not_mutually_exclusive": dict(rejections),
         "join_rejection_counts": dict(join_rejections),
         "class_counts_in_joined_candidates": dict(Counter(x["class"] for x in joined).most_common()),
@@ -273,6 +320,18 @@ def report_markdown(summary, *, capped_sales, capped_buildings, sales_meta, buil
 
 ## Property class distribution (not yet validated as single-family)
 {sect_dict(summary['class_counts_in_joined_candidates'])}
+
+## Breakdown by sale year
+### Screened sales
+{sect_dict(summary.get('screened_sales_by_year', {}))}
+### Joined sales
+{sect_dict(summary.get('joined_sales_by_year', {}))}
+
+## Card counts from exactly-one-row prior-year matches
+{sect_dict(summary.get('single_prior_record_card_value_counts', {}))}
+
+## Unmatched prior-year records (exploratory only)
+{sect_dict(summary.get('no_prior_building_diagnostics', {}))}
 
 ## Limitations and decision guards
 """ + "\n".join("- " + s for s in summary["limitations"]) + "\n\n**Not a commercial-quality, legal-rights, valuation or historical backtest certification.**\n"
