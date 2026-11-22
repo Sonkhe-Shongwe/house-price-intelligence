@@ -21,7 +21,7 @@
 - Source-specific public-display and redistribution rights.
 - Whether prediction can outperform the comparable baseline on a genuine chronological holdout.
 - Backend language/framework, relational database, frontend framework, hosting and ML library.
-- Repository public/private status after real data, terms and security review. Prefer private during early research.
+- **Current repository visibility:** Public, as configured at creation. Evaluate switching to private during early research; never publish raw records, sensitive personal data or datasets without reviewing their terms.
 
 ## Do not silently decide
 
