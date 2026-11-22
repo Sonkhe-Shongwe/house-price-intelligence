@@ -1,6 +1,6 @@
 # Automated Cook County Data Audit
 
-**Status:** Workflow configured for validation. A successful offline test run does not prove the cloud data extraction succeeds.
+**Status:** End-to-end verified on [GitHub Actions run 45045580458](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458), 22 November 2026. Both live phases, 27 offline tests and aggregate artifact upload succeeded.
 
 ## What runs
 
@@ -25,6 +25,8 @@ Open the workflow run page:
 - Inspect the **historical-data-audit** job steps and its generated summary.
 - If successful, download the **house-price-audit-summary-N** artifact (retained for 14 days).
 - `phase0_summary.json`, `phase0_report.md`, `phase1_summary.json`, `phase1_report.md` and `run_manifest.json` are the expected reports after both phases succeed. A partial artifact is possible if a stage fails.
+
+The first successful run produced [saved Phase 1 findings](research/PHASE1_CLOUD_AUDIT_RESULTS.md) and [an aggregate report artifact](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458/artifacts/14763313317). The artifact expires after 14 days; the project findings document does not.
 
 Do not interpret these historical analyses as current home valuations, arm's-length confirmations or leakage-safe model evaluations. The implementation still requires official property class verification, data timing analysis, source-use review and more representative validation.
 

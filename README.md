@@ -59,4 +59,4 @@ Use small reviewed commits, document rejected assumptions and keep regression te
 
 ## Automated data audit
 
-Phase 0 and Phase 1 can run in GitHub Actions without installing the audit locally. See [Automated Data Audit](docs/AUTOMATED_DATA_AUDIT.md) for triggers, report artifacts, failure handling and privacy limits. Live cloud extraction is separate from the offline unit tests and must be verified by a real workflow run.
+Phase 0 and Phase 1 can run in GitHub Actions without installing the audit locally. See [Automated Data Audit](docs/AUTOMATED_DATA_AUDIT.md) for triggers, report artifacts, failure handling and privacy limits. The end-to-end cloud extraction and report upload were verified in [the first successful run](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458). See the [saved Phase 1 findings](docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md).
