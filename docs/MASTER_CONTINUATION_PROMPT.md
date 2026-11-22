@@ -16,7 +16,7 @@ Read relevant current sources in order:
 2. `docs/DOCUMENTATION_INDEX.md` for canonical sources and document precedence.
 3. `docs/CHECKPOINT.md` for the newest verified handoff and next acceptance blocker.
 4. `docs/P_PHASE_ROADMAP.md` and `docs/DECISIONS.md` for delivery P0-P8, percentages, approved versus open choices, and phase gates.
-5. `docs/product/PRODUCT_BRIEF.md`, `docs/engineering/ENGINEERING_CONTRACT.md`, and the relevant architecture/API or implementation contract, once created.
+5. `docs/product/PRODUCT_BRIEF.md`, `docs/engineering/ENGINEERING_CONTRACT.md`, the active `docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md` and the relevant architecture/API or implementation contract, once created.
 6. `docs/research/SOURCE_REGISTER.md`, the latest dated Phase 0-2 or subsequent research findings, and `docs/AUTOMATED_DATA_AUDIT.md` when data is involved.
 7. Relevant implementation, tests, workflows, issue reports, Git history, CI runs and retained evidence for the actual workstream.
 
@@ -83,6 +83,9 @@ A passing unit test is not proof of deployed usability. A retrospective matched 
 Use exact source/run/commit identities. For cloud jobs, distinguish workflow code passing from real API ingestion and successful artifact export. Do not invent outcomes, metrics, acceptance approvals or real user observations.
 
 ## 5. Engineer and verify the smallest useful change
+
+**Active lean directive:** Apply [Lean Engineering and Delivery Directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md): one authoritative implementation, small complete vertical slices, minimal dependencies, clear service/storage/UI boundaries and risk-focused tests. Avoid accumulating isolated prototypes or overbuilding infrastructure. Keep existing valuable regressions. Refactor or migrate HTTP/framework technologies only when concrete requirements justify the maintenance cost.
+
 
 Before editing: inspect source and diffs, discover current architecture and matching interfaces, check existing tests and document any conflicting work. Use small, reversible changes; preserve concurrent changes and history. Separate business/domain logic from HTTP, storage and UI layers. Keep existing matcher invariants, including earlier-only sales, unique comparable PIN, same supported class, documented geography expansion, provenance, explicit insufficiency and price-free matching/ranking.
 

@@ -34,6 +34,7 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
 | [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
 | [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
+| [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Simplified architecture, feature workflow, testing and efficiency |
 | [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
 | [Documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Reviewed inconsistencies and corrections |
 

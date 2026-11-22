@@ -2,6 +2,12 @@
 
 **Reviewed:** 22 November 2026. Applies to both the research pipeline and the future buyer application. The [P0–P8 roadmap](../P_PHASE_ROADMAP.md) specifies stage acceptance, while this document states safeguards that remain binding throughout.
 
+## Active development directive: lean engineering
+
+The owner adopted the [Lean Engineering and Delivery Directive](LEAN_ENGINEERING_DIRECTIVE.md) on 22 November 2026. **Default to the simplest correct modular implementation, one authoritative codebase, small fully connected user features, clear typed boundaries, database constraints, fast targeted tests and CI on authorised integration.** Avoid uncontrolled prototype proliferation, speculative frameworks, redundant tests and repeated documentation. Maintain all data-provenance, security, historical-evidence and approval gates below; speed never overrides them.
+
+**Technology choices are proposed, not silently decided:** Evaluate Python modular monolith, SQLite, plain HTML/CSS/JavaScript, optional FastAPI/Pydantic, Ruff and limited browser automation against real needs. Do not imply approval to install dependencies, train models or deploy.
+
 ## Data invariants
 
 1. A sale transaction, parcel, building and historical assessment-year record are separate entities. Never multiply transactions through joins or allocate a multi-parcel sale price to one building.
