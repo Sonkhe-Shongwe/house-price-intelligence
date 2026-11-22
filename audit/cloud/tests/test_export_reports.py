@@ -7,7 +7,7 @@ import subprocess
 import sys
 import tempfile
 
-from export_reports import export_summary, PHASE0_FIELDS, PHASE1_FIELDS
+from export_reports import export_summary, PHASE0_FIELDS, PHASE1_FIELDS, PHASE2_FIELDS
 
 
 class ExportTests(unittest.TestCase):
@@ -27,6 +27,13 @@ class ExportTests(unittest.TestCase):
         result = export_summary(original, PHASE1_FIELDS)
         self.assertNotIn('pin', json.dumps(result))
         self.assertEqual(result['evaluation']['2024_subjects'], 90)
+
+    def test_phase2_summary_does_not_export_identifying_examples(self):
+        summary = {'subject_count': 83, 'tier_counts': {'same_neighborhood': 66},
+                   'per_property_evidence': [{'pin': '00000000000222', 'document': 'SECRET'}]}
+        safe = export_summary(summary, PHASE2_FIELDS)
+        self.assertEqual(safe, {'subject_count': 83, 'tier_counts': {'same_neighborhood': 66}})
+        self.assertNotIn('SECRET', json.dumps(safe))
 
     def test_partial_failure_still_exports_safe_phase0_results(self):
         with tempfile.TemporaryDirectory() as temp:

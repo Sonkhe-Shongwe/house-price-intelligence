@@ -1,4 +1,4 @@
-name: Cook County data audit (Phase 0 and 1)
+name: Cook County data audit (Phases 0 to 2)
 
 on:
   workflow_dispatch:
@@ -8,6 +8,7 @@ on:
       - '.github/workflows/data-audit.yml'
       - 'audit/phase0/**'
       - 'audit/phase1/**'
+      - 'audit/phase2/**'
       - 'audit/cloud/**'
 
 # The audit reads public data and does not need write access to this repository.
@@ -35,6 +36,9 @@ jobs:
       - name: Test Phase 1 code
         working-directory: audit/phase1
         run: python -m unittest discover -s tests -v
+      - name: Test Phase 2 matching engine
+        working-directory: audit/phase2
+        run: python -m unittest discover -s tests -v
       - name: Test cloud report exporter
         working-directory: audit/cloud
         run: python -m unittest discover -s tests -v
@@ -47,9 +51,12 @@ jobs:
       - name: Enrich Class 203 records and compare neighbourhood baselines
         working-directory: audit/phase1
         run: python expand.py --phase0 ../phase0/output --out output
+      - name: Evaluate neighbourhood-first and 2 km fallback matches
+        working-directory: audit/phase2
+        run: python evaluate.py --phase1 ../phase1/output --out output
       - name: Prepare privacy-conscious summary reports
         if: always()
-        run: python audit/cloud/export_reports.py --phase0 audit/phase0/output --phase1 audit/phase1/output --out reports
+        run: python audit/cloud/export_reports.py --phase0 audit/phase0/output --phase1 audit/phase1/output --phase2 audit/phase2/output --out reports
       - name: Upload summary reports (no raw extracts)
         if: always()
         uses: actions/upload-artifact@v4

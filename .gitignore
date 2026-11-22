@@ -40,3 +40,6 @@ node_modules/
 .next/
 /audit/phase1/output/
 /audit/phase1/outputs/
+
+/audit/phase2/output/
+/audit/phase2/outputs/

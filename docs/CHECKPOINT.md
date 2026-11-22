@@ -24,6 +24,8 @@ See [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1 cloud fi
 
 ## Next engineering work
 
-Investigate a neighbourhood-first matching approach with a transparent, limited fallback and missing-evidence states. Evaluate coverage and descriptive errors on matched cohorts before deciding which facts the user-facing application can responsibly display.
+Phase 2 now implements a deterministic **same-neighbourhood first / 2 km bounded radius / insufficient-evidence** comparable selector. It is intentionally not a property valuation service. Offline tests cover out-of-window, future and same-day sales; duplicate property transactions; absent coordinates; class/area mismatches; price-blind ranking; fallback rationale; and abstention cases.
+
+The cloud workflow will evaluate Phase 2 on 2024 historical Class 203 subjects after Phase 1, comparing adaptive, township and strict-neighbourhood median-of-five reference baselines on **paired groups**, including fallback-only cases. The next product decision must use those real Phase 2 metrics. Then scope a buyer-facing evidence contract and complete vertical slice, while retaining date-availability and public-data-display safeguards.
 
 When source or audit code changes are pushed to `main`, the [cloud data audit](../.github/workflows/data-audit.yml) automatically reruns. For a manual rerun without code changes, use GitHub Actions → Cook County data audit → Run workflow. No local dataset download or ZIP upload is needed.

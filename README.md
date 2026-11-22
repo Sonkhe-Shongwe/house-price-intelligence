@@ -1,6 +1,6 @@
 # House Price Intelligence
 
-**Status: Phase 0 data feasibility; product and technology choices remain provisional.**
+**Status: Phase 2 comparable-selection experiment; browser application and long-term technology choices remain provisional.**
 
 House Price Intelligence is a prospective homebuyer's evidence-based decision workspace. The user can eventually enter an asking price, investigate verified completed sales, understand which properties are comparable, save a shortlist and make an informed comparison. A statistical price estimate will be included **only if** source-quality and time-based model evaluation justify it.
 
@@ -8,10 +8,11 @@ This is a **software engineering project**, not merely a house-price notebook. T
 
 ## Current state (22 November 2026)
 
-- Active project selected; no complete application implemented.
-- Existing Phase 0 Python standard-library audit migrated into [`audit/phase0`](audit/phase0/). Seven fabricated-data unit tests exist and have been verified locally.
-- Live Cook County extraction, measured joins and comparable coverage **have not been completed**. Do not represent placeholder examples as real valuations.
-- Frontend, server framework, production database and machine-learning methods are intentionally **not selected yet**. Product requirements and measured data constraints determine those decisions.
+- Phase 0: actual Cook County township 17 extraction completed in GitHub Actions, with **1,285** accepted historical sale-to-building matches from 2022–2024.
+- Phase 1: 273 Class 203 records enriched with historical neighbourhood and building details; 66 of 83 historical 2024 subjects supported by at least three same-neighbourhood prior sales.
+- Phase 2: a **neighbourhood-first, bounded 2 km fallback and abstention** comparable-selection engine has been implemented. Its real-data evaluation is a separate, still-experimental milestone; see [`audit/phase2`](audit/phase2/).
+- Routine source audits and aggregate report uploads run in [GitHub Actions](.github/workflows/data-audit.yml), without a local data extract or manual ZIP upload.
+- No production data store, public property API, browser interface or validated valuation model exists yet. This remains an engineering and feasibility project, not a live property price service.
 
 ## Quick start for the existing audit (Python 3.10+)
 
@@ -60,3 +61,7 @@ Use small reviewed commits, document rejected assumptions and keep regression te
 ## Automated data audit
 
 Phase 0 and Phase 1 can run in GitHub Actions without installing the audit locally. See [Automated Data Audit](docs/AUTOMATED_DATA_AUDIT.md) for triggers, report artifacts, failure handling and privacy limits. The end-to-end cloud extraction and report upload were verified in [the first successful run](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458). See the [saved Phase 1 findings](docs/research/PHASE1_CLOUD_AUDIT_RESULTS.md).
+
+## Current comparable selection experiment
+
+The Phase 2 engine chooses same-assessor-neighbourhood sales first, then tries a disclosed 2 km location-based fallback and otherwise abstains. It does not use sale prices to rank properties. See [Phase 2 matching contract](audit/phase2/README.md) and the [latest project checkpoint](docs/CHECKPOINT.md).

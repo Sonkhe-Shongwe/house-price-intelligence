@@ -1,4 +1,4 @@
-name: Phase 0 audit tests
+name: Property audit unit tests
 
 on:
   push:
@@ -19,4 +19,10 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Run Phase 1 offline unit tests
         working-directory: audit/phase1
+        run: python -m unittest discover -s tests -v
+      - name: Run Phase 2 offline unit tests
+        working-directory: audit/phase2
+        run: python -m unittest discover -s tests -v
+      - name: Run artifact exporter offline unit tests
+        working-directory: audit/cloud
         run: python -m unittest discover -s tests -v
