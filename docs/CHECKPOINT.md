@@ -1,6 +1,6 @@
 # House Price Intelligence: current development checkpoint
 
-**Last updated: 22 November 2026**
+**Last updated: 22 November 2026, Phase 2 cloud evaluation completed**
 
 House Price Intelligence has its own GitHub repository. The South African graduate-programme research repository remains a separate, unchanged source of career-research documentation.
 
@@ -10,10 +10,11 @@ House Price Intelligence has its own GitHub repository. The South African gradua
 - Identified and fixed an integral-decimal card-count parsing defect with regression tests.
 - Phase 1 targeted historical parcel universe and characteristics enrichment for 262 distinct Class 203 PIN-year keys.
 - Phase 1 descriptive baseline analysis on 83 historical 2024 subjects; 66 have >=3 same-neighbourhood comparables.
-- **GitHub Actions cloud automation verified:** tests, Phase 0, Phase 1, summary reports and artifact upload succeeded on [run 45045580458](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458).
+- **GitHub Actions cloud automation verified:** Phase 0, Phase 1 and report upload succeeded on [run 45045580458](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45045580458).
+- **Phase 2 matching engine completed:** neighbourhood-first, bounded 2 km geographic fallback, property deduplication, explanation, and abstention states. End-to-end [cloud evaluation succeeded](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782) with 42 offline unit tests. On 83 historical subjects, 66 had at least three neighbourhood comparables and 17 needed the 2 km fallback. The fallback's MAE was worse than township-wide matching on those same 17 subjects; do not promote fallback median as a credible valuation.
 - The cloud workflow saves only aggregate reports; no raw source extracts are published as artifacts. No manual PowerShell steps are required for routine audits.
 
-See [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1 cloud findings](research/PHASE1_CLOUD_AUDIT_RESULTS.md), and [cloud audit operating instructions](AUTOMATED_DATA_AUDIT.md).
+See [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1 findings](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2 findings](research/PHASE2_CLOUD_AUDIT_RESULTS.md) and [cloud audit operating instructions](AUTOMATED_DATA_AUDIT.md).
 
 ## Remaining problems
 
@@ -24,8 +25,8 @@ See [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1 cloud fi
 
 ## Next engineering work
 
-Phase 2 now implements a deterministic **same-neighbourhood first / 2 km bounded radius / insufficient-evidence** comparable selector. It is intentionally not a property valuation service. Offline tests cover out-of-window, future and same-day sales; duplicate property transactions; absent coordinates; class/area mismatches; price-blind ranking; fallback rationale; and abstention cases.
+The Phase 2 engine and live evaluation are complete. **Next priority:** build the first user-facing property investigation vertical slice, with a documented evidence response contract, subject input validation, traceable comparable sale explanations and clear distinctions between recorded facts, historical analysis and not-yet-approved predictions. Do not show fallback median prices as reliable valuations.
 
-The cloud workflow will evaluate Phase 2 on 2024 historical Class 203 subjects after Phase 1, comparing adaptive, township and strict-neighbourhood median-of-five reference baselines on **paired groups**, including fallback-only cases. The next product decision must use those real Phase 2 metrics. Then scope a buyer-facing evidence contract and complete vertical slice, while retaining date-availability and public-data-display safeguards.
+Before a public buyer app, review per-field source reuse/display rights, personal-record exclusion, historical availability, and current-market coverage. Continue evaluating geographical matching against a truly later holdout, not by overfitting to these 83 retrospectively analysed subjects.
 
-When source or audit code changes are pushed to `main`, the [cloud data audit](../.github/workflows/data-audit.yml) automatically reruns. For a manual rerun without code changes, use GitHub Actions → Cook County data audit → Run workflow. No local dataset download or ZIP upload is needed.
+Relevant GitHub Actions workflows run automatically on audit source changes; the results stay in a 14-day artifact, and verified findings must also be documented here.

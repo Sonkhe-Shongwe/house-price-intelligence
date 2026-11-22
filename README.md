@@ -10,7 +10,7 @@ This is a **software engineering project**, not merely a house-price notebook. T
 
 - Phase 0: actual Cook County township 17 extraction completed in GitHub Actions, with **1,285** accepted historical sale-to-building matches from 2022–2024.
 - Phase 1: 273 Class 203 records enriched with historical neighbourhood and building details; 66 of 83 historical 2024 subjects supported by at least three same-neighbourhood prior sales.
-- Phase 2: a **neighbourhood-first, bounded 2 km fallback and abstention** comparable-selection engine has been implemented. Its real-data evaluation is a separate, still-experimental milestone; see [`audit/phase2`](audit/phase2/).
+- Phase 2: the **neighbourhood-first, bounded 2 km fallback and abstention** comparable-selection engine has been implemented and tested in the cloud. Across 83 historical 2024 Class 203 subjects, 66 had enough same-neighbourhood comparables and 17 required fallback. The fallback was less accurate than township-wide matching on those 17; treat its sales as exploratory evidence, not a reliable valuation. See [Phase 2 findings](docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md).
 - Routine source audits and aggregate report uploads run in [GitHub Actions](.github/workflows/data-audit.yml), without a local data extract or manual ZIP upload.
 - No production data store, public property API, browser interface or validated valuation model exists yet. This remains an engineering and feasibility project, not a live property price service.
 

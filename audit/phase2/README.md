@@ -37,3 +37,7 @@ The evaluator tests 2024 historical recorded sales, compares the median of the s
 - The reference township is only one geography, and the pilot only supports Class 203.
 - Property condition, renovations and sale circumstances remain outside the data.
 - The rule may improve coverage while making median error worse. The experiment must reveal this rather than optimise results after seeing them.
+
+## First verified cloud experiment
+
+[GitHub Actions run 45046687782](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782) completed. The same-neighbourhood tier supported 66 of 83 retrospective 2024 Class 203 subjects; the 2 km fallback recovered the remaining 17 for **comparison evidence**, but its MAE on those 17 was $209,470.65 versus the township baseline $192,153.00. **Do not use spatial-fallback median prices as a validated sale-price estimate.** See the [permanent audit write-up](../../docs/research/PHASE2_CLOUD_AUDIT_RESULTS.md).
