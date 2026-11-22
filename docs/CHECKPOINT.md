@@ -2,6 +2,8 @@
 
 **As of 22 November 2026**
 
+**GitHub publication:** The standalone project repository is now at https://github.com/Sonkhe-Shongwe/house-price-intelligence on `main`. The initial 21 files were verified against the migration package; the seven offline tests also pass locally. The repository is currently **public**. See [GitHub setup](GITHUB_SETUP.md) for correct clone instructions. The live API extraction remains unverified.
+
 **Objective:** Build House Price Intelligence as a functioning product, not just a machine-learning notebook. Preserve the pinnacle but prove the data and one bounded buyer journey first.
 
 **Migrated:** Project brief and pinnacle framing, dataset feasibility research and source register, phase 0 Python audit, seven unit tests, run instructions, audit checkpoint and implementation decision history. Original docs in the private SA Tech Graduate Playbook have not been deleted or modified.
