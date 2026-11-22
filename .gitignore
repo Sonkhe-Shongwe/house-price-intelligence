@@ -1,0 +1,40 @@
+# Python/cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# IDE and environment
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+
+# Real source records, exports and generated reports
+/data/raw/
+/data/processed/
+/data/exports/
+/data/tmp/
+/audit/phase0/output/
+/audit/phase0/outputs/
+*.sqlite
+*.sqlite3
+*.db
+*.parquet
+*.arrow
+*.feather
+
+# Build and test artefacts
+build/
+dist/
+coverage/
+htmlcov/
+.coverage
+node_modules/
+.next/
