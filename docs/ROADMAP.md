@@ -1,48 +1,23 @@
-# Execution roadmap
+# House Price Intelligence: execution roadmap
 
-Target: seek a complete portfolio-grade House Price Intelligence application by late December 2026 or January 2027, with the second project (ShiftForge) also competing for development time. This target is provisional and not a guarantee.
+**Current governing roadmap:** [P0–P8 phase-gated delivery plan](P_PHASE_ROADMAP.md).
 
-## Phase 0: prove the data (active)
+**Status as of 22 November 2026:** approximately **22.8%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
 
-- [x] Preserve product definition and dataset research.
-- [x] Create executable source/quality audit with fabricated-data tests.
-- [ ] Run actual API extraction on a networked machine, capture errors/metadata.
-- [ ] Confirm adequate non-capped data extract; assess stable query/pagination.
-- [ ] Produce genuine sale-join cardinality and exclusion counts.
-- [ ] Verify class and township meanings.
-- [ ] Check at least 20 historical subjects and detailed examples.
-- [ ] Resolve data display/reuse requirements.
-- [ ] Hold a bounded go/no-go review.
+| Phase | Focus | Weight | Estimated completion |
+| --- | --- | ---: | ---: |
+| P0 | Discovery, market and source viability | 6% | 85% |
+| P1 | Data quality, ingestion and provenance | 12% | 75% |
+| P2 | Explainable historical comparables | 14% | 55% |
+| P3 | Domain, architecture and API contracts | 10% | 10% |
+| P4 | Backend API and database | 16% | 0% |
+| P5 | Buyer-facing browser investigation | 16% | 0% |
+| P6 | Save/reopen, shortlist and compare | 12% | 0% |
+| P7 | Integrated QA, privacy, rights, readiness | 8% | 0% |
+| P8 | Release, demo and portfolio handoff | 6% | 0% |
 
-## Phase 1: lock a bounded flagship
+**Next engineering milestone:** P3 domain design and acceptance of the subject -> ranked historical comparables -> evidence/warning/abstention API contract, followed by a P4 vertical slice against curated SQL storage.
 
-- [ ] Define one buyer, geography, house class, interaction contract, acceptance tests.
-- [ ] Choose application components and database **based on proven needs**.
-- [ ] Define source/cleaned/app data separation and provenance.
-- [ ] Set API/domain boundaries, error cases and security approach.
+**Critical boundaries:** Do not equate the 42 passing tests and historical audits with a finished app. Only 83 historical 2024 Class 203 subjects were evaluated; a 2 km fallback recovered 17 previously unsupported subjects but produced worse retrospective median-price MAE than the township baseline on those cases. No current-market valuation or trained ML model is authorized. Historical availability and public display rights remain unresolved.
 
-## Phase 2: first vertical slice
-
-- [ ] Curated records loaded to application storage with stable source keys.
-- [ ] Property inquiry submitted and validated.
-- [ ] Earlier eligible sales identified and explained.
-- [ ] Result saved and reopened; insufficient data handled correctly.
-- [ ] Automated integration tests.
-
-## Phase 3: finished buyer workflow
-
-- [ ] Save and compare multiple properties with data and source-date labels.
-- [ ] Improve usability, performance, data integrity and access restrictions.
-- [ ] Document reproducible setup, tests and demonstration.
-- [ ] Deploy only after reviewing data rights and security.
-
-## Conditional Phase 4: estimation
-
-- [ ] Establish a comparable-based baseline.
-- [ ] Evaluate candidate price model chronologically on held-out sales.
-- [ ] Validate intervals separately, show failure/unsupported conditions.
-- [ ] Include estimates only if measured quality justifies it.
-
-## Scope to defer
-
-Global listing search, live photos, proprietary property APIs, mortgage integrations, AI agent, notification infrastructure, multi-city expansion and professional-appraisal claims.
+The [earlier preliminary roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) is retained for history. Original target remains a portfolio-grade application by late December 2026 or January 2027, with ShiftForge competing for time; it is aspirational, not an acceptance commitment.

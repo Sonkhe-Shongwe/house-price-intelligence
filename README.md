@@ -37,7 +37,8 @@ The second command requires network access to the Cook County Open Data APIs and
 | [`docs/research/DATA_FEASIBILITY.md`](docs/research/DATA_FEASIBILITY.md) | Dataset risks, source leads, research gates |
 | [`docs/research/SOURCE_REGISTER.md`](docs/research/SOURCE_REGISTER.md) | Primary URLs and provenance |
 | [`docs/engineering/ENGINEERING_CONTRACT.md`](docs/engineering/ENGINEERING_CONTRACT.md) | Engineering invariants and quality gates |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phase 0 through first release |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Current P0–P8 overview and weighted progress |
+| [`docs/P_PHASE_ROADMAP.md`](docs/P_PHASE_ROADMAP.md) | Full PilotODIN-style phase-gated process and acceptance criteria |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Settled vs open choices |
 | [`docs/CHECKPOINT.md`](docs/CHECKPOINT.md) | Current handoff and next action |
 | [`docs/MIGRATION_MANIFEST.md`](docs/MIGRATION_MANIFEST.md) | Origins and excluded materials |

@@ -30,3 +30,11 @@ The Phase 2 engine and live evaluation are complete. **Next priority:** build th
 Before a public buyer app, review per-field source reuse/display rights, personal-record exclusion, historical availability, and current-market coverage. Continue evaluating geographical matching against a truly later holdout, not by overfitting to these 83 retrospectively analysed subjects.
 
 Relevant GitHub Actions workflows run automatically on audit source changes; the results stay in a 14-day artifact, and verified findings must also be documented here.
+
+## Adopted P0–P8 phase-gated delivery tracking (22 November 2026)
+
+The project now uses a House Price Intelligence-specific adaptation of PilotODIN's complexity-last P0–P8 *process*, with explicit acceptance gates and weighted completion estimates. This does not import PilotODIN's Windows installer, AI orchestration or other unrelated requirements.
+
+**Estimated bounded portfolio-MVP completion: 22.8%**, excluding optional ML valuation. Weights/completion: P0 6%/85%, P1 12%/75%, P2 14%/55%, P3 10%/10%, P4 16%/0%, P5 16%/0%, P6 12%/0%, P7 8%/0%, P8 6%/0%. These are subjective planning estimates, not measured output.
+
+**Immediate P3 work:** Specify property/subject, sale, building, comparable evidence, rule/version, and saved investigation objects; define a support/abstention response contract; evaluate API and SQL design against the first real buyer workflow. The original Phase 0–2 dataset audit code and results are preserved separately. See [P-stage roadmap](P_PHASE_ROADMAP.md).
