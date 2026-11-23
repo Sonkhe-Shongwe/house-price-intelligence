@@ -1,7 +1,7 @@
 # House Price Intelligence: current checkpoint
 
-**As of:** 23 November 2026, post-continuity/document audit.  
-**Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence), branch `main`; last checked source before documentation update: `317149392678646455a0eb6080c086d682bca293`. Re-read HEAD and CI next session.  
+**As of:** 23 November 2026, cloud-first operating-document audit.  
+**Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence), branch `main`; last verified `main` baseline before cloud-first docs branch: `49f933d54c8de7221f45db9f57de953a40e02185`. Re-read HEAD and CI next session.  
 **Active stage:** P3 product architecture/contracts, **10% estimated complete**; **22.8% estimated weighted MVP progress**. P3 exit gate remains **open**; no progress added by design discussion or docs.
 
 ## Product direction and approvals
@@ -22,7 +22,7 @@ Historical tax-year matching does **not** establish when property facts were fir
 
 | State | Evidence | Boundary |
 | --- | --- | --- |
-| **Committed `main`** | Synthetic-only Python/SQLite/WSGI investigation + plain HTML/CSS/JS, four API statuses, saved in-memory investigation UUID/reopen, 15-table draft schema. **125 tests** passed in [CI 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620). Recent docs-only HEAD [CI 45126415402](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45126415402) also successful | No production API, permitted real-data frontend, stable consumer address lookup, persistent multi-property shortlist or map |
+| **Committed `main`** | Synthetic-only Python/SQLite/WSGI investigation + plain HTML/CSS/JS, four API statuses, saved in-memory investigation UUID/reopen, 15-table draft schema. **125 tests** passed in [CI 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620). Latest checked `main` [CI 45131930665](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45131930665) also successful | No production API, permitted real-data frontend, stable consumer address lookup, persistent multi-property shortlist or map |
 | **Separate isolated Windows patch** | User screenshots: **127 Python tests**, **15 Chromium DOM scenarios**, and full synthetic **browser -> HTTP -> Python -> SQLite** supported/insufficient/reopen/error journey passed | **Not integrated** into `main`; two additional backend guard tests and frontend/backend safety patch are not in GitHub CI. Original repository reported untouched by isolated runner |
 | **Production and release** | None | No authenticated production app, approved data-field display or deployment |
 
@@ -42,11 +42,21 @@ Historical tax-year matching does **not** establish when property facts were fir
 
 **Specific review target:** SQL prices are exact cents, but synthetic comparable response uses `cents / 100` floating-point conversion; define an exact external-money contract before extending use. Complete 11-item list in [continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md).
 
+## Cloud-first operating change and manual acceptance (23 November 2026)
+
+**Approved development method:** One repository, a controlled short-lived GitHub feature branch and PR, GitHub Actions as the primary automated verification environment, and only necessary Windows pulls for physical compatibility and owner UX acceptance. See [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) and the dated [workflow audit](reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md). GitHub Actions does not independently author code. The approved eight-step Lean Directive is unchanged.
+
+**Observed local synthetic application:** The owner launched the committed localhost WSGI app in Chrome. Screenshot/server-log evidence showed an invented known parcel with **3 explained comparable sales**, the same investigation reopened in a second tab, and an unknown parcel saved with **0 comparable sales** and no valuation. Local responses included `200` and `201`. This is **manual application acceptance evidence**, not the safety-patched 127-test suite and not a hosted-browser CI run. No public dataset was shown and in-memory saves vanish on shutdown.
+
+**Current CI gap:** The existing `audit-tests.yml` runs 125 Python tests and documentation checks, but does **not enforce JavaScript syntax or host Chromium acceptance**. The external `data-audit.yml` remains separately restricted. GitHub `main` was observed **unprotected** as of this audit; no required PR gate has been configured.
+
+**Highest-priority next engineering change (separate approval):** Extend the existing offline GitHub Actions checks, then add a minimal genuine synthetic browser-to-HTTP-to-SQLite test for supported, insufficient and reopen paths; validate stable checks before considering protected-`main` rules. Reconcile the actual Windows safety-patch diff and reviewed address candidates in **one** subsequent source branch. Do not treat missing local patch contents as merged. No code, workflow configuration, data extraction or progress percentage changes are authorised by this documentation-only update.
+
 ## New-tab action plan
 
 1. **Read** [Master Continuation Prompt](MASTER_CONTINUATION_PROMPT.md), this checkpoint, [Decision Register](DECISIONS.md), [P3 Contract](engineering/P3_APPLICATION_CONTRACT.md), [latest continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) and [UX research](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); verify current GitHub HEAD and CI.
-2. **P3 contract review:** Settle first buyer/market, credible consumer property identity, domain/ERD (transaction/parcel/building/assessment, source builds and evidence), API error/status semantics, versioning and save/reopen rules. No automatic P3 acceptance because synthetic browser tests passed.
-3. **Engineering after owner approval:** Reconcile actual Windows working tree, inspect verified integrated safety patch exactly, add relevant backend/JS regressions and reproducible Chromium journey into one authoritative repository, and verify GitHub CI for the resulting commit. Preserve untracked files. The current documentation request is **not** approval to integrate code.
+2. **Cloud-first CI infrastructure after separate approval:** Add enforced JS syntax and a focused synthetic graphical browser/HTTP/SQLite acceptance suite to the existing GitHub CI station. Keep external data audits gated and secure; review stable PR checks before asking to protect `main`.
+3. **P3 source integration after separate approval:** Recover the exact uncommitted Windows safety patch without replacing local files; reconcile approved source identity, money and address candidates into one GitHub feature branch. Complete contract and owner acceptance before awarding P3 credit. The current documentation request is **not** permission to integrate code or merge `main`.
 4. Continue rights/time/identity/source evaluation in parallel; only then justify P4/P5 connected slices and map-provider implementation. P6 shortlist remains a required MVP user feature, not yet delivered.
 
 **Current true commands:** `python tools/dev_check.py` and `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repository root. The convenient `tools/bootstrap.ps1`, `tools/check.ps1`, `tools/run.ps1` scripts have **not been created**.

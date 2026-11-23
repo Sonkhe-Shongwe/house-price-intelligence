@@ -13,6 +13,10 @@ This repository builds a buyer-facing historical comparable-sales investigation 
 
 Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5 may be implemented in connected slices after P3 acceptance, but have distinct acceptance gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
 
+## Cloud-first development station (owner-approved 23 November 2026)
+
+Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) alongside the unchanged eight-step directive. Use **one GitHub repository, one active milestone branch/PR and GitHub Actions for routine verifiable tests**. Source changes are authored through authorised GitHub/cloud tools; Actions executes builds and checks rather than automatically writing code. Pull to Windows only for essential platform testing or owner UX acceptance. Never create another active app workspace or serial review ZIP as a substitute for integration. Separate observed manual tests, unmerged patches and committed CI evidence. Do not commit, merge, deploy, change repository rules or dispatch live-data jobs without the relevant owner authorisation.
+
 ## Engineering boundaries
 
 - Prioritise traceable data, correct joins, source/time limitations, reproducible tests, clear comparable evidence and a complete buyer workflow.
