@@ -119,6 +119,10 @@ CREATE TABLE comparable_evidence (
     transaction_id TEXT NOT NULL,
     selection_tier TEXT NOT NULL CHECK (selection_tier IN ('same_neighborhood','spatial_fallback')),
     explanation TEXT NOT NULL,
+    -- Freeze original sale provenance and exact cents in this P3-only schema.
+    -- Do not reconstruct them from mutable transaction rows on reopen.
+    source_snapshot_id TEXT NOT NULL REFERENCES source_snapshots(snapshot_id),
+    sale_price_usd_cents INTEGER NOT NULL CHECK (sale_price_usd_cents > 0),
     PRIMARY KEY (investigation_id, rank),
     UNIQUE (investigation_id, transaction_id),
     FOREIGN KEY (investigation_id, build_id) REFERENCES investigations(investigation_id, build_id) ON DELETE CASCADE,

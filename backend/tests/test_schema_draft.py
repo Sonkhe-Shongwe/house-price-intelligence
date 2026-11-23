@@ -76,16 +76,16 @@ class DraftSQLTests(unittest.TestCase):
                           ("inv-a", "fixture-build", "00000000000001", "2024-07-01",
                            "{}", "v0.2", "supported_neighbourhood", "2026-11-22T00:00:00Z"))
         with self.assertRaises(sqlite3.IntegrityError):
-            self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?)",
-                              ("inv-a", "fixture-build", 1, "txn-x", "same_neighborhood", "synthetic"))
+            self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?,?,?)",
+                              ("inv-a", "fixture-build", 1, "txn-x", "same_neighborhood", "synthetic", "synthetic", 20000000))
         # A build with the transaction but a different investigation is also rejected.
         with self.assertRaises(sqlite3.IntegrityError):
-            self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?)",
-                              ("inv-a", "other-build", 1, "txn-x", "same_neighborhood", "synthetic"))
+            self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?,?,?)",
+                              ("inv-a", "other-build", 1, "txn-x", "same_neighborhood", "synthetic", "synthetic", 20000000))
         # Once specifically imported into the enquiry's build, linkage succeeds.
         self.conn.execute("INSERT INTO curated_build_transactions VALUES(?,?)", ("fixture-build", "txn-x"))
-        self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?)",
-                          ("inv-a", "fixture-build", 1, "txn-x", "same_neighborhood", "synthetic"))
+        self.conn.execute("INSERT INTO comparable_evidence VALUES(?,?,?,?,?,?,?,?)",
+                          ("inv-a", "fixture-build", 1, "txn-x", "same_neighborhood", "synthetic", "synthetic", 20000000))
         self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM comparable_evidence").fetchone()[0], 1)
 
 
