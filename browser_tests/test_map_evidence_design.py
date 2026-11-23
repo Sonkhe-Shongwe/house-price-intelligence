@@ -124,6 +124,18 @@ class MapEvidenceVisualStudyTests(unittest.TestCase):
                 self.page.evaluate("document.documentElement.scrollWidth > window.innerWidth + 2"),
                 "Page-wide overflow on mobile view: " + name,
             )
+        self.page.set_viewport_size({"width": 320, "height": 640})
+        self.assertFalse(
+            self.page.evaluate("document.documentElement.scrollWidth > window.innerWidth + 2"),
+            "Page-wide horizontal overflow at 320px",
+        )
+        self.page.emulate_media(reduced_motion="reduce")
+        self.page.locator('.topnav [data-view="investigation"]').click()
+        self.assertEqual(
+            self.page.locator('.map-art').first.evaluate(
+                "(el) => getComputedStyle(el).transitionDuration"
+            ), "0s", "Schematic map must respect reduced motion",
+        )
 
     def test_fake_geography_and_no_current_valuation_disclosed(self):
         source = (ROOT / "design-prototypes" / "map-evidence-studio.html").read_text(encoding="utf-8")
