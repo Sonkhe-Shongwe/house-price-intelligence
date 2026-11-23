@@ -45,6 +45,175 @@ Apply the [eight-step engineering lifecycle](engineering/LEAN_ENGINEERING_DIRECT
 
 Classify each deliverable explicitly as **implemented, verified, integrated, accepted or released**. High-risk multi-layer changes should use compatible expansion, reproducible migration, controlled switching and recovery checks. Phase credit requires accepted evidence, not code quantity, test count or a documentation update.
 
+## Granular deliverable and acceptance matrix (planning proposal, 23 November 2026)
+
+**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The existing stage summary and **22.8%** weighted assessment remain authoritative. Each ID can be tracked independently as implementation advances.
+
+**Progress vocabulary for this matrix:**
+
+- **RESEARCH:** Documentary evidence, pilot analysis or a source survey exists. It is **not** a signed-off product deliverable.
+- **VERIFIED:** Working implementation has relevant automated evidence on the **development** branch, generally synthetic only. This does **not** imply production readiness or owner acceptance.
+- **PARTIAL:** Some design, code or evidence exists, but the deliverable described in its acceptance column is incomplete.
+- **OPEN:** No completed delivery evidence yet.
+- **BLOCKED:** Cannot be responsibly accepted before a named external decision, data permission or independent proof.
+
+**Every item must eventually be accompanied by:** concrete output or code reference, the exact tested commit/CI or dated research evidence, owner review where necessary, and its resulting state: *proposed → implemented → verified → integrated → accepted → released*. For future progress reviews, record both **candidate implementation** and **accepted phase credit**. A long checklist is not itself evidence of completion. The historical Phase 0–2 audits remain distinct from delivery stages P0–P2.
+
+### P0 | Buyer, market and product feasibility | Weight 6% | Recorded completion 85%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P0.1 | Define buyer decision and narrow value proposition | RESEARCH | Owner accepts Investigate → Compare → Decide for a single buyer comparing two or three homes, not a listings marketplace |
+| P0.2 | Define explicit first-MVP inclusion/exclusion list | PARTIAL | Owner approves flagship features and non-goals, including conditional-only ML and no unverified live listings |
+| P0.3 | Research one candidate geography and property segment | RESEARCH | Record market, source IDs, eligible-sale counts, supported class and limitations for the pilot |
+| P0.4 | Validate source availability and property-entry feasibility | PARTIAL | Demonstrate which real inputs a buyer can legally and reliably identify, including unmatchable/ambiguous addresses |
+| P0.5 | Review field-by-field data rights, privacy and attribution | BLOCKED | Written reuse/display decision for each required source/field; define synthetic-only fallback if needed |
+| P0.6 | Approve final first-market/class and intended buyer scenario | BLOCKED | Owner signs off market and class or documents a deliberate no-go/pivot with reasons |
+| P0.7 | Issue bounded feasibility and release-path decision | BLOCKED | A go/no-go record reconciles coverage, quality, legal permissions, cost and the permitted demo mode |
+
+**P0 exit:** Approved scope, first supported market/class, source register, field policy and a clear permitted release approach. Current evidence: Evanston township 17 and Class 203 are **research pilot candidates**, not permanent geography or public-display approval.
+
+### P1 | Source extraction, cleaning and historical data | Weight 12% | Recorded completion 75%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P1.1 | Source inventory and schema/field register | RESEARCH | Dataset IDs, field definitions, source URLs, licence status and schema metadata captured |
+| P1.2 | Deterministic bounded extraction in CI | RESEARCH | Re-running the documented query returns reproducible counts or explicitly explains any dataset revision |
+| P1.3 | Data type, null, duplicate and exclusion policies | PARTIAL | Automated quality log tracks conversions, exclusions and source changes, including historical numeric parser issue |
+| P1.4 | Preserve transaction, parcel, building and card grain | PARTIAL | Uniqueness and ambiguous/multi-parcel tests reconcile rows without allocating one sale to each parcel |
+| P1.5 | Historical as-of availability and late/backfilled changes | BLOCKED | Archived snapshot/publication evidence or an explicitly conservative non-as-of policy is reviewed and implemented |
+| P1.6 | Versioned source manifest, drift/re-run comparison | PARTIAL | Extract timestamp, query, schema/source update time and drift assertions can be checked across two runs |
+| P1.7 | Idempotent curated application-ready import | OPEN | Duplicate import leaves stable record counts, durable IDs and valid source-build membership |
+| P1.8 | Publisher-safe output and operational reproducibility | PARTIAL | Aggregate audits run without exposing raw/identifying records; rights-per-field decision remains required |
+
+**P1 exit:** Reproducible ingestion, stable keys, explained exclusions, source lineage and legally safe curated storage. Research pilot counts include 3,539 sales, 39,401 building records and 1,285 accepted historical joins; those alone do not prove complete historical or legal validity.
+
+### P2 | Explainable comparable-sales intelligence | Weight 14% | Recorded completion 55%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P2.1 | Deterministic eligibility and exclusion rules | RESEARCH | Earlier-only sales, correct class/township, area tolerance, valid window and excluded shared transactions tested |
+| P2.2 | Prevent duplicate property/document comparables | RESEARCH | Each selected comparable is unique under defined PIN/document/source grain and explainable |
+| P2.3 | Same-neighbourhood selection and stable ranking | RESEARCH | Rank and explain relevant previous sales without using sale price as a ranking input |
+| P2.4 | Evaluate bounded geographic fallback | PARTIAL | Compare error, support and failure risks independently; current 2 km fallback must remain labelled exploratory |
+| P2.5 | Validate insufficiency and abstention policy | PARTIAL | Missing/unsupported records produce a deterministic honest result with no manufactured estimate |
+| P2.6 | Test better similarity and sale-quality factors | OPEN | Evidence-backed candidate features, exclusion reasons and controlled paired ablations recorded |
+| P2.7 | Independent later chronological holdout | OPEN | A future withheld period measures coverage/error and protects against leakage or reuse of test cases in policy tuning |
+| P2.8 | Prove time-valid source provenance and interpretability | BLOCKED | Every displayed sale has a traceable, permitted record and appropriate as-of/revision limitation |
+| P2.9 | Accept evidence-only versus price-estimation boundary | BLOCKED | Owner approves when fallback may be displayed and how unsupported predictions/weak evidence are labelled |
+
+**P2 exit:** Reliable, explainable comparable selection with a justified fallback and independent assessment. **Known limitation:** on the 17 fallback cases, exploratory 2 km retrospective MAE was about $209,471, worse than township comparison at about $192,153. Do **not** present the sample median as a validated house-price prediction.
+
+### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 10%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P3.1 | Define inquiry, sale, parcel, building, assessment and evidence entities | VERIFIED | Owner reviews canonical [proposed ERD](engineering/P3_APPLICATION_CONTRACT.md), grain, cardinalities and no-false-identity rules |
+| P3.2 | Define address resolution and ambiguous identity | VERIFIED | Synthetic v3 handles same-address/multi-parcel candidates; accept a *real* source-validated address/building/parcel design separately |
+| P3.3 | Define buyer input and server-owned fields | VERIFIED | Contract tests disallow user selection of trusted source facts; cover unknown, conflicting and missing inputs |
+| P3.4 | Define status/error/abstention contract | VERIFIED | Versioned requests and deterministic supported, exploratory, insufficient and out-of-coverage outcomes tested and reviewed |
+| P3.5 | Define provenance, snapshots and frozen evidence | VERIFIED | Source-build membership, original sale cents, response hash and reopening invalidation have negative tests |
+| P3.6 | Define exact-money and currency representation | VERIFIED | Synthetic v0.3 uses integer cents and canonical two-decimal USD text; production currency, scale and range limits still require approval |
+| P3.7 | Define schema evolution and recovery method | VERIFIED | Fixture SQLite v1–v3 checksum, rollback, refusal of unknown databases and data-preserving upgrade tested; production plan still open |
+| P3.8 | Select application stack, hosting and access approach | PARTIAL | Owner accepts modular Python/SQL/browser approach and justifies production DB, auth and hosting choice |
+| P3.9 | Define secure, permission-aware buyer experience | PARTIAL | UX acceptance cases, privacy boundaries, accessible evidence and error disclosure reviewed; existing teal UI is provisional |
+| P3.10 | Decide real geography/identity/as-of/field-rights boundaries | BLOCKED | Specific source and rights evidence connects the final market to safe real property selection and display |
+| P3.11 | Run formal P3 contract and design acceptance review | BLOCKED | Owner signs off ERD, migration, API, errors, evidence states, UX and threat/privacy plan with unresolved issues recorded |
+
+**P3 exit:** A **signed-off**, test-backed domain, data, API, error, security and first-journey specification. A good synthetic CI run is important evidence, but does not mean real identity, usage rights or production migration has been accepted.
+
+### P4 | Database, curated ingestion and backend APIs | Weight 16% | Recorded completion 0%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P4.1 | Implement relational constraints and migration runner | VERIFIED | Current synthetic SQLite v1–v3 constraints, checksum history, transaction rollback and preserved investigation tests pass |
+| P4.2 | Implement versioned and validated investigation HTTP contract | VERIFIED | Synthetic same-origin API accepts permitted input and rejects malformed/conflicting/unauthorised requests |
+| P4.3 | Join the existing pure matcher to curated SQL records | VERIFIED | End-to-end fixture run returns actual stored synthetic transactions, not hand-entered output totals |
+| P4.4 | Store, check and reopen frozen comparable evidence | VERIFIED | Saved JSON, transaction IDs, snapshot IDs and cents remain consistent in current running process |
+| P4.5 | Implement production-appropriate durable database | OPEN | Data survive clean restart, selected migrations are tested on backup/recovery and access is bounded |
+| P4.6 | Implement idempotent source-to-curated import | OPEN | Re-importing one authorised data build avoids duplicate sale/property records and tracks exclusions |
+| P4.7 | Resolve real buyer properties without unsupported guesses | BLOCKED | Approved address/parcel/building resolver and clear ambiguous/not-found outcomes tested against allowed records |
+| P4.8 | Implement time-valid evidence and source refresh handling | BLOCKED | Revisions, retired builds and as-of limitations are explicit; old saved results remain reproducible |
+| P4.9 | Finalise API stability, error safety and operational boundaries | PARTIAL | Contract/response compatibility, safe errors, safe query handling and deployment-specific limits reviewed |
+| P4.10 | Run persistent database/API acceptance | OPEN | Restart/reopen, migrations, duplicate import, excluded sales and insufficient property flow pass against durable storage |
+
+**P4 exit:** A durable, safe, source-aware backend supporting real permitted data or a clearly scoped synthetic-only publicly labelled mode. In-memory fixture storage alone does not satisfy the phase.
+
+### P5 | Browser investigation experience | Weight 16% | Recorded completion 0%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P5.1 | Establish workspace/navigation and buyer entry flow | PARTIAL | Owner agrees actual user journey, hierarchy, layout and navigation; teal prototype is not final brand approval |
+| P5.2 | Address search, ambiguous candidate selection and validation | VERIFIED | Synthetic browser asks for explicit parcel choice and prevents accidental previous-property submission |
+| P5.3 | Investigation result and comparable evidence cards | VERIFIED | Browser displays source-backed synthetic prices, selected comp count, dates and no numeric valuation |
+| P5.4 | Buyer-reported asking price and source attribution | PARTIAL | Every displayed value has clear user/sale/provenance status and cannot be mistaken for live listings |
+| P5.5 | Differences and comparison-quality explanations | PARTIAL | User sees relevant area, sale recency, geography, ranking, exclusions and evidence limitations rather than only prices |
+| P5.6 | Complete supported, exploratory, unknown and error states | PARTIAL | Manual and browser checks cover loading, empty, fallback warning, no data and safe recovery from a failed request |
+| P5.7 | Responsive, accessible browser acceptance | OPEN | Keyboard-only, named controls, visible focus, mobile/reflow, contrast and screen-reader status tests plus owner UX review |
+| P5.8 | Real-permitted market coverage and source explanation | BLOCKED | UI accurately states supported geography, as-of caveats and field-level reuse restrictions |
+| P5.9 | Approve final buyer workflow, styling and information hierarchy | BLOCKED | Owner reviews tasks with one supported and one insufficient case; branding/map remains optional pending separate evidence |
+
+**P5 exit:** A buyer can independently select a property, investigate eligible historical sales, understand why results are available or unavailable and act on the limitations, on the actual backend.
+
+### P6 | Save, shortlist, compare and decide | Weight 12% | Recorded completion 0%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P6.1 | Save/reopen one synthetic investigation | VERIFIED | Current process reopens a frozen UUID-backed investigation; results disappear on process shutdown |
+| P6.2 | Define shortlist and membership schema | PARTIAL | Proposed shortlist tables exist; final owner/session, access and note rules remain open |
+| P6.3 | Build durable save and restore across restarts | OPEN | At least two different properties remain available after restarting the supported application |
+| P6.4 | Add and remove shortlist entries with notes | OPEN | Notes and user labels are editable without modifying original recorded sale evidence |
+| P6.5 | Build two- or three-property side-by-side view | OPEN | Each saved enquiry has a separate asking price, evidence status, comparable count and matching rules |
+| P6.6 | Preserve weak-evidence and excluded properties in shortlist | OPEN | Insufficient/out-of-coverage enquiries can be saved and fairly compared without a fake valuation |
+| P6.7 | Keep immutable evidence/provenance alongside mutable notes | OPEN | Reopen retains source/rule versions and archived result while user decisions/notes evolve separately |
+| P6.8 | Decide safe access and optional export/report rules | BLOCKED | Owner accepts user storage/auth/retention model; export includes only fields approved for disclosure |
+| P6.9 | Full returning-buyer comparison acceptance | OPEN | New session opens two saved homes, compares evidence and notes, and demonstrates unsupported-case honesty |
+
+**P6 exit:** A real **Investigate → Compare → Decide** workflow with two or three reopenable properties, notes and defensible frozen evidence. The current transient one-property save does **not** satisfy P6.
+
+### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 0%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | Current synthetic CI includes 148 Python and 7 Chromium checks at the last corrected v3 code revision |
+| P7.2 | Validate hostile/invalid/unsupported requests | PARTIAL | Input validation, same-origin guards, error contracts and non-fabrication are checked and extended to real deployment assumptions |
+| P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Synthetic hash/snapshot/cents guards and v1–v3 upgrade safety tested; production backup/restore still absent |
+| P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Extend research invariants to accepted end-to-end imports and dated data builds |
+| P7.5 | Accessibility, responsiveness and buyer failure recovery | OPEN | Record browser-based and owner-accepted results for keyboard, screen-reader, reflow and error recovery |
+| P7.6 | Authentication/privacy/retention and secrets review | BLOCKED | Access control follows actual user-data design; no private property/user records or secrets in public Git/CI |
+| P7.7 | Load, rate, recovery and operational monitoring checks | OPEN | Representative latency, resource ceilings, backup drill and clear failure/runbook criteria recorded |
+| P7.8 | Licence, attribution and source-time release audit | BLOCKED | Permitted fields, display mode and honest historical availability approved for intended deployment |
+| P7.9 | Full user journey and release-readiness sign-off | BLOCKED | Separate P7 acceptance suite passes against release-like storage, APIs and browser; owner approves readiness |
+
+**P7 exit:** A reproducible and verified **release candidate**, with privacy/security/rights gates satisfied. CI-verified synthetic fixtures are not the same thing as a release security review.
+
+### P8 | Deployment, credible demonstration and recruiter handoff | Weight 6% | Recorded completion 0%
+
+| ID | Work package | State | Measurable acceptance |
+| --- | --- | --- | --- |
+| P8.1 | Decide public demonstration mode and data | BLOCKED | Owner approves licensed permitted field display or a clearly marked fabricated fixture-only demo |
+| P8.2 | Provide reproducible clean setup and deployment config | OPEN | A clean environment boots the accepted app and database without manual secret copying |
+| P8.3 | Configure authorised hosting and safe endpoints | OPEN | Deployment uses reviewed network/auth/configuration; no localhost-only fixture WSGI accidentally exposed publicly |
+| P8.4 | Demonstrate the complete buyer decision journey | OPEN | Add/restore two homes, inspect eligible comparables and weakness warnings, compare and save notes |
+| P8.5 | Publish clear architecture, data dictionary and evidence lineage | PARTIAL | Existing docs are condensed into an accurate reviewer-friendly diagram, API overview and limitations |
+| P8.6 | Prepare technical recruiter walkthrough and failure demonstration | OPEN | Explain a SQL join, matcher eligibility, one blocked data condition and an automated regression test |
+| P8.7 | Final project README, portfolio links and demo recording | OPEN | User can follow documented steps; video/screenshots show actual permitted, working features |
+| P8.8 | Owner acceptance, integration and release handoff | BLOCKED | Approved P7 readiness, reviewed \`main\` merge, correct demo URL/artifacts and final handoff record |
+
+**P8 exit:** A recruiter can try or watch the completed **Investigate → Compare → Decide** application and independently inspect a truthful code/test/evidence story. No deployment or release has yet been authorised.
+
+### Critical path and workable parallel tracks
+
+1. **Decisions first (P0/P3):** Accept exact MVP buyer journey, real pilot coverage, source rights/display approach, address→parcel→building handling, v0.3 contract boundaries, production storage and security assumptions. A synthetic-only portfolio demonstration is a legitimate *proposal* if rights block real property display, but its release still needs approval.
+2. **Research/data risk in parallel (P1/P2):** Quantify exclusions/drift, investigate as-of availability and defensible sales, evaluate fallback honestly, and establish the permitted input/output dataset. These external-evidence tasks may block public real-data claims even when software is ready.
+3. **Build cohesive P4/P5 slices:** A durable curated property record → server investigation → evidence/abstention UI; migrate/version safely and verify each slice in both backend and Chromium. P4 and P5 keep **separate gates**, even though implementation overlaps.
+4. **Complete P6 before calling this a flagship product:** Persist two or three enquiries and notes, side-by-side compare, reopen frozen source/rule evidence and preserve insufficient cases.
+5. **Treat P7 and P8 as independent release gates:** Security, rights, accessibility, performance, safe deployment and portfolio walkthrough. A green development build is not public release authorisation.
+
+**Suggested first acceptance review (next project session):** P3.1/3.2 domain and candidate identity, P3.3/3.4 HTTP and errors, P3.5/3.6 evidence/money, P3.7 migration, P3.8/3.9 stack/security/UX, then P3.10 rights/real-market dependencies and P3.11 formal sign-off. Document accepted, accepted-for-fixture-only, deferred and rejected aspects separately. Complete only the decisions supported by evidence; do not assert real field permissions or historical point-in-time data without proof.
+
+**Scoring rule:** Existing P0–P8 stage weights, completion estimates and **22.8%** overall baseline do not change from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
+
 ## Full process and phase exit gates
 
 ### P0: Discovery and feasibility — 6% weight; 85% estimated complete
