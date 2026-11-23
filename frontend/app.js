@@ -192,12 +192,22 @@
         text(addressFeedback, 'No invented address matched. Try Fictional Way or enter a synthetic PIN.');
         return;
       }
-      text(addressFeedback, response.candidates.length + ' fictional address option(s). Select one. No automatic identity guess.');
+      const hasSharedAddress = response.candidates.some(item => item.ambiguous_address);
+      text(addressFeedback, response.candidates.length + ' fictional parcel candidate(s). '
+        + (hasSharedAddress ? 'One address has multiple parcels: choose the correct option. ' : '')
+        + 'No automatic identity guess.');
       for (const candidate of response.candidates) {
         if (typeof candidate.address_id !== 'string' || typeof candidate.display_address !== 'string') {
           throw Error('Address search returned an invalid candidate.');
         }
-        const option = element('button', 'address-option', candidate.display_address);
+        if (candidate.identity_scope !== 'parcel_only'
+            || typeof candidate.ambiguous_address !== 'boolean')
+          throw Error('Invalid parcel candidate scope.');
+        if (candidate.ambiguous_address && (!candidate.parcel_hint || typeof candidate.parcel_hint !== 'string'))
+          throw Error('Ambiguous address lacks a parcel distinction.');
+        const optionLabel = candidate.display_address
+          + (candidate.ambiguous_address ? ' · ' + candidate.parcel_hint : '');
+        const option = element('button', 'address-option', optionLabel);
         option.type = 'button';
         option.addEventListener('click', async () => {
           const selectionRevision = ++addressSelectionRevision;
@@ -208,6 +218,8 @@
             if (resolved?.source_kind !== 'synthetic_fixture'
                 || resolved?.identity_status !== 'synthetic_mapping_only'
                 || resolved.address_id !== candidate.address_id
+                || resolved.identity_scope !== 'parcel_only'
+                || resolved.building_identity_verified !== false
                 || !/^\d{14}$/.test(resolved.pin)) {
               throw Error('The selected address did not resolve to a synthetic parcel.');
             }
@@ -215,7 +227,9 @@
             id('pin').value = resolved.pin;
             id('label').value = resolved.display_address.slice(0, 120);
             selectedAddress.hidden = false;
-            text(selectedAddress, 'Selected: ' + resolved.display_address + ' (fictional address)');
+            const detail = candidate.ambiguous_address ? ' · ' + candidate.parcel_hint : '';
+            text(selectedAddress, 'Selected: ' + resolved.display_address + detail
+              + ' (fictional parcel only; building unverified)');
             text(addressFeedback, 'Property selected. Review your inputs and investigate.');
             clear(addressResults);
             addressResults.hidden = true;

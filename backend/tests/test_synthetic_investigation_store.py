@@ -151,6 +151,17 @@ class SyntheticServiceTests(unittest.TestCase):
             self.store.create(enquiry(), today=TODAY)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
 
+    def test_changed_saved_address_mapping_refuses_reopen(self):
+        created = self.store.create(enquiry(address_id="fictional-5", pin=None),
+                                    today=TODAY, investigation_id="address-drift")
+        self.assertEqual(created["subject"]["pin"], "00000000000005")
+        self.db.execute(
+            "UPDATE synthetic_address_candidates SET pin=? WHERE candidate_id=?",
+            ("00000000000006", "fictional-5"),
+        )
+        with self.assertRaisesRegex(EvidenceStoreError, "address candidate"):
+            self.store.reopen("address-drift")
+
     def test_changed_underlying_sale_price_refuses_reopen(self):
         self.store.create(enquiry(), today=TODAY, investigation_id="price-drift")
         self.db.execute(

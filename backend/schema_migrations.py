@@ -17,8 +17,9 @@ BASELINE: Final = ROOT / "schema_draft.sql"
 SCRIPTS: Final = {
     1: BASELINE,
     2: ROOT / "migrations" / "0002_fixture_query_indexes.sql",
+    3: ROOT / "migrations" / "0003_synthetic_address_candidates.sql",
 }
-CURRENT_SCHEMA_VERSION: Final = 2
+CURRENT_SCHEMA_VERSION: Final = 3
 
 
 class SchemaMigrationError(RuntimeError):

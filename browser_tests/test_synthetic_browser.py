@@ -215,6 +215,36 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
             reopened.goto(self.base_url + "/#investigation/" + investigation_id)
         self.assertEqual(original.value.json(), saved.value.json())
 
+    def test_identical_fictional_address_requires_explicit_parcel_choice(self):
+        self.page.goto(self.base_url + "/")
+        self.page.locator("#address-query").fill("105 Fictional Court")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ) as searched:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(len(searched.value.json()["candidates"]), 2)
+        expect(self.page.locator("#address-search-feedback")).to_contain_text(
+            "One address has multiple parcels"
+        )
+        expect(self.page.locator("#address-results .address-option")).to_have_count(2)
+        expect(self.page.locator("#pin")).to_have_value("")
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/addresses/fictional-6")
+        ) as selected:
+            self.page.get_by_role("button", name="105 Fictional Court, Demonstration District · Synthetic parcel option B").click()
+        self.assertEqual(selected.value.json()["pin"], "00000000000006")
+        expect(self.page.locator("#pin")).to_have_value("00000000000006")
+        expect(self.page.locator("#selected-address")).to_contain_text("building unverified")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+        ) as created:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(created.value.status, 201)
+        self.assertEqual(created.value.json()["subject"]["address_id"], "fictional-6")
+        self.assertEqual(created.value.json()["subject"]["pin"], "00000000000006")
+        self.assertEqual(created.value.json()["subject"]["identity_scope"], "parcel_only")
+        self.assertIs(created.value.json()["subject"]["building_identity_verified"], False)
+
     def test_manual_pin_edit_clears_address_selection(self):
         self.page.goto(self.base_url + "/")
         with self.page.expect_response(

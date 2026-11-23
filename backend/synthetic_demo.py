@@ -29,7 +29,7 @@ def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sql
         for snapshot, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                                ("geo-snap", "geography")):
             conn.execute("INSERT INTO curated_build_sources VALUES (?,?,?)", (BUILD_ID, snapshot, role))
-        for idx in range(1, 5):
+        for idx in range(1, 7):
             pin = f"{idx:014d}"
             conn.execute("INSERT INTO parcels VALUES (?,?)", (pin, "17"))
             conn.execute("INSERT INTO assessment_records VALUES (?,?,?,?,?,?,?,?)",
@@ -51,6 +51,18 @@ def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sql
                  f"{100 + idx} Fictional Way, Demonstration District",
                  f"{100 + idx} fictional way demonstration district"),
             )
+        if schema_version >= 3:
+            # Same invented address, two distinct parcel candidates.
+            for idx, hint in ((5, "Synthetic parcel option A"),
+                              (6, "Synthetic parcel option B")):
+                conn.execute(
+                    """INSERT INTO synthetic_address_candidates
+                       (candidate_id, display_address, search_key, pin, parcel_hint)
+                       VALUES (?,?,?,?,?)""",
+                    (f"fictional-{idx}", "105 Fictional Court, Demonstration District",
+                     "105 fictional court demonstration district",
+                     f"{idx:014d}", hint),
+                )
         conn.commit()
         return conn, SyntheticInvestigationStore(conn, build_id=BUILD_ID)
     except Exception:

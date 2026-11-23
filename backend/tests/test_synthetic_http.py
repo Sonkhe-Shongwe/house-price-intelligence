@@ -67,6 +67,33 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertTrue(all("pin" not in x for x in found["body"]["candidates"]))
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
 
+    def test_shared_street_label_requires_distinct_selected_candidate(self):
+        found = self.invoke("POST", "/v1/addresses/search",
+                            payload={"query": "105 Fictional Court"})
+        self.assertEqual(found["status"], 200)
+        options = found["body"]["candidates"]
+        self.assertEqual(len(options), 2)
+        self.assertEqual({x["display_address"] for x in options},
+                         {"105 Fictional Court, Demonstration District"})
+        self.assertTrue(all(x["ambiguous_address"] and x["parcel_hint"] for x in options))
+        self.assertTrue(all("pin" not in x for x in options))
+        selected_pins = set()
+        for option in options:
+            selected = self.invoke(path="/v1/addresses/" + option["address_id"])
+            self.assertEqual(selected["status"], 200)
+            self.assertEqual(selected["body"]["identity_scope"], "parcel_only")
+            self.assertIs(selected["body"]["building_identity_verified"], False)
+            selected_pins.add(selected["body"]["pin"])
+            req = example_request()
+            req["subject"].update(pin=None, address_id=option["address_id"])
+            created = self.invoke("POST", "/v1/investigations", payload=req)
+            self.assertEqual(created["status"], 201)
+            self.assertEqual(created["body"]["subject"]["pin"], selected["body"]["pin"])
+            self.assertEqual(created["body"]["subject"]["identity_scope"], "parcel_only")
+            self.assertEqual(self.invoke(path=created["headers"]["Location"])["body"],
+                             created["body"])
+        self.assertEqual(len(selected_pins), 2)
+
     def test_selected_address_resolves_to_server_owned_parcel_and_investigates(self):
         found = self.invoke("POST", "/v1/addresses/search", payload={"query": "101 fictional"})
         self.assertEqual(len(found["body"]["candidates"]), 1)

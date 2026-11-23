@@ -116,36 +116,46 @@ class SyntheticInvestigationStore:
                 "source_kind": kind, "source_snapshot_ids": snapshots}
 
     def search_synthetic_addresses(self, query: str) -> dict[str, Any]:
-        """Return possible invented addresses; never guess a chosen property."""
-        self._build()  # Refuse non-fixture curated builds.
+        """Return distinct parcel candidates; identical addresses remain ambiguous."""
+        self._build()
         key = " ".join(re.findall(r"[a-z0-9]+", query.casefold()))
         rows = self.connection.execute(
-            """SELECT address_id, display_address
-               FROM synthetic_address_index
-               WHERE instr(search_key, ?) > 0
-               ORDER BY display_address, address_id LIMIT 9""",
+            """SELECT c.candidate_id, c.display_address, c.parcel_hint,
+                      (SELECT COUNT(*) FROM synthetic_address_candidates other
+                       WHERE other.search_key = c.search_key)
+               FROM synthetic_address_candidates c
+               WHERE instr(c.search_key, ?) > 0
+               ORDER BY c.display_address, c.candidate_id LIMIT 9""",
             (key,),
         ).fetchall()
-        candidates = [{"address_id": aid, "display_address": label}
-                      for aid, label in rows[:8]]
+        candidates = [
+            {"address_id": aid, "display_address": label,
+             "ambiguous_address": count > 1,
+             "parcel_hint": hint if count > 1 else None,
+             "identity_scope": "parcel_only"}
+            for aid, label, hint, count in rows[:8]
+        ]
         return {"source_kind": "synthetic_fixture",
                 "status": "matches" if candidates else "no_match",
                 "candidates": candidates, "truncated": len(rows) > 8}
 
     def resolve_synthetic_address(self, address_id: str) -> dict[str, Any] | None:
-        """Resolve an explicitly selected invented ID to an existing parcel."""
+        """Resolve a selected fictional candidate to one parcel, never a building."""
         self._build()
         row = self.connection.execute(
-            """SELECT a.address_id, a.display_address, a.pin
-               FROM synthetic_address_index a
-               JOIN parcels p ON p.pin = a.pin
-               WHERE a.address_id = ?""", (address_id,),
+            """SELECT c.candidate_id, c.display_address, c.pin, c.parcel_hint
+               FROM synthetic_address_candidates c
+               JOIN parcels p ON p.pin = c.pin
+               WHERE c.candidate_id = ?""", (address_id,),
         ).fetchone()
         if row is None:
             return None
         return {"source_kind": "synthetic_fixture",
                 "identity_status": "synthetic_mapping_only",
-                "address_id": row[0], "display_address": row[1], "pin": row[2]}
+                "identity_scope": "parcel_only",
+                "building_identity_verified": False,
+                "address_id": row[0], "display_address": row[1], "pin": row[2],
+                "parcel_hint": row[3]}
 
     def _assessment(self, pin: str, tax_year: int):
         rows = self.connection.execute(
@@ -265,6 +275,8 @@ class SyntheticInvestigationStore:
         response["contract_version"] = "p3-draft-v0.3"
         if address_id is not None:
             response["subject"]["identity_status"] = "synthetic_mapping_only"
+            response["subject"]["identity_scope"] = "parcel_only"
+            response["subject"]["building_identity_verified"] = False
         for comp in response["comparables"]:
             key = (comp["pin"], comp["document"], comp["sale_date"])
             source = transaction_ids.get(key, [])
@@ -336,6 +348,14 @@ class SyntheticInvestigationStore:
         result = json.loads(raw)
         if result.get("status") != status or result.get("data_build", {}).get("build_id") != build:
             raise EvidenceStoreError("Stored response conflicts with investigation record")
+        subject = result.get("subject", {})
+        if subject.get("address_id") is not None:
+            # A saved fictional selection must not silently change parcel.
+            chosen = self.resolve_synthetic_address(subject["address_id"])
+            if (chosen is None or chosen["pin"] != subject.get("pin")
+                    or subject.get("identity_scope") != "parcel_only"
+                    or subject.get("building_identity_verified") is not False):
+                raise EvidenceStoreError("Saved address candidate no longer matches its parcel")
         count = self.connection.execute("SELECT COUNT(*) FROM comparable_evidence WHERE investigation_id = ?",
                                         (investigation_id,)).fetchone()[0]
         if count != len(result.get("comparables", [])) or count != result.get("selected_count"):
