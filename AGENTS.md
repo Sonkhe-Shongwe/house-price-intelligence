@@ -11,7 +11,7 @@ This repository builds a buyer-facing historical comparable-sales investigation 
 
 ## Lean delivery policy
 
-Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5 may be implemented in connected slices after P3 acceptance, but have distinct acceptance gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
+Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5/P6 fictional-only capabilities have already been implemented in owner-authorised connected slices while P3 acceptance remains open; this does not waive their distinct phase exit gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
 
 ## Cloud-first development station (owner-approved 23 November 2026)
 
@@ -22,8 +22,8 @@ Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORK
 - Prioritise traceable data, correct joins, source/time limitations, reproducible tests, clear comparable evidence and a complete buyer workflow.
 - Do not conflate recorded sales with a property listing or user-reported asking price. Never label exploratory 2 km spatial fallback prices as validated valuations.
 - Keep publisher data, user data, property-level raw extracts and credentials out of public commits or artifacts. Publication/display rights have not been approved.
-- No approved production database, backend API, browser UI, deploy or price-prediction model is implied by the existing research pipeline.
-- Preserve dated audit reports; update current handoffs and decisions only with new evidence. Use `python tools/check_docs.py` for internal Markdown links and P-stage arithmetic.
+- The integrated local **fictional-only** backend/browser/SQLite/shortlist is verified on `development`, but it is **not an approved production** database, real-property API, final buyer UI, deployment or price-prediction model. Consult the [current checkpoint](docs/CHECKPOINT.md).
+- Preserve dated audit reports; update current handoffs and decisions only with new evidence. Use `python tools/check_docs.py` for internal Markdown links and P-stage arithmetic. For map work, consult [mapping research](docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md): existing synthetic parcel coordinates all overlap, there is no approved map contract, and renderer, tile provider, geocoder and property source must be independently decided.
 - Do not automatically publish Git changes, manually dispatch live data audits, change scheduled cloud jobs or deploy without the owner's relevant approval. A specific user instruction to update GitHub permits the bounded changes requested.
 - Never force-push or delete/rewrite uncommitted work or retained evidence.
 
