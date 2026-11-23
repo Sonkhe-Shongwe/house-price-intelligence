@@ -26,6 +26,10 @@
 | Directive (confirmed 23 Nov) | Retain existing eight-step lean lifecycle unchanged; apply UX sign-off and geospatial/source integrity within it | [Lean directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) |
 | Repository | Keep this codebase separate from the [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) | Original graduate research untouched |
 
+## Current integration candidate (not an approved public-data feature)
+
+- **23 November 2026, `development` `07f637b`:** Four invented address rows were added to the P3 disposable SQLite demo, with a bounded search endpoint, explicit candidate selection and existing synthetic comparable investigation/reopen. CI [45193537292](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45193537292) passed 132 Python and 5 hosted Chromium tests. This demonstrates an original, connected buyer interaction on the approved technology stack; it **does not settle the real address/parcel/building identity decision**, rights, historical availability, migrations, branding or production scope. Remains in the [draft development integration PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4), not accepted on `main`.
+
 ## Open decisions, with next acceptance point
 
 | Question | Needed evidence or approval | Gate |
