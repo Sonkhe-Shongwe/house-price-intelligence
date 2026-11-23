@@ -8,6 +8,8 @@
 - `schema_draft.sql`: **frozen fixture-only v1 baseline** of 16 domain/fixture tables. It is not an approved production DDL. Do not change this v1 script in place after versioning: add a numbered migration.
 - `schema_migrations.py` and numbered `migrations/`: immutable v1, v2 query indexes and **v3 synthetic parcel-candidate table**, with SHA-256 history, SQLite user-version checks, foreign keys, explicit DDL rollback and no adoption of unversioned databases. Version control adds one metadata table, `schema_migrations`.
 - `synthetic_demo.py`: creates an in-memory v3 fixture by default, with four unambiguous invented addresses and two different parcels sharing the *same invented street address*. Historic v1/v2 fixtures can still upgrade, preserving saved investigations.
+- `durable_fixture.py`: explicit on-disk invented-fixture opener with source/schema integrity checks and no adoption of unknown real databases.
+- `synthetic_shortlists.py`: capped two-to-three-property shortlist workflow with editable notes that never modify frozen sale evidence. Browser UI compares the properties side by side.
 
 From the repository root, run only for local, synthetic-only acceptance:
 
@@ -16,9 +18,9 @@ python -m backend.run_synthetic_api --fixture-only --port 8765
 python tools/dev_check.py --focus app
 ```
 
-Open http://127.0.0.1:8765/ locally. Nothing is persisted after process shutdown and the service must not be deployed or given real publisher records. Automated tests run in GitHub Actions on the permanent `development` branch. Fixture migrations are an engineering candidate, not the accepted production backup/restore, source-ingestion or user-identity plan.
+Open http://127.0.0.1:8765/ locally. By default nothing is persisted after process shutdown; explicit `--fixture-db` mode persists fictional investigations, shortlists and notes across restarts. The service must not be deployed or given real publisher records. Automated tests run in GitHub Actions on the permanent `development` branch. Fixture migrations are an engineering candidate, not the accepted production backup/restore, source-ingestion or user-identity plan.
 
-See the [single current P3 contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md), [current checkpoint](../docs/CHECKPOINT.md), and [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md).
+See the [P3 candidate contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md), [P6 shortlist contract](../docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [current checkpoint](../docs/CHECKPOINT.md), and [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md).
 
 ## Optional durable fictional investigations (development only)
 
