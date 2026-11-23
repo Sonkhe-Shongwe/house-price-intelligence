@@ -25,7 +25,9 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 - Preserve user-entered listing/asking-price observations separately from publisher-sourced completed sale facts and model estimates.
 - Do not imply precision when sale evidence is too thin, inconsistent or outside the supported geography.
 
-## Acceptance criteria for flagship (not yet implemented)
+## Flagship acceptance criteria (synthetic features partly implemented; final acceptance open)
+
+**Implementation note (23 Nov 2026):** `development` already demonstrates two-to-three-property fictional shortlists, editable notes, frozen source-linked comparables, insufficient evidence and restart recovery via opt-in fixture SQLite (PRs #5/#6). **The unchecked criteria below are still product/owner acceptance gates**, not claims that none of the related code exists. Approved market data rights, real property identity, visual UX and public release remain unresolved. See [P0–P8 roadmap](../P_PHASE_ROADMAP.md) and [P6 contract](../engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md).
 
 - [ ] Audited geography, property class, record count, join quality, comparable coverage and permitted display fields.
 - [ ] User can add and save two properties, view side-by-side comparisons and reopen them.
