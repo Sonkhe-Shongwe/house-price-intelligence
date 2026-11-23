@@ -30,6 +30,8 @@
 
 - **23 November 2026, `development` `07f637b`:** Four invented address rows were added to the P3 disposable SQLite demo, with a bounded search endpoint, explicit candidate selection and existing synthetic comparable investigation/reopen. CI [45193537292](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45193537292) passed 132 Python and 5 hosted Chromium tests. This demonstrates an original, connected buyer interaction on the approved technology stack; it **does not settle the real address/parcel/building identity decision**, rights, historical availability, migrations, branding or production scope. Remains in the [draft development integration PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4), not accepted on `main`.
 
+- **23 November 2026, `development` `79a7c4d`:** Candidate synthetic investigation contract `p3-draft-v0.3` now carries an optional fictional-address ID which the server binds to a trusted synthetic parcel, with 422 on mismatch; comparable HTTP prices are fixed-scale USD text derived from exact SQLite cents, not JSON floats. [Push CI 45196929621](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45196929621) passed 137 Python + 6 hosted Chromium cases. This **does not settle real address identity, real-data source rights, approved commercial pricing or production migrations**. Provisional until owner P3 acceptance. Still in draft PR #4.
+
 ## Open decisions, with next acceptance point
 
 | Question | Needed evidence or approval | Gate |
@@ -48,7 +50,7 @@
 | What should the application look and feel like? | Refine promising workspace-first idea, compare visual directions, accessibility, responsive information density and buyer tasks; **no palette or final style approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |
 | When can the 127-test patch be committed? | Review exact local/remote diff, protect untracked work, obtain bounded owner code-integration authority, commit tested guard and browser regressions, verify CI | P3 |
 | Should protected-`main` required checks be enabled? | Enforced JavaScript syntax, 128 Python tests and three actual Chromium acceptance scenarios now pass on integrated `main`; owner-approved repository rules are still needed. Review stable checks and branch permission changes separately | Engineering operations / P3 |
-| What exact money representation is required? | SQL exact cents versus synthetic float response conversion; specify contract before real-money features | P3/P4 |
+| What exact money representation is required? | Synthetic v0.3 fixture HTTP response now uses fixed two-decimal sale-price strings derived from SQLite integer cents; confirm cross-market currency, scale, limits and versioning before approving any real-data/production contract | P3/P4 |
 
 ## Non-negotiable interpretation rules
 
