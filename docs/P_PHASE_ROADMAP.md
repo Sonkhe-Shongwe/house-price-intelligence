@@ -29,7 +29,7 @@ House Price Intelligence has a different product, market, platform and release t
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 0% | 0.0 pts |
 | **Total** | **Bounded flagship MVP** | **100%** | **22.8% weighted** | **22.8 pts** |
 
-Progress is deliberately conservative because **no production database, property API, buyer UI, saved buyer workflow or deployment exists**. A tested data/audit engine is not a completed application.
+Progress is deliberately conservative because **no production database, real-data property API, accepted buyer UI, durable multi-property shortlist or deployment exists**. The `development` branch already has a tested **synthetic-only** address → investigation → evidence browser/HTTP/SQLite journey; implementation verification does not confer P3–P5 acceptance.
 
 The **22.8%** weighted progress is a subjective planning estimate derived from accepted evidence and unresolved phase gates. A documentation-only cleanup does **not** add delivered features and therefore does not change this estimate. The phases are delivery stages, distinct from the Phase 0–2 research experiments.
 
@@ -37,7 +37,7 @@ The **22.8%** weighted progress is a subjective planning estimate derived from a
 
 Apply the [eight-step engineering lifecycle](engineering/LEAN_ENGINEERING_DIRECTIVE.md) proportionately to meaningful work. **Keep P0-P8 stage meanings, weights, acceptance and progress independent from implementation order.**
 
-- **P3 is the immediate gate:** Review and accept the already-integrated, synthetic-only PIN-first domain/SQL/API contract, error states and real-browser journey. Passing fixture CI alone is not contract acceptance.
+- **P3 is the immediate gate:** Review the current synthetic **address-candidate/PIN, parcel-only** domain and v0.3 HTTP/SQL/API contract, errors, v1–v3 migrations and hosted browser journey. Passing fixture CI alone is not design, rights or production contract acceptance.
 - **P4/P5 may overlap in implementation once P3 is accepted:** Build complete buyer slices through browser -> HTTP -> service -> curated SQL -> unchanged matcher, verifying supported, exploratory, insufficient and out-of-coverage behaviour. Backend P4 and browser P5 retain **distinct exit tests and completion credit**; there is no automatic percentage transfer.
 - **P6 completes the decision workflow:** Save, reopen and compare at least two subject enquiries with notes and frozen evidence. A temporary one-property P3 save is not an accepted P6 shortlist.
 - **P0-P2 unresolved gates run in parallel:** Source rights, joins, historical publication time, leakage and independent comparable evaluation remain open while synthetic software is built.
@@ -304,8 +304,8 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Near-term execution, complexity last
 
-1. **Now P3:** Review the integrated fixture-only contracts and ERD, validate the separate guard patch when authorised, and run a real graphical supported/insufficient/reopen journey. Preserve open buyer-input and rights decisions.
-2. **Then P4/P5 overlapping vertical slices:** Introduce compatible curated-build ingestion/storage and the smallest browser-backed query, evidence and error interactions. Test against controlled fixtures; accept P4 and P5 separately.
+1. **Now P3:** Review the current candidate ERD, v3 ambiguous-address/parcel identity, exact USD money strings and frozen-source rules against [P3.1–P3.11](P_PHASE_ROADMAP.md). Original frozen sale cents/source guards already merged via PR #3; actual hosted browser tests now run in CI. Separate fixture-only acceptance from unresolved real-market identity, source rights, production migration and security choices.
+2. **Then P4/P5 overlapping vertical slices:** Extend the **existing tested synthetic browser → API → SQL journey** with a durable database, approved curated import and fully explained/accessibility-reviewed buyer flows. Test each connected slice; retain distinct P4 and P5 acceptance gates.
 3. **Next P6:** Persist multi-property notes and shortlist/reopen/side-by-side comparison with frozen rule/source evidence.
 4. **Throughout:** Continue P0-P2 source quality and rights review; run risk-focused security, migrations, rollback and error checks. P7 is independent readiness; P8 is separately approved release.
 5. Defer speculative AI valuation, wholesale framework changes and public record display until evidence and permissions justify them.

@@ -1,8 +1,30 @@
 # P3 application contract and integration review
 
-**Reviewed:** 22 November 2026; **CI evidence addendum:** 23 November 2026. **Status:** Synthetic-only application contract included in the authorised repository integration. Integration and passing tests do **not** constitute final P3 acceptance, external deployment, or connection to publisher records. **Prior verified baseline:** `main` at `cd98592f4b20bd02362ec0802db989ac7e94ee32`.
+**Current development review:** 23 November 2026, verified candidate at [`5e0a7f3`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5e0a7f382c13d82b8640f63f18b5d981ff967e99). **Scope:** Fictional-data-only browser/HTTP/SQLite contract; not owner-approved production architecture, real address resolution or permitted publisher-data display. The [checkpoint](../CHECKPOINT.md) is authoritative for subsequent code and CI progress.
 
-This is the **single current P3 application contract for the integrated candidate**. Earlier v0.1–v0.5 notes remain historical local review material and should not become competing current implementation instructions. The [engineering contract](ENGINEERING_CONTRACT.md) and [lean engineering directive](LEAN_ENGINEERING_DIRECTIVE.md) govern correctness and delivery.
+The **current synthetic contract is stated first below**. Dated implementation-stage notes afterwards explain how the prototype evolved and are **historical**, not competing requirements. Apply the [engineering contract](ENGINEERING_CONTRACT.md), [lean directive](LEAN_ENGINEERING_DIRECTIVE.md) and [P0–P8 acceptance roadmap](../P_PHASE_ROADMAP.md).
+
+## Current synthetic API and data contract on `development`
+
+**Verified code:** [development CI 45208709369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45208709369) and [draft PR CI 45208727239](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45208727239) passed **148 Python, 7 real Chromium browser journeys**, JavaScript and documentation checks at `5e0a7f3`. No P3 owner acceptance, public release or permission to use real-property data is implied.
+
+**Identity and journey:**
+
+1. `POST /v1/addresses/search` accepts a bounded JSON `{"query":"Fictional Way"}`, returns invented `address_id` candidates, no PIN and an explicit ambiguity hint when multiple parcels share a fictional street label. A query with no match is not converted into a guessed property.
+2. `GET /v1/addresses/{address_id}` resolves **an explicitly selected candidate** to a fictional 14-digit parcel PIN, `identity_scope=parcel_only` and `building_identity_verified=false`. This does not prove the physical building, legal title or real street address. A PIN-first technical path still exists for synthetic testing.
+3. `POST /v1/investigations` accepts top-level `township_code`, `class_code`, `analysis_date` and `subject`. Subject allows `pin`, optional `address_id`, `building_area_sqft`, optional `asking_price_usd` decimal text and optional `label`. A selected address ID may supply the PIN; if both are sent they must match the server's SQLite mapping. Unknown IDs and conflicts fail HTTP 422 without creating an investigation. Caller-provided source values, coordinates, neighbourhood, comparables and source/build IDs remain forbidden.
+4. The server chooses synthetic curated source snapshots and eligible historical transactions. The existing Phase 2 neighbourhood-first matcher excludes inappropriate future/duplicate/multi-parcel sales and labels 2 km fallback exploratory; no sale price is used for eligibility/rank.
+5. `POST /v1/investigations` responds HTTP 201 with an investigation ID and `Location`; `GET /v1/investigations/{uuid}` reopens the original stored evidence. API statuses: `supported_neighbourhood`, `exploratory_spatial`, `insufficient_data` and `out_of_coverage`. `valuation` is always `null`. Unsupported-but-well-formed enquiries can be saved without fabricated evidence.
+
+**Money and provenance:** The SQLite-backed HTTP response has `contract_version="p3-draft-v0.3"`. Each reported comparable contains fixed-two-decimal USD text `sale_price_usd` (for example `"525000.01"`) derived from trusted integer cents; **no JSON numeric `sale_price`** is disclosed by this HTTP result. Buyer `asking_price_usd` is user-reported, not a verified listing or sale. Direct pure research adapter fixtures still use their earlier v0.2 numeric representation and are **not the current HTTP contract**. Original comparable transaction IDs, source snapshots/roles, cents and response hash are checked on reopen; changed fictional address/parcel mapping also fails closed. These checks are not a production cryptographic attestation.
+
+**Database and lifetime:** Immutable `schema_draft.sql` is fixture v1 (**16 domain tables**), v2 adds three query indexes, v3 adds `synthetic_address_candidates` (**17 domain tables**). `schema_migrations` is an additional control table, **18 total SQLite tables** (excluding SQLite internal metadata). It validates version history/checksums and transactional upgrades for disposable fixtures. The server uses in-memory SQLite: **no restart persistence** and no completed P6 shortlist. The older `synthetic_address_index` remains for migration history; new candidate lookup is via `synthetic_address_candidates`. This is not a production data migration or real address provider.
+
+**Safe use boundary:** The WSGI server is explicitly fixture-only and loopback-bound. Research pilot township 17 and Class 203, first-market identity, property-level publication/attribution rights, historical as-of proof, general currency/limits, production storage/auth, final UX and any public deployment remain undecided. Treat the [proposed ERD below](#proposed-domain-erd-and-controlled-fixture-migration) as an implementation candidate, not a signed-off production model.
+
+## Historical P3 baseline and implementation evolution (retained for provenance)
+
+*The following original PIN-first/15-table and interim v0.2 sections describe **older states**; their constraints, field lists, source code and status claims are superseded by the current synthetic contract above. Subsequent dated v0.3/v3 addenda preserve the actual changes and remain design evidence.*
 
 ## Buyer journey implemented with synthetic fixtures
 

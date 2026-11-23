@@ -6,7 +6,19 @@
 **Workflow:** Default source changes target the permanent `development` branch; `main` is stable. Discover and verify both current heads. Do not assume GitHub reflects the user's local Windows branch.  
 **Previously used Windows checkout (unverified now):** `C:\Users\Lenovo\Downloads\Github Projects\house-price-intelligence`
 
-## Current handoff note: 23 November 2026
+## Current verified working handoff (23 November 2026)
+
+**Read first:** [current checkpoint](CHECKPOINT.md), [granular 80-package P0–P8 roadmap](P_PHASE_ROADMAP.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the [two-branch workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Verify the live `development` SHA and CI on every new session.
+
+**Verified at this handoff:** `development` [`5e0a7f3`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5e0a7f382c13d82b8640f63f18b5d981ff967e99) passed [push CI 45208709369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45208709369) and [draft PR CI 45208727239](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45208727239), **148 Python and 7 real Chromium tests** plus JS/docs checks. Stable `main` is `103c854`; [PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4) remains **draft**. These are implementation/CI evidence, not approved P3/P4/P5 gates.
+
+**Current synthetic buyer slice:** search invented addresses, explicitly choose between same-address parcel options, let the server bind `address_id` to a parcel, investigate eligible historical invented comparables, render v0.3 exact-text sale amounts, and reopen frozen snapshot/source/cents evidence. SQLite v1–v3 migrations are verified for disposable fixture use; permanent save/shortlist, real-data rights and approved real address resolver are absent. P3 remains **10%**, weighted MVP **22.8%**.
+
+**Next:** Conduct owner P3.1–P3.11 acceptance review with explicit *fixture-only* versus production decisions; continue P0–P2 source and rights evidence in parallel. Build P4/P5 durable slices and P6 shortlist on the same `development` branch after bounded approval. Never directly merge, deploy, dispatch real-data jobs or assume Windows worktree state.
+
+## Historical handoff notes (retained for dated context; NOT current status)
+
+## Handoff note: early 23 November 2026
 
 Before following any older guidance, read [the latest checkpoint](CHECKPOINT.md), [continuity and directive audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) and [decisions](DECISIONS.md). The last audited remote source pre-update was `3171493`, with successful [CI 45126415402](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45126415402) and **125 committed Python tests**. Separate user Windows screenshots show **127 Python tests, 15 Playwright Chromium DOM scenarios and a synthetic browser-to-Python-to-SQLite acceptance pass** from an **isolated review-only safety patch**. That patch and browser suite are NOT in the GitHub repo yet; do not call those 127 committed tests.
 

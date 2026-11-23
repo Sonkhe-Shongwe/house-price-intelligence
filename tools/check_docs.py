@@ -84,15 +84,60 @@ def progress_errors(root: Path):
     return errors
 
 
+def active_handoff_errors(root: Path):
+    """Protect a few durable current-document contracts against status drift.
+
+    This is deliberately narrow: dated reports and historical sections are
+    excluded, and no test count, commit hash or accepted phase score is frozen.
+    Passing this check does NOT establish full factual accuracy.
+    """
+    required = {
+        "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),
+        "frontend/README.md": ("POST /v1/addresses/search", "105 Fictional Court", "building_identity_verified"),
+        "docs/engineering/P3_APPLICATION_CONTRACT.md": (
+            "## Current synthetic API and data contract on `development`",
+            "`p3-draft-v0.3`", "`synthetic_address_candidates`",
+        ),
+        "docs/CHECKPOINT.md": ("## Current verified implementation on development", "`development`", "`main`"),
+        "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8"),
+    }
+    forbidden = {
+        "docs/GITHUB_SETUP.md": ("Code changes are committed to `main`", "git pull --ff-only origin main"),
+        "frontend/README.md": ("**Not implemented:** trusted address search",),
+        "docs/ROADMAP.md": ("127 patched tests, not committed",),
+        "docs/CHECKPOINT.md": ("the stricter sale-price/sales-snapshot guard remains in a review-only patch",),
+    }
+    errors = []
+    for rel, tokens in required.items():
+        path = root / rel
+        try:
+            contents = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            errors.append(f"{rel}: cannot check active guidance: {exc}")
+            continue
+        for token in tokens:
+            if token not in contents:
+                errors.append(f"{rel}: missing current guidance: {token}")
+    for rel, tokens in forbidden.items():
+        try:
+            contents = (root / rel).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for token in tokens:
+            if token in contents:
+                errors.append(f"{rel}: obsolete current guidance: {token}")
+    return errors
+
+
 def main():
-    errors = local_link_errors(ROOT) + progress_errors(ROOT)
+    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT)
     if errors:
         print("Documentation checks failed:")
         for issue in errors:
             print("- " + issue)
         return 1
-    print("Documentation checks passed: internal Markdown links resolve and P0-P8 tables agree.")
-    print("This does not validate external URL availability or the correctness of narrative statements.")
+    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants agree.")
+    print("This is not a semantic audit of all historical reports, external URLs or product acceptance.")
     return 0
 
 
