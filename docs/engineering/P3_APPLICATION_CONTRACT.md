@@ -106,7 +106,8 @@ erDiagram
     SOURCE_SNAPSHOTS ||--o{ ASSESSMENT_RECORDS : supplies
     PARCELS ||--o{ PARCEL_GEOGRAPHIES : located_by_year
     SOURCE_SNAPSHOTS ||--o{ PARCEL_GEOGRAPHIES : supplies
-    PARCELS ||--o| SYNTHETIC_ADDRESS_INDEX : fictional_only
+    PARCELS ||--o| SYNTHETIC_ADDRESS_INDEX : legacy_fixture_mapping
+    PARCELS ||--o{ SYNTHETIC_ADDRESS_CANDIDATES : candidate_or_alias_only
     CURATED_BUILDS ||--o{ INVESTIGATIONS : frozen_build
     PARCELS |o--o{ INVESTIGATIONS : optional_subject
     INVESTIGATIONS ||--o{ COMPARABLE_EVIDENCE : preserves
@@ -124,13 +125,24 @@ erDiagram
 | Sale transaction and transaction-parcel link | One source sale with zero or more parcel links; a transaction can link multiple parcels | A multi-parcel transaction's full price belongs to each parcel |
 | Curated evidence build | Explicit source snapshots and role membership | All sources were independently historically available |
 | Investigation and selected evidence | Buyer enquiry, source-bound transaction and frozen response | An appraisal, live listing, or current valuation |
-| Fictional address index | Deliberately invented one-to-one address-to-PIN browser fixture | Real address-to-building-to-parcel cardinality, coverage or usage rights |
+| Fictional address index | Deliberately invented one-to-one v1/v2 fixture index; retained for versioned history | Real address-to-building-to-parcel cardinality, coverage or usage rights |
+| Fictional parcel candidates (v3) | One candidate ID maps to exactly one fictional parcel; identical display address may have multiple candidates and a parcel may have several fictional aliases | A building is verified or a real address is resolved from a publisher |
 
 **Provisional SQLite migration contract:** The existing `schema_draft.sql` becomes the immutable v1 fixture script. Numbered `migrations/0002_fixture_query_indexes.sql` adds three relational query indexes. The runner requires foreign keys, contiguous recorded history, valid script SHA-256 hashes and matching SQLite `PRAGMA user_version`. It applies DDL and history updates inside an explicit transaction, rejects unknown existing databases, refuses downgrades and rolls back a failed migration. Existing data and a saved synthetic investigation survive a tested v1-to-v2 upgrade.
 
 [GitHub Actions PR run 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) passed **144 Python tests** and **6 real Chromium journeys**, including 7 new fixture migration checks. The corresponding [development push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) also passed.
 
 **P3 acceptance still open:** The team must review the true parcel/building/address relationship for a rights-approved first market, choose the production SQL/migration/backup policy, validate historical availability and provenance, approve the money and endpoint contracts, and review privacy/security. The fixture-only runner is **not** a production migration, backup solution, publicly served dataset or release authorisation.
+
+## Development-only v3: explicit ambiguous-address parcel selection
+
+**Implemented** on permanent `development` at [`25008ee`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/25008ee64f6f6c80c9fb0e31e5df9092d2de9f46), with fixture/CI corrections at [`3793b81`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3793b814d09ecd16724578df405b691578d5d979).
+
+The **immutable v1 baseline** still contains 16 domain/fixture tables. v2 adds indexes; **v3 adds `synthetic_address_candidates` as the 17th domain/fixture table**. Migration backfills original invented candidate IDs from the legacy `synthetic_address_index`, preserving original parcel mappings. The original v1/v2 index remains in historical schema. The separate `schema_migrations` table tracks script versions and SHA-256 digests. The current disposable runtime seeds a shared invented street address, **105 Fictional Court**, associated with two different parcel candidate IDs.
+
+`POST /v1/addresses/search` returns each matching candidate ID, its fictional display address, `ambiguous_address` and an explicit `parcel_hint` when multiple parcels share a label. No PIN is exposed at the search stage, and identical street labels are never silently deduplicated or auto-resolved. The user selects a specific candidate before `GET /v1/addresses/{address_id}` returns its synthetic PIN. The resolution declares `identity_scope=parcel_only` and `building_identity_verified=false`. The investigation response persists those identity caveats; reopening refuses a formerly selected candidate whose underlying parcel link changes. The browser visibly distinguishes the options and says the building is not verified.
+
+**Scope:** This deliberately invented one-to-many address-to-parcel test is *not* proof of the real address/building/parcel model, nor permission to use a geocoder or publisher records. The real first-market mapping, duplicate handling, historical availability, field rights, buyer privacy and production storage/migration choices still require evidence and owner acceptance. The Phase 2 matching policy and exact two-decimal money output are unchanged.
 
 ## Verification and remaining acceptance
 

@@ -6,8 +6,8 @@
 - `synthetic_investigation_store.py`: server-bound fictional address selection, curated source joins, exact sale-price strings from integer cents, saved results and tamper-checked reopening.
 - `synthetic_http.py` and `run_synthetic_api.py`: loopback-only HTTP boundary with no real-source publication.
 - `schema_draft.sql`: **frozen fixture-only v1 baseline** of 16 domain/fixture tables. It is not an approved production DDL. Do not change this v1 script in place after versioning: add a numbered migration.
-- `schema_migrations.py` and `migrations/0002_fixture_query_indexes.sql`: fixture v1-to-v2 upgrade with SHA-256 history, SQLite user-version checks, foreign-key verification, explicit DDL rollback and refusal of unknown unversioned databases. Version history adds one control table, `schema_migrations`.
-- `synthetic_demo.py`: creates a disposable in-memory v2 fixture by default; tests can initialise v1 and upgrade it, retaining saved evidence.
+- `schema_migrations.py` and numbered `migrations/`: immutable v1, v2 query indexes and **v3 synthetic parcel-candidate table**, with SHA-256 history, SQLite user-version checks, foreign keys, explicit DDL rollback and no adoption of unversioned databases. Version control adds one metadata table, `schema_migrations`.
+- `synthetic_demo.py`: creates an in-memory v3 fixture by default, with four unambiguous invented addresses and two different parcels sharing the *same invented street address*. Historic v1/v2 fixtures can still upgrade, preserving saved investigations.
 
 From the repository root, run only for local, synthetic-only acceptance:
 

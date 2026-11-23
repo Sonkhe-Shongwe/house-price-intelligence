@@ -34,6 +34,8 @@
 
 - **23 November 2026, `development` `8ed4269`:** Candidate v1/v2 synthetic SQLite migration runner added with hash and version checks, rollback, no unversioned adoption and populated-database upgrade tests. The [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) contains the proposed domain ERD and distinct identity grains. [Push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) and [PR CI 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) passed 144 Python and 6 Chromium tests. No production database, backup, real address identity or P3 gate acceptance has been approved.
 
+- **23 November 2026, `development` `3793b81`:** A new v3 **fictional-only** parcel-candidate table permits two parcels to share a visible address or one parcel to have multiple aliases. Search shows separate parcel options, the server binds the exact chosen candidate, the UI labels building identity unverified, and saved investigations fail closed if the selected mapping changes. This is a testable identity-risk model, **not an approved real-source address, building or title-identity solution**. [Current P3 contract and ERD](engineering/P3_APPLICATION_CONTRACT.md). No P3 completion credit.
+
 ## Open decisions, with next acceptance point
 
 | Question | Needed evidence or approval | Gate |

@@ -4,7 +4,13 @@
 **Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). Stable `main` verified at `103c854eae36a0a0fa81bb007b71ebadc52179d6` with [passing CI 45184193870](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45184193870). Permanent working branch: `development`, created from that revision. Verify HEAD and CI again before next work.  
 **Active stage:** P3 product architecture/contracts, **10% estimated complete**; **22.8% estimated weighted MVP progress**. P3 exit gate remains **open**; no progress added by design discussion or docs.
 
-## Latest P3 candidate: versioned fixture migrations and proposed domain ERD (23 November 2026)
+## Latest P3 development candidate: no silent identity guessing (23 November 2026)
+
+**Implementation:** [`3793b81`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3793b814d09ecd16724578df405b691578d5d979) on `development`, still in [draft PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4). Added **fixture-only SQLite v3** `synthetic_address_candidates` preserving historical v1/v2 invented candidate IDs, allowing multiple parcels with identical street labels and multiple aliases for one parcel. The browser shows explicitly distinguished candidates, requires selection, labels the result parcel-only/building-unverified, and the server refuses changed saved address/parcel relationships on reopen. The matched sale prices, synthetic source safety and immutable comparison rules are unchanged.
+
+**Verification:** The first v3 CI attempt failed on fixture seeding and old test setup; the follow-up commit corrects those wiring issues. Review the exact-head [push CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45204774523) and [draft PR CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45204788218) before declaring the whole revision green. This new work still does not approve real-world address identity, publisher field rights, production data migrations or a public application. **P3 remains 10% and overall weighted MVP 22.8%** until the acceptance gate is reviewed. `main` remains stable at `103c854`.
+
+## Previous P3 candidate: versioned fixture migrations and proposed domain ERD (23 November 2026)
 
 **Code:** [`8ed4269`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8ed4269af18e42add85726ae0fd45e406b8019c4) on the ongoing `development` branch and [draft PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4). [Push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) and [PR CI 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) both passed: **144 Python tests**, JavaScript syntax, documentation and **6 hosted Chromium** tests.
 
