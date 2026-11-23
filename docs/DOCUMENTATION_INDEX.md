@@ -13,6 +13,7 @@
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review UX research and visual concepts | [UX research and product direction, 23 Nov](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | **Exploratory, not approved**; inspiration, palettes, screen architecture, accessibility and design decisions |
 | Review professional UI baseline proposal | [Visual Foundation V1 implementation proposal](design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | **Owner review pending**; proposes screen hierarchy, prototype tokens, staged frontend work and acceptance tests; no UI changes approved |
+| Review map and professional-UI grey areas | [Professional UI and mapping research](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) | **Research only**; map data coordinate blocker, renderer/provider/legal/CSP separations, linked-map buyer UX, frontend choices, cost/security/a11y/performance gates |
 | Apply quality/invariants | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) | **Binding engineering guardrails** |
 | Develop efficiently and consistently | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) | **Active eight-step engineering process**, approved 23 Nov |
 | Run the two-branch development station | [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) | **Current operating method:** ongoing `development`, accepted `main`, hosted CI implemented |
