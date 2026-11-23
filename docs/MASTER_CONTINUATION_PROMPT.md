@@ -1,10 +1,18 @@
-# House Price Intelligence | Master Continuation Prompt v1.0
+# House Price Intelligence | Master Continuation Prompt v1.1
 
 **Purpose:** General-purpose continuation across sessions, phases, tools and workstreams. This prompt is not limited to P3, research or any particular technology stack. Its first duty is to restore the **current verified state** before deciding what to do.
 
 **GitHub:** https://github.com/Sonkhe-Shongwe/house-price-intelligence  
 **Working branch:** Discover and verify; do not assume `main` is the user's active local branch.  
 **Previously used Windows checkout (unverified now):** `C:\Users\Lenovo\Downloads\Github Projects\house-price-intelligence`
+
+## Current handoff note: 23 November 2026
+
+Before following any older guidance, read [the latest checkpoint](CHECKPOINT.md), [continuity and directive audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) and [decisions](DECISIONS.md). The last audited remote source pre-update was `3171493`, with successful [CI 45126415402](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45126415402) and **125 committed Python tests**. Separate user Windows screenshots show **127 Python tests, 15 Playwright Chromium DOM scenarios and a synthetic browser-to-Python-to-SQLite acceptance pass** from an **isolated review-only safety patch**. That patch and browser suite are NOT in the GitHub repo yet; do not call those 127 committed tests.
+
+**Product:** Independent evidence-based Investigate / Compare / Decide buyer workspace; geography-flexible based on verified usable data, not forced South Africa. Cook County/Evanston Class 203 remains a research pilot. Workspace-first low-fidelity UX received positive feedback, but no final visual identity, map provider or full UI design is approved. Maps are proposed evidence displays, not an automatic MVP feature. Keep the [eight-step directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) unchanged.
+
+**Next:** Verify current HEAD and CI; continue P3 buyer-input/ERD/API/versioning/rights acceptance; consider controlled integration of tested patch only with owner permission and after reconciling the Windows checkout. Keep P3 **10%** and estimated MVP **22.8%** until a real acceptance gate changes. Proposed `tools/check.ps1` and `tools/run.ps1` scripts do not exist yet.
 
 ## 1. Restore authoritative context
 

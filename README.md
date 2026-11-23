@@ -2,7 +2,7 @@
 
 **Status reviewed 23 November 2026: research engines verified; synthetic-only P3 application integrated for review, not yet accepted or deployed.** Current planning stage: **P3, product architecture and API contracts**. The bounded portfolio-MVP progress baseline is **22.8%**, a subjective weighted estimate, not a measurement of code completion.
 
-House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API/database, approved public-data frontend or deployed service exists.** A local, invented-data HTTP/SQLite/browser investigation slice is included for engineering review.
+House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. It is an original Investigate / Compare / Decide workspace, not a copied property listings marketplace; the supported geography should be selected by verified data quality and rights, not nationality. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API/database, approved public-data frontend or deployed service exists.** A local, invented-data HTTP/SQLite/browser investigation slice is included for engineering review.
 
 ## Verified evidence, not product claims
 
@@ -38,7 +38,8 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step feature lifecycle, risk-based tests, safe large changes and phase-governed integration |
 | [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
 | [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
-| [Latest process audit](docs/reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Engineering directive changes, status reconciliation and open gates |
+| [Latest continuity/directive audit](docs/reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | Verified versus isolated evidence, grey areas, product scope, maps and new-tab handoff |
+| [Earlier process audit](docs/reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Dated engineering directive adoption and prior status review |
 | [Previous documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Retained historical cleanup findings |
 
 The repository also retains the original [pinnacle vision](docs/product/PINNACLE_VISION.md), [data-feasibility research](docs/research/DATA_FEASIBILITY.md) and [migration history](docs/MIGRATION_MANIFEST.md). The older Phase 0–2 **audit experiment names are distinct from the overall P0–P8 delivery stages**.

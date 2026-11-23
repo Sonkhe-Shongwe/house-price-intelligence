@@ -11,14 +11,17 @@
 | Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 22.8% subjective baseline |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development sequencing (approved 23 Nov) | P4 backend and P5 browser implementation can overlap after P3 acceptance via complete vertical slices; each phase retains its own exit gate and progress | [P-stage roadmap](P_PHASE_ROADMAP.md) |
-| Research geography | Use Cook County township 17 / Evanston as the **research pilot** | Phase 0–2 verified cloud runs; not approval of permanent market |
+| Market choice (23 Nov) | **Data-first, geography-flexible**. Do not force South African coverage if sources, identity, attributes, usage rights or reliability limit the product. Cook County township 17 / Evanston remains the **research pilot**, not final permanent coverage | Phase 0–2 research and owner direction |
 | Research segment | Investigate assessor Class 203, a one-story residence category | 273 historical matched sale records; individual building form/condition not verified |
 | Data strategy | Preserve transaction, parcel, building and assessment-year grain separately; reject inappropriate joins | [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md) |
 | Comparison policy | Test neighbourhood-first with bounded spatial fallback, distinct PINs and abstention | [Phase 2 findings](research/PHASE2_CLOUD_AUDIT_RESULTS.md); **exploratory only** |
 | Processing | Use GitHub Actions for source research audits and publish **aggregate-only** report artifacts | [Automated audit](AUTOMATED_DATA_AUDIT.md) |
 | Security | No raw property extracts, seller/buyer names, secrets or user records in public repository | [Data policy](../data/README.md) |
 | Boundaries | Do not claim current price prediction, live listings or app deployment | No such accepted implementation exists |
-| UX design authority (23 Nov) | Treat P3's existing aesthetic as provisional; visual identity, navigation hierarchy and final design must be discussed and approved before adopting them | [23 Nov UX research and alternatives](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); documentation is not approval |
+| UX design authority (23 Nov) | Current teal interface is provisional; owner liked the **workspace-first low-fidelity study** for exploration, not as final branding/navigation approval | [23 Nov UX research](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) |
+| Independent product (23 Nov) | Investigate / Compare / Decide, not a Property24 clone or listings marketplace; external platforms are UX inspiration only | [Product brief](product/PRODUCT_BRIEF.md) and [pinnacle vision](product/PINNACLE_VISION.md) |
+| Map direction (23 Nov) | Explore a map-linked evidence view with reliable coordinates and a synced evidence table; **not implemented, provider-approved or required MVP scope yet** | [Continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) |
+| Directive (confirmed 23 Nov) | Retain existing eight-step lean lifecycle unchanged; apply UX sign-off and geospatial/source integrity within it | [Lean directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) |
 | Repository | Keep this codebase separate from the [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) | Original graduate research untouched |
 
 ## Open decisions, with next acceptance point
@@ -30,12 +33,15 @@
 | What counts as a defensible completed sale? | Filter definitions, parcel/document grain and representative exclusions | P1/P2 |
 | How do we guarantee evidence available as of analysis date? | Historical snapshots or an explicitly honest policy; later holdout validation | P1/P2 |
 | Should exploratory 2 km fallback be included in UI? | Evidence-only warning design and independent testing; current price errors are poor | P2/P3 |
-| Which subject inputs, geographic entry and map behaviour? | First supported buyer workflow and inputs realistically available in source | P3 |
+| Which buyer entry and property identity? | Address/parcel/building resolution and real supported market; technical 14-digit PIN is not final consumer entry | P3 |
+| What would a responsible map require? | Coordinate source/accuracy, provider/tile rights, attribution, restrictive CSP/referrer compatibility, keyboard/table alternative | P3/P5 |
 | Backend framework, database, frontend and hosting? | Reviewed P3 contract and deployment constraints; no precommitment | P3 |
 | How are saved investigations versioned and accessed? | Identity/security, snapshot and persistence design | P3/P6 |
 | Can price prediction be shipped? | Untouched chronological holdout, acceptable baseline comparisons, uncertainty | Post-MVP, conditional |
 | Should repository remain public? | Repository risk review and owner choice; currently reported public | P7 |
-| What should the application look and feel like? | Compare consumer-first versus analytical-first UX, shortlist-first navigation, palettes, accessibility, responsive information density and user journeys; **no direction yet approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |
+| What should the application look and feel like? | Refine promising workspace-first idea, compare visual directions, accessibility, responsive information density and buyer tasks; **no palette or final style approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |
+| When can the 127-test patch be committed? | Review exact local/remote diff, protect untracked work, obtain bounded owner code-integration authority, commit tested guard and browser regressions, verify CI | P3 |
+| What exact money representation is required? | SQL exact cents versus synthetic float response conversion; specify contract before real-money features | P3/P4 |
 
 ## Non-negotiable interpretation rules
 

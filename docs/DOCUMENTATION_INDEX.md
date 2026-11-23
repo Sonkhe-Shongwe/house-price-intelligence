@@ -18,7 +18,8 @@
 | Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
 | Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
 | Re-run research | [Cloud audit operations](AUTOMATED_DATA_AUDIT.md) | **Current operating guide** |
-| See latest process audit | [23 Nov directive audit](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | **Current process change, evidence and unresolved gates** |
+| See newest audit and grey areas | [23 Nov continuity/directive audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | **Latest audit**, tested vs committed evidence, map/geography decisions, new-tab handoff |
+| See earlier process adoption | [23 Nov directive audit](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Historical dated process change, not latest implementation state |
 | See earlier cleanup | [22 Nov documentation audit](reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | **Retained historical audit** |
 | Review old scope/origins | [Pinnacle vision](product/PINNACLE_VISION.md), [Migration manifest](MIGRATION_MANIFEST.md), [archived roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) | **Historical/reference**, not current status |
 
@@ -38,6 +39,6 @@
 
 ## Active engineering handoff
 
-**Next work remains P3 acceptance:** Review the now-integrated, fixture-only PIN-first domain contract, SQLite schema, API statuses and evidence/reopen flow; confirm the legitimate buyer input and public data rights, and verify the graphical browser journey. [CI run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed on the integrated synthetic source, **not** graphical browser or final product acceptance. After P3 contract approval, P4 and P5 work may overlap with separate gates. There is no production API, permitted real-property display, deployed consumer application or shortlist user workflow.
+**Next work remains P3 product-contract acceptance and safety-patch integration review:** [Committed CI 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) verifies **125** Python tests. Separate owner Windows screenshots establish **127 tests + 15 Chromium DOM cases + synthetic full browser/database flow** in an **isolated patched checkout**, not `main` CI. Source rights, legitimate consumer input, ERD, evidence versioning, final UX and permanent shortlist are outstanding. Do not mistake the map/colour studies for approved frontend. See [checkpoint](CHECKPOINT.md) and [continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md).
 
 See [latest checkpoint](CHECKPOINT.md).

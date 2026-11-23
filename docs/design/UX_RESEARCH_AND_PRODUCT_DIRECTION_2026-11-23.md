@@ -270,6 +270,12 @@ A visually attractive concept **does not pass** until actual tasks and error/wea
 
 Until these are decided, references, concepts and colour values are **nonbinding exploration**. Any final aesthetic change requires a separate design decision and owner sign-off.
 
+## 12A. Owner feedback, map and geography clarification (23 November 2026)
+
+The owner positively received the **workspace-first low-fidelity structure**, but has not approved a final navigation system, colours, branding or site redesign. The product should remain original, learning from Property24/Redfin/PriceHubble without copying sites, records, imagery or proprietary content. Geography should be chosen for reliable lawful data; **do not require South Africa** if its available data presents limitations. Evanston/Class 203 remains a research pilot, not a final market constraint.
+
+The owner is interested in an **interactive map** connecting the buyer's subject and eligible comparable sales, synchronised with evidence lists. This is a **candidate**, not a committed MVP feature. Verify coordinate source and precision (parcel centroid versus building), rights and attribution, tile/geocoder terms, CSP/referrer interactions, mobile and keyboard/table alternatives before engineering it. Do not make map distance a substitute for authoritative comparable eligibility. See the [continuity audit](../reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md).
+
 ## 13. Status and handoff
 
 **Remote GitHub source before this documentation update:** `3f08060ed282173c0ade8d66cf2d66df45189893`, with last committed 125-test offline CI run successful. The original source at that revision has **not** adopted the consolidated P3 safety patch.

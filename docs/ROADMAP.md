@@ -16,7 +16,7 @@
 | P7 | Integrated QA, privacy, rights, readiness | 8% | 0% |
 | P8 | Release, demo and portfolio handoff | 6% | 0% |
 
-**Next engineering milestone:** Accept the integrated synthetic P3 subject/evidence/error contract and verify a graphical fixture-only investigation. Then implement P4 backend and P5 browser as connected slices, with distinct acceptance gates, followed by P6 shortlist and comparison. Use the [active eight-step directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md).
+**Next engineering milestone:** Accept the P3 subject/evidence/error contract and reconcile locally verified **isolated synthetic Chromium acceptance** (127 patched tests, not committed) with a future authorised integration and CI. Then P4 backend and P5 browser can advance in connected slices with distinct gates, followed by P6 shortlist/compare. No map or final visual design is approved. See [current checkpoint](CHECKPOINT.md) and [active eight-step directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md).
 
 **Critical boundaries:** Do not equate the 42 passing tests and historical audits with a finished app. Only 83 historical 2024 Class 203 subjects were evaluated; a 2 km fallback recovered 17 previously unsupported subjects but produced worse retrospective median-price MAE than the township baseline on those cases. No current-market valuation or trained ML model is authorized. Historical availability and public display rights remain unresolved.
 

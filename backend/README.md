@@ -16,6 +16,6 @@ python -m backend.run_synthetic_api --fixture-only --port 8765
 
 Then open `http://127.0.0.1:8765/`. The process binds only to loopback, has no public auth, and must **never** be deployed or given real records. Saved fixture investigations vanish on shutdown.
 
-For fast checks run `python tools/dev_check.py --focus app`, or `python tools/dev_check.py` for all research and application suites. Browser graphical acceptance is still outstanding. P3 domain/input/technology decisions remain subject to review.
+For fast checks run `python tools/dev_check.py --focus app`, or `python tools/dev_check.py` for all research and application suites. The later **isolated patched** Windows checkout passed 127 Python tests and genuine synthetic graphical browser/database acceptance, but that patch and its two extra Python regressions remain **uncommitted**. Current GitHub CI has 125 tests and no committed Playwright acceptance. P3 domain/input/technology decisions remain subject to review.
 
 See the [current P3 contract](../docs/engineering/P3_APPLICATION_CONTRACT.md), [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md), [lean directive](../docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) and [checkpoint](../docs/CHECKPOINT.md).
