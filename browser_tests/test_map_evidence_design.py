@@ -116,7 +116,7 @@ class MapEvidenceVisualStudyTests(unittest.TestCase):
         expect(self.page.locator(".map-shell")).to_be_visible()
         expect(self.page.locator(".evidence-shell")).to_be_hidden()
         for name in ("investigation", "workspace", "shortlist", "methodology"):
-            self.page.locator('.topnav [data-view="' + name + '"]').click() if name != "methodology" else self.page.locator('[data-view="investigation"]').last.click()
+            self.page.locator('.topnav [data-view="' + (name if name != "methodology" else "investigation") + '"]').click()
             if name == "methodology":
                 self.page.locator("#method-link").click()
             self.assertFalse(
