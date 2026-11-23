@@ -7,16 +7,17 @@
 | Need | Canonical document | Status |
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
-| Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and P3 next step |
+| Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 22.8% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review UX research and visual concepts | [UX research and product direction, 23 Nov](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | **Exploratory, not approved**; inspiration, palettes, screen architecture, accessibility and design decisions |
+| Review professional UI baseline proposal | [Visual Foundation V1 implementation proposal](design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | **Owner review pending**; proposes screen hierarchy, prototype tokens, staged frontend work and acceptance tests; no UI changes approved |
 | Apply quality/invariants | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) | **Binding engineering guardrails** |
 | Develop efficiently and consistently | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) | **Active eight-step engineering process**, approved 23 Nov |
 | Run the two-branch development station | [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) | **Current operating method:** ongoing `development`, accepted `main`, hosted CI implemented |
 | Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | **Synthetic-only code/HTTP/SQL/UI review candidate; acceptance pending** |
-| Review P6 shortlist branch | [P6 synthetic shortlist contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | **Unmerged draft PR #6**, no P6 acceptance; persists fictional investigations only in opt-in local fixture mode |
+| Review integrated P6 shortlist | [P6 synthetic shortlist contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | **Merged to `development` as PR #6**, synthetic-only; phase exit and access/privacy decisions still open |
 | Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
 | Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
 | Re-run research | [Cloud audit operations](AUTOMATED_DATA_AUDIT.md) | **Current operating guide** |
@@ -46,6 +47,6 @@
 
 **Working method:** The single permanent `development` branch receives authorised code/docs and hosted checks. Stable `main` receives milestone changes only through explicitly approved integration PRs. [Workflow](engineering/CLOUD_FIRST_WORKFLOW.md). No routine direct-to-main commits.
 
-**Current capability boundary:** Synthetic local address search, explicit same-street parcel choice, source-bound investigation, exact-decimal comparable prices, v1–v3 versioned SQLite fixtures and opt-in restart-safe frozen investigations are CI-tested on `development` after approved PR #5. The two-to-three-property shortlist, notes and side-by-side browser view are in **unmerged draft PR #6**, not an accepted release. There is no real-address resolver, real property display permission, production database, accepted visual UX or deployment. See the [current P3 contract](engineering/P3_APPLICATION_CONTRACT.md). The original locally tested Windows safety patch was separate historical work; PR #3 independently merged the frozen comparable integrity safeguard.
+**Current capability boundary:** Synthetic local address search, explicit same-street parcel choice, source-bound investigation, exact-decimal comparable prices, v1–v3 versioned SQLite fixtures, opt-in restart-safe frozen investigations, and two-to-three-property shortlist with notes/comparison are CI-tested on `development` after approved PRs #5 and #6. This is **not an owner-accepted P3–P6 or released application**. There is no real-address resolver, real property display permission, production database, accepted visual UX or deployment. See the [current P3 contract](engineering/P3_APPLICATION_CONTRACT.md). The original locally tested Windows safety patch was separate historical work; PR #3 independently merged the frozen comparable integrity safeguard.
 
 **Phase scores:** P3 **10%**, weighted MVP **22.8%**, unchanged until relevant owner acceptance. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.
