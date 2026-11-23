@@ -302,6 +302,97 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertEqual(r["status"], 503)
         self.assertEqual(r["body"], {"error": "evidence_unavailable"})
 
+    def test_shortlist_http_two_properties_notes_and_frozen_evidence(self):
+        first = self.invoke("POST", "/v1/investigations", payload=example_request())["body"]
+        unknown_request = example_request()
+        unknown_request["subject"]["pin"] = "00000000000099"
+        unknown_request["subject"]["label"] = "Unknown fictional house"
+        second = self.invoke("POST", "/v1/investigations", payload=unknown_request)["body"]
+        created = self.invoke("POST", "/v1/shortlists", payload={"label": "My fictional shortlist"})
+        self.assertEqual(created["status"], 201)
+        sid = created["body"]["shortlist_id"]
+        path = "/v1/shortlists/" + sid
+        self.assertEqual(created["headers"]["Location"], path)
+        self.assertEqual(self.invoke(path=path)["body"], created["body"])
+        listed = self.invoke(path="/v1/shortlists")
+        self.assertEqual(listed["status"], 200)
+        self.assertEqual(listed["body"]["shortlists"][0]["entry_count"], 0)
+
+        for result in (first, second):
+            added = self.invoke(
+                "POST", path + "/entries",
+                payload={"investigation_id": result["investigation_id"]})
+            self.assertEqual(added["status"], 201)
+        self.assertEqual(added["body"]["entries"][0]["investigation"], first)
+        self.assertEqual(added["body"]["entries"][1]["investigation"], second)
+        self.assertEqual([e["investigation"]["selected_count"] for e in added["body"]["entries"]],
+                         [3, 0])
+        self.assertIsNone(added["body"]["entries"][1]["investigation"]["valuation"])
+        self.assertEqual(self.invoke(path=path)["body"], added["body"])
+
+        before = self.db.execute(
+            "SELECT response_json, result_sha256 FROM investigation_results WHERE investigation_id=?",
+            (first["investigation_id"],),
+        ).fetchone()
+        edit_path = path + "/entries/" + first["investigation_id"]
+        updated = self.invoke("PATCH", edit_path, payload={"note_text": "Inspect the roof"})
+        self.assertEqual(updated["status"], 200)
+        self.assertEqual(updated["body"]["entries"][0]["note_text"], "Inspect the roof")
+        self.assertEqual(self.db.execute(
+            "SELECT response_json, result_sha256 FROM investigation_results WHERE investigation_id=?",
+            (first["investigation_id"],),
+        ).fetchone(), before)
+        removed = self.invoke("DELETE", edit_path)
+        self.assertEqual(removed["status"], 200)
+        self.assertEqual(len(removed["body"]["entries"]), 1)
+        self.assertEqual(self.invoke(path="/v1/investigations/" + first["investigation_id"])["body"], first)
+
+    def test_shortlist_http_rejects_bad_methods_unknown_ids_and_invalid_note(self):
+        sid = self.invoke("POST", "/v1/shortlists", payload={"label": "My shortlist"})["body"]["shortlist_id"]
+        path = "/v1/shortlists/" + sid
+        self.assertEqual(self.invoke("PUT", path)["status"], 405)
+        self.assertEqual(self.invoke("OPTIONS", "/v1/shortlists")["status"], 405)
+        self.assertEqual(self.invoke("POST", path + "/entries", payload={"note_text": "no ID"})["status"], 422)
+        self.assertEqual(self.invoke("POST", "/v1/shortlists", payload={"label": "A", "extra": 1})["status"], 422)
+        self.assertEqual(self.invoke("PATCH", path + "/entries/" + "0" * 36,
+                                     payload={"note_text": "hi"})["status"], 404)
+        self.assertEqual(self.invoke(path="/v1/shortlists/00000000-0000-4000-8000-000000000000")["status"], 404)
+        self.assertEqual(self.invoke("POST", "/v1/shortlists", raw=b'{"label":"a","label":"b"}')["status"], 400)
+        self.assertEqual(self.invoke("POST", "/v1/shortlists",
+                                     payload={"label": "x"}, origin="https://hostile.example")["status"], 403)
+
+    def test_shortlist_http_duplicate_property_limit_and_invalid_note(self):
+        sid = self.invoke("POST", "/v1/shortlists", payload={"label": "Three homes"})["body"]["shortlist_id"]
+        path = "/v1/shortlists/" + sid
+        ids = []
+        for number in (1, 2, 3, 4):
+            request = example_request()
+            request["subject"]["pin"] = f"{number:014d}"
+            created = self.invoke("POST", "/v1/investigations", payload=request)
+            self.assertEqual(created["status"], 201)
+            ids.append(created["body"]["investigation_id"])
+        for iid in ids[:3]:
+            self.assertEqual(self.invoke("POST", path + "/entries",
+                                         payload={"investigation_id": iid})["status"], 201)
+        self.assertEqual(self.invoke("POST", path + "/entries",
+                                     payload={"investigation_id": ids[3]})["status"], 409)
+        self.assertEqual(self.invoke("PATCH", path + "/entries/" + ids[0],
+                                     payload={"note_text": "X" * 801})["status"], 422)
+        self.assertEqual(self.invoke(path=path)["body"]["entries"][0]["note_text"], "")
+
+    def test_shortlist_http_tampered_comparable_fails_closed(self):
+        sid = self.invoke("POST", "/v1/shortlists", payload={"label": "Protected"})["body"]["shortlist_id"]
+        saved = self.invoke("POST", "/v1/investigations", payload=example_request())["body"]
+        path = "/v1/shortlists/" + sid
+        self.assertEqual(self.invoke("POST", path + "/entries",
+                                     payload={"investigation_id": saved["investigation_id"]})["status"], 201)
+        self.db.execute("UPDATE comparable_evidence SET sale_price_usd_cents=sale_price_usd_cents+1")
+        self.db.commit()
+        result = self.invoke(path=path)
+        self.assertEqual(result["status"], 503)
+        self.assertEqual(result["body"], {"error": "evidence_unavailable"})
+        self.assertEqual(self.invoke("DELETE", path + "/entries/" + saved["investigation_id"])["status"], 503)
+
     def test_loopback_real_http_post_then_get(self):
         # A real HTTP request is sent over OS loopback, but SQLite stays on
         # the creating thread, and no external network services are contacted.

@@ -297,6 +297,220 @@
       setFeedback('Investigation link copied. Available only while this local server runs.', true);
     } catch { setFeedback('Copy your browser URL to reopen this investigation in the current session.', true); }
   });
+
+  // P6 fixture-only: a 2-3-property buyer workspace. Never infer a valuation
+  // from comparable-sale data. Notes are mutable; evidence is never rewritten.
+  let activeShortlist = null;
+  const shortlistFeedback = id('shortlist-feedback');
+  const shortlistEntries = id('shortlist-entries');
+  const shortlistTable = id('shortlist-comparison');
+
+  function shortlistMessage(message, ok = false) {
+    shortlistFeedback.className = ok ? 'shortlist-feedback success' : 'shortlist-feedback';
+    text(shortlistFeedback, message);
+  }
+
+  function rowValue(item, key) {
+    const result = item.investigation;
+    const subject = result.subject || {};
+    if (key === 'price') return currencyAmount(subject.asking_price_usd) + ' (buyer-reported)';
+    if (key === 'pin') return subject.pin ? 'Fictional PIN ' + subject.pin : 'Unresolved identity';
+    if (key === 'area') return subject.building_area_sqft == null ? 'Not available' : String(subject.building_area_sqft) + ' sq ft (buyer-reported)';
+    if (key === 'status') {
+      const states = {
+        supported_neighbourhood:'Same-neighbourhood evidence',
+        exploratory_spatial:'Exploratory spatial fallback',
+        insufficient_data:'Insufficient evidence',
+        out_of_coverage:'Outside test coverage'
+      };
+      return states[result.status] || 'Unknown evidence status';
+    }
+    if (key === 'count') return String(result.selected_count ?? 0);
+    if (key === 'tier') return result.tier === 'same_neighborhood' ? 'Neighbourhood' :
+      result.tier === 'spatial_fallback' ? 'Exploratory 2 km' : 'No eligible evidence';
+    if (key === 'date') return niceDate(result.analysis_date);
+    if (key === 'snapshots') return (result.data_build?.source_snapshot_ids || []).join(', ') || 'Not available';
+    if (key === 'rules') return item.match_policy_version || 'Unverified rule';
+    if (key === 'warnings') return (result.warnings || []).join(' | ') || 'No additional warning';
+    if (key === 'valuation') return 'Not produced';
+    return 'Not available';
+  }
+
+  function renderShortlist(data) {
+    if (data?.source_kind !== 'synthetic_fixture' || !uuid.test(data.shortlist_id)
+        || data.max_entries !== 3 || !Array.isArray(data.entries) || data.entries.length > 3)
+      throw Error('Invalid synthetic shortlist response.');
+    for (const entry of data.entries) {
+      if (!uuid.test(entry.investigation_id)
+          || entry.investigation?.data_build?.source_kind !== 'synthetic_fixture'
+          || entry.investigation.valuation !== null
+          || entry.investigation.contract_version !== 'p3-draft-v0.3'
+          || typeof entry.note_text !== 'string'
+          || typeof entry.match_policy_version !== 'string')
+        throw Error('Invalid saved investigation or note in shortlist response.');
+    }
+    activeShortlist = data.shortlist_id;
+    id('shortlist-content').hidden = false;
+    text(id('shortlist-title'), data.label);
+    text(id('shortlist-count'), data.entries.length + ' / 3 properties selected. Choose two or three to compare.');
+    text(id('shortlist-id-value'), 'Shortlist ID: ' + data.shortlist_id);
+    id('shortlist-open-id').value = data.shortlist_id;
+    id('shortlist-add-current').disabled = data.entries.length >= 3;
+    history.replaceState(null, '', '#shortlist/' + data.shortlist_id);
+    clear(shortlistEntries);
+
+    if (!data.entries.length)
+      shortlistEntries.appendChild(element('p', 'shortlist-empty', 'No properties selected. Investigate a fictional property above, then add its saved result.'));
+
+    for (const [index, entry] of data.entries.entries()) {
+      const investigation = entry.investigation;
+      const label = investigation.subject?.label || 'Fictional property ' + (index + 1);
+      const card = element('article', 'shortlist-entry');
+      const header = element('div', 'shortlist-entry-head');
+      const title = element('h4', '', label);
+      header.appendChild(title);
+      header.appendChild(element('span', 'shortlist-state', rowValue(entry, 'status')));
+      card.appendChild(header);
+      card.appendChild(element('p', 'shortlist-entry-meta',
+        rowValue(entry, 'price') + ' · ' + (investigation.selected_count ?? 0) + ' selected sales'));
+      const labelNode = element('label', '', 'Decision notes for ' + label);
+      const note = element('textarea', 'shortlist-note');
+      note.id = 'note-' + entry.investigation_id;
+      note.maxLength = 800;
+      note.rows = 3;
+      note.value = entry.note_text;
+      labelNode.htmlFor = note.id;
+      card.appendChild(labelNode);
+      card.appendChild(note);
+      const actions = element('div', 'shortlist-entry-actions');
+      const saveButton = element('button', 'secondary-button', 'Save notes');
+      saveButton.type = 'button';
+      saveButton.addEventListener('click', async () => {
+        try {
+          saveButton.disabled = true;
+          const result = await requestJson('/v1/shortlists/' + activeShortlist + '/entries/' + entry.investigation_id,
+            {method:'PATCH', headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({note_text:note.value})});
+          renderShortlist(result);
+          shortlistMessage('Notes saved without changing the original sale evidence.', true);
+        } catch (error) { shortlistMessage('Could not save notes: ' + error.message); }
+        finally { saveButton.disabled = false; }
+      });
+      const inspectButton = element('button', 'secondary-button', 'Inspect evidence');
+      inspectButton.type = 'button';
+      inspectButton.addEventListener('click', () => reopen(entry.investigation_id));
+      const removeButton = element('button', 'secondary-button shortlist-remove', 'Remove');
+      removeButton.type = 'button';
+      removeButton.addEventListener('click', async () => {
+        try {
+          removeButton.disabled = true;
+          const result = await requestJson('/v1/shortlists/' + activeShortlist + '/entries/' + entry.investigation_id,
+            {method:'DELETE'});
+          renderShortlist(result);
+          shortlistMessage('Property removed from the shortlist; its original investigation remains saved.', true);
+        } catch (error) { shortlistMessage('Could not remove property: ' + error.message); }
+        finally { removeButton.disabled = false; }
+      });
+      actions.appendChild(saveButton);
+      actions.appendChild(inspectButton);
+      actions.appendChild(removeButton);
+      card.appendChild(actions);
+      shortlistEntries.appendChild(card);
+    }
+
+    const comparePanel = id('shortlist-compare');
+    comparePanel.hidden = data.entries.length < 2;
+    clear(shortlistTable);
+    if (data.entries.length >= 2) {
+      const head = document.createElement('thead');
+      const tr = document.createElement('tr');
+      tr.appendChild(element('th', '', 'Evidence field'));
+      for (const [i, entry] of data.entries.entries())
+        tr.appendChild(element('th', '', entry.investigation.subject?.label || 'Property ' + (i + 1)));
+      head.appendChild(tr);
+      shortlistTable.appendChild(head);
+      const body = document.createElement('tbody');
+      const fields = [
+        ['Asking price', 'price'], ['Parcel identity', 'pin'],
+        ['Building area', 'area'], ['Evidence support', 'status'],
+        ['Eligible earlier sales', 'count'], ['Matching method', 'tier'],
+        ['Analysis date', 'date'], ['Source snapshots', 'snapshots'],
+        ['Matching rules', 'rules'], ['Evidence warnings', 'warnings'],
+        ['Estimated current price', 'valuation']
+      ];
+      for (const [label, key] of fields) {
+        const row = document.createElement('tr');
+        const th = element('th', '', label);
+        th.scope = 'row';
+        row.appendChild(th);
+        for (const entry of data.entries) row.appendChild(element('td', '', rowValue(entry, key)));
+        body.appendChild(row);
+      }
+      shortlistTable.appendChild(body);
+    }
+  }
+
+  async function loadShortlist(sid) {
+    if (!uuid.test(sid)) { shortlistMessage('Use a valid lowercase shortlist UUID.'); return; }
+    try {
+      const data = await requestJson('/v1/shortlists/' + sid);
+      renderShortlist(data);
+      shortlistMessage('Saved fictional shortlist and frozen evidence reopened.', true);
+    } catch (error) { shortlistMessage('Could not open shortlist: ' + error.message); }
+  }
+
+  id('shortlist-create-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      const created = await requestJson('/v1/shortlists', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({label:id('shortlist-label').value.trim()})
+      });
+      renderShortlist(created);
+      shortlistMessage('Fictional shortlist created. Add the current investigation.', true);
+    } catch (error) { shortlistMessage('Could not create shortlist: ' + error.message); }
+  });
+
+  id('shortlist-open-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await loadShortlist(id('shortlist-open-id').value.trim());
+  });
+
+  id('shortlist-add-current').addEventListener('click', async () => {
+    if (!activeShortlist || !lastInvestigation) {
+      shortlistMessage('First create or open a shortlist and investigate a property.'); return;
+    }
+    try {
+      const result = await requestJson('/v1/shortlists/' + activeShortlist + '/entries', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({investigation_id:lastInvestigation})
+      });
+      renderShortlist(result);
+      shortlistMessage('Saved property added without changing the recorded evidence.', true);
+    } catch (error) { shortlistMessage('Could not add investigation: ' + error.message); }
+  });
+
+  id('shortlist-find').addEventListener('click', async () => {
+    const found = id('shortlist-found');
+    clear(found);
+    try {
+      const result = await requestJson('/v1/shortlists');
+      if (result?.source_kind !== 'synthetic_fixture' || !Array.isArray(result.shortlists))
+        throw Error('Invalid local shortlist index.');
+      if (!result.shortlists.length) found.appendChild(element('p', '', 'No saved fictional shortlists in this database.'));
+      for (const item of result.shortlists) {
+        if (!uuid.test(item.shortlist_id)) throw Error('Invalid shortlist identifier.');
+        const openButton = element('button', 'secondary-button', item.label + ' · ' + item.entry_count + ' homes');
+        openButton.type = 'button';
+        openButton.addEventListener('click', () => loadShortlist(item.shortlist_id));
+        found.appendChild(openButton);
+      }
+      shortlistMessage('Local shortlists loaded. They are not private accounts.', true);
+    } catch (error) { shortlistMessage('Could not list shortlists: ' + error.message); }
+  });
+
+  const startingShortlist = window.location.hash.match(/^#shortlist\/([0-9a-f-]+)$/);
   const starting = window.location.hash.match(/^#investigation\/([0-9a-f-]+)$/);
-  if (starting) reopen(starting[1]);
+  if (startingShortlist) loadShortlist(startingShortlist[1]);
+  else if (starting) reopen(starting[1]);
 })();
