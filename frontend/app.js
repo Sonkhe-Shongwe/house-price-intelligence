@@ -330,7 +330,7 @@
       result.tier === 'spatial_fallback' ? 'Exploratory 2 km' : 'No eligible evidence';
     if (key === 'date') return niceDate(result.analysis_date);
     if (key === 'snapshots') return (result.data_build?.source_snapshot_ids || []).join(', ') || 'Not available';
-    if (key === 'rules') return result.match_policy_version || result.rule_version || 'See saved evidence contract';
+    if (key === 'rules') return item.match_policy_version || 'Unverified rule';
     if (key === 'warnings') return (result.warnings || []).join(' | ') || 'No additional warning';
     if (key === 'valuation') return 'Not produced';
     return 'Not available';
@@ -345,7 +345,8 @@
           || entry.investigation?.data_build?.source_kind !== 'synthetic_fixture'
           || entry.investigation.valuation !== null
           || entry.investigation.contract_version !== 'p3-draft-v0.3'
-          || typeof entry.note_text !== 'string')
+          || typeof entry.note_text !== 'string'
+          || typeof entry.match_policy_version !== 'string')
         throw Error('Invalid saved investigation or note in shortlist response.');
     }
     activeShortlist = data.shortlist_id;
