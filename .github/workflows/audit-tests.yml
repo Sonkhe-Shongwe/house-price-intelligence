@@ -61,4 +61,14 @@ jobs:
           python -m pip install "playwright==1.56.0"
           python -m playwright install --with-deps chromium
       - name: Exercise real Chromium -> localhost HTTP -> synthetic SQLite
+        env:
+          HPI_DESIGN_SCREENSHOTS: ${{ runner.temp }}/hpi-visual-preview
         run: python -m unittest discover -s browser_tests -p 'test_*.py' -v
+      - name: Publish offline Visual Foundation prototype screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpi-visual-study-${{ github.run_id }}
+          path: ${{ runner.temp }}/hpi-visual-preview/*.png
+          if-no-files-found: warn
+          retention-days: 7
