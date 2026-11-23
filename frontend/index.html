@@ -41,7 +41,7 @@
 
     <div class="safety-notice" role="note">
       <div class="notice-icon" aria-hidden="true">i</div>
-      <div><strong>This is a synthetic engineering prototype.</strong> Every property and sale displayed here is invented. No live listings, current valuations, real addresses, or financial recommendations are provided. Saved investigations last only while this local server runs.</div>
+      <div><strong>This is a synthetic engineering prototype.</strong> Every property and sale displayed here is invented. No live listings, current valuations, real addresses, or financial recommendations are provided. Saved investigations are temporary by default; an explicitly enabled local fixture database preserves them across restarts. Do not enter personal information.</div>
     </div>
 
     <div class="workspace">
@@ -105,12 +105,48 @@
           <div id="comparables" class="comparables"></div>
           <div id="unsupported" class="unsupported" hidden></div>
           <details class="provenance"><summary>Source lineage and limitations <span aria-hidden="true">⌄</span></summary><div id="provenance-content"></div></details>
-          <div class="result-actions"><button type="button" class="secondary-button" id="copy-link">Copy investigation link</button><span class="save-note">Saved in temporary SQLite memory</span></div>
+          <div class="result-actions"><button type="button" class="secondary-button" id="copy-link">Copy investigation link</button><span class="save-note">Local fixture only. Persistence requires --fixture-db.</span></div>
         </div>
       </section>
     </div>
 
-    <section class="reopen-panel" aria-labelledby="reopen-heading"><div><div class="mini-label">CONTINUE WHERE YOU LEFT OFF</div><h2 id="reopen-heading">Open an investigation</h2><p>Reopen a saved result using its ID. Results disappear when the local server stops.</p></div><form id="reopen-form"><label for="reopen-id" class="visually-hidden">Investigation ID</label><input id="reopen-id" name="reopen-id" type="text" placeholder="Paste investigation UUID" autocomplete="off" spellcheck="false" required><button type="submit" class="secondary-button">Open saved result</button></form></section>
+    <section class="reopen-panel" aria-labelledby="reopen-heading"><div><div class="mini-label">CONTINUE WHERE YOU LEFT OFF</div><h2 id="reopen-heading">Open an investigation</h2><p>Reopen a saved result using its ID. Results persist across restarts only in explicit --fixture-db mode.</p></div><form id="reopen-form"><label for="reopen-id" class="visually-hidden">Investigation ID</label><input id="reopen-id" name="reopen-id" type="text" placeholder="Paste investigation UUID" autocomplete="off" spellcheck="false" required><button type="submit" class="secondary-button">Open saved result</button></form></section>
+
+    <section class="shortlist-panel" id="shortlist-workspace" aria-labelledby="shortlist-heading">
+      <div class="section-topline"><span>03 / BUYER SHORTLIST</span><span class="stage-tag">FICTIONAL PROPERTIES ONLY</span></div>
+      <div class="shortlist-heading">
+        <div><h2 id="shortlist-heading">Compare homes, not just prices.</h2>
+          <p>Save up to three different invented properties, keep private-to-this-device notes, and compare frozen evidence side by side. Unsupported properties remain visible without invented valuations.</p></div>
+      </div>
+      <div class="shortlist-controls">
+        <form id="shortlist-create-form" class="shortlist-form">
+          <label for="shortlist-label">New shortlist name</label>
+          <div class="shortlist-inline"><input id="shortlist-label" maxlength="80" value="My fictional property shortlist" required autocomplete="off"><button type="submit" class="secondary-button">Create shortlist</button></div>
+        </form>
+        <form id="shortlist-open-form" class="shortlist-form">
+          <label for="shortlist-open-id">Reopen saved shortlist UUID</label>
+          <div class="shortlist-inline"><input id="shortlist-open-id" autocomplete="off" spellcheck="false" required placeholder="Paste shortlist UUID"><button type="submit" class="secondary-button">Open shortlist</button></div>
+        </form>
+      </div>
+      <div class="shortlist-discovery"><button id="shortlist-find" type="button" class="secondary-button">Find local shortlists</button><div id="shortlist-found" aria-label="Saved fictional shortlists"></div></div>
+      <p id="shortlist-feedback" role="status" aria-live="polite" class="shortlist-feedback">Create or open a shortlist to begin. Only fictional data belongs here.</p>
+      <div id="shortlist-content" hidden>
+        <div class="shortlist-active">
+          <div><span class="mini-label">CURRENT BUYER WORKSPACE</span><h3 id="shortlist-title"></h3>
+            <p id="shortlist-count"></p><p id="shortlist-id-value" class="shortlist-uuid"></p></div>
+          <button type="button" class="primary-button" id="shortlist-add-current">Add current investigation</button>
+        </div>
+        <div id="shortlist-entries" class="shortlist-entries" aria-label="Shortlisted property notes"></div>
+        <div id="shortlist-compare" class="shortlist-compare" hidden>
+          <h3>Side-by-side evidence</h3>
+          <p>Each column is one saved property. Asking prices are buyer-reported, completed sales are fictional fixtures and no current price estimate is produced.</p>
+          <div class="shortlist-table-scroll" id="shortlist-comparison-wrap" role="region" aria-label="Property evidence comparison" tabindex="0">
+            <table id="shortlist-comparison" class="shortlist-comparison"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <footer><div><strong>HOUSE PRICE INTELLIGENCE</strong><span>Experimental evidence workspace · 2026</span></div><span>Not an appraisal service. Synthetic demonstration only.</span></footer>
   </main>
 </body>
