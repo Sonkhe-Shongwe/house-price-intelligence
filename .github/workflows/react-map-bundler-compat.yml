@@ -38,11 +38,11 @@ jobs:
           cat > toolchain-proof/src/main.tsx <<'TSX'
           import React, {useEffect, useRef, useState} from 'react';
           import {createRoot} from 'react-dom/client';
-          import maplibregl from 'maplibre-gl';
+          import * as maplibregl from 'maplibre-gl';
           import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
           import 'maplibre-gl/dist/maplibre-gl.css';
           maplibregl.setWorkerUrl(workerUrl);
-          const pointData: GeoJSON.FeatureCollection = {type:'FeatureCollection', features:[{type:'Feature', id:1, geometry:{type:'Point',coordinates:[0,0]}, properties:{kind:'fictional_sale'}}]};
+          const pointData = {type:'FeatureCollection' as const, features:[{type:'Feature' as const, id:1, geometry:{type:'Point' as const, coordinates:[0,0]}, properties:{kind:'fictional_sale'}}]};
           const inlineStyle: maplibregl.StyleSpecification = {version:8,sources:{fake:{type:'geojson',data:pointData}}, layers:[{id:'bg',type:'background',paint:{'background-color':'#e7ece6'}},{id:'fake-sale',type:'circle',source:'fake',paint:{'circle-radius':16,'circle-color':'#235947'}}]};
           function App(){
             const [selected,setSelected]=useState(false);const [vector,setVector]=useState(false);const [status,setStatus]=useState('svg');const mapElement=useRef<HTMLDivElement>(null);
