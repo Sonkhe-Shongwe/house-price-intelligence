@@ -15,6 +15,7 @@ from typing import Any
 
 from backend.investigation_contract import ContractError
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
+from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -50,6 +51,10 @@ def _static_response(start_response, asset):
 
 ID_ROUTE = re.compile(r"^/v1/investigations/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$")
 ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
+UUID_PART = r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+SHORTLIST_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"$")
+SHORTLIST_MEMBERS_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries$")
+SHORTLIST_ENTRY_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries/" + UUID_PART + r"$")
 ADDRESS_SEARCH_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 .,\-']{1,79}$")
 ALLOWED_HOST = re.compile(r"^(?:127\.0\.0\.1|localhost|\[::1\])(?::[0-9]{1,5})?$", re.IGNORECASE)
 
@@ -73,7 +78,8 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
     status = {200: "200 OK", 201: "201 Created", 400: "400 Bad Request",
               403: "403 Forbidden", 404: "404 Not Found", 405: "405 Method Not Allowed",
               411: "411 Length Required", 413: "413 Content Too Large",
-              415: "415 Unsupported Media Type", 422: "422 Unprocessable Content",
+              415: "415 Unsupported Media Type", 409: "409 Conflict",
+              422: "422 Unprocessable Content",
               503: "503 Service Unavailable", 500: "500 Internal Server Error"}[code]
     headers = [("Content-Type", "application/json; charset=utf-8"),
                ("Content-Length", str(len(payload))), *SECURITY_HEADERS]
@@ -93,6 +99,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
     """
     if not isinstance(store, SyntheticInvestigationStore):
         raise TypeError("Only the fixture-backed investigation store may be served")
+    shortlists = SyntheticShortlistService(store)
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "")
@@ -123,8 +130,38 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _response(start_response, 200, {"status": "ok", "mode": "synthetic_fixture_only"})
 
-        if path in ("/v1/investigations", "/v1/addresses/search"):
-            if method != "POST":
+        shortlist_match = SHORTLIST_ROUTE.fullmatch(path)
+        members_match = SHORTLIST_MEMBERS_ROUTE.fullmatch(path)
+        entry_match = SHORTLIST_ENTRY_ROUTE.fullmatch(path)
+
+        if (path == "/v1/shortlists" and method == "GET"
+                or shortlist_match and method == "GET"
+                or entry_match and method == "DELETE"):
+            try:
+                if path == "/v1/shortlists":
+                    result = shortlists.list()
+                elif shortlist_match:
+                    result = shortlists.get(shortlist_match.group(1))
+                else:
+                    result = shortlists.remove(entry_match.group(1), entry_match.group(2))
+                return _response(start_response, 200, result)
+            except ShortlistError as exc:
+                return _response(start_response, exc.status, {"error": exc.code})
+            except (EvidenceStoreError, sqlite3.Error):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+
+        if shortlist_match or (entry_match and method != "PATCH"):
+            return _response(start_response, 405, {"error": "method_not_allowed"},
+                             allow="GET" if shortlist_match else "PATCH, DELETE")
+        if members_match and method != "POST":
+            return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
+        if path == "/v1/shortlists" and method not in ("GET", "POST"):
+            return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
+
+        shortlist_write = (path == "/v1/shortlists" or members_match is not None
+                           or entry_match is not None)
+        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write:
+            if not shortlist_write and method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
                 return _response(start_response, 400, {"error": "unsupported_transfer_encoding"})
@@ -151,6 +188,23 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if shortlist_write:
+                try:
+                    if path == "/v1/shortlists":
+                        result = shortlists.create(payload)
+                        return _response(start_response, 201, result,
+                                         location="/v1/shortlists/" + result["shortlist_id"])
+                    if members_match:
+                        result = shortlists.add(members_match.group(1), payload)
+                        return _response(start_response, 201, result)
+                    result = shortlists.set_note(entry_match.group(1), entry_match.group(2), payload)
+                    return _response(start_response, 200, result)
+                except ShortlistError as exc:
+                    return _response(start_response, exc.status, {"error": exc.code})
+                except (EvidenceStoreError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "evidence_unavailable"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
             if path == "/v1/addresses/search":
                 if (not isinstance(payload, dict) or set(payload) != {"query"}
                         or not isinstance(payload.get("query"), str)):
