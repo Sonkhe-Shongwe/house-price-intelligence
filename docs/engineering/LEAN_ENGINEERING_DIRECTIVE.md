@@ -5,7 +5,7 @@
 **Scope:** All delivery stages (P0–P8), including research, database, Python services, browser UI, testing, CI, documentation and handoffs.  
 **Authority:** Complements the [engineering contract](ENGINEERING_CONTRACT.md), [P-stage roadmap](../P_PHASE_ROADMAP.md) and [master continuation instructions](../MASTER_CONTINUATION_PROMPT.md). Correctness, owner approvals and source-data protections take precedence over speed.
 
-**Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md) to perform source work in the one GitHub repository and most automated checks in GitHub Actions, with Windows pulls reserved for indispensable human or platform tests. This *implements* the existing lifecycle; it does not alter its eight steps, approval requirements or phase gates.
+**Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md), later refined to one continuing `development` branch plus stable `main`, with GitHub Actions for routine tests and Windows only for indispensable human/platform checks. This implements the existing lifecycle without changing its eight steps, approvals or phase gates.
 
 ## 1. Core operating principle
 
@@ -30,7 +30,7 @@
 **Required approach going forward:**
 
 1. Inspect the latest remote repository **and** the actual local working tree when accessible; never assume they match.
-2. Stop making indefinitely numbered copies of the same developing app. Select one reviewed source workspace or short-lived branch, preserve other work as history/patches, and integrate compatible changes in small units when publication is authorised.
+2. Stop making indefinitely numbered copies of the same app. Develop approved work in the permanent `development` branch, preserving `main` for stable accepted releases. Preserve earlier work as history/patches and reconcile exact changes carefully. Create exceptional branches only when specifically justified and approved.
 3. Keep the Phase 2 matching engine's documented selection invariants unchanged unless a separate acceptance decision requires and verifies a change.
 4. Before extracting abstractions, establish at least two real uses or a measured need. Avoid speculative plugin systems, provider adapters, event queues or service layers that do not simplify the current feature.
 5. Preserve a single current handoff and existing phase-gate records; do not grow a parallel family of authoritative progress files.

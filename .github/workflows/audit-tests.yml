@@ -2,8 +2,10 @@ name: Property audit unit tests
 
 on:
   push:
-    branches: [main]
+    # Run on every accepted release and every development commit.
+    branches: [main, development]
   pull_request:
+    branches: [main]
 
 # Test untrusted PRs with read-only repository access. No secrets or live-source data.
 permissions:

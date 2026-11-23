@@ -1,9 +1,9 @@
-# House Price Intelligence | Master Continuation Prompt v1.2
+# House Price Intelligence | Master Continuation Prompt v1.3
 
 **Purpose:** General-purpose continuation across sessions, phases, tools and workstreams. This prompt is not limited to P3, research or any particular technology stack. Its first duty is to restore the **current verified state** before deciding what to do.
 
 **GitHub:** https://github.com/Sonkhe-Shongwe/house-price-intelligence  
-**Working branch:** Discover and verify; do not assume `main` is the user's active local branch.  
+**Workflow:** Default source changes target the permanent `development` branch; `main` is stable. Discover and verify both current heads. Do not assume GitHub reflects the user's local Windows branch.  
 **Previously used Windows checkout (unverified now):** `C:\Users\Lenovo\Downloads\Github Projects\house-price-intelligence`
 
 ## Current handoff note: 23 November 2026
@@ -16,11 +16,19 @@ Before following any older guidance, read [the latest checkpoint](CHECKPOINT.md)
 
 ## Cloud-first operating handoff: 23 November 2026
 
-The owner adopted a **controlled, uniform, cloud-first development station**. Apply [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) with the unchanged eight-step directive. All meaningful source improvements should be integrated into the **one GitHub repository** through a controlled feature branch, PR and automated checks; Actions runs tests, it is not itself a code-writing service. Use Windows only for indispensable target-platform or owner UX acceptance. No more disconnected, serial review ZIPs as the active development method.
+The owner adopted a **controlled, uniform, cloud-first development station**. Apply [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) with the unchanged eight-step directive. As refined later on 23 November, author approved work on the persistent **`development`** branch and review milestone PRs into stable **`main`**, with automated checks; Actions runs tests, it is not itself a code-writing service. Use Windows only for indispensable target-platform or owner UX acceptance. No more disconnected, serial review ZIPs as the active development method.
 
 The authoritative main baseline at this docs audit was `49f933d54c8de7221f45db9f57de953a40e02185`, with [successful CI 45131930665](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45131930665) and 125 committed Python tests. The owner also ran the committed fixture UI on Windows: known synthetic PIN produced 3 comparables, a saved investigation reopened in a second tab, and an unknown PIN returned 0 comparables and no valuation. That **manual acceptance evidence is not new hosted browser CI**. The original 127-test safety patch and subsequent address candidates remain outside committed `main`. P3 10%; estimated MVP 22.8%; no automatic gate acceptance.
 
-**Next execution:** First strengthen the existing GitHub Actions checks through a separately approved CI feature PR, with synthetic browser acceptance; then reconcile the exact local safety patch and integrate the buyer-identity work. No P3/P4/P5 phase credit solely for this operating audit.
+**Historical execution note:** The separate CI PR is now integrated with real hosted Chromium tests, and the P3 frozen-evidence guard has also merged. The two-branch continuation note below and [CHECKPOINT](CHECKPOINT.md) govern next work. No P3/P4/P5 phase credit solely for operating-process changes.
+
+## Two-branch continuation note: 23 November 2026
+
+The owner replaced short-lived milestone feature branches with **one permanent `development` working branch**, preserving stable `main`. Create extra branches only for an explicitly justified exception. Approved changes accumulate on `development` with GitHub Actions checks on every push, while milestone pull requests from `development` to `main` require explicit review and acceptance. Prefer a normal merge commit for a permanent development branch rather than squash or force rewriting shared history.
+
+**Verified integration as of this note:** PR #3 merged into `main` at `103c854eae36a0a0fa81bb007b71ebadc52179d6`. [Main CI 45184193870](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45184193870) passed **128 Python tests**, JavaScript and documentation checks, and **3 real hosted Chromium journeys**. P3 remains **10%** and weighted MVP **22.8%**, with P3 exit gate open. Original local safety/address packages were not automatically imported. The older dated handoff above remains historical and does not supersede this note.
+
+**Next:** Continue approved P3 contract and connected buyer functionality in `development`, using automated verification; request Windows input only when indispensable. Verify the exact `development` SHA and latest CI before asserting completion. See [current checkpoint](CHECKPOINT.md) and [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md).
 
 ## 1. Restore authoritative context
 
@@ -52,7 +60,7 @@ Prioritise, in order:
 
 - Correctness, safety, source provenance and protection of user or publisher data.
 - Unmet phase acceptance requirements and critical blockers.
-- A working buyer journey and integration of existing components through the cloud-first GitHub branch/PR/Actions station, not repeated planning or review ZIPs.
+- A working buyer journey and integration of existing components on the permanent `development` branch with GitHub Actions, not repeated planning, short-lived branches per fix or review ZIPs.
 - Regression prevention, maintainability and testable evidence.
 - Optional refinements only after the essential workflow is solid.
 

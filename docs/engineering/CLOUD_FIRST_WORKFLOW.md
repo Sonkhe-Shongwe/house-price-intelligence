@@ -1,59 +1,48 @@
 # Cloud-first development operations
 
-**Adopted:** 23 November 2026, by owner direction.  
-**Status:** Current operating method, not a claim that all proposed CI gates are implemented.  
-**Authority:** Applies the existing [eight-step Lean Engineering and Delivery Directive](LEAN_ENGINEERING_DIRECTIVE.md), [P0-P8 phase gates](../P_PHASE_ROADMAP.md) and [decision register](../DECISIONS.md). It does not replace those documents or authorise code publication, production deployment, external source downloads or phase acceptance.
+**Adopted:** 23 November 2026; **two-branch model approved:** 23 November 2026.  
+**Authority:** Implements the unchanged [eight-step Lean Engineering and Delivery Directive](LEAN_ENGINEERING_DIRECTIVE.md) and [P0–P8 acceptance gates](../P_PHASE_ROADMAP.md). It is not permission to deploy, disclose publisher data, change source rights, or accept an incomplete delivery phase.
 
-## 1. One authoritative implementation
+## Authoritative working arrangement
 
-- **Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). `main` is the stable integration target; use a short-lived feature branch and pull request for an approved milestone. Avoid active standalone project clones, serial candidate ZIPs and competing checkpoints.
-- **Cloud-first authoring and review:** Write and review source in this GitHub repository through authorised connected GitHub editing or cloud coding tools. **GitHub Actions runs jobs on commits; it is not, by itself, an autonomous code author.** Never claim a workflow developed or merged code merely because it passed tests.
-- **GitHub Actions first:** Routine automated test, database, API, lint/syntax, documentation and eventual browser acceptance checks should run on the exact GitHub commit. Use existing commands locally only for fast diagnostics or a proven environment-specific gap.
-- **Local Windows role:** Pull a reviewed revision **only when essential** for physical Windows compatibility, owner UX/visual judgment or final human acceptance. Give the owner the exact SHA, one command and a short scenario checklist. A local screenshot is evidence for that session, not a committed CI result.
-- **Approvals:** An explicit bounded request to update GitHub can authorise the requested branch/PR change. Do not silently merge, deploy, force-push, change paid jobs, publish source property records or alter acceptance gates. A green check is not owner approval.
-- **Preserve source:** Before incorporating earlier local work, inspect the real local status/diff or an exact exported patch. Keep untracked records. Never assume the isolated Windows safety patch is in `main`; do not replace it with a lookalike.
+- **One GitHub repository:** [house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). No competing source checkouts, numbered review ZIPs or parallel status ledgers.
+- **`development` is our single continuing working branch.** Build approved application features, fixes, tests and documentation on it. Do **not** create another feature branch for each task. Additional branches require a demonstrated reason, such as an urgent release hotfix, incompatible experiment or concurrent risky migration, and explicit approval.
+- **`main` is the stable integrated branch.** Keep the last tested and owner-accepted milestone here. Never use `main` for routine incremental development.
+- **GitHub-connected source tools author code; GitHub Actions runs verification.** Actions is not an independent coding agent. Only the exact commit that passed its relevant checks is verified.
+- **Windows is the manual acceptance station only when necessary:** Windows-only compatibility, actual UX/visual judgment or owner sign-off. Never treat Windows's unknown uncommitted changes as automatically represented by GitHub.
 
-## 2. Controlled feature delivery loop
+## Continuous development and integration loop
 
-1. **Specify the next buyer outcome:** Identify its P-stage, acceptance criteria, abstention/failure case, data/privacy boundary and manual testing necessity; use one issue or PR description, not a new parallel roadmap.
-2. **Create one feature branch** from verified `main`; check the actual current HEAD and known concurrent changes. Do not develop directly on `main` by default.
-3. **Implement one coherent vertical slice** across necessary layers only. Use the existing matcher, synthetic fixtures and contracted evidence rules. Do not introduce speculative services or UI frameworks.
-4. **Push reviewed commits** to the feature branch only when authorised. Trigger existing GitHub Actions and the additional CI gates as they are actually implemented. Do not download real publisher records for a UI/docs edit.
-5. **Diagnose failing jobs on the same branch.** Run deterministic unit, SQLite, HTTP, safety and browser acceptance checks, with safe logs and precise commit SHA. Mark any missing test layer as unverified.
-6. **Review the PR and owner acceptance requirements** before integration. Once required checks and applicable manual approval pass, merge through the agreed procedure, then confirm `main` CI on the merged SHA.
-7. **Update canonical continuity:** Record accepted implementation in [CHECKPOINT](../CHECKPOINT.md), [DECISIONS](../DECISIONS.md) and the roadmap only when phase evidence actually changes. No automatic percent credit for commits, docs or CI infrastructure.
+1. Restore the canonical [checkpoint](../CHECKPOINT.md), actual repository heads, [decisions](../DECISIONS.md), approval scope and current acceptance gate. Inspect relevant implementation and tests before changing it.
+2. Develop authorised work directly on **`development`** in coherent, connected buyer slices. Keep each commit reversible, read-only with respect to real publisher data and small enough to diagnose. Implement the complete backend/SQL/frontend/test path when required.
+3. Push reviewed commits to **`development`** only when owner-authorised for the scope. The existing offline GitHub Actions workflow runs automatically on every `development` push and every `main` push, plus PRs targeting `main`. A failed check must be corrected on `development`; do not hide failures.
+4. At a **meaningful owner-review milestone**, use one pull request from `development` to `main` to inspect the accumulated changes, recheck CI and seek explicit integration approval. There is **no PR required for each ordinary commit or fix**. A continuously open milestone PR is acceptable; it should be updated, not duplicated, while the milestone remains unmerged.
+5. Merge only after relevant checks and owner acceptance. **Prefer a normal merge commit, not a squash merge or force-push, for this permanent working branch**, so shared history stays understandable and the branch survives for the next cycle. Confirm merged `main` CI; reconcile any changes made to `main` back into `development` before continuing.
+6. Update the existing checkpoint and decisions after meaningful accepted work. Change P0–P8 percentages only on justified phase deliverables, not merely because a branch, test or commit exists.
 
-The approved eight-step engineering lifecycle still governs requirements, architecture, risk, implementation, verification, user acceptance, controlled integration and handoff. This loop only specifies **where and how** to execute it.
+The development branch is not a staging copy of real property datasets or a public deployment. No real property-level source records, owner/seller names, credentials or secrets may enter commits or CI logs.
 
-## 3. Test responsibility matrix
+## Test responsibility and current verified baseline
 
-| Test / evidence | Default owner | Actual status at adoption |
+| Evidence or test | Default location | Verified status at two-branch adoption |
 | --- | --- | --- |
-| Research unit tests and aggregate-report tests | GitHub Actions | **Implemented** in `audit-tests.yml` |
-| Synthetic Python, SQLite, service/HTTP contract tests | GitHub Actions | **Implemented** in `audit-tests.yml`; 125 Python tests in total across suites |
-| Documentation links and P0-P8 arithmetic | GitHub Actions | **Implemented** via `tools/check_docs.py` |
-| JavaScript syntax | GitHub Actions | **Not enforced in CI**; optional Node diagnostic in `tools/dev_check.py` |
-| Real Chromium browser-to-HTTP-to-SQLite user journeys | GitHub Actions | **Not in committed CI**; previously passed only in a separate isolated Windows patch |
-| Negative paths: unknown property, malformed input, tampered evidence | GitHub Actions | Some Python tests already exist; expand actual browser checks only for meaningful risks |
-| Windows compatibility, physical UI and owner visual acceptance | Owner, only as required | **Manual**; 23 November known/unknown/reopen synthetic demonstration observed |
-| Final public source permissions, privacy and release decision | Owner + evidence review | **Open**; no deployment approval |
+| 12 Phase 0 + 12 Phase 1 + 14 Phase 2 + 4 exporter Python tests | GitHub Actions | Implemented, passing |
+| 86 P3 synthetic Python/database/HTTP tests | GitHub Actions | Implemented, passing |
+| JavaScript syntax and documentation/phase arithmetic | GitHub Actions | Implemented, passing |
+| Supported, unknown-property, reopen and invalid-price Chromium browser scenarios | GitHub Actions | **3 real browser tests passing** against actual local fixture API and SQLite |
+| Browser visual quality, device/Windows-specific behaviour and final UX acceptance | Owner where necessary | Not replaced by headless CI |
+| Dataset-specific field display rights, historical availability and public release acceptance | Evidence review / owner | Not approved |
 
-`audit-tests.yml` currently runs on pushes and pull requests. It does not enforce Node or Playwright. `data-audit.yml` is separate, performs external source extraction only on its restricted push paths or manual dispatch, and uploads aggregate-only summaries. **Do not merge these into one always-on expensive workflow.**
+**Verified historical integration checkpoint:** `main` commit `103c854eae36a0a0fa81bb007b71ebadc52179d6`, [passing CI 45184193870](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45184193870), 128 Python tests and 3 hosted Chromium cases. The documentation update that establishes `development` is not itself a product deliverable. The current exact branch heads and CI must be checked again on every later session.
 
-Reference: [offline test workflow](../../.github/workflows/audit-tests.yml), [live research audit workflow](../../.github/workflows/data-audit.yml) and [developer checks](../../tools/dev_check.py).
+The [offline CI workflow](../../.github/workflows/audit-tests.yml) runs on `main` and `development` pushes and PRs into `main`. The [real-data audit workflow](../../.github/workflows/data-audit.yml) **stays separate** and is restricted to its configured paths/manual dispatch. Do not trigger external extraction for ordinary frontend or documentation work.
 
-## 4. First GitHub Actions implementation milestone (not yet implemented)
+## Priorities and safeguards
 
-1. Enhance the **existing** offline test workflow to enforce JavaScript syntax alongside Python and docs, with read-only `contents` permission, reasonable timeouts and a clear job summary. Confirm green PR CI before considering a branch rule.
-2. Add the smallest synthetic Chromium acceptance check for a **supported** investigation, a truthful **insufficient-data** result and **reopen**, exercising browser -> HTTP -> SQLite. Keep fixtures invented; ensure browser and application tests run from the *same commit*. Do not claim acceptance from static asset GETs or mocked browser API alone.
-3. Review and enable required PR checks / branch protection **only after** their jobs have stable names and pass. As audited on 23 November, `main` is not protected. This is a proposed configuration change requiring a separate owner-approved action.
-4. Then reconcile the original local 127-test safety patch, exact money and address-search candidates through **one** reviewed integration branch. Exact local patch contents are required; previous review archives are inputs, not new active source trees.
+- **Product:** Complete P3 contract acceptance (property identity, exact-money response, domain/ERD, source versions, rights/privacy) before granting P3 gate completion. Then progress through the already-agreed integrated P4/P5 browser-to-service-to-SQL slices and P6 comparison features.
+- **Evidence:** Mark changes as proposed, implemented, verified, integrated, accepted or released. A green CI run does not automatically accept a product feature.
+- **Earlier Windows patches:** The original isolated 127-test safety patch and address-search candidates are historical inputs. Some safeguards were independently implemented on GitHub; do not assume every original local change is merged. Obtain their exact source diff before incorporating any unmerged element; preserve all local files.
+- **Release control:** The repository's `main` protection was not enabled at adoption. Required branch rules remain a separately reviewed configuration decision. Until then, use the documented PR + explicit approval discipline.
+- **Progress baseline:** P3 **10%**, weighted MVP **22.8%**, exit gate open. This is a subjective milestone estimate and stays unchanged for workflow-only work.
 
-No new workflow, dependency, repository rule, trigger, secret or cloud-hosted browser suite is created by adopting this document.
-
-## 5. Safety, reporting and progress
-
-- Use least-privilege GitHub Actions permissions. Never pass secrets or protected publisher records to untrusted pull-request jobs. Keep CI artifacts aggregate or synthetic and avoid logging person-level or property-level source records.
-- Separate `implemented`, `verified`, `integrated`, `accepted` and `released`. State exact branch, SHA, workflow run, test scope and missing acceptance layers.
-- Review outcomes in the single PR and [current checkpoint](../CHECKPOINT.md); do not produce serial ZIP handoff packages.
-- Keep the [P0-P8 weighted roadmap](../P_PHASE_ROADMAP.md) unchanged until a substantive milestone meets its gate. **Baseline at adoption: P3 10%, weighted MVP 22.8%.**
+**Operating principle:** One working branch, automated cloud verification, one stable integration branch, milestone approvals rather than a PR for each small step.

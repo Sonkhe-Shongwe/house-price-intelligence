@@ -1,7 +1,7 @@
 # House Price Intelligence: current checkpoint
 
-**As of:** 23 November 2026, cloud-first operating-document audit.  
-**Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence), branch `main`; last verified `main` baseline before cloud-first docs branch: `49f933d54c8de7221f45db9f57de953a40e02185`. Re-read HEAD and CI next session.  
+**As of:** 23 November 2026, after approved P3 evidence-guard integration and two-branch operating change.  
+**Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). Stable `main` verified at `103c854eae36a0a0fa81bb007b71ebadc52179d6` with [passing CI 45184193870](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45184193870). Permanent working branch: `development`, created from that revision. Verify HEAD and CI again before next work.  
 **Active stage:** P3 product architecture/contracts, **10% estimated complete**; **22.8% estimated weighted MVP progress**. P3 exit gate remains **open**; no progress added by design discussion or docs.
 
 ## Product direction and approvals
@@ -44,23 +44,23 @@ Historical tax-year matching does **not** establish when property facts were fir
 
 ## Cloud-first operating change and manual acceptance (23 November 2026)
 
-**Approved development method:** One repository, a controlled short-lived GitHub feature branch and PR, GitHub Actions as the primary automated verification environment, and only necessary Windows pulls for physical compatibility and owner UX acceptance. See [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) and the dated [workflow audit](reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md). GitHub Actions does not independently author code. The approved eight-step Lean Directive is unchanged.
+**Approved development method (refined 23 Nov):** One repository, permanent `development` working branch, stable `main`, milestone PRs into `main`, GitHub Actions as the primary automated verification environment, and only necessary Windows pulls for physical compatibility and owner UX acceptance. See [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) and the dated [workflow audit](reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md). GitHub Actions does not independently author code. The approved eight-step Lean Directive is unchanged.
 
 **Observed local synthetic application:** The owner launched the committed localhost WSGI app in Chrome. Screenshot/server-log evidence showed an invented known parcel with **3 explained comparable sales**, the same investigation reopened in a second tab, and an unknown parcel saved with **0 comparable sales** and no valuation. Local responses included `200` and `201`. This is **manual application acceptance evidence**, not the safety-patched 127-test suite and not a hosted-browser CI run. No public dataset was shown and in-memory saves vanish on shutdown.
 
-**Current CI gap:** The existing `audit-tests.yml` runs 125 Python tests and documentation checks, but does **not enforce JavaScript syntax or host Chromium acceptance**. The external `data-audit.yml` remains separately restricted. GitHub `main` was observed **unprotected** as of this audit; no required PR gate has been configured.
+**Current CI:** `audit-tests.yml` now checks **128 Python tests, JavaScript syntax, docs and 3 real Chromium/browser-to-HTTP-to-SQLite cases** on committed `main` (run 45184193870), plus PRs. The new branch configuration also checks `development` pushes. The external `data-audit.yml` remains separately restricted. GitHub `main` remained **unprotected** at the two-branch adoption; required PR checks are still a distinct review/approval decision.
 
-**Highest-priority next engineering change (separate approval):** Extend the existing offline GitHub Actions checks, then add a minimal genuine synthetic browser-to-HTTP-to-SQLite test for supported, insufficient and reopen paths; validate stable checks before considering protected-`main` rules. Reconcile the actual Windows safety-patch diff and reviewed address candidates in **one** subsequent source branch. Do not treat missing local patch contents as merged. No code, workflow configuration, data extraction or progress percentage changes are authorised by this documentation-only update.
+**Highest-priority next product engineering work (separate approval):** On the **same `development` branch**, finish the P3 identity/ERD and exact-money contract, then implement a coherent synthetic address-search → property-selection → investigation → evidence vertical slice. Inspect, rather than guess, the original Windows address candidates. Do not grant the P3 exit gate solely for passed fixture tests. Protected-`main` rules remain a separately approved configuration action.
 
 ## New-tab action plan
 
 1. **Read** [Master Continuation Prompt](MASTER_CONTINUATION_PROMPT.md), this checkpoint, [Decision Register](DECISIONS.md), [P3 Contract](engineering/P3_APPLICATION_CONTRACT.md), [latest continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) and [UX research](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); verify current GitHub HEAD and CI.
-2. **Cloud-first CI infrastructure after separate approval:** Add enforced JS syntax and a focused synthetic graphical browser/HTTP/SQLite acceptance suite to the existing GitHub CI station. Keep external data audits gated and secure; review stable PR checks before asking to protect `main`.
-3. **P3 source integration after separate approval:** Recover the exact uncommitted Windows safety patch without replacing local files; reconcile approved source identity, money and address candidates into one GitHub feature branch. Complete contract and owner acceptance before awarding P3 credit. The current documentation request is **not** permission to integrate code or merge `main`.
+2. **Single-branch delivery:** Use `development` for approved ongoing source changes and CI, keeping `main` stable. First complete P3 contract review (identity, buyer input, ERD, exact-money, provenance and rights), then implement an integrated browser/API/SQLite property-search journey.
+3. **Unmerged local sources:** Recover exact Windows patch contents when available, preserving untracked files. P3 comparable price/source integrity was independently merged in PR #3, but unverified address work is not yet part of the repository. Review major milestone changes using a PR from `development` to `main`. No blanket permission to merge or deploy.
 4. Continue rights/time/identity/source evaluation in parallel; only then justify P4/P5 connected slices and map-provider implementation. P6 shortlist remains a required MVP user feature, not yet delivered.
 
 **Current true commands:** `python tools/dev_check.py` and `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repository root. The convenient `tools/bootstrap.ps1`, `tools/check.ps1`, `tools/run.ps1` scripts have **not been created**.
 
 **Windows checkout last shared:** `C:\Users\Lenovo\Downloads\Github Projects\house-price-intelligence`; temporary review at `C:\Users\Lenovo\Downloads\HPI-P3-review`. Earlier actual repo status showed three untracked research ZIPs. GitHub connector cannot inspect current Windows worktree. No deletion, force checkout or ZIP overwrite.
 
-**Progress:** P3 **10%**; total weighted MVP **22.8%**; unchanged.
+**Progress:** P3 **10%**; total weighted MVP **22.8%**; unchanged. The latest integration added synthetic evidence safeguards, not an accepted P3 exit gate.
