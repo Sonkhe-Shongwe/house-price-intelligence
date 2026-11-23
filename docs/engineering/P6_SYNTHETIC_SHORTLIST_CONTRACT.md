@@ -1,6 +1,6 @@
 # P6 synthetic shortlist and side-by-side evidence candidate
 
-**Documented:** 23 November 2026. **Status:** Short-lived feature candidate only, subject to review and GitHub Actions at its exact HEAD. No owner P3/P6 exit acceptance, production deployment, release, public source-rights permission or phase-score change.
+**Documented:** 23 November 2026. **Status (updated after owner-authorised integration):** [PR #6](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/6) merged into `development` at `44e278f5ff68475616d889d2c7fafd0b5b3c6304`; both development checks passed 172 Python and 9 Chromium tests. This remains a **synthetic-only implemented and integrated candidate**, not an owner-accepted P3/P6 exit, production deployment, release, public source-rights permission or phase-score change.
 
 ## Buyer problem and smallest supported journey
 
