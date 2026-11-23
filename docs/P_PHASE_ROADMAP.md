@@ -1,6 +1,6 @@
 # House Price Intelligence: P0–P8 phase-gated delivery plan
 
-**Established:** 22 November 2026. **Planning status:** adopted as the portfolio-MVP tracking framework, subject to owner revision. **Current baseline:** approximately 22.8% weighted progress.
+**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current baseline:** approximately 22.8% weighted progress.
 
 ## Origin and scope
 
@@ -32,6 +32,18 @@ House Price Intelligence has a different product, market, platform and release t
 Progress is deliberately conservative because **no production database, property API, buyer UI, saved buyer workflow or deployment exists**. A tested data/audit engine is not a completed application.
 
 The **22.8%** weighted progress is a subjective planning estimate derived from accepted evidence and unresolved phase gates. A documentation-only cleanup does **not** add delivered features and therefore does not change this estimate. The phases are delivery stages, distinct from the Phase 0–2 research experiments.
+
+## Phase-governed, vertical-slice delivery directive (23 November 2026)
+
+Apply the [eight-step engineering lifecycle](engineering/LEAN_ENGINEERING_DIRECTIVE.md) proportionately to meaningful work. **Keep P0-P8 stage meanings, weights, acceptance and progress independent from implementation order.**
+
+- **P3 is the immediate gate:** Review and accept the already-integrated, synthetic-only PIN-first domain/SQL/API contract, error states and real-browser journey. Passing fixture CI alone is not contract acceptance.
+- **P4/P5 may overlap in implementation once P3 is accepted:** Build complete buyer slices through browser -> HTTP -> service -> curated SQL -> unchanged matcher, verifying supported, exploratory, insufficient and out-of-coverage behaviour. Backend P4 and browser P5 retain **distinct exit tests and completion credit**; there is no automatic percentage transfer.
+- **P6 completes the decision workflow:** Save, reopen and compare at least two subject enquiries with notes and frozen evidence. A temporary one-property P3 save is not an accepted P6 shortlist.
+- **P0-P2 unresolved gates run in parallel:** Source rights, joins, historical publication time, leakage and independent comparable evaluation remain open while synthetic software is built.
+- **P7 independently accepts integrated readiness; P8 requires authorised release.** Error handling, safe coding, privacy and security start with architecture and continue at every stage rather than being deferred until P7.
+
+Classify each deliverable explicitly as **implemented, verified, integrated, accepted or released**. High-risk multi-layer changes should use compatible expansion, reproducible migration, controlled switching and recovery checks. Phase credit requires accepted evidence, not code quantity, test count or a documentation update.
 
 ## Full process and phase exit gates
 
@@ -69,7 +81,7 @@ The **22.8%** weighted progress is a subjective planning estimate derived from a
 
 **Goal:** Translate the research engine into explicit, testable business objects and contracts for a real application.
 
-**Evidence:** High-level product brief and engineering invariants exist; production service architecture and schemas have not been approved.
+**Evidence:** High-level product brief and invariants exist. Synthetic-only P3 SQLite, HTTP, UI and test candidate is integrated at [`e8b8f70`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/e8b8f70de2bb10fd61b9cec9cc1d12aabdc6cfef) with [125-test successful CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620). Production architecture and schemas, final buyer input and graphical browser flow remain unapproved.
 
 **Planned:** Define subject/property inquiry (user-reported data), source sale, historical building/parcel, matching run and evidence, saved investigation and shortlist. Specify source/version/date timestamps and snapshot semantics. Define a request/response schema for `supported_neighbourhood`, `exploratory_spatial`, `insufficient_data` and out-of-coverage. Decide Python API, SQL database, frontend and deploy strategy only after examining real domain needs.
 
@@ -123,10 +135,11 @@ The **22.8%** weighted progress is a subjective planning estimate derived from a
 
 ## Near-term execution, complexity last
 
-1. **Now:** P3 domain schema, API evidence contract, field-level reuse constraints and first browser journey. Do this while explicitly tracking unfinished P0/P1/P2 gates.
-2. **Next:** P4 curated database ingest + one subject query API integrating the already-tested matcher; prove browser-to-API-to-database correctness early.
-3. **Then:** P5 basic browser investigation; P6 persistence and shortlist; P7 quality/security; P8 release.
-4. Avoid building a predictive model, AI agent or complicated operations stack before the buyer workflow and evidence quality exist.
+1. **Now P3:** Review the integrated fixture-only contracts and ERD, validate the separate guard patch when authorised, and run a real graphical supported/insufficient/reopen journey. Preserve open buyer-input and rights decisions.
+2. **Then P4/P5 overlapping vertical slices:** Introduce compatible curated-build ingestion/storage and the smallest browser-backed query, evidence and error interactions. Test against controlled fixtures; accept P4 and P5 separately.
+3. **Next P6:** Persist multi-property notes and shortlist/reopen/side-by-side comparison with frozen rule/source evidence.
+4. **Throughout:** Continue P0-P2 source quality and rights review; run risk-focused security, migrations, rollback and error checks. P7 is independent readiness; P8 is separately approved release.
+5. Defer speculative AI valuation, wholesale framework changes and public record display until evidence and permissions justify them.
 
 ## Evidence and reporting policy
 

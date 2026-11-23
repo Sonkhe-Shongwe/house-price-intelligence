@@ -1,6 +1,6 @@
 # House Price Intelligence: current checkpoint
 
-**As of:** 22 November 2026  
+**As of:** 23 November 2026 (engineering process audit; previous delivered-code baseline retained)  
 **Project:** [house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence), branch `main`  
 **Delivery-stage baseline:** P3 (synthetic vertical slice integrated; contract acceptance next); **22.8% estimated weighted MVP progress**, unchanged pending formal acceptance of the integrated candidate. This percentage is a planning judgment, not measured development output.
 
@@ -15,9 +15,17 @@
 
 ## P3 synthetic application integration (22 November 2026)
 
-The owner authorised integration of the consolidated P3 candidate. The repository now includes a **synthetic-only** Python/SQLite investigation service, local loopback HTTP API, HTML/CSS/JavaScript frontend, saved-investigation retrieval, a 15-table draft schema and **83 fixture-only application tests** alongside the 42 research tests. The code was tested locally (125/125 on Python 3.13). The GitHub Actions Python 3.12 result for this integration must be inspected independently; a committed test is not itself a successful CI run.
+The owner authorised integration of the consolidated P3 candidate. The repository now includes a **synthetic-only** Python/SQLite investigation service, local loopback HTTP API, HTML/CSS/JavaScript frontend, saved-investigation retrieval, a 15-table draft schema and **83 fixture-only application tests** alongside the 42 research tests. The code was tested locally (125/125 on Python 3.13). The [post-integration GitHub Actions run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) has now been independently inspected: 12 Phase 0, 12 Phase 1, 14 Phase 2, 4 exporter and 83 P3 synthetic application tests passed (**125** total), plus documentation checks on Python 3.12. This does not verify a graphical browser or approve P3 contracts.
 
 The research Phase 2 matcher is preserved byte-for-byte. This is **not** a production database, authorised publisher data display, real property ingestion, trained price model, public API or deployed application. The browser-to-HTTP flow has been tested without a graphical browser; real Chromium graphical acceptance was blocked by administrator policy. Refer to the [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) and [fixture-only backend](../backend/README.md).
+
+## Owner-approved engineering process and documentation audit (23 November 2026)
+
+The owner approved the [eight-step engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) with proportional architecture/risk planning, end-to-end slices, layered verification, safe migration and explicit implemented/verified/integrated/accepted/released states. **Existing P0-P8 stages, weights and gates remain unchanged.** After P3 acceptance, P4/P5 backend/browser work may overlap while stage credit remains separate.
+
+**Source verified:** remote `main` at [`e8b8f70`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/e8b8f70de2bb10fd61b9cec9cc1d12aabdc6cfef); [CI run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) succeeded on the unmodified integrated code. Windows local active branch and uncommitted changes cannot be inspected. The proposed reopen sale-price/snapshot fix is a separate review-only patch, not on `main`.
+
+The [23 November audit](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) reconciles stale P3 and CI status wording. No code, source research, production schema, real property records or live workflows were changed by adopting the process. **P3 remains 10% with gate open; overall weighted MVP remains 22.8%.**
 
 ## Current blockers and pending approvals
 
@@ -50,6 +58,7 @@ For future ChatGPT or coding sessions, start with the [Master Continuation Promp
 - [P0–P8 roadmap and weighted baseline](P_PHASE_ROADMAP.md)
 - [Decision register](DECISIONS.md)
 - [Current audit findings](research/PHASE2_CLOUD_AUDIT_RESULTS.md)
-- [Latest docs cleanup audit](reviews/DOCUMENTATION_AUDIT_2026-11-22.md)
+- [Engineering directive audit (23 November)](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md)
+- [Historical docs cleanup audit (22 November)](reviews/DOCUMENTATION_AUDIT_2026-11-22.md)
 
 **Naming rule:** `audit/phase0`, `audit/phase1`, `audit/phase2` describe research experiments; P0–P8 describe overall software delivery. Do not equate completion of a research experiment with completing the identically numbered P-stage.

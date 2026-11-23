@@ -1,6 +1,6 @@
 # House Price Intelligence: Lean Engineering and Delivery Directive
 
-**Adopted:** 22 November 2026  
+**Adopted:** 22 November 2026; **engineering lifecycle extended by owner:** 23 November 2026  
 **Status:** Active engineering process directive for future work. It does **not** approve a framework, override data/rights restrictions, accept an unintegrated prototype or award a delivery milestone.  
 **Scope:** All delivery stages (P0–P8), including research, database, Python services, browser UI, testing, CI, documentation and handoffs.  
 **Authority:** Complements the [engineering contract](ENGINEERING_CONTRACT.md), [P-stage roadmap](../P_PHASE_ROADMAP.md) and [master continuation instructions](../MASTER_CONTINUATION_PROMPT.md). Correctness, owner approvals and source-data protections take precedence over speed.
@@ -21,7 +21,9 @@
 
 ## 2. One authoritative implementation, not successive disconnected prototypes
 
-**Observed process risk (22 Nov 2026):** The GitHub main branch contains the verified research code, while isolated P3 v0.1–v0.5 candidates contain a synthetic property enquiry, SQLite storage, HTTP service and browser assets that have not been accepted or integrated. Their local test results must not be reported as GitHub CI or native browser acceptance.
+**Historical risk at initial adoption (22 November):** The P3 v0.1-v0.5 candidates had not yet been integrated. This remains dated historical context, not the latest source state.
+
+**Verified remote on 23 November:** The fixture-only P3 application was integrated at [`e8b8f70`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/e8b8f70de2bb10fd61b9cec9cc1d12aabdc6cfef). [Post-integration CI run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed 125 research/application tests and documentation checks on Python 3.12. The graphical browser, P3 contract, production database, public-data rights and deployment are **not** accepted. The owner's Windows branch and uncommitted files were inaccessible.
 
 **Required approach going forward:**
 
@@ -71,8 +73,8 @@ The matcher does not import HTTP, SQL, frontend code or source-download utilitie
 - Parameterise SQL. Enforce relevant primary/foreign keys, uniqueness and transactional rollback in the database; verify SQLite foreign-key enforcement per connection.
 - Explicitly separate a user-reported asking price, recorded sale prices, descriptive historical calculations and any eventual approved prediction.
 - Avoid N+1 queries when observed or obvious in a hot path; profile or measure before introducing caches.
-- Keep error responses deterministic and actionable; no silent fallback to township median or guessed property facts.
-- Log useful failures, correlation context and source-build identifiers where safe, without exposing protected personal or per-property records.
+- Keep error responses deterministic and actionable. Valid `insufficient_data` or `out_of_coverage` outcomes are different from bad input, unavailable evidence and infrastructure failure; never silently fall back to township median or guessed property facts.
+- Log useful failures, correlation context and source-build identifiers where safe, without exposing protected personal or per-property records. Handle expected errors at their relevant boundary; return safe external errors for unexpected failures and retain protected diagnostics.
 - Avoid broad catches, permissive defaults, hardcoded real property details, hidden mutation and magic numbers without documented domain justification.
 - Refactor only when there is actual duplication, complexity, changing requirements or maintainability pain; do not rewrite successful components for fashion.
 
@@ -97,15 +99,28 @@ The matcher does not import HTTP, SQL, frontend code or source-download utilitie
 
 **Feedback-time targets (aspirations, not verified SLAs):** coding checks in seconds, focused suite plus contract checks approximately under one minute on a normal runner, few browser tests only when pertinent. Measure actual times, and only optimise meaningful bottlenecks.
 
-## 6. Seven-step feature workflow
+## 6. Eight-step feature engineering lifecycle (approved 23 November 2026)
 
-1. **Outcome:** State the user-visible behaviour or data invariant and an explicit done condition.
-2. **Inspect:** Read current relevant source, test evidence, diffs, outstanding approvals and compatibility boundaries.
-3. **Design minimally:** Specify inputs, outputs, errors, affected data and one acceptance case. Do not write a substantial speculative proposal.
-4. **Implement a vertical slice:** Reuse domain logic; connect only the necessary browser, service and database components.
-5. **Verify proportionately:** Run focused checks, add only high-value regressions, and perform relevant integration/browser tests.
-6. **Integrate when authorised:** Small, reviewable change; remote SHA lease; run CI and inspect real results. Do not accumulate another unsynchronised long-lived prototype.
-7. **Handoff sparingly:** Update the current checkpoint and decisions only for a meaningful accepted change; preserve previous evidence and update P-stage percentages only when gates justify credit.
+Apply this **proportionately**: a tiny fix needs a concise outcome and a focused regression; a change affecting a schema, trust boundary, public-data handling or multiple components needs explicit contract, migration and recovery review. This replaces the old seven-step sequence, without removing its protections.
+
+1. **Problem and requirements:** Define buyer outcome, inputs/outputs, invariants and at least one success and meaningful failure/abstention example.
+2. **Architecture and contract:** Assign ownership across browser, HTTP, service, matcher and storage; specify key identity, dates, money, source versions, API responses and expensive-to-reverse decisions.
+3. **Risk and failure analysis:** Check bad joins, duplicate PIN, future or backfilled evidence, source drift, privacy, interruption, permission and rollback.
+4. **Implementation:** Build the smallest complete vertical slice; preserve accepted behaviour and retain compatible paths.
+5. **Automated verification:** Run risk-focused unit, domain, SQL, API and security checks. Protect each genuine defect with a meaningful regression test.
+6. **Integrated user acceptance:** Where relevant, actually run browser-to-HTTP-to-database success, insufficiency, unsupported and infrastructure failure flows. HTTP asset loading alone is not a graphical browser pass.
+7. **Review and controlled integration:** Check source/HEAD and available local diffs, inspect the change, obtain publication approval, and verify CI on the precise source revision.
+8. **Documentation and continuity:** Update only the one authoritative checkpoint, decisions and milestone records affected by accepted evidence. Preserve historical findings and do not award progress for docs or test counts alone.
+
+### Evidence and Definition of Done
+
+- **Implemented:** Code exists at an identified source revision.
+- **Verified:** Appropriate named checks passed on that revision and environment; untested levels remain explicit.
+- **Integrated:** Reviewed work is in the intended branch with local/remote divergence reconciled where available.
+- **Accepted:** Applicable contract, buyer, evidence and owner gates have passed.
+- **Released:** Operational, security, data-rights and authorised deployment gates have passed.
+
+Each substantial change should identify its outcome, affected boundaries, unchanged invariants, success/abstention/error cases, test evidence, exact source/CI, blockers, approval and progress decision. Do not create extensive paperwork for trivial changes.
 
 ## 7. Quality and delivery metrics
 
@@ -120,14 +135,25 @@ Track useful signals rather than code volume:
 
 No arbitrary 100% test coverage requirement, 100% lint cleanliness on untouched historical code, forced test-count reduction, or KPI used to justify weakening safety checks.
 
-## 8. Current execution priorities and boundaries
+## 8. Current priorities and boundaries (23 November 2026)
 
-1. **Consolidate P3 v0.5:** Review the locally tested code, inspect compatibility with the GitHub research matcher, and integrate into one authoritative implementation when explicitly authorised. Avoid another disconnected v0.6 merely for organisation.
-2. **One fast quality command:** Add minimal reproducible Python formatting/lint and existing unit/SQL/API regression checks, within practical dependency constraints. Avoid a project-wide rewrite.
-3. **Review HTTP complexity:** Evaluate whether the current minimal HTTP implementation or a thin FastAPI adapter is simpler **based on actual maintenance and contract behaviour**. This is a technical decision, not automatic permission to install or migrate.
-4. **Real browser journey:** Verify investigate, show evidence and warnings, save and reopen; retain the existing blocked-browser finding until a permitted browser succeeds.
-5. **Deliver buyer value:** Resolve PIN versus trusted address discovery, then save/compare multiple properties and prepare the release gates.
+1. **Accept P3 before expanding:** Review the already-integrated synthetic PIN-first API, 15-table draft ERD, error/abstention states and genuine graphical browser journey. CI is verified but P3 acceptance remains open.
+2. **Review-only evidence integrity guard:** A separate sale-price/sales-snapshot reopen-guard patch exists outside GitHub. Do not claim it is integrated or tested by the 125-test CI. Reconcile the Windows checkout and rerun the full suite before any authorised integration.
+3. **P4/P5 connected slices after P3:** Implement curated-build storage/reader, investigation API and matching browser behaviour together on safe fixtures. **P4 and P5 still have separate completion scores and exit gates**.
+4. **P6 buyer workflow:** Saved two-property shortlist, notes, reopen and comparison with frozen provenance.
+5. **Continuous protection; independent readiness:** Validate security, errors, provenance, privacy and migrations during every stage. P7 independently checks readiness, while P8 remains authorised deployment and portfolio handoff.
 
-**Always pending until independently verified:** Data rights and public display authorisation; historical source publication timing; chronological valuation evaluation; final consumer lookup contract; public deployment requirements.
+**Unresolved:** final buyer entry/market scope, public field rights, historical as-of availability, later holdout, approved production framework/hosting, graphical acceptance, shortlist and deployment. No automated valuation model is approved.
 
-**Baseline at adoption:** GitHub `main` at commit `708239eb2451e379981767136186ab5010057fed`, with 42 published offline tests; isolated P3 v0.5 reported 83 local fixture/HTTP tests. Delivery P3 remained **10% estimated** and overall MVP **22.8% estimated**. These historical figures are **not** permanent targets and must be rechecked every session. Document adoption does not itself earn phase credit.
+**Historical baseline:** The original 22 Nov adoption referred to `708239eb2451e379981767136186ab5010057fed`, 42 published research tests and 83 local isolated P3 tests. This was a dated baseline and remains preserved for continuity.
+
+**Planning estimate unchanged:** P3 **10%**; weighted MVP **22.8%**.
+
+## 9. Safe large changes, migrations and CI controls
+
+Use **baseline -> explicit contract -> compatible expansion -> tested migration/comparison -> controlled switch -> monitoring/recovery -> retirement** rather than one large destructive replacement.
+
+- Test database migrations on verified copies; keep snapshot/transaction provenance, idempotency and recovery controls. A Git rollback is not automatically a safe database rollback.
+- Preserve price-free comparable ranking, earlier-only sales, unique PIN, sale/building/parcel grain, exact cents, leading-zero IDs and distinct analysis/publication/extraction dates. Reject inconsistent evidence rather than manufacture a value.
+- Maintain least-privilege CI and separate cheap offline checks from costly live data extraction. Workflow, branch protection, dependency pinning and hosted services require separately reviewed implementation and permissions.
+- Apply the same review to AI-assisted and human code. No LLM output authorises data publication, protected writes or unsupported valuation claims. Do not rewrite the framework unless measured needs justify it.

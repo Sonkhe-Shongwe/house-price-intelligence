@@ -1,6 +1,6 @@
 # Decisions and open questions
 
-**Reviewed:** 22 November 2026. **Authority:** Active product choices and documented user direction; research observations alone do not approve public product claims.
+**Reviewed:** 23 November 2026. **Authority:** Active product choices and documented user direction; research observations alone do not approve public product claims.
 
 ## Confirmed direction
 
@@ -8,7 +8,9 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Adopt a House Price Intelligence-specific P0–P8 complexity-last framework | [P-stage roadmap](P_PHASE_ROADMAP.md); 22.8% subjective baseline |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 22.8% subjective baseline |
+| Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
+| Development sequencing (approved 23 Nov) | P4 backend and P5 browser implementation can overlap after P3 acceptance via complete vertical slices; each phase retains its own exit gate and progress | [P-stage roadmap](P_PHASE_ROADMAP.md) |
 | Research geography | Use Cook County township 17 / Evanston as the **research pilot** | Phase 0–2 verified cloud runs; not approval of permanent market |
 | Research segment | Investigate assessor Class 203, a one-story residence category | 273 historical matched sale records; individual building form/condition not verified |
 | Data strategy | Preserve transaction, parcel, building and assessment-year grain separately; reject inappropriate joins | [Phase 0 findings](research/PHASE0_LIVE_AUDIT_RESULTS.md) |
