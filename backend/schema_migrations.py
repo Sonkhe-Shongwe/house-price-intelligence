@@ -109,15 +109,16 @@ def migrate_fixture(conn: sqlite3.Connection, *, target_version: int = CURRENT_S
             "BEGIN IMMEDIATE;\n" + script + "\n" + bootstrap + "\n"
             + f"INSERT INTO schema_migrations VALUES ({version}, '{digest}');\n"
             + f"PRAGMA user_version = {version};\n"
-            + "COMMIT;\n"
         )
         try:
             conn.executescript(sql)
-        except sqlite3.Error as exc:
+            # Validate deferred foreign keys before the schema commit.
+            if conn.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                raise SchemaMigrationError("Foreign-key violations during migration")
+            conn.commit()
+        except (sqlite3.Error, SchemaMigrationError) as exc:
             conn.rollback()
             raise SchemaMigrationError(f"Fixture schema migration {version} failed") from exc
-        if conn.execute("PRAGMA foreign_key_check").fetchone() is not None:
-            raise SchemaMigrationError("Foreign-key violations after migration")
     return _verify_history(conn)
 
 
