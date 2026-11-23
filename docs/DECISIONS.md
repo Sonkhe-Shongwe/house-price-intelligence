@@ -10,6 +10,8 @@
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
 | Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 22.8% subjective baseline |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
+| Development station (approved 23 Nov) | **Cloud-first, one authoritative GitHub repository**, authorised short-lived feature branches/PRs and GitHub Actions for most automated checks; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Actions executes jobs, not autonomous source authoring; no blanket permission to publish or merge |
+| Delivery evidence (23 Nov) | Owner manually verified the committed synthetic browser journey: 3 known-PIN comparables, saved reopen, unknown PIN 0 comparables without valuation | [Current checkpoint](CHECKPOINT.md); separate from 125 committed CI and 127 unmerged local safety tests |
 | Development sequencing (approved 23 Nov) | P4 backend and P5 browser implementation can overlap after P3 acceptance via complete vertical slices; each phase retains its own exit gate and progress | [P-stage roadmap](P_PHASE_ROADMAP.md) |
 | Market choice (23 Nov) | **Data-first, geography-flexible**. Do not force South African coverage if sources, identity, attributes, usage rights or reliability limit the product. Cook County township 17 / Evanston remains the **research pilot**, not final permanent coverage | Phase 0–2 research and owner direction |
 | Research segment | Investigate assessor Class 203, a one-story residence category | 273 historical matched sale records; individual building form/condition not verified |
@@ -41,6 +43,7 @@
 | Should repository remain public? | Repository risk review and owner choice; currently reported public | P7 |
 | What should the application look and feel like? | Refine promising workspace-first idea, compare visual directions, accessibility, responsive information density and buyer tasks; **no palette or final style approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |
 | When can the 127-test patch be committed? | Review exact local/remote diff, protect untracked work, obtain bounded owner code-integration authority, commit tested guard and browser regressions, verify CI | P3 |
+| Which hosted browser test and PR checks? | Review a small deterministic Playwright suite, enforced JS syntax, read-only CI permissions and passing check names before enabling protected-`main` rules; none are active yet | Engineering operations / P3 |
 | What exact money representation is required? | SQL exact cents versus synthetic float response conversion; specify contract before real-money features | P3/P4 |
 
 ## Non-negotiable interpretation rules

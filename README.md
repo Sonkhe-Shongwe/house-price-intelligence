@@ -36,6 +36,8 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [UX research and product direction](docs/design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | Design research, competitor references, visual studies, screen IA and open design decisions; **not approved UI** |
 | [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step feature lifecycle, risk-based tests, safe large changes and phase-governed integration |
+| [Cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) | One GitHub branch/PR, automated versus manual tests, current CI gaps and controlled handoff |
+| [Cloud-first documentation audit](docs/reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md) | Dated audit of the new operating model; not a second checkpoint |
 | [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
 | [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
 | [Latest continuity/directive audit](docs/reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | Verified versus isolated evidence, grey areas, product scope, maps and new-tab handoff |
@@ -45,6 +47,8 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 The repository also retains the original [pinnacle vision](docs/product/PINNACLE_VISION.md), [data-feasibility research](docs/research/DATA_FEASIBILITY.md) and [migration history](docs/MIGRATION_MANIFEST.md). The older Phase 0–2 **audit experiment names are distinct from the overall P0–P8 delivery stages**.
 
 ## Run and development workflows
+
+**Owner-approved cloud-first execution (23 November 2026):** Develop in this single GitHub repository on a reviewed feature branch. GitHub Actions is the default for routine automated checks; it does not write source code by itself. Keep Windows pulls for essential platform-specific tests and human acceptance. See [cloud-first operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md). Existing CI still lacks enforced JavaScript syntax, hosted Chromium acceptance and protected-`main` PR requirements; those are the **next engineering tasks**, not capabilities already delivered.
 
 **Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline unit-test workflow](.github/workflows/audit-tests.yml) checks the four research suites and the P3 synthetic application suite on pushes and pull requests. Audits are not on a recurring time schedule.
 

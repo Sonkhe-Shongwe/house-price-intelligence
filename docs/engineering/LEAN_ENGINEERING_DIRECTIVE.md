@@ -5,6 +5,8 @@
 **Scope:** All delivery stages (P0–P8), including research, database, Python services, browser UI, testing, CI, documentation and handoffs.  
 **Authority:** Complements the [engineering contract](ENGINEERING_CONTRACT.md), [P-stage roadmap](../P_PHASE_ROADMAP.md) and [master continuation instructions](../MASTER_CONTINUATION_PROMPT.md). Correctness, owner approvals and source-data protections take precedence over speed.
 
+**Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md) to perform source work in the one GitHub repository and most automated checks in GitHub Actions, with Windows pulls reserved for indispensable human or platform tests. This *implements* the existing lifecycle; it does not alter its eight steps, approval requirements or phase gates.
+
 ## 1. Core operating principle
 
 **Build the simplest correct solution that demonstrably solves the current user problem. Prevent defects through clear interfaces, explicit domain rules, maintainable architecture and database constraints, then verify the remaining high-value risks with lightweight automation.**

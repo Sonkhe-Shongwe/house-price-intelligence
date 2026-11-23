@@ -1,4 +1,4 @@
-# House Price Intelligence | Master Continuation Prompt v1.1
+# House Price Intelligence | Master Continuation Prompt v1.2
 
 **Purpose:** General-purpose continuation across sessions, phases, tools and workstreams. This prompt is not limited to P3, research or any particular technology stack. Its first duty is to restore the **current verified state** before deciding what to do.
 
@@ -12,7 +12,15 @@ Before following any older guidance, read [the latest checkpoint](CHECKPOINT.md)
 
 **Product:** Independent evidence-based Investigate / Compare / Decide buyer workspace; geography-flexible based on verified usable data, not forced South Africa. Cook County/Evanston Class 203 remains a research pilot. Workspace-first low-fidelity UX received positive feedback, but no final visual identity, map provider or full UI design is approved. Maps are proposed evidence displays, not an automatic MVP feature. Keep the [eight-step directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) unchanged.
 
-**Next:** Verify current HEAD and CI; continue P3 buyer-input/ERD/API/versioning/rights acceptance; consider controlled integration of tested patch only with owner permission and after reconciling the Windows checkout. Keep P3 **10%** and estimated MVP **22.8%** until a real acceptance gate changes. Proposed `tools/check.ps1` and `tools/run.ps1` scripts do not exist yet.
+**Historical next-step note:** Verify current HEAD and CI; continue P3 buyer-input/ERD/API/versioning/rights acceptance; consider controlled integration of tested patch only with owner permission and after reconciling the Windows checkout. The later cloud-first handoff below supersedes this note's execution order. Keep P3 **10%** and estimated MVP **22.8%** until a real acceptance gate changes. Proposed `tools/check.ps1` and `tools/run.ps1` scripts do not exist yet.
+
+## Cloud-first operating handoff: 23 November 2026
+
+The owner adopted a **controlled, uniform, cloud-first development station**. Apply [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) with the unchanged eight-step directive. All meaningful source improvements should be integrated into the **one GitHub repository** through a controlled feature branch, PR and automated checks; Actions runs tests, it is not itself a code-writing service. Use Windows only for indispensable target-platform or owner UX acceptance. No more disconnected, serial review ZIPs as the active development method.
+
+The authoritative main baseline at this docs audit was `49f933d54c8de7221f45db9f57de953a40e02185`, with [successful CI 45131930665](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45131930665) and 125 committed Python tests. The owner also ran the committed fixture UI on Windows: known synthetic PIN produced 3 comparables, a saved investigation reopened in a second tab, and an unknown PIN returned 0 comparables and no valuation. That **manual acceptance evidence is not new hosted browser CI**. The original 127-test safety patch and subsequent address candidates remain outside committed `main`. P3 10%; estimated MVP 22.8%; no automatic gate acceptance.
+
+**Next execution:** First strengthen the existing GitHub Actions checks through a separately approved CI feature PR, with synthetic browser acceptance; then reconcile the exact local safety patch and integrate the buyer-identity work. No P3/P4/P5 phase credit solely for this operating audit.
 
 ## 1. Restore authoritative context
 
@@ -44,7 +52,7 @@ Prioritise, in order:
 
 - Correctness, safety, source provenance and protection of user or publisher data.
 - Unmet phase acceptance requirements and critical blockers.
-- A working buyer journey and integration of existing components, not repeated planning.
+- A working buyer journey and integration of existing components through the cloud-first GitHub branch/PR/Actions station, not repeated planning or review ZIPs.
 - Regression prevention, maintainability and testable evidence.
 - Optional refinements only after the essential workflow is solid.
 
@@ -92,7 +100,7 @@ Use exact source/run/commit identities. For cloud jobs, distinguish workflow cod
 
 ## 5. Engineer and verify the smallest useful change
 
-**Active lean directive:** Apply [Lean Engineering and Delivery Directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md): one authoritative implementation, small complete vertical slices, minimal dependencies, clear service/storage/UI boundaries and risk-focused tests. Avoid accumulating isolated prototypes or overbuilding infrastructure. Keep existing valuable regressions. Refactor or migrate HTTP/framework technologies only when concrete requirements justify the maintenance cost.
+**Active lean directive:** Apply [Lean Engineering and Delivery Directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) and its [cloud-first execution method](engineering/CLOUD_FIRST_WORKFLOW.md): one authoritative implementation, small complete vertical slices, minimal dependencies, clear service/storage/UI boundaries and risk-focused GitHub Actions verification. Avoid accumulating isolated prototypes or overbuilding infrastructure. Keep existing valuable regressions. Refactor or migrate HTTP/framework technologies only when concrete requirements justify the maintenance cost.
 
 
 Before editing: inspect source and diffs, discover current architecture and matching interfaces, check existing tests and document any conflicting work. Use small, reversible changes; preserve concurrent changes and history. Separate business/domain logic from HTTP, storage and UI layers. Keep existing matcher invariants, including earlier-only sales, unique comparable PIN, same supported class, documented geography expansion, provenance, explicit insufficiency and price-free matching/ranking.
@@ -126,6 +134,7 @@ For meaningful milestones, update the existing source of truth, not a growing pi
 - `docs/P_PHASE_ROADMAP.md` and `docs/ROADMAP.md`: phase gates and reconciled weighted progress **only if changed**.
 - `docs/DOCUMENTATION_INDEX.md`: canonical navigation and precedence when documents are added.
 - A dated research or QA report **only** when new evidence materially needs preservation.
+- `docs/engineering/CLOUD_FIRST_WORKFLOW.md`: the practical cloud-first execution method (not a second engineering directive).
 
 Preserve old source findings and rejected experiments, using dated supersession notes instead of silently editing historical results. Do not continually reformat documents after minor changes. Keep source links valid; run documentation checks when available.
 
