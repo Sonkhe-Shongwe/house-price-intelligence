@@ -26,6 +26,10 @@
 
 The earlier 127-Python/15-browser Windows checkout is a **historical isolated candidate**. Do not call all of that patch merged. The relevant frozen-sale guard was independently integrated in PR #3; other unverified local changes are **not** assumed present.
 
+## P3 readiness review recorded (technical review, not sign-off)
+
+A source-backed [P3.1–P3.11 acceptance matrix](DECISIONS.md#p31p311-contract-readiness-and-owner-acceptance-review-23-november-2026) now separates **seven technically verified fixture-only contract candidates**, **two partial specifications** (hosting/storage/access and buyer UX/security), and **two unresolved gates** (real-market identity/rights/as-of and formal owner sign-off). Its suggested fixture-only design baseline is a **proposal**. No P3 exit, release or public-data permission has been approved, and P0–P8 phase scores are unchanged. The recommendation is to progress connected synthetic buyer features while resolving the real-data and production gates separately.
+
 ## Priority decisions and execution
 
 1. **P3 acceptance review, P3.1–P3.11:** Review the [current proposed domain model and synthetic HTTP contract](engineering/P3_APPLICATION_CONTRACT.md), explicit ambiguity/identity, money and source evidence, schema/migration boundaries, threat/privacy and buyer UX. Record each item as *accepted for synthetic scope*, *accepted for production*, *deferred* or *rejected* in [DECISIONS.md](DECISIONS.md). A fixture API is not proof of real public identity.

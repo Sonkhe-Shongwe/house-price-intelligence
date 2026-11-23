@@ -22,6 +22,12 @@ The **current synthetic contract is stated first below**. Dated implementation-s
 
 **Safe use boundary:** The WSGI server is explicitly fixture-only and loopback-bound. Research pilot township 17 and Class 203, first-market identity, property-level publication/attribution rights, historical as-of proof, general currency/limits, production storage/auth, final UX and any public deployment remain undecided. Treat the [proposed ERD below](#proposed-domain-erd-and-controlled-fixture-migration) as an implementation candidate, not a signed-off production model.
 
+## P3 acceptance review and unresolved architecture boundary
+
+A per-package P3.1–P3.11 **technical readiness review and proposed owner dispositions** is now recorded in the [decision register](../DECISIONS.md#p31p311-contract-readiness-and-owner-acceptance-review-23-november-2026). The current v3/HTTP-v0.3 synthetic contract is **eligible for fixture-only approval** on P3.1–P3.7, but has **not been signed off**. P3.8 hosting/access and P3.9 final UX/security are partial; P3.10 rights/real-market identity and P3.11 overall acceptance remain unresolved. No public release or real property display is authorised, and P3 remains 10%.
+
+**Technical review caveat:** The migration runner tests rollback for SQL execution errors, but checks foreign-key integrity after executing a committed migration. That is not a production recovery or transactional backup guarantee. Real-source data publication timing and address-to-building identity require independent evidence, not more invented-fixture test cases.
+
 ## Historical P3 baseline and implementation evolution (retained for provenance)
 
 *The following original PIN-first/15-table and interim v0.2 sections describe **older states**; their constraints, field lists, source code and status claims are superseded by the current synthetic contract above. Subsequent dated v0.3/v3 addenda preserve the actual changes and remain design evidence.*
