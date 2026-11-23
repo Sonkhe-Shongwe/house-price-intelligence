@@ -1,13 +1,12 @@
 """SQLite-to-matcher end-to-end tests using invented transactions only."""
 from datetime import date, datetime, timezone
-from pathlib import Path
 import sqlite3
 import unittest
 
 from backend.investigation_contract import ContractError
+from backend.schema_migrations import migrate_fixture
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 
-SCHEMA = Path(__file__).resolve().parents[1] / "schema_draft.sql"
 TODAY = date(2026, 11, 22)
 NOW = datetime(2026, 11, 22, 16, 0, tzinfo=timezone.utc)
 BUILD = "synthetic-build"
@@ -25,8 +24,7 @@ def enquiry(**updates):
 class SyntheticServiceTests(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
-        self.db.executescript(SCHEMA.read_text(encoding="utf-8"))
-        self.db.execute("PRAGMA foreign_keys = ON")
+        migrate_fixture(self.db)
         for src, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                           ("geo-snap", "geography")):
             self.db.execute("INSERT INTO source_snapshots (snapshot_id, dataset_id, extracted_at_utc, source_query) VALUES(?,?,?,?)",
@@ -152,12 +150,17 @@ class SyntheticServiceTests(unittest.TestCase):
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
 
     def test_changed_saved_address_mapping_refuses_reopen(self):
-        created = self.store.create(enquiry(address_id="fictional-5", pin=None),
+        self.db.execute(
+            "INSERT INTO synthetic_address_candidates VALUES (?,?,?,?,?)",
+            ("fictional-1", "101 Fictional Way, Demonstration District",
+             "101 fictional way demonstration district", SUBJECT, "Synthetic parcel 1"),
+        )
+        created = self.store.create(enquiry(address_id="fictional-1", pin=None),
                                     today=TODAY, investigation_id="address-drift")
-        self.assertEqual(created["subject"]["pin"], "00000000000005")
+        self.assertEqual(created["subject"]["pin"], SUBJECT)
         self.db.execute(
             "UPDATE synthetic_address_candidates SET pin=? WHERE candidate_id=?",
-            ("00000000000006", "fictional-5"),
+            ("00000000000002", "fictional-1"),
         )
         with self.assertRaisesRegex(EvidenceStoreError, "address candidate"):
             self.store.reopen("address-drift")

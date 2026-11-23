@@ -36,7 +36,7 @@ def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sql
                          (f"assessment-{pin}", "assess-snap", pin, 2023, "1", None, "203", 1600))
             conn.execute("INSERT INTO parcel_geographies VALUES (?,?,?,?,?,?,?)",
                          ("geo-snap", pin, 2023, "17", 42.04, -87.68, 1))
-            if idx != 1:
+            if idx in (2, 3, 4):
                 txn = f"txn-{idx}"
                 conn.execute("INSERT INTO sale_transactions VALUES (?,?,?,?,?,?)",
                              (txn, "sale-snap", f"row-{idx}", f"DOC-{idx}", "2024-02-01", 52500000))
@@ -52,6 +52,15 @@ def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sql
                  f"{100 + idx} fictional way demonstration district"),
             )
         if schema_version >= 3:
+            # v3 is installed before the demo data are inserted. Replicate the
+            # synthetic v1 addresses as candidates after the fixture seed.
+            conn.execute(
+                """INSERT INTO synthetic_address_candidates
+                   (candidate_id, display_address, search_key, pin, parcel_hint)
+                   SELECT address_id, display_address, search_key, pin,
+                          'Synthetic parcel ' || CAST(pin AS INTEGER)
+                   FROM synthetic_address_index"""
+            )
             # Same invented address, two distinct parcel candidates.
             for idx, hint in ((5, "Synthetic parcel option A"),
                               (6, "Synthetic parcel option B")):

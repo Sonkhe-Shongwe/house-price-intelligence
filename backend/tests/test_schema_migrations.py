@@ -33,7 +33,7 @@ class FixtureMigrationTests(unittest.TestCase):
         self.assertEqual(migrate_fixture(self.db), CURRENT_SCHEMA_VERSION)
         self.assertEqual(self.db.execute(
             "SELECT COUNT(*) FROM schema_migrations"
-        ).fetchone()[0], 2)
+        ).fetchone()[0], 3)
         self.assertEqual(self.db.execute("PRAGMA foreign_key_check").fetchall(), [])
 
     def test_upgrade_populated_fixture_retains_frozen_investigations(self):
