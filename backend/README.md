@@ -19,3 +19,26 @@ python tools/dev_check.py --focus app
 Open http://127.0.0.1:8765/ locally. Nothing is persisted after process shutdown and the service must not be deployed or given real publisher records. Automated tests run in GitHub Actions on the permanent `development` branch. Fixture migrations are an engineering candidate, not the accepted production backup/restore, source-ingestion or user-identity plan.
 
 See the [single current P3 contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md), [current checkpoint](../docs/CHECKPOINT.md), and [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md).
+
+## Optional durable fictional investigations (development only)
+
+The existing `--fixture-only` command uses disposable in-memory SQLite by default.
+To retain invented investigations across controlled restarts, explicitly specify
+a **new or previously verified fixture database** in an existing directory:
+
+```bash
+python -m backend.run_synthetic_api --fixture-only --port 8765 --fixture-db /path/to/my-fictional.sqlite
+```
+
+The file contains seeded fictional evidence plus whatever enquiry labels and
+asking-price text the tester chooses to enter. **Do not enter personal data.**
+Neither authentication nor encryption is provided. This is a localhost-only
+development feature, not a production database, public API or real-data importer.
+
+An existing recognized v3 database reopens without reseeding or rematching old
+results. Unknown, corrupted, symlinked or older-version databases are refused
+without automatic conversion. Existing values are not silently overwritten.
+The durable file, SQLite journal/WAL files and other local data files are
+ignored by Git. Use a new path when you want a fresh fictional demonstration.
+The existing matcher, transaction cents, snapshot roles and saved-evidence
+guards remain unchanged.

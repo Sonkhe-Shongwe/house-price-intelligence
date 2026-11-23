@@ -300,6 +300,70 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
         self.assertEqual(posted, [])
         expect(self.page.locator("#result-state")).to_have_text("AWAITING INVESTIGATION")
 
+    def test_durable_fixture_reopens_after_real_server_restart(self):
+        """Chromium -> HTTP -> file-backed SQLite -> server restart -> reopen."""
+        with tempfile.TemporaryDirectory() as folder:
+            fixture_path = Path(folder) / "browser-fictional.sqlite"
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind(("127.0.0.1", 0))
+                port = sock.getsockname()[1]
+            base = f"http://127.0.0.1:{port}"
+            restarted_server = None
+
+            def launch():
+                process = subprocess.Popen(
+                    [sys.executable, "-m", "backend.run_synthetic_api",
+                     "--fixture-only", "--port", str(port),
+                     "--fixture-db", str(fixture_path)],
+                    cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT,
+                )
+                for _ in range(80):
+                    if process.poll() is not None:
+                        raise RuntimeError("Durable synthetic server exited unexpectedly")
+                    try:
+                        with urlopen(base + "/health", timeout=0.4) as response:
+                            if response.status == 200:
+                                return process
+                    except (OSError, URLError):
+                        time.sleep(0.15)
+                process.terminate()
+                process.wait(timeout=5)
+                raise RuntimeError("Durable synthetic server did not become healthy")
+
+            try:
+                restarted_server = launch()
+                self.page.goto(base + "/")
+                with self.page.expect_response(
+                    lambda response: response.url == base + "/v1/investigations"
+                    and response.request.method == "POST"
+                ) as creation:
+                    self.page.locator("#submit-button").click()
+                saved = creation.value.json()
+                self.assertEqual(creation.value.status, 201)
+                self.assertEqual(saved["selected_count"], 3)
+                self.assertIsNone(saved["valuation"])
+                self.assertEqual(saved["comparables"][0]["sale_price_usd"], "525000.00")
+                restarted_server.terminate()
+                restarted_server.wait(timeout=5)
+                restarted_server = None
+
+                restarted_server = launch()
+                later = self.context.new_page()
+                with later.expect_response(
+                    lambda response: response.url == base + "/v1/investigations/"
+                    + saved["investigation_id"]
+                ) as reopened:
+                    later.goto(base + "/#investigation/" + saved["investigation_id"])
+                self.assertEqual(reopened.value.status, 200)
+                self.assertEqual(reopened.value.json(), saved)
+                expect(later.locator("#comparables .comp")).to_have_count(3)
+                expect(later.locator("#stat-count")).to_have_text("3")
+            finally:
+                if restarted_server is not None and restarted_server.poll() is None:
+                    restarted_server.terminate()
+                    restarted_server.wait(timeout=5)
+
+
 
 if __name__ == "__main__":
     unittest.main()
