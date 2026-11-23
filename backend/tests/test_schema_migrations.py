@@ -147,6 +147,31 @@ class FixtureMigrationTests(unittest.TestCase):
         ).fetchone())
         self.assertEqual(migrate_fixture(self.db, target_version=2), 2)
 
+    def test_deferred_foreign_key_violation_prevents_schema_commit(self):
+        migrate_fixture(self.db, target_version=1)
+        original = schema_migrations._load_script
+
+        def invalid_script(version):
+            if version == 2:
+                return (
+                    "PRAGMA defer_foreign_keys=ON;\n"
+                    "INSERT INTO sale_transaction_parcels VALUES "
+                    "('missing-transaction', '00000000000001');"
+                )
+            return original(version)
+
+        with patch.object(schema_migrations, "_load_script", side_effect=invalid_script):
+            with self.assertRaisesRegex(SchemaMigrationError, "migration 2 failed"):
+                migrate_fixture(self.db, target_version=2)
+        self.assertEqual(self.db.execute("PRAGMA user_version").fetchone()[0], 1)
+        self.assertEqual(self.db.execute(
+            "SELECT version FROM schema_migrations ORDER BY version"
+        ).fetchall(), [(1,)])
+        self.assertEqual(self.db.execute(
+            "SELECT COUNT(*) FROM sale_transaction_parcels"
+        ).fetchone()[0], 0)
+        self.assertEqual(self.db.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_schema_version_must_be_integer_and_valid(self):
         for bad in (0, -1, 4, True, "2", 1.0):
             with self.subTest(bad=bad), self.assertRaises(SchemaMigrationError):
