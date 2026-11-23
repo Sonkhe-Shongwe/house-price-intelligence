@@ -29,7 +29,7 @@ House Price Intelligence has a different product, market, platform and release t
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 0% | 0.0 pts |
 | **Total** | **Bounded flagship MVP** | **100%** | **22.8% weighted** | **22.8 pts** |
 
-Progress is deliberately conservative because **no production database, real-data property API, accepted buyer UI, durable multi-property shortlist or deployment exists**. The `development` branch already has a tested **synthetic-only** address → investigation → evidence browser/HTTP/SQLite journey; implementation verification does not confer P3–P5 acceptance.
+Progress is deliberately conservative because **no production database, real-data property API, owner-accepted buyer UI, production-safe multi-user shortlist or deployment exists**. On `development`, the **synthetic-only** address → investigation → evidence browser/HTTP/SQLite journey and opt-in durable **fictional** investigation/shortlist/notes/comparison have been implemented and verified. That evidence does not confer P3–P6 exit acceptance. See [current checkpoint](CHECKPOINT.md).
 
 The **22.8%** weighted progress is a subjective planning estimate derived from accepted evidence and unresolved phase gates. A documentation-only cleanup does **not** add delivered features and therefore does not change this estimate. The phases are delivery stages, distinct from the Phase 0–2 research experiments.
 
@@ -38,8 +38,8 @@ The **22.8%** weighted progress is a subjective planning estimate derived from a
 Apply the [eight-step engineering lifecycle](engineering/LEAN_ENGINEERING_DIRECTIVE.md) proportionately to meaningful work. **Keep P0-P8 stage meanings, weights, acceptance and progress independent from implementation order.**
 
 - **P3 is the immediate gate:** Review the current synthetic **address-candidate/PIN, parcel-only** domain and v0.3 HTTP/SQL/API contract, errors, v1–v3 migrations and hosted browser journey. Passing fixture CI alone is not design, rights or production contract acceptance.
-- **P4/P5 may overlap in implementation once P3 is accepted:** Build complete buyer slices through browser -> HTTP -> service -> curated SQL -> unchanged matcher, verifying supported, exploratory, insufficient and out-of-coverage behaviour. Backend P4 and browser P5 retain **distinct exit tests and completion credit**; there is no automatic percentage transfer.
-- **P6 completes the decision workflow:** Save, reopen and compare at least two subject enquiries with notes and frozen evidence. A temporary one-property P3 save is not an accepted P6 shortlist.
+- **P4/P5 cross-layer slices are already synthetically implemented and verified, but P3 acceptance remains pending:** Assess browser -> HTTP -> service -> curated SQLite -> unchanged matcher, including supported/insufficient/unknown cases. Any further production-oriented P4/P5 work still requires scoped approval. Backend P4 and browser P5 retain **distinct exit tests and completion credit**.
+- **P6 synthetic journey is integrated and verified, but not phase-accepted:** Two or three fictitious properties, mutable notes, immutable evidence and opt-in restart recovery now pass browser/SQLite tests. Real access/retention, final owner UX, authorised data and full P6 acceptance remain open.
 - **P0-P2 unresolved gates run in parallel:** Source rights, joins, historical publication time, leakage and independent comparable evaluation remain open while synthetic software is built.
 - **P7 independently accepts integrated readiness; P8 requires authorised release.** Error handling, safe coding, privacy and security start with architecture and continue at every stage rather than being deferred until P7.
 
@@ -129,13 +129,13 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P4.1 | Implement relational constraints and migration runner | VERIFIED | Current synthetic SQLite v1–v3 constraints, checksum history, transaction rollback and preserved investigation tests pass |
 | P4.2 | Implement versioned and validated investigation HTTP contract | VERIFIED | Synthetic same-origin API accepts permitted input and rejects malformed/conflicting/unauthorised requests |
 | P4.3 | Join the existing pure matcher to curated SQL records | VERIFIED | End-to-end fixture run returns actual stored synthetic transactions, not hand-entered output totals |
-| P4.4 | Store, check and reopen frozen comparable evidence | VERIFIED | Saved JSON, transaction IDs, snapshot IDs and cents remain consistent in current running process |
+| P4.4 | Store, check and reopen frozen comparable evidence | VERIFIED | Fixture JSON, transaction IDs, snapshot IDs and exact cents remain consistent in memory **and in opt-in trusted local SQLite files** after restart |
 | P4.5 | Implement production-appropriate durable database | OPEN | Data survive clean restart, selected migrations are tested on backup/recovery and access is bounded |
 | P4.6 | Implement idempotent source-to-curated import | OPEN | Re-importing one authorised data build avoids duplicate sale/property records and tracks exclusions |
 | P4.7 | Resolve real buyer properties without unsupported guesses | BLOCKED | Approved address/parcel/building resolver and clear ambiguous/not-found outcomes tested against allowed records |
 | P4.8 | Implement time-valid evidence and source refresh handling | BLOCKED | Revisions, retired builds and as-of limitations are explicit; old saved results remain reproducible |
 | P4.9 | Finalise API stability, error safety and operational boundaries | PARTIAL | Contract/response compatibility, safe errors, safe query handling and deployment-specific limits reviewed |
-| P4.10 | Run persistent database/API acceptance | OPEN | Restart/reopen, migrations, duplicate import, excluded sales and insufficient property flow pass against durable storage |
+| P4.10 | Run persistent database/API acceptance | PARTIAL | Opt-in fictional SQLite restart/reopen, notes and frozen evidence verified in Python/API/Chromium. Real permitted import idempotence, backup/recovery, production access and end-to-end source refresh are not accepted |
 
 **P4 exit:** A durable, safe, source-aware backend supporting real permitted data or a clearly scoped synthetic-only publicly labelled mode. In-memory fixture storage alone does not satisfy the phase.
 
@@ -159,23 +159,23 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
-| P6.1 | Save/reopen one synthetic investigation | VERIFIED | Current process reopens a frozen UUID-backed investigation; results disappear on process shutdown |
-| P6.2 | Define shortlist and membership schema | PARTIAL | Proposed shortlist tables exist; final owner/session, access and note rules remain open |
-| P6.3 | Build durable save and restore across restarts | OPEN | At least two different properties remain available after restarting the supported application |
-| P6.4 | Add and remove shortlist entries with notes | OPEN | Notes and user labels are editable without modifying original recorded sale evidence |
-| P6.5 | Build two- or three-property side-by-side view | OPEN | Each saved enquiry has a separate asking price, evidence status, comparable count and matching rules |
-| P6.6 | Preserve weak-evidence and excluded properties in shortlist | OPEN | Insufficient/out-of-coverage enquiries can be saved and fairly compared without a fake valuation |
-| P6.7 | Keep immutable evidence/provenance alongside mutable notes | OPEN | Reopen retains source/rule versions and archived result while user decisions/notes evolve separately |
+| P6.1 | Save/reopen one synthetic investigation | VERIFIED | Frozen UUID-backed investigation reopens in memory and across restart with explicit `--fixture-db`; default memory-only demo remains temporary |
+| P6.2 | Define shortlist and membership schema | PARTIAL | Existing `shortlists`/`shortlist_investigations` tables now support verified fictional memberships and 800-character notes. Final owner/session, access, privacy and retention model remains open |
+| P6.3 | Build durable save and restore across restarts | VERIFIED | Opt-in `--fixture-db` preserved two fictional investigations, shortlist and notes across a real server restart in Chromium. No production persistence guarantee |
+| P6.4 | Add and remove shortlist entries with notes | VERIFIED | Fixture-only add/remove and note editing preserve frozen response hash, original sale cents and comparable links |
+| P6.5 | Build two- or three-property side-by-side view | VERIFIED | Real Chromium verifies aligned fictional-property asking prices, evidence statuses, eligible-sale counts, rules and no valuation; owner final visual acceptance pending |
+| P6.6 | Preserve weak-evidence and excluded properties in shortlist | VERIFIED | At least one insufficient-data fictional property (0 eligible sales) remains visible alongside a three-sale property; broader real-market coverage not accepted |
+| P6.7 | Keep immutable evidence/provenance alongside mutable notes | VERIFIED | Fixture notes stored separately; reopening rechecks source snapshot/role, saved cents, response hash, match rule and identity |
 | P6.8 | Decide safe access and optional export/report rules | BLOCKED | Owner accepts user storage/auth/retention model; export includes only fields approved for disclosure |
-| P6.9 | Full returning-buyer comparison acceptance | OPEN | New session opens two saved homes, compares evidence and notes, and demonstrates unsupported-case honesty |
+| P6.9 | Full returning-buyer comparison acceptance | PARTIAL | Real Chromium demonstrates reopening two invented homes, notes and insufficient-data warning after process restart; owner usability, privacy and release-like acceptance outstanding |
 
-**P6 exit:** A real **Investigate → Compare → Decide** workflow with two or three reopenable properties, notes and defensible frozen evidence. The current transient one-property save does **not** satisfy P6.
+**P6 exit:** An owner-accepted, responsible **Investigate → Compare → Decide** buyer workflow with two or three reopenable properties, notes, defensible evidence and appropriate data/access/retention and UX gates. The **implemented fictional-only P6 workflow** is verified, but it is not a production or formal P6 acceptance.
 
 ### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 0%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
-| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | Current synthetic CI includes 148 Python and 7 Chromium checks at the last corrected v3 code revision |
+| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | At owner-approved PR #6 integration `44e278f`, the synthetic CI passed **172 Python and 9 real Chromium tests**, JavaScript syntax and documentation checks; verify newer `development` SHA separately |
 | P7.2 | Validate hostile/invalid/unsupported requests | PARTIAL | Input validation, same-origin guards, error contracts and non-fabrication are checked and extended to real deployment assumptions |
 | P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Synthetic hash/snapshot/cents guards and v1–v3 upgrade safety tested; production backup/restore still absent |
 | P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Extend research invariants to accepted end-to-end imports and dated data builds |
@@ -207,10 +207,10 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 1. **Decisions first (P0/P3):** Accept exact MVP buyer journey, real pilot coverage, source rights/display approach, address→parcel→building handling, v0.3 contract boundaries, production storage and security assumptions. A synthetic-only portfolio demonstration is a legitimate *proposal* if rights block real property display, but its release still needs approval.
 2. **Research/data risk in parallel (P1/P2):** Quantify exclusions/drift, investigate as-of availability and defensible sales, evaluate fallback honestly, and establish the permitted input/output dataset. These external-evidence tasks may block public real-data claims even when software is ready.
 3. **Build cohesive P4/P5 slices:** A durable curated property record → server investigation → evidence/abstention UI; migrate/version safely and verify each slice in both backend and Chromium. P4 and P5 keep **separate gates**, even though implementation overlaps.
-4. **Complete P6 before calling this a flagship product:** Persist two or three enquiries and notes, side-by-side compare, reopen frozen source/rule evidence and preserve insufficient cases.
+4. **Review integrated P6 for owner acceptance before calling this a flagship product:** Two/three fictional enquiries, notes, side-by-side evidence and frozen-restart reopening are code-verified. Complete missing UX, access, retention, approved source display and release-like cases.
 5. **Treat P7 and P8 as independent release gates:** Security, rights, accessibility, performance, safe deployment and portfolio walkthrough. A green development build is not public release authorisation.
 
-**Suggested first acceptance review (next project session):** P3.1/3.2 domain and candidate identity, P3.3/3.4 HTTP and errors, P3.5/3.6 evidence/money, P3.7 migration, P3.8/3.9 stack/security/UX, then P3.10 rights/real-market dependencies and P3.11 formal sign-off. Document accepted, accepted-for-fixture-only, deferred and rejected aspects separately. Complete only the decisions supported by evidence; do not assert real field permissions or historical point-in-time data without proof.
+**Suggested next review:** Audit acceptance of P3.1/3.2 domain and candidate identity, P3.3/3.4 HTTP and errors, P3.5/3.6 evidence/money, P3.7 migration, P3.8/3.9 stack/security/UX, then P3.10 rights/real-market dependencies and P3.11 formal sign-off. In parallel, review the [professional UI/map grey-area research](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) before authorising any new map data contract, framework migration or basemap service. Document accepted, accepted-for-fixture-only, deferred and rejected aspects separately. Complete only the decisions supported by evidence; do not assert real field permissions or historical point-in-time data without proof.
 
 **Scoring rule:** Existing P0–P8 stage weights, completion estimates and **22.8%** overall baseline do not change from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
