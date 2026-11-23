@@ -26,3 +26,49 @@
 .address-option:hover{background:#eaf6f2}
 .address-option:focus-visible{outline:3px solid #91e4d1;outline-offset:1px}
 @media(max-width:560px){.address-search-row{flex-direction:column;align-items:stretch}.address-search-row button{width:100%}}
+
+
+/* P6 invented-data buyer shortlist. Columns remain aligned and scroll on narrow screens. */
+.shortlist-panel{margin-top:24px;padding:28px 31px;border:1px solid var(--line);border-radius:15px;background:#fff}
+.shortlist-heading{margin:15px 0 22px}
+.shortlist-heading h2{font-size:24px;letter-spacing:-.035em;margin:0 0 7px;color:#234b52}
+.shortlist-heading p{margin:0;color:#6c858c;font-size:12px;line-height:1.65;max-width:770px}
+.shortlist-controls{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.shortlist-form label{display:block;font-size:11px;font-weight:760;color:#31555d;margin:0 0 8px}
+.shortlist-inline{display:flex;gap:8px;align-items:stretch}
+.shortlist-inline input{min-width:0;flex:1;height:43px;border:1px solid #ccdddf;border-radius:7px;padding:9px 12px;font-size:11px}
+.shortlist-inline button{white-space:nowrap}
+.shortlist-discovery{margin:16px 0;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+#shortlist-found{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.shortlist-feedback{min-height:25px;padding:8px 0;margin:10px 0;color:#795c35;font-size:11px;line-height:1.5}
+.shortlist-feedback.success{color:#146c58}
+.shortlist-active{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:19px 0;border-top:1px solid var(--line)}
+.shortlist-active h3{font-size:19px;letter-spacing:-.025em;margin:5px 0 9px}
+.shortlist-active p{margin:4px 0;color:#779198;font-size:11px}
+.shortlist-uuid{overflow-wrap:anywhere}
+.shortlist-active button{white-space:nowrap}
+.shortlist-entries{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0 22px}
+.shortlist-entry{border:1px solid #dce8e9;border-radius:11px;padding:16px;background:#f9fcfb;min-width:0}
+.shortlist-entry-head{display:flex;flex-wrap:wrap;align-items:start;gap:9px;justify-content:space-between}
+.shortlist-entry h4{font-size:15px;margin:0;letter-spacing:-.018em;overflow-wrap:anywhere}
+.shortlist-state{font-size:10px;font-weight:740;color:#286761;background:#e9f5f1;border-radius:5px;padding:4px 7px}
+.shortlist-entry-meta{font-size:11px;color:#5d7981;line-height:1.55}
+.shortlist-entry label{display:block;font-size:11px;font-weight:700;color:#31555d;margin-bottom:7px}
+.shortlist-note{width:100%;box-sizing:border-box;min-height:78px;padding:9px;border:1px solid #cbdcde;border-radius:7px;resize:vertical;font-family:inherit;font-size:12px;line-height:1.5;background:#fff;color:#23454d}
+.shortlist-entry-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.shortlist-entry-actions button{padding:9px 11px}
+.shortlist-remove{color:#965448;border-color:#efd2ce}
+.shortlist-empty{padding:15px;color:#789298;font-size:12px}
+.shortlist-compare{padding:18px 0 4px;border-top:1px solid var(--line)}
+.shortlist-compare h3{font-size:17px;margin:0 0 7px}
+.shortlist-compare>p{font-size:11px;color:#6a868e;line-height:1.65;max-width:800px}
+.shortlist-table-scroll{max-width:100%;overflow-x:auto;border:1px solid #dce8e9;border-radius:9px}
+.shortlist-comparison{width:100%;min-width:660px;table-layout:fixed;border-collapse:collapse;font-size:11px}
+.shortlist-comparison th,.shortlist-comparison td{text-align:left;padding:13px 12px;vertical-align:top;border-bottom:1px solid #e4edef;overflow-wrap:anywhere;line-height:1.5}
+.shortlist-comparison thead th{background:#eaf5f2;color:#285750;font-size:12px}
+.shortlist-comparison th:first-child{width:21%;font-weight:760}
+.shortlist-comparison tbody th{background:#f7faf9;color:#4e6b71}
+.shortlist-comparison tbody tr:last-child>*{border-bottom:none}
+.shortlist-panel button:focus-visible,.shortlist-panel input:focus-visible,.shortlist-panel textarea:focus-visible,.shortlist-table-scroll:focus-visible{outline:3px solid #62b8a7;outline-offset:2px}
+@media(max-width:980px){.shortlist-controls{grid-template-columns:1fr}.shortlist-entries{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:610px){.shortlist-panel{padding:20px}.shortlist-entries{grid-template-columns:1fr}.shortlist-active{flex-direction:column;align-items:stretch}.shortlist-inline{flex-direction:column}.shortlist-inline button{width:100%}.shortlist-heading h2{font-size:21px}}
