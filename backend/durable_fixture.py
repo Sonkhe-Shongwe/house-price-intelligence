@@ -9,6 +9,7 @@ This is not a real-property importer, production database or account store.
 """
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import sqlite3
@@ -35,6 +36,46 @@ _EXPECTED_ROLES = [
 ]
 
 
+# Only buyer investigations, selected evidence and shortlist records may vary
+# between verified fixture launches. All recorded-source and candidate identity
+# rows must match the trusted invented seed exactly, including source prices.
+_IMMUTABLE_SOURCE_TABLES = (
+    "source_snapshots",
+    "curated_builds",
+    "curated_build_sources",
+    "parcels",
+    "buildings",
+    "sale_transactions",
+    "sale_transaction_parcels",
+    "assessment_records",
+    "parcel_geographies",
+    "curated_build_transactions",
+    "synthetic_address_index",
+    "synthetic_address_candidates",
+)
+
+
+def _fixture_signature(conn: sqlite3.Connection):
+    """Compare full invented-source rows and schema, not forgeable source labels.
+
+    Canonical row sorting tolerates SQLite row order changes. This is strictly
+    a tiny demo database check, not a general real-data signature mechanism.
+    """
+    schema = conn.execute(
+        """SELECT type, name, sql FROM sqlite_master
+           WHERE name NOT LIKE 'sqlite_%' AND type IN ('table', 'index', 'view', 'trigger')
+           ORDER BY type, name"""
+    ).fetchall()
+    sources = []
+    for table in _IMMUTABLE_SOURCE_TABLES:
+        rows = conn.execute(f"SELECT * FROM {table}").fetchall()
+        sources.append((table, tuple(sorted(
+            json.dumps(row, ensure_ascii=True, separators=(",", ":"), allow_nan=False)
+            for row in rows
+        ))))
+    return schema, sources
+
+
 def _verify_durable_fixture(conn: sqlite3.Connection) -> SyntheticInvestigationStore:
     """Accept only our known versioned fixture, not a caller-supplied data build."""
     if conn.execute("PRAGMA integrity_check").fetchone() != ("ok",):
@@ -45,6 +86,20 @@ def _verify_durable_fixture(conn: sqlite3.Connection) -> SyntheticInvestigationS
             "Existing fixture schema version is not current; explicit reviewed migration required"
         )
     migrate_fixture(conn)  # validates checksums, migration history and foreign keys
+    # A metadata-only synthetic marker cannot prove that a database still
+    # contains invented records. The protected fixture rows and schema must
+    # match the trusted seed; only saved buyer investigations may change.
+    expected_conn, _ = in_memory_demo()
+    try:
+        expected = _fixture_signature(expected_conn)
+    finally:
+        expected_conn.close()
+    try:
+        actual = _fixture_signature(conn)
+    except (sqlite3.Error, TypeError, ValueError) as exc:
+        raise FixturePersistenceError("Unexpected synthetic fixture schema or source records") from exc
+    if actual != expected:
+        raise FixturePersistenceError("Synthetic fixture schema or source records differ from trusted seed")
     sources = conn.execute(
         "SELECT snapshot_id, dataset_id, source_query FROM source_snapshots ORDER BY snapshot_id"
     ).fetchall()
