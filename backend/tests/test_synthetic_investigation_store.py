@@ -77,6 +77,16 @@ class SyntheticServiceTests(unittest.TestCase):
         self.assertEqual(self.db.execute("SELECT match_policy_version FROM investigations").fetchone()[0],
                          SyntheticInvestigationStore.POLICY_VERSION)
 
+    def test_sqlite_one_cent_amount_roundtrips_as_exact_text(self):
+        self.db.execute("UPDATE sale_transactions SET price_usd_cents=52500001 WHERE transaction_id='txn-2'")
+        created = self.store.create(enquiry(), today=TODAY, investigation_id="cent")
+        self.assertEqual(created["contract_version"], "p3-draft-v0.3")
+        self.assertEqual(created["comparables"][0]["sale_price_usd"], "525000.01")
+        for sale in created["comparables"]:
+            self.assertRegex(sale["sale_price_usd"], r"^[0-9]+\.[0-9]{2}$")
+            self.assertNotIn("sale_price", sale)
+        self.assertEqual(self.store.reopen("cent"), created)
+
     def test_fallback_marked_exploratory(self):
         self.db.execute("UPDATE parcel_geographies SET neighborhood_code = '18', latitude = 42.041, longitude = -87.681 WHERE pin != ?", (SUBJECT,))
         result = self.store.create(enquiry(), today=TODAY, investigation_id="fallback")

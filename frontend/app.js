@@ -8,10 +8,10 @@
   const feedback = id('form-feedback');
   const submit = id('submit-button');
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-  const currency = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2});
   let lastInvestigation = null;
   let addressSearchRevision = 0;
   let addressSelectionRevision = 0;
+  let selectedAddressId = null;
 
   function text(node, value) { node.textContent = value == null ? '' : String(value); }
   function element(tag, className, content) {
@@ -31,8 +31,11 @@
     text(target, label);
   }
   function currencyAmount(value) {
-    const amount = Number(value);
-    return Number.isFinite(amount) && amount >= 0 ? currency.format(amount) : 'Not available';
+    // Canonical decimal strings only; BigInt handles whole-dollar grouping.
+    if (typeof value !== 'string' || !/^(?:0|[1-9][0-9]*)\.[0-9]{2}$/.test(value))
+      return 'Not available';
+    const [whole, cents] = value.split('.');
+    return '$' + BigInt(whole).toLocaleString('en-US') + '.' + cents;
   }
   function niceDate(value) {
     if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return 'Unknown date';
@@ -59,6 +62,7 @@
     if (data?.data_build?.source_kind !== 'synthetic_fixture') throw Error('This page accepts only synthetic fixture responses.');
     if (!uuid.test(data.investigation_id)) throw Error('The server returned an invalid investigation identifier.');
     if (data.valuation !== null) throw Error('Unexpected valuation data; refusing to display response.');
+    if (data.contract_version !== 'p3-draft-v0.3') throw Error('Unsupported synthetic money contract.');
     lastInvestigation = data.investigation_id;
     id('result-empty').hidden = true;
     id('result-content').hidden = false;
@@ -90,7 +94,10 @@
       const top = element('div', 'comp-top');
       const left = element('div');
       left.appendChild(element('div', 'comp-label', `COMPARABLE ${String(index + 1).padStart(2, '0')}`));
-      left.appendChild(element('div', 'comp-price', currencyAmount(comp.sale_price)));
+      if (Object.hasOwn(comp, 'sale_price') || typeof comp.sale_price_usd !== 'string'
+          || !/^(?:0|[1-9][0-9]*)\.[0-9]{2}$/.test(comp.sale_price_usd))
+        throw Error('Invalid exact-money comparable evidence.');
+      left.appendChild(element('div', 'comp-price', currencyAmount(comp.sale_price_usd)));
       top.appendChild(left);
       top.appendChild(element('div', 'comp-tag', comp.same_neighborhood ? 'Same neighbourhood' : 'Nearby sale'));
       card.appendChild(top);
@@ -148,10 +155,19 @@
   const addressButton = id('address-search-button');
   function resetAddressSelection() {
     addressSelectionRevision += 1;
+    selectedAddressId = null;
     selectedAddress.hidden = true;
     text(selectedAddress, '');
   }
   id('pin').addEventListener('input', resetAddressSelection);
+  id('address-query').addEventListener('input', () => {
+    ++addressSearchRevision;
+    resetAddressSelection();
+    id('pin').value = '';
+    clear(addressResults);
+    addressResults.hidden = true;
+    text(addressFeedback, 'Search the new fictional address before selecting a parcel.');
+  });
 
   addressForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -195,6 +211,7 @@
                 || !/^\d{14}$/.test(resolved.pin)) {
               throw Error('The selected address did not resolve to a synthetic parcel.');
             }
+            selectedAddressId = resolved.address_id;
             id('pin').value = resolved.pin;
             id('label').value = resolved.display_address.slice(0, 120);
             selectedAddress.hidden = false;
@@ -224,9 +241,14 @@
     if (rawPrice && !/^\d+(?:\.\d{1,2})?$/.test(rawPrice)) { setFeedback('Enter the asking price using up to two decimal places.'); return; }
     const area = Number(id('area').value);
     if (!Number.isFinite(area) || area <= 0 || area > 100000) { setFeedback('Enter a valid positive building area.'); return; }
+    const subject = {
+      pin, building_area_sqft:area, asking_price_usd:rawPrice || null,
+      label:id('label').value.trim() || null
+    };
+    if (selectedAddressId !== null) subject.address_id = selectedAddressId;
     const payload = {
       township_code:'17', class_code:'203', analysis_date:id('analysis-date').value,
-      subject:{pin, building_area_sqft:area, asking_price_usd:rawPrice || null, label:id('label').value.trim() || null}
+      subject
     };
     submit.disabled = true; setFeedback('Creating a synthetic investigation…', true);
     state('loading', 'ANALYSING…');

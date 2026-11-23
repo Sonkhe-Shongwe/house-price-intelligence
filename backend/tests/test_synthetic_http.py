@@ -83,6 +83,39 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertIsNone(created["body"]["valuation"])
         self.assertEqual(self.invoke(path=created["headers"]["Location"])["body"], created["body"])
 
+    def test_selected_address_is_bound_by_server_even_without_client_pin(self):
+        req = example_request()
+        req["subject"].update(pin=None, address_id="fictional-1")
+        created = self.invoke("POST", "/v1/investigations", payload=req)
+        self.assertEqual(created["status"], 201)
+        self.assertEqual(created["body"]["subject"]["pin"], SUBJECT_PIN)
+        self.assertEqual(created["body"]["subject"]["address_id"], "fictional-1")
+        self.assertEqual(created["body"]["subject"]["identity_status"], "synthetic_mapping_only")
+        self.assertEqual(created["body"]["selected_count"], 3)
+        self.assertEqual(self.invoke(path=created["headers"]["Location"])["body"], created["body"])
+
+    def test_stale_or_unknown_address_id_fails_without_a_saved_record(self):
+        for address_id, pin, code in (
+            ("fictional-1", "00000000000002", "identity_conflict"),
+            ("fictional-99", SUBJECT_PIN, "address_not_found"),
+        ):
+            req = example_request()
+            req["subject"].update(address_id=address_id, pin=pin)
+            with self.subTest(address_id=address_id):
+                result = self.invoke("POST", "/v1/investigations", payload=req)
+                self.assertEqual(result["status"], 422)
+                self.assertEqual(result["body"]["field"], "subject.address_id")
+                self.assertEqual(result["body"]["code"], code)
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
+
+    def test_exact_money_json_contract_does_not_expose_float_prices(self):
+        created = self.invoke("POST", "/v1/investigations", payload=example_request())
+        self.assertEqual(created["status"], 201)
+        self.assertEqual(created["body"]["contract_version"], "p3-draft-v0.3")
+        for sale in created["body"]["comparables"]:
+            self.assertEqual(sale["sale_price_usd"], "525000.00")
+            self.assertNotIn("sale_price", sale)
+
     def test_unknown_and_malformed_address_fail_safely(self):
         none = self.invoke("POST", "/v1/addresses/search",
                            payload={"query": "Nonexistent Imaginary Road"})

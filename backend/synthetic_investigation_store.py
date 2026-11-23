@@ -49,6 +49,21 @@ def _saved_cents(value: Any) -> int | None:
         return None
 
 
+def _money_text(cents: int) -> str:
+    """Serialize trusted SQLite integer cents with no binary float conversion."""
+    if type(cents) is not int or cents <= 0:
+        raise EvidenceStoreError("Selected sale price must have positive integer cents")
+    return f"{cents // 100}.{cents % 100:02d}"
+
+
+def _exact_money_cents(value: Any) -> int | None:
+    """Parse canonical two-decimal JSON strings without floating-point math."""
+    if not isinstance(value, str) or not re.fullmatch(r"(?:0|[1-9][0-9]*)\.[0-9]{2}", value):
+        return None
+    dollars, cents = value.split(".")
+    return int(dollars) * 100 + int(cents)
+
+
 def _utc(timestamp: datetime | None) -> str:
     value = timestamp or datetime.now(timezone.utc)
     if value.tzinfo is None or value.utcoffset() is None:
@@ -231,11 +246,35 @@ class SyntheticInvestigationStore:
         # User-provided content cannot select build ID, sales, source data or demo mode.
         request = validate_request(payload, today=today)
         build = self._build()
+        address_id = request["subject"].get("address_id")
+        if address_id is not None:
+            chosen = self.resolve_synthetic_address(address_id)
+            if chosen is None:
+                raise ContractError("subject.address_id", "address_not_found")
+            submitted_pin = request["subject"]["pin"]
+            if submitted_pin is not None and submitted_pin != chosen["pin"]:
+                raise ContractError("subject.address_id", "identity_conflict")
+            request["subject"]["pin"] = chosen["pin"]
         resolved = self._resolved_subject(request)
         candidates, transaction_ids = self._candidates(request)
         response = build_investigation(request, resolved_subject=resolved,
                                        candidate_sales=candidates, data_build=build,
                                        synthetic_demo=True, today=today)
+        # The historical matcher keeps its research price; the v0.3 fixture
+        # API exposes only exact decimal strings derived from SQLite cents.
+        response["contract_version"] = "p3-draft-v0.3"
+        if address_id is not None:
+            response["subject"]["identity_status"] = "synthetic_mapping_only"
+        for comp in response["comparables"]:
+            key = (comp["pin"], comp["document"], comp["sale_date"])
+            source = transaction_ids.get(key, [])
+            if len(source) != 1:
+                raise EvidenceStoreError("Selected comparable has ambiguous source transaction")
+            _, _, cents = source[0]
+            if _saved_cents(comp.get("sale_price")) != cents:
+                raise EvidenceStoreError("Selected comparable price differs from exact source cents")
+            comp["sale_price_usd"] = _money_text(cents)
+            del comp["sale_price"]
         identifier = investigation_id or str(uuid.uuid4())
         if not isinstance(identifier, str) or not identifier or len(identifier) > 120:
             raise EvidenceStoreError("Invalid server-side investigation identifier")
@@ -268,7 +307,7 @@ class SyntheticInvestigationStore:
                 if len(ids) != 1:
                     raise EvidenceStoreError("Selected comparable has ambiguous source transaction")
                 transaction_id, snapshot_id, original_cents = ids[0]
-                if _saved_cents(comp.get("sale_price")) != original_cents:
+                if _exact_money_cents(comp.get("sale_price_usd")) != original_cents:
                     raise EvidenceStoreError("Saved comparable price differs from exact source cents")
                 self.connection.execute(
                     """INSERT INTO comparable_evidence
@@ -331,6 +370,7 @@ class SyntheticInvestigationStore:
             # cannot quietly acquire new provenance.
             if (current_snapshot != saved_snapshot or not sales_role
                     or current_cents != saved_cents
-                    or _saved_cents(comp.get("sale_price")) != saved_cents):
+                    or "sale_price" in comp
+                    or _exact_money_cents(comp.get("sale_price_usd")) != saved_cents):
                 raise EvidenceStoreError("Persisted comparable sale price or source snapshot changed")
         return {"investigation_id": investigation_id, **result}

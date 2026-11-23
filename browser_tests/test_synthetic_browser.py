@@ -201,7 +201,12 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
             self.page.locator("#submit-button").click()
         self.assertEqual(saved.value.status, 201)
         self.assertEqual(saved.value.json()["selected_count"], 3)
+        self.assertEqual(saved.value.json()["subject"]["address_id"], "fictional-1")
+        self.assertEqual(saved.value.json()["subject"]["identity_status"], "synthetic_mapping_only")
+        self.assertEqual(saved.value.json()["comparables"][0]["sale_price_usd"], "525000.00")
+        self.assertNotIn("sale_price", saved.value.json()["comparables"][0])
         expect(self.page.locator("#comparables .comp")).to_have_count(3)
+        expect(self.page.locator(".comp-price").first).to_have_text("$525,000.00")
         investigation_id = saved.value.json()["investigation_id"]
         reopened = self.context.new_page()
         with reopened.expect_response(
@@ -209,6 +214,27 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
         ) as original:
             reopened.goto(self.base_url + "/#investigation/" + investigation_id)
         self.assertEqual(original.value.json(), saved.value.json())
+
+    def test_manual_pin_edit_clears_address_selection(self):
+        self.page.goto(self.base_url + "/")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ):
+            self.page.locator("#address-search-button").click()
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/addresses/fictional-1")
+        ):
+            self.page.get_by_role("button", name="101 Fictional Way, Demonstration District").click()
+        expect(self.page.locator("#selected-address")).to_be_visible()
+        self.page.locator("#pin").fill("00000000000099")
+        expect(self.page.locator("#selected-address")).to_be_hidden()
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+        ) as created:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(created.value.status, 201)
+        self.assertEqual(created.value.json()["status"], "insufficient_data")
+        self.assertNotIn("address_id", created.value.json()["subject"])
 
     def test_no_address_match_does_not_guess_or_investigate_old_pin(self):
         self.page.goto(self.base_url + "/")

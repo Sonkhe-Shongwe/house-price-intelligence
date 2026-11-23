@@ -72,7 +72,7 @@ def validate_request(payload: Mapping[str, Any], *, today: date | None = None) -
     subj = payload.get("subject")
     if not isinstance(subj, dict):
         raise ContractError("subject", "object_required")
-    allowed = {"pin", "building_area_sqft", "asking_price_usd", "label"}
+    allowed = {"pin", "address_id", "building_area_sqft", "asking_price_usd", "label"}
     if set(subj) - allowed:
         # No user-supplied neighbourhood/lat/lon. Those must be resolved from a vetted source.
         raise ContractError("subject", "unknown_fields")
@@ -90,19 +90,26 @@ def validate_request(payload: Mapping[str, Any], *, today: date | None = None) -
     pin = subj.get("pin")
     if pin is not None and (not isinstance(pin, str) or not PIN_PATTERN.fullmatch(pin)):
         raise ContractError("subject.pin", "invalid_pin")
+    address_id = subj.get("address_id")
+    if address_id is not None and (not isinstance(address_id, str)
+                                  or not re.fullmatch(r"[a-z0-9-]{1,40}", address_id)):
+        raise ContractError("subject.address_id", "invalid_address_id")
     area = _area(subj.get("building_area_sqft"), "subject.building_area_sqft")
     label = subj.get("label")
     if label is not None:
         label = _string(label, "subject.label")
+    subject = {
+        "pin": pin, "building_area_sqft": area,
+        "asking_price_usd": _price(subj.get("asking_price_usd"), "subject.asking_price_usd"),
+        "label": label,
+    }
+    if address_id is not None:
+        subject["address_id"] = address_id
     return {
         "township_code": township,
         "class_code": class_code,
         "analysis_date": when.isoformat(),
-        "subject": {
-            "pin": pin, "building_area_sqft": area,
-            "asking_price_usd": _price(subj.get("asking_price_usd"), "subject.asking_price_usd"),
-            "label": label,
-        },
+        "subject": subject,
     }
 
 
