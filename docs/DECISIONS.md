@@ -18,6 +18,7 @@
 | Processing | Use GitHub Actions for source research audits and publish **aggregate-only** report artifacts | [Automated audit](AUTOMATED_DATA_AUDIT.md) |
 | Security | No raw property extracts, seller/buyer names, secrets or user records in public repository | [Data policy](../data/README.md) |
 | Boundaries | Do not claim current price prediction, live listings or app deployment | No such accepted implementation exists |
+| UX design authority (23 Nov) | Treat P3's existing aesthetic as provisional; visual identity, navigation hierarchy and final design must be discussed and approved before adopting them | [23 Nov UX research and alternatives](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); documentation is not approval |
 | Repository | Keep this codebase separate from the [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) | Original graduate research untouched |
 
 ## Open decisions, with next acceptance point
@@ -34,6 +35,7 @@
 | How are saved investigations versioned and accessed? | Identity/security, snapshot and persistence design | P3/P6 |
 | Can price prediction be shipped? | Untouched chronological holdout, acceptable baseline comparisons, uncertainty | Post-MVP, conditional |
 | Should repository remain public? | Repository risk review and owner choice; currently reported public | P7 |
+| What should the application look and feel like? | Compare consumer-first versus analytical-first UX, shortlist-first navigation, palettes, accessibility, responsive information density and user journeys; **no direction yet approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |
 
 ## Non-negotiable interpretation rules
 

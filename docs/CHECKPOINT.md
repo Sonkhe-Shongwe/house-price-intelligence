@@ -27,6 +27,14 @@ The owner approved the [eight-step engineering directive](engineering/LEAN_ENGIN
 
 The [23 November audit](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) reconciles stale P3 and CI status wording. No code, source research, production schema, real property records or live workflows were changed by adopting the process. **P3 remains 10% with gate open; overall weighted MVP remains 22.8%.**
 
+## Local P3 browser evidence and UX discovery (23 November 2026)
+
+**User-provided Windows screenshots:** From the correct HPI repository at `3f08060`, an isolated review runner SHA-verified 64 committed files, applied the pending backend/JavaScript safety patch to a disposable checkout and passed **127 Python tests**, **15 real Chromium DOM scenarios** and a synthetic **browser-to-Python-to-SQLite** journey. It reported the original Windows repository was unchanged. These results were **local on the proposed isolated patch**, not committed GitHub CI and not public-data/production acceptance. The older "graphical browser was blocked" statement above remains a dated historical observation, now superseded **for this isolated synthetic verification only**.
+
+The owner requested that UX/visual direction be discussed before further aesthetic changes. A detailed [23 Nov UX research and concept record](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) now preserves design principles, references, the proposed shortlist-first information architecture, three candidate palettes, the Precision Slate illustrative concept, responsive/accessibility guidance and unresolved design choices. **No design system, site redesign, consumer address input or new product feature was approved.**
+
+P3 remains **10%**, weighted MVP **22.8%**, with formal product/domain/source gates still open. The reviewed patch is still **unintegrated** into GitHub `main`.
+
 ## Current blockers and pending approvals
 
 1. **Source policy (P0/P7):** Field-specific public display, attribution, redistribution and privacy rules have not been approved. This blocks public exposure of property-level records.

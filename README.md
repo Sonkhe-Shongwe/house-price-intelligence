@@ -33,6 +33,7 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Roadmap summary](docs/ROADMAP.md) | Concise percentage table |
 | [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
 | [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
+| [UX research and product direction](docs/design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | Design research, competitor references, visual studies, screen IA and open design decisions; **not approved UI** |
 | [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step feature lifecycle, risk-based tests, safe large changes and phase-governed integration |
 | [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
@@ -46,7 +47,7 @@ The repository also retains the original [pinnacle vision](docs/product/PINNACLE
 
 **Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline unit-test workflow](.github/workflows/audit-tests.yml) checks the four research suites and the P3 synthetic application suite on pushes and pull requests. Audits are not on a recurring time schedule.
 
-**Fixture-only demo:** `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repo root, then open `http://127.0.0.1:8765/`. Run `python tools/dev_check.py` for no-dependency checks. This is an in-memory local demonstration, not an authorised public service, and browser graphical acceptance is outstanding.
+**Fixture-only demo:** `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repo root, then open `http://127.0.0.1:8765/`. Run `python tools/dev_check.py` for no-dependency checks. This is an in-memory local demonstration, not an authorised public service. A separate **isolated patched checkout** has passed owner-reported Windows Chromium and browser-to-Python-to-SQLite synthetic acceptance, but that patch and its tests have not been committed, and P3 production/design acceptance is still outstanding. See [checkpoint](docs/CHECKPOINT.md).
 
 Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.md), [Phase 1](audit/phase1/README.md), [Phase 2](audit/phase2/README.md) and [Windows Git setup](docs/GITHUB_SETUP.md). Never commit extracted datasets, private user data, personal names, API tokens or generated property-level output. See [data handling](data/README.md).
 
@@ -54,7 +55,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next (P3):** Review and accept the integrated fixture-only domain/API/evidence contract and PIN-first internal journey; verify a genuine graphical browser journey. The [post-integration 125-test CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed, but does not certify browser or contract acceptance. Then develop P4/P5 together in tested slices while accepting each stage separately. The existing SQLite/HTTP/UI slice demonstrates feasibility but does not satisfy production P4/P5 or source-rights gates. Final public input/stack/deployment decisions remain open.
+**Next (P3):** Review and accept the domain/API/evidence contract and PIN-first internal journey; reconcile the already completed local-only graphical fixture acceptance against the eventual committed patch and CI. The [post-integration 125-test CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed, but does not certify browser or contract acceptance. Then develop P4/P5 together in tested slices while accepting each stage separately. The existing SQLite/HTTP/UI slice demonstrates feasibility but does not satisfy production P4/P5 or source-rights gates. Final public input/stack/deployment decisions remain open.
 
 **Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 
