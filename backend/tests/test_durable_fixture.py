@@ -101,12 +101,45 @@ class DurableFixtureTests(unittest.TestCase):
                 "UPDATE sale_transactions SET price_usd_cents=price_usd_cents+1 "
                 "WHERE transaction_id='txn-2'"
             )
-        reopened, store2 = open_file_demo(self.path)
-        try:
-            with self.assertRaisesRegex(EvidenceStoreError, "sale price"):
-                store2.reopen(saved["investigation_id"])
-        finally:
-            reopened.close()
+        # The stored manifest still claims a fictional source. Refuse the
+        # tampered source rows before any new investigation could use them.
+        with self.assertRaisesRegex(FixturePersistenceError, "trusted seed"):
+            open_file_demo(self.path)
+        with sqlite3.connect(self.path) as unchanged:
+            self.assertEqual(
+                unchanged.execute(
+                    "SELECT price_usd_cents FROM sale_transactions WHERE transaction_id='txn-2'"
+                ).fetchone()[0],
+                52500001,
+            )
+
+    def test_extra_source_transaction_is_rejected_even_with_synthetic_manifest(self):
+        conn, _ = open_file_demo(self.path)
+        conn.close()
+        with sqlite3.connect(self.path) as altered:
+            altered.execute(
+                """INSERT INTO sale_transactions
+                   (transaction_id, snapshot_id, source_row_id, document_number,
+                    sale_date, price_usd_cents)
+                   VALUES ('injected', 'sale-snap', 'other-row', 'DOC-X',
+                           '2024-02-01', 99999999)"""
+            )
+        with self.assertRaisesRegex(FixturePersistenceError, "trusted seed"):
+            open_file_demo(self.path)
+
+    def test_unexpected_schema_table_is_rejected_without_deleting_it(self):
+        conn, _ = open_file_demo(self.path)
+        conn.close()
+        with sqlite3.connect(self.path) as altered:
+            altered.execute("CREATE TABLE outside_source (note TEXT)")
+            altered.execute("INSERT INTO outside_source VALUES ('preserve me')")
+        with self.assertRaisesRegex(FixturePersistenceError, "trusted seed"):
+            open_file_demo(self.path)
+        with sqlite3.connect(self.path) as unchanged:
+            self.assertEqual(
+                unchanged.execute("SELECT note FROM outside_source").fetchone(),
+                ("preserve me",),
+            )
 
     def test_nonsqlite_existing_file_is_not_overwritten(self):
         payload = b"not-a-sqlite-database; preserve this file"
