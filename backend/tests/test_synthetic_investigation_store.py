@@ -141,6 +141,45 @@ class SyntheticServiceTests(unittest.TestCase):
             self.store.create(enquiry(), today=TODAY)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
 
+    def test_changed_underlying_sale_price_refuses_reopen(self):
+        self.store.create(enquiry(), today=TODAY, investigation_id="price-drift")
+        self.db.execute(
+            "UPDATE sale_transactions SET price_usd_cents = price_usd_cents + 1 "
+            "WHERE transaction_id='txn-2'"
+        )
+        with self.assertRaisesRegex(EvidenceStoreError, "sale price or source snapshot"):
+            self.store.reopen("price-drift")
+
+    def test_changed_sales_snapshot_refuses_reopen_even_if_authorised(self):
+        self.store.create(enquiry(), today=TODAY, investigation_id="snapshot-drift")
+        self.db.execute(
+            "INSERT INTO source_snapshots "
+            "(snapshot_id, dataset_id, extracted_at_utc, source_query) VALUES(?,?,?,?)",
+            ("second-sale-snap", "synthetic-sales", "2026-11-22T00:00:00Z", "fabricated"),
+        )
+        # Even a source registered for the same build does not replace
+        # the original snapshot that justified the saved evidence.
+        self.db.execute(
+            "INSERT INTO curated_build_sources VALUES (?,?,?)",
+            (BUILD, "second-sale-snap", "sales"),
+        )
+        self.db.execute(
+            "UPDATE sale_transactions SET snapshot_id='second-sale-snap' "
+            "WHERE transaction_id='txn-2'"
+        )
+        with self.assertRaisesRegex(EvidenceStoreError, "sale price or source snapshot"):
+            self.store.reopen("snapshot-drift")
+
+    def test_removed_sales_snapshot_authorisation_refuses_reopen(self):
+        self.store.create(enquiry(), today=TODAY, investigation_id="sales-role-drift")
+        self.db.execute(
+            "DELETE FROM curated_build_sources "
+            "WHERE build_id = ? AND snapshot_id = 'sale-snap' AND source_role = 'sales'",
+            (BUILD,),
+        )
+        with self.assertRaisesRegex(EvidenceStoreError, "sale price or source snapshot"):
+            self.store.reopen("sales-role-drift")
+
     def test_wrong_comparable_explanation_detected_on_reopen(self):
         self.store.create(enquiry(), today=TODAY, investigation_id="rebound")
         self.db.execute("UPDATE comparable_evidence SET explanation='altered text' "

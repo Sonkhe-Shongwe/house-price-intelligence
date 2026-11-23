@@ -12,6 +12,7 @@ in that build with the required role. Missing/ambiguous historical rows abstain.
 from __future__ import annotations
 
 from collections import defaultdict
+from decimal import Decimal, InvalidOperation
 from datetime import date, datetime, timezone
 import hashlib
 import json
@@ -28,6 +29,23 @@ class EvidenceStoreError(RuntimeError):
 
 def _json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+
+
+def _saved_cents(value: Any) -> int | None:
+    """Interpret the existing numeric JSON sale-price field without float arithmetic.
+
+    This does not change the provisional response-money contract; that remains
+    a separate P3 decision. Refuse non-cent, non-finite or non-numeric values.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    try:
+        cents = Decimal(str(value)) * 100
+        if not cents.is_finite() or cents != cents.to_integral_value():
+            return None
+        return int(cents)
+    except (InvalidOperation, ValueError, OverflowError):
+        return None
 
 
 def _utc(timestamp: datetime | None) -> str:
@@ -132,7 +150,8 @@ class SyntheticInvestigationStore:
         # snapshot has been registered with the sales role for this build.
         records = self.connection.execute(
             """SELECT t.transaction_id, t.document_number, t.sale_date,
-                      t.price_usd_cents, link.pin, p.township_code
+                      t.price_usd_cents, link.pin, p.township_code,
+                      t.snapshot_id
                FROM curated_build_transactions cb
                JOIN sale_transactions t ON t.transaction_id = cb.transaction_id
                JOIN curated_build_sources bs ON bs.build_id = cb.build_id
@@ -150,7 +169,7 @@ class SyntheticInvestigationStore:
         for transaction_id, linked in grouped.items():
             if len(linked) != 1:  # A multi-parcel sale is not a one-home priced comparable.
                 continue
-            txn, doc, when, cents, pin, township = linked[0]
+            txn, doc, when, cents, pin, township, snapshot_id = linked[0]
             if not isinstance(when, str) or len(when) != 10 or cents is None or cents <= 0:
                 continue
             try:
@@ -171,7 +190,7 @@ class SyntheticInvestigationStore:
                    "nbhd_code": hood, "lat": lat, "lon": lon,
                    "characteristics_year": year - 1}
             candidates.append(row)
-            transaction_ids[(pin, doc, when)].append(txn)
+            transaction_ids[(pin, doc, when)].append((txn, snapshot_id, cents))
         return candidates, transaction_ids
 
     def create(self, payload: Mapping[str, Any], *, today: date | None = None,
@@ -215,11 +234,16 @@ class SyntheticInvestigationStore:
                 ids = transaction_ids.get(key, [])
                 if len(ids) != 1:
                     raise EvidenceStoreError("Selected comparable has ambiguous source transaction")
+                transaction_id, snapshot_id, original_cents = ids[0]
+                if _saved_cents(comp.get("sale_price")) != original_cents:
+                    raise EvidenceStoreError("Saved comparable price differs from exact source cents")
                 self.connection.execute(
                     """INSERT INTO comparable_evidence
-                       (investigation_id, build_id, rank, transaction_id, selection_tier, explanation)
-                       VALUES(?,?,?,?,?,?)""",
-                    (identifier, self.build_id, rank, ids[0], response["tier"], comp["explanation"]),
+                       (investigation_id, build_id, rank, transaction_id, selection_tier,
+                        explanation, source_snapshot_id, sale_price_usd_cents)
+                       VALUES(?,?,?,?,?,?,?,?)""",
+                    (identifier, self.build_id, rank, transaction_id,
+                     response["tier"], comp["explanation"], snapshot_id, original_cents),
                 )
         return {"investigation_id": identifier, **response}
 
@@ -246,17 +270,34 @@ class SyntheticInvestigationStore:
             raise EvidenceStoreError("Persisted selected evidence count does not match response")
         evidence = self.connection.execute(
             """SELECT ce.rank, ce.selection_tier, ce.explanation,
-                      t.document_number, t.sale_date, link.pin
+                      t.document_number, t.sale_date, link.pin,
+                      t.snapshot_id, ce.source_snapshot_id,
+                      t.price_usd_cents, ce.sale_price_usd_cents,
+                      EXISTS (
+                          SELECT 1 FROM curated_build_sources bs
+                          WHERE bs.build_id = ce.build_id
+                            AND bs.snapshot_id = t.snapshot_id
+                            AND bs.source_role = 'sales'
+                      )
                FROM comparable_evidence ce
                JOIN sale_transactions t ON t.transaction_id = ce.transaction_id
                JOIN sale_transaction_parcels link ON link.transaction_id = ce.transaction_id
                WHERE ce.investigation_id = ?
                ORDER BY ce.rank, link.pin""", (investigation_id,),
         ).fetchall()
-        if len(evidence) != count or any(
-            row != (rank, result["tier"], comp["explanation"],
-                    comp["document"], comp["sale_date"], comp["pin"])
-            for rank, (row, comp) in enumerate(zip(evidence, result["comparables"]), 1)
-        ):
+        if len(evidence) != count:
             raise EvidenceStoreError("Persisted comparable identities do not match saved evidence")
+        for rank, (row, comp) in enumerate(zip(evidence, result["comparables"]), 1):
+            if row[:6] != (rank, result["tier"], comp["explanation"],
+                           comp["document"], comp["sale_date"], comp["pin"]):
+                raise EvidenceStoreError("Persisted comparable identities do not match saved evidence")
+            current_snapshot, saved_snapshot, current_cents, saved_cents, sales_role = row[6:]
+            # The original evidence must remain the same *transaction, source
+            # snapshot and exact cent amount*, not merely the same PIN/document.
+            # A transaction moved even to a different authorised sales snapshot
+            # cannot quietly acquire new provenance.
+            if (current_snapshot != saved_snapshot or not sales_role
+                    or current_cents != saved_cents
+                    or _saved_cents(comp.get("sale_price")) != saved_cents):
+                raise EvidenceStoreError("Persisted comparable sale price or source snapshot changed")
         return {"investigation_id": investigation_id, **result}
