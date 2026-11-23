@@ -106,11 +106,11 @@ function renderProperty(){
  text('#quality-count',p.count+' records');text('#quality-tier',p.supported?'Neighbourhood':'Insufficient');text('#evidence-warning',p.supported?'All sale prices and locations on this screen are invented. The schematic map never determines which sales qualify or estimates a current home price.':'No earlier sale records qualify for this fictional enquiry. Do not infer that the asking price is reasonable or unreasonable. The map cannot fill missing evidence.');
  text('#evidence-intro',p.supported?'Three invented earlier sales meet the illustrative comparison policy. The drawn placements are not geographic coordinates.':'There are no eligible earlier sales for this example. Empty support is not a zero-valued estimate.');
  $('#swap-property').textContent=p.supported?'Explore unsupported case ↗':'Explore supported case ↗';
- selected='subject';renderMap();renderEvidence();
+ selected='subject';zoom=1;renderMap();updateZoom();renderEvidence();
 }
 function renderMap(){
  var p=properties[current],host=$('#map-pins');host.replaceChildren();var button=function(id,x,y,label,isSubject){
-  var el=create('button','map-pin'+(isSubject?' subject':''),isSubject?'⌂':id);el.type='button';el.style.left=x+'%';el.style.top=y+'%';el.dataset.marker=id;el.setAttribute('aria-label',label);el.setAttribute('aria-pressed',String(selected===id));el.addEventListener('click',function(){select(id)});host.appendChild(el);
+  var el=create('button','map-pin'+(isSubject?' subject':''),isSubject?'⌂':id);el.type='button';el.style.left=x+'%';el.style.top=y+'%';el.dataset.baseX=String(x);el.dataset.baseY=String(y);el.dataset.marker=id;el.setAttribute('aria-label',label);el.setAttribute('aria-pressed',String(selected===id));el.addEventListener('click',function(){select(id)});host.appendChild(el);
  };
  button('subject',p.subject.x,p.subject.y,p.title+' (fictional subject)',true);
  p.sales.forEach(function(s){button(s.id,s.x,s.y,'Comparable '+s.id+', '+s.name+', '+s.price,false)});
@@ -128,6 +128,13 @@ function renderEvidence(){
  detail.appendChild(create('div','comp-details-label',currentSale?'Selected evidence · Comparable '+selected:'Subject property'));
  detail.appendChild(create('p','',currentSale?currentSale.why:'Select a numbered marker or sale card to inspect the illustrative comparable evidence. The home itself is not a completed-sale comparable.'));
 }
+function updateZoom(){
+ $('#district-art').style.setProperty('--map-zoom',String(zoom));
+ all('#map-pins .map-pin').forEach(function(pin){
+  var x=Number(pin.dataset.baseX),y=Number(pin.dataset.baseY);
+  pin.style.left=(50+(x-50)*zoom)+'%';pin.style.top=(50+(y-50)*zoom)+'%';
+ });
+}
 function select(id){selected=id;all('.map-pin').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.marker===id))});renderEvidence()}
 function toggleMobile(mode){var grid=$('#investigation-grid');grid.classList.toggle('mobile-map',mode==='map');grid.classList.toggle('mobile-list',mode==='list');all('[data-mobile]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mobile===mode))})}
 function switchShortlist(mode){all('[data-shortlist-mode]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.shortlistMode===mode))});$('#compare-table').hidden=mode!=='table';$('#compare-map').hidden=mode!=='map'}
@@ -138,9 +145,9 @@ all('[data-shortlist-mode]').forEach(function(b){b.addEventListener('click',func
 all('[data-open-property]').forEach(function(b){b.addEventListener('click',function(){current=b.dataset.openProperty;showView('investigation')})});
 $('#go-shortlist').addEventListener('click',function(){showView('shortlist')});$('#workspace-investigate').addEventListener('click',function(){showView('investigation')});$('#workspace-shortlist').addEventListener('click',function(){showView('shortlist')});$('#method-link').addEventListener('click',function(){showView('methodology')});
 $('#swap-property').addEventListener('click',function(){current=current==='a'?'b':'a';renderProperty()});
-$('#map-zoom-in').addEventListener('click',function(){zoom=Math.min(1.4,Math.round((zoom+.1)*10)/10);$('#district-art').style.setProperty('--map-zoom',String(zoom))});
-$('#map-zoom-out').addEventListener('click',function(){zoom=Math.max(1,Math.round((zoom-.1)*10)/10);$('#district-art').style.setProperty('--map-zoom',String(zoom))});
-$('#map-fit').addEventListener('click',function(){zoom=1;$('#district-art').style.setProperty('--map-zoom','1')});
+$('#map-zoom-in').addEventListener('click',function(){zoom=Math.min(1.4,Math.round((zoom+.1)*10)/10);updateZoom()});
+$('#map-zoom-out').addEventListener('click',function(){zoom=Math.max(1,Math.round((zoom-.1)*10)/10);updateZoom()});
+$('#map-fit').addEventListener('click',function(){zoom=1;updateZoom()});
 all('.shortlist-card textarea').forEach(function(t){t.addEventListener('input',function(){var state=t.id==='notes-a'?'#note-a-state':'#note-b-state';text(state,'Draft in this page only. Not saved to SQLite or a user account.');})});
 theme('editorial');showView('investigation');toggleMobile('map');switchShortlist('table');
 })();
