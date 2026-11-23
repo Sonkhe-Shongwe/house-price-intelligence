@@ -5,21 +5,19 @@ addresses, user identities or sale records in this fixture.
 """
 from __future__ import annotations
 
-from pathlib import Path
 import sqlite3
 
+from backend.schema_migrations import CURRENT_SCHEMA_VERSION, migrate_fixture
 from backend.synthetic_investigation_store import SyntheticInvestigationStore
 
 SUBJECT_PIN = "00000000000001"
 BUILD_ID = "synthetic-build"
-SCHEMA = Path(__file__).with_name("schema_draft.sql")
 
 
-def in_memory_demo() -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
+def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
     conn = sqlite3.connect(":memory:")
     try:
-        conn.executescript(SCHEMA.read_text(encoding="utf-8"))
-        conn.execute("PRAGMA foreign_keys = ON")
+        migrate_fixture(conn, target_version=schema_version)
         for snapshot, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                                ("geo-snap", "geography")):
             conn.execute(
