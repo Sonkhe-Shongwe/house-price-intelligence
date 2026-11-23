@@ -92,6 +92,10 @@ def active_handoff_errors(root: Path):
     Passing this check does NOT establish full factual accuracy.
     """
     required = {
+        "README.md": ("--fixture-db", "PRs #5 and #6"),
+        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.4", "two-to-three-property shortlist"),
+        "docs/ROADMAP.md": ("P6 two-to-three-property shortlist", "22.8%"),
+        "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md",),
         "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),
         "frontend/README.md": ("POST /v1/addresses/search", "105 Fictional Court", "building_identity_verified"),
         "docs/engineering/P3_APPLICATION_CONTRACT.md": (
@@ -102,6 +106,11 @@ def active_handoff_errors(root: Path):
         "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8"),
     }
     forbidden = {
+        "README.md": ("not a public service or durable shortlist",),
+        "frontend/README.md": ("**The in-memory data disappear on shutdown**", "7 actual Chromium browser journeys"),
+        "docs/ROADMAP.md": ("durable persistence and P6 shortlist/compare remain ahead",),
+        "docs/P_PHASE_ROADMAP.md": ("no production database, real-data property API, accepted buyer UI, durable multi-property shortlist or deployment exists",),
+        "docs/engineering/P3_APPLICATION_CONTRACT.md": ("The server uses in-memory SQLite: **no restart persistence** and no completed P6 shortlist",),
         "docs/GITHUB_SETUP.md": ("Code changes are committed to `main`", "git pull --ff-only origin main"),
         "frontend/README.md": ("**Not implemented:** trusted address search",),
         "docs/ROADMAP.md": ("127 patched tests, not committed",),
