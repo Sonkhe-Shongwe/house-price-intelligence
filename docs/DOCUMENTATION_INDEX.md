@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
+| Inspect latest documentation cleanup | [Post-P6 documentation reconciliation audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) | **Dated audit**, current-source corrections, unchanged phase scores, unresolved mapping and release gates; not another current checkpoint |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 22.8% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
@@ -31,7 +32,7 @@
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.
-- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current overall weighted baseline is **22.8%**, with P3 integration review and acceptance next. Passing the three audit experiments does not mean delivery P0/P1/P2 are accepted or finished.
+- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The official recorded weighted baseline remains **22.8%**. P3 contract acceptance is open, while P4/P5/P6 *synthetic implementations* are CI-verified and integrated into `development`, not phase-accepted. Passing the Phase 0–2 data experiments does not mean delivery P0/P1/P2 are accepted or finished.
 
 ## Document precedence and maintenance
 
@@ -48,6 +49,6 @@
 
 **Working method:** The single permanent `development` branch receives authorised code/docs and hosted checks. Stable `main` receives milestone changes only through explicitly approved integration PRs. [Workflow](engineering/CLOUD_FIRST_WORKFLOW.md). No routine direct-to-main commits.
 
-**Current capability boundary:** Synthetic local address search, explicit same-street parcel choice, source-bound investigation, exact-decimal comparable prices, v1–v3 versioned SQLite fixtures, opt-in restart-safe frozen investigations, and two-to-three-property shortlist with notes/comparison are CI-tested on `development` after approved PRs #5 and #6. This is **not an owner-accepted P3–P6 or released application**. There is no real-address resolver, real property display permission, production database, accepted visual UX or deployment. See the [current P3 contract](engineering/P3_APPLICATION_CONTRACT.md). The original locally tested Windows safety patch was separate historical work; PR #3 independently merged the frozen comparable integrity safeguard.
+**Current capability boundary:** Synthetic local address search, explicit same-street parcel choice, source-bound investigation, exact-decimal comparable prices, v1–v3 versioned SQLite fixtures, opt-in restart-safe frozen investigations, and two-to-three-property shortlist with notes/comparison are CI-tested on `development` after approved PRs #5 and #6. This is **not owner-accepted P3–P6 or a released application**. There is no verified map UI/coordinate contract: all six original fictional parcel positions overlap. There is no real-address resolver, real property display permission, production database, accepted visual UX or deployment. See the [current P3 contract](engineering/P3_APPLICATION_CONTRACT.md). The original locally tested Windows safety patch was separate historical work; PR #3 independently merged the frozen comparable integrity safeguard.
 
 **Phase scores:** P3 **10%**, weighted MVP **22.8%**, unchanged until relevant owner acceptance. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.
