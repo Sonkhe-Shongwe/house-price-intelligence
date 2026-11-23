@@ -1,6 +1,6 @@
 # House Price Intelligence
 
-**Status reviewed 23 November 2026: research engines verified; synthetic-only P3 application integrated for review, not yet accepted or deployed.** Current planning stage: **P3, product architecture and API contracts**. The bounded portfolio-MVP progress baseline is **22.8%**, a subjective weighted estimate, not a measurement of code completion.
+**Status reviewed 23 November 2026:** Research phases 0–2 were verified in their dated audits. Owner-authorised PRs #5 and #6 integrated the **fictional-only P3/P4/P5/P6 application slice into `development`**: persisted local investigations, notes and two-to-three-property shortlists, plus browser comparison. The [verified application merge](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/44e278f5ff68475616d889d2c7fafd0b5b3c6304) passed **172 Python and 9 real Chromium tests**, JavaScript and documentation checks. **No P3–P8 phase exit, public release, visual design or real property display is accepted.** The official **22.8%** is a subjective weighted *acceptance baseline*, not a measure of code already implemented; review the [current checkpoint](docs/CHECKPOINT.md) for newer status.
 
 House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. It is an original Investigate / Compare / Decide workspace, not a copied property listings marketplace; the supported geography should be selected by verified data quality and rights, not nationality. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API/database, approved public-data frontend or deployed service exists.** A local, invented-data HTTP/SQLite/browser investigation slice is included for engineering review.
 
@@ -33,14 +33,17 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Roadmap summary](docs/ROADMAP.md) | Concise percentage table |
 | [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
 | [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
-| [UX research and product direction](docs/design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | Design research, competitor references, visual studies, screen IA and open design decisions; **not approved UI** |
+| [UX research and product direction](docs/design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | Exploratory screen hierarchy and visual concepts; **not approved UI** |
+| [Visual Foundation V1 proposal](docs/design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | Proposed professional visual foundation and open frontend stack choices; no redesign authorised |
+| [Professional UI and mapping research](docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) | Map renderer, geometry integrity, tile rights/CSP/cost, premium interface risks and test gates |
+| [P6 shortlist contract](docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | Integrated fictional-only shortlist, notes and side-by-side comparison; phase acceptance pending |
 | [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step feature lifecycle, risk-based tests, safe large changes and phase-governed integration |
 | [Cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) | Permanent `development`, stable `main`, automated versus manual acceptance and controlled milestone merges |
 | [Cloud-first documentation audit](docs/reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md) | Dated audit of the new operating model; not a second checkpoint |
 | [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
 | [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
-| [Latest continuity/directive audit](docs/reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | Verified versus isolated evidence, grey areas, product scope, maps and new-tab handoff |
+| [Earlier continuity/directive audit](docs/reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | Historical risk review, partially superseded by later integration and mapping research |
 | [Earlier process audit](docs/reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Dated engineering directive adoption and prior status review |
 | [Previous documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Retained historical cleanup findings |
 
@@ -52,7 +55,7 @@ The repository also retains the original [pinnacle vision](docs/product/PINNACLE
 
 **Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline application CI workflow](.github/workflows/audit-tests.yml) checks research and synthetic application tests, JavaScript, docs and genuine Chromium against the fixture-only local API on `development` and `main` pushes and PRs targeting `main`. Costly real-data audits remain separately restricted.
 
-**Fixture-only demo:** `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repo root, then open `http://127.0.0.1:8765/`. Run `python tools/dev_check.py` for no-dependency checks. The current `development` browser provides **fictional address search, explicit ambiguous parcel choice, server-bound investigation and saved evidence reopen**. It is an in-memory local demonstration, not a public service or durable shortlist. Earlier isolated Windows patch evidence is historical; its contents were not automatically imported. [Current verified status](docs/CHECKPOINT.md).
+**Fixture-only demo:** Run `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repo root, then open `http://127.0.0.1:8765/`. Run `python tools/dev_check.py` for dependency-free checks. The browser supports fictional address search, explicit ambiguous parcel choice, frozen investigations, saved **two-to-three-property shortlists, editable notes and side-by-side evidence**. The default database is **in-memory and temporary**. For opt-in restart persistence on this machine only, add `--fixture-db ./local-fictional-demo.sqlite` to the server command. No accounts, encryption or public access are provided. Do not enter personal or real property information. [Backend setup](backend/README.md), [frontend workflow](frontend/README.md) and [current checkpoint](docs/CHECKPOINT.md).
 
 Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.md), [Phase 1](audit/phase1/README.md), [Phase 2](audit/phase2/README.md) and [Windows Git setup](docs/GITHUB_SETUP.md). Never commit extracted datasets, private user data, personal names, API tokens or generated property-level output. See [data handling](data/README.md).
 
@@ -60,7 +63,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next (P3):** Review the **already-implemented synthetic-only** identity, exact-money, evidence, ERD and v1–v3 migration contracts via [P3.1–P3.11](docs/P_PHASE_ROADMAP.md); record which are accepted only for fixtures and what remains blocked for real-market data. In parallel establish a rights-approved first-market decision. Then deliver durable P4/P5 backend/browser capabilities and the P6 two-to-three-property shortlist in integrated slices. A tested fictional address-to-investigation flow does **not** satisfy production P4/P5, source rights or P3 exit approval.
+**Next:** Consolidated P3–P6 synthetic capabilities are **implemented and CI-verified on `development`**, but their phase exits remain unaccepted. Conduct the [P3.1–P3.11](docs/P_PHASE_ROADMAP.md) fixture-versus-production contract review; independently resolve source rights, real property identity, time validity, persistence/access and phase acceptance. In parallel, review high-fidelity UI/map research and conduct a **clearly fictional, non-geographic schematic map/list interaction proof** before adopting a basemap, frontend framework or changed map API. Do not infer real-world map accuracy: today's six invented parcels share the same fixture coordinates. `main` remains protected by owner merge decisions; no deployment is authorised.
 
 **Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 
