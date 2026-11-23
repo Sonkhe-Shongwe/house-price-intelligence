@@ -32,6 +32,8 @@
 
 - **23 November 2026, `development` `79a7c4d`:** Candidate synthetic investigation contract `p3-draft-v0.3` now carries an optional fictional-address ID which the server binds to a trusted synthetic parcel, with 422 on mismatch; comparable HTTP prices are fixed-scale USD text derived from exact SQLite cents, not JSON floats. [Push CI 45196929621](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45196929621) passed 137 Python + 6 hosted Chromium cases. This **does not settle real address identity, real-data source rights, approved commercial pricing or production migrations**. Provisional until owner P3 acceptance. Still in draft PR #4.
 
+- **23 November 2026, `development` `8ed4269`:** Candidate v1/v2 synthetic SQLite migration runner added with hash and version checks, rollback, no unversioned adoption and populated-database upgrade tests. The [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) contains the proposed domain ERD and distinct identity grains. [Push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) and [PR CI 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) passed 144 Python and 6 Chromium tests. No production database, backup, real address identity or P3 gate acceptance has been approved.
+
 ## Open decisions, with next acceptance point
 
 | Question | Needed evidence or approval | Gate |
@@ -44,7 +46,8 @@
 | Which buyer entry and property identity? | Address/parcel/building resolution and real supported market; technical 14-digit PIN is not final consumer entry | P3 |
 | What would a responsible map require? | Coordinate source/accuracy, provider/tile rights, attribution, restrictive CSP/referrer compatibility, keyboard/table alternative | P3/P5 |
 | Backend framework, database, frontend and hosting? | Reviewed P3 contract and deployment constraints; no precommitment | P3 |
-| How are saved investigations versioned and accessed? | Identity/security, snapshot and persistence design | P3/P6 |
+| How are saved investigations versioned and accessed? | Identity/security, snapshot and persistence design; fixture-only schema upgrade is tested, but user access is undecided | P3/P6 |
+| Which production database migration, recovery and retention policy? | Synthetic SQLite migration runner and rollback are verified only for disposable fixtures; production DB, backup/restore, retention, access and historical source identity remain to be selected and approved | P3/P4/P7 |
 | Can price prediction be shipped? | Untouched chronological holdout, acceptable baseline comparisons, uncertainty | Post-MVP, conditional |
 | Should repository remain public? | Repository risk review and owner choice; currently reported public | P7 |
 | What should the application look and feel like? | Refine promising workspace-first idea, compare visual directions, accessibility, responsive information density and buyer tasks; **no palette or final style approved** | [Exploratory UX study](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md); P3/P5 |

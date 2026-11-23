@@ -87,6 +87,51 @@ Added at [`79a7c4d`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/
 
 The **pure Phase 2 matcher** remains numerically unchanged for research. The direct `build_investigation` *research adapter* retains its dated v0.2 fixture and numeric `sale_price` for compatibility; the SQLite-backed HTTP envelope performs the v0.3 conversion. The API is a synthetic demonstration, not an approved general-currency/production money contract. Do not use any of these fictional records as real property evidence.
 
+## Proposed domain ERD and controlled fixture migration
+
+**Source:** `backend/schema_draft.sql` and `backend/schema_migrations.py`, added to permanent `development` at [8ed4269](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8ed4269af18e42add85726ae0fd45e406b8019c4). This is a *synthetic-only candidate*, not the approved production model. The baseline has 16 application/fixture tables, and the version runner adds an independent `schema_migrations` table.
+
+```mermaid
+erDiagram
+    SOURCE_SNAPSHOTS ||--o{ CURATED_BUILD_SOURCES : supplies
+    CURATED_BUILDS ||--o{ CURATED_BUILD_SOURCES : includes
+    CURATED_BUILDS ||--o{ CURATED_BUILD_TRANSACTIONS : selects
+    SALE_TRANSACTIONS ||--o{ CURATED_BUILD_TRANSACTIONS : belongs_to
+    SOURCE_SNAPSHOTS ||--o{ SALE_TRANSACTIONS : records
+    SALE_TRANSACTIONS ||--o{ SALE_TRANSACTION_PARCELS : links
+    PARCELS ||--o{ SALE_TRANSACTION_PARCELS : participates_in
+    PARCELS ||--o{ BUILDINGS : may_contain
+    PARCELS ||--o{ ASSESSMENT_RECORDS : observed_by
+    BUILDINGS |o--o{ ASSESSMENT_RECORDS : optional_identity
+    SOURCE_SNAPSHOTS ||--o{ ASSESSMENT_RECORDS : supplies
+    PARCELS ||--o{ PARCEL_GEOGRAPHIES : located_by_year
+    SOURCE_SNAPSHOTS ||--o{ PARCEL_GEOGRAPHIES : supplies
+    PARCELS ||--o| SYNTHETIC_ADDRESS_INDEX : fictional_only
+    CURATED_BUILDS ||--o{ INVESTIGATIONS : frozen_build
+    PARCELS |o--o{ INVESTIGATIONS : optional_subject
+    INVESTIGATIONS ||--o{ COMPARABLE_EVIDENCE : preserves
+    SALE_TRANSACTIONS ||--o{ COMPARABLE_EVIDENCE : selected_record
+    INVESTIGATIONS ||--|| INVESTIGATION_RESULTS : frozen_response
+    SHORTLISTS ||--o{ SHORTLIST_INVESTIGATIONS : contains
+    INVESTIGATIONS ||--o{ SHORTLIST_INVESTIGATIONS : belongs_to
+```
+
+| Entity/grain | What it means | What cannot be inferred |
+| --- | --- | --- |
+| Parcel PIN | 14-digit parcel identity, with leading zeroes | The parcel contains one building, or had one residential sale |
+| Building | Optional physical building identity belonging to a parcel | A historical assessment card identifies a verified building |
+| Assessment record | Snapshot, parcel, tax year, card combination | Publisher data were available on the sale date |
+| Sale transaction and transaction-parcel link | One source sale with zero or more parcel links; a transaction can link multiple parcels | A multi-parcel transaction's full price belongs to each parcel |
+| Curated evidence build | Explicit source snapshots and role membership | All sources were independently historically available |
+| Investigation and selected evidence | Buyer enquiry, source-bound transaction and frozen response | An appraisal, live listing, or current valuation |
+| Fictional address index | Deliberately invented one-to-one address-to-PIN browser fixture | Real address-to-building-to-parcel cardinality, coverage or usage rights |
+
+**Provisional SQLite migration contract:** The existing `schema_draft.sql` becomes the immutable v1 fixture script. Numbered `migrations/0002_fixture_query_indexes.sql` adds three relational query indexes. The runner requires foreign keys, contiguous recorded history, valid script SHA-256 hashes and matching SQLite `PRAGMA user_version`. It applies DDL and history updates inside an explicit transaction, rejects unknown existing databases, refuses downgrades and rolls back a failed migration. Existing data and a saved synthetic investigation survive a tested v1-to-v2 upgrade.
+
+[GitHub Actions PR run 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) passed **144 Python tests** and **6 real Chromium journeys**, including 7 new fixture migration checks. The corresponding [development push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) also passed.
+
+**P3 acceptance still open:** The team must review the true parcel/building/address relationship for a rights-approved first market, choose the production SQL/migration/backup policy, validate historical availability and provenance, approve the money and endpoint contracts, and review privacy/security. The fixture-only runner is **not** a production migration, backup solution, publicly served dataset or release authorisation.
+
 ## Verification and remaining acceptance
 
 **Verified in the isolated integration workspace before publication:** 12 Phase 0 tests, 12 Phase 1 tests, 14 Phase 2 tests, 4 aggregate-export tests and 83 P3 application tests: **125 Python tests passing locally** on Python 3.13. JavaScript syntax and local HTTP GET/POST/persist/reopen paths passed. The local test report alone was not GitHub CI evidence. Independent inspection now confirms [run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed 125 committed tests plus documentation checks on Python 3.12 at [`e8b8f70`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/e8b8f70de2bb10fd61b9cec9cc1d12aabdc6cfef). It does not include the separately prepared uncommitted reopen-guard patch. Chromium graphical browser execution was blocked by administrator policy and remains unverified.

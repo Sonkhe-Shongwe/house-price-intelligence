@@ -4,7 +4,17 @@
 **Repository:** [Sonkhe-Shongwe/house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). Stable `main` verified at `103c854eae36a0a0fa81bb007b71ebadc52179d6` with [passing CI 45184193870](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45184193870). Permanent working branch: `development`, created from that revision. Verify HEAD and CI again before next work.  
 **Active stage:** P3 product architecture/contracts, **10% estimated complete**; **22.8% estimated weighted MVP progress**. P3 exit gate remains **open**; no progress added by design discussion or docs.
 
-## Latest verified P3 refinement on `development`: trusted selection and exact-money output (23 November 2026)
+## Latest P3 candidate: versioned fixture migrations and proposed domain ERD (23 November 2026)
+
+**Code:** [`8ed4269`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8ed4269af18e42add85726ae0fd45e406b8019c4) on the ongoing `development` branch and [draft PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4). [Push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) and [PR CI 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) both passed: **144 Python tests**, JavaScript syntax, documentation and **6 hosted Chromium** tests.
+
+**Delivered candidate:** The existing synthetic-only 16-table `schema_draft.sql` is treated as immutable v1; `schema_migrations.py` adds checked version history, the v2 relational indexes, explicit transaction rollback, refusal of unversioned/unknown databases, and seven tests including a populated v1-to-v2 upgrade that reopens the original frozen evidence unchanged. The disposable application now starts using the controlled migration runner. The [existing P3 contract](engineering/P3_APPLICATION_CONTRACT.md) includes the proposed relational ERD and clearly separates parcels, buildings, cards, transactions, curated builds, fictional addresses and buyer investigations.
+
+**Not accepted:** Real address/parcel/building identity, historically available data, source rights, production persistence/migrations, backup and user security remain open. No P3 exit gate or real-data release decision has changed. **Progress: P3 10%, weighted MVP 22.8%, unchanged.** Stable `main` remains at `103c854`.
+
+## Previous P3 refinement on `development`: trusted selection and exact-money output (23 November 2026)
+
+
 
 **Source:** [`79a7c4d`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/79a7c4dfcb0e1c2e1543b138539c28aa5a118eae), on permanent `development`. [Push CI 45196929621](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45196929621) passed **137 Python tests**, JavaScript and documentation validation and **6 real Chromium browser journeys**. This change is included in ongoing [draft PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4) and is **not merged into stable `main`**.
 

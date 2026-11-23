@@ -1,21 +1,21 @@
-# Backend: synthetic-only property investigation slice
+# Backend: synthetic-only investigation service
 
-**Status (22 November 2026):** An owner-authorised P3 integration provides a **fixture-only**, stdlib Python and SQLite investigation flow. It is **not** a production backend, real-source ingestion, approved public API, authenticated service or price model.
+**Current candidate: 23 November 2026.** Python standard library, SQLite, WSGI, HTML/CSS/JS. This is a local fictional-data investigation prototype, **not** a production API, an authorised public property database or an appraisal.
 
-- `investigation_contract.py`: validated subject input and four evidence statuses, with a no-valuation policy.
-- `schema_draft.sql`: 15-table relational *draft* separating parcels, historical records, sale transactions, source builds and saved investigations. It is not an accepted production migration.
-- `synthetic_investigation_store.py`: PIN resolution, historical-match orchestration and transactional save/reopen in a curated synthetic build.
-- `synthetic_http.py` / `run_synthetic_api.py`: restricted localhost HTTP endpoints and fixed frontend assets.
-- `synthetic_demo.py`: invented in-memory dataset; no publisher records or personal data.
+- `investigation_contract.py`: validates buyer-entered enquiry fields and four evidence statuses; buyer asking price is user reported.
+- `synthetic_investigation_store.py`: server-bound fictional address selection, curated source joins, exact sale-price strings from integer cents, saved results and tamper-checked reopening.
+- `synthetic_http.py` and `run_synthetic_api.py`: loopback-only HTTP boundary with no real-source publication.
+- `schema_draft.sql`: **frozen fixture-only v1 baseline** of 16 domain/fixture tables. It is not an approved production DDL. Do not change this v1 script in place after versioning: add a numbered migration.
+- `schema_migrations.py` and `migrations/0002_fixture_query_indexes.sql`: fixture v1-to-v2 upgrade with SHA-256 history, SQLite user-version checks, foreign-key verification, explicit DDL rollback and refusal of unknown unversioned databases. Version history adds one control table, `schema_migrations`.
+- `synthetic_demo.py`: creates a disposable in-memory v2 fixture by default; tests can initialise v1 and upgrade it, retaining saved evidence.
 
-Run an explicitly opted-in disposable demo from the repository root:
+From the repository root, run only for local, synthetic-only acceptance:
 
 ```bash
 python -m backend.run_synthetic_api --fixture-only --port 8765
+python tools/dev_check.py --focus app
 ```
 
-Then open `http://127.0.0.1:8765/`. The process binds only to loopback, has no public auth, and must **never** be deployed or given real records. Saved fixture investigations vanish on shutdown.
+Open http://127.0.0.1:8765/ locally. Nothing is persisted after process shutdown and the service must not be deployed or given real publisher records. Automated tests run in GitHub Actions on the permanent `development` branch. Fixture migrations are an engineering candidate, not the accepted production backup/restore, source-ingestion or user-identity plan.
 
-For fast checks run `python tools/dev_check.py --focus app`, or `python tools/dev_check.py` for all research and application suites. The later **isolated patched** Windows checkout passed 127 Python tests and genuine synthetic graphical browser/database acceptance, but that patch and its two extra Python regressions remain **uncommitted**. Current GitHub CI has 125 tests and no committed Playwright acceptance. P3 domain/input/technology decisions remain subject to review.
-
-See the [current P3 contract](../docs/engineering/P3_APPLICATION_CONTRACT.md), [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md), [lean directive](../docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) and [checkpoint](../docs/CHECKPOINT.md).
+See the [single current P3 contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md), [current checkpoint](../docs/CHECKPOINT.md), and [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md).
