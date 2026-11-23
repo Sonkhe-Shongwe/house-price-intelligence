@@ -95,6 +95,13 @@ jobs:
               assert not errors, f'Page errors: {errors}'
               browser.close()
           PY
+      - name: Archive verified dependencies for isolated full-source validation
+        if: always()
+        run: |
+          if [ -d toolchain-proof/node_modules ]; then
+            tar -C toolchain-proof -czf toolchain-proof/node_modules-ci-linux-x64.tgz node_modules
+            ls -lh toolchain-proof/node_modules-ci-linux-x64.tgz
+          fi
       - name: Attach build, lockfile and visual smoke result
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,6 +109,7 @@ jobs:
           name: hpi-maplibre-toolchain-${{ github.run_id }}
           path: |
             toolchain-proof/package-lock.json
+            toolchain-proof/node_modules-ci-linux-x64.tgz
             toolchain-proof/dist/**
             toolchain-proof/react-maplibre-compat.png
             toolchain-proof/preview.log
