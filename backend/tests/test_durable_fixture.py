@@ -87,7 +87,7 @@ class DurableFixtureTests(unittest.TestCase):
                 "UPDATE source_snapshots SET dataset_id='non-synthetic-source' "
                 "WHERE snapshot_id='sale-snap'"
             )
-        with self.assertRaisesRegex(FixturePersistenceError, "not the original synthetic"):
+        with self.assertRaisesRegex(FixturePersistenceError, "trusted seed"):
             open_file_demo(self.path)
 
     def test_tampered_underlying_sale_is_not_reopened_after_restart(self):
