@@ -6,7 +6,7 @@
 
 The owner adopted the [Lean Engineering and Delivery Directive](LEAN_ENGINEERING_DIRECTIVE.md) on 22 November 2026. **Default to the simplest correct modular implementation, one authoritative codebase, small fully connected user features, clear typed boundaries, database constraints, fast targeted tests and CI on authorised integration.** Avoid uncontrolled prototype proliferation, speculative frameworks, redundant tests and repeated documentation. Maintain all data-provenance, security, historical-evidence and approval gates below; speed never overrides them.
 
-**Technology choices are proposed, not silently decided:** Evaluate Python modular monolith, SQLite, plain HTML/CSS/JavaScript, optional FastAPI/Pydantic, Ruff and limited browser automation against real needs. Do not imply approval to install dependencies, train models or deploy.
+**Technology choices are proposed, not silently decided:** The current Python/SQLite + HTML/CSS/JavaScript synthetic application is a verified implementation, not a fixed frontend requirement or a production architecture approval. The owner wants **exceptional visual and interaction quality** and has explicitly allowed comparing React/TypeScript, Vue, Svelte, modern vanilla tools and mapping technology if the benefit is demonstrated. Preserve the server-owned evidence contract; do not imply approval to install new dependencies, expose tiles, train models or deploy. See [Visual Foundation V1](../design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) and [mapping research](../design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md).
 
 ## Data invariants
 
