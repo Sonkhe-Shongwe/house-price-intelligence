@@ -48,7 +48,7 @@ jobs:
             const [selected,setSelected]=useState(false);const [vector,setVector]=useState(false);const [status,setStatus]=useState('svg');const mapElement=useRef<HTMLDivElement>(null);
             useEffect(()=>{
               if(!vector)return;
-              if(!mapElement.current || !maplibregl.supported()){setStatus('fallback');return;}
+              if(!mapElement.current){setStatus('fallback');return;}
               let map:maplibregl.Map;
               try{map=new maplibregl.Map({container:mapElement.current,style:inlineStyle,center:[0,0],zoom:12,scrollZoom:false,dragRotate:false,attributionControl:false});map.on('load',()=>setStatus('ready'));map.on('error',()=>setStatus('fallback'));}
               catch{setStatus('fallback');return;}
