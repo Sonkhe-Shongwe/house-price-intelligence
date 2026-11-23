@@ -69,6 +69,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hpi-visual-study-${{ github.run_id }}
-          path: ${{ runner.temp }}/hpi-visual-preview/*.png
+          path: |
+            ${{ runner.temp }}/hpi-visual-preview/*.png
+            design-prototypes/map-evidence-studio.html
           if-no-files-found: warn
           retention-days: 7
