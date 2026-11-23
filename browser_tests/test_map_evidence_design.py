@@ -4,6 +4,7 @@ These checks do not replace the browser->HTTP->SQLite acceptance tests and do
 not approve a final visual identity, geographic parcel map or framework.
 """
 from pathlib import Path
+import os
 import unittest
 from playwright.sync_api import sync_playwright, expect
 
@@ -132,6 +133,24 @@ class MapEvidenceVisualStudyTests(unittest.TestCase):
         expect(self.page.locator(".map-caption")).to_contain_text("No geographic measurements")
         self.page.locator('.topnav [data-view="shortlist"]').click()
         expect(self.page.locator("#compare-table")).to_contain_text("Not produced")
+
+
+    def test_capture_review_screenshots_if_requested(self):
+        folder = os.environ.get("HPI_DESIGN_SCREENSHOTS")
+        if not folder:
+            self.skipTest("Screenshots are captured only in authorised CI review")
+        output = Path(folder)
+        output.mkdir(parents=True, exist_ok=True)
+        self.page.screenshot(path=str(output / "01-editorial-desktop.png"), full_page=True)
+        self.page.locator('[data-theme-option="precision"]').click()
+        self.page.screenshot(path=str(output / "02-intelligence-desktop.png"), full_page=True)
+        self.page.locator('[data-theme-option="editorial"]').click()
+        self.page.set_viewport_size({"width": 375, "height": 812})
+        self.page.screenshot(path=str(output / "03-editorial-mobile.png"), full_page=True)
+        self.page.set_viewport_size({"width": 1440, "height": 900})
+        self.page.locator('.topnav [data-view="shortlist"]').click()
+        self.page.screenshot(path=str(output / "04-shortlist-desktop.png"), full_page=True)
+
 
 
 if __name__ == "__main__":
