@@ -176,6 +176,59 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
         self.assertEqual(reopened.value.status, 200)
         self.assertEqual(reopened.value.json(), result)
 
+    def test_address_search_selection_investigation_and_reopen(self):
+        self.page.goto(self.base_url + "/")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+            and response.request.method == "POST"
+        ) as search:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(search.value.status, 200)
+        self.assertEqual(len(search.value.json()["candidates"]), 4)
+        expect(self.page.locator("#address-results .address-option")).to_have_count(4)
+        expect(self.page.locator("#pin")).to_have_value("")
+        with self.page.expect_response(
+            lambda response: "/v1/addresses/fictional-1" in response.url
+        ) as choice:
+            self.page.get_by_role("button", name="101 Fictional Way, Demonstration District").click()
+        self.assertEqual(choice.value.status, 200)
+        expect(self.page.locator("#pin")).to_have_value("00000000000001")
+        expect(self.page.locator("#selected-address")).to_contain_text("101 Fictional Way")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+            and response.request.method == "POST"
+        ) as saved:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(saved.value.status, 201)
+        self.assertEqual(saved.value.json()["selected_count"], 3)
+        expect(self.page.locator("#comparables .comp")).to_have_count(3)
+        investigation_id = saved.value.json()["investigation_id"]
+        reopened = self.context.new_page()
+        with reopened.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations/" + investigation_id
+        ) as original:
+            reopened.goto(self.base_url + "/#investigation/" + investigation_id)
+        self.assertEqual(original.value.json(), saved.value.json())
+
+    def test_no_address_match_does_not_guess_or_investigate_old_pin(self):
+        self.page.goto(self.base_url + "/")
+        self.page.locator("#address-query").fill("Nonexistent Imaginary Road")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ) as search:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(search.value.json()["status"], "no_match")
+        expect(self.page.locator("#address-search-feedback")).to_contain_text("No invented address matched")
+        expect(self.page.locator("#address-results .address-option")).to_have_count(0)
+        expect(self.page.locator("#pin")).to_have_value("")
+        posted = []
+        self.page.on("request", lambda request: posted.append(request.url)
+                     if request.url == self.base_url + "/v1/investigations"
+                     and request.method == "POST" else None)
+        self.page.locator("#submit-button").click()
+        self.assertEqual(posted, [])
+        expect(self.page.locator("#result-state")).to_have_text("AWAITING INVESTIGATION")
+
     def test_invalid_asking_price_does_not_send_a_request(self):
         self.page.goto(self.base_url + "/")
         self.page.locator("#price").fill("not-a-price")

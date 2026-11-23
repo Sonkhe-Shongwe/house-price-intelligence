@@ -44,6 +44,15 @@ def in_memory_demo() -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
                              (txn, "sale-snap", f"row-{idx}", f"DOC-{idx}", "2024-02-01", 52500000))
                 conn.execute("INSERT INTO sale_transaction_parcels VALUES(?,?)", (txn, pin))
                 conn.execute("INSERT INTO curated_build_transactions VALUES (?,?)", (BUILD_ID, txn))
+        # Every label below is fictional. The index is populated only inside
+        # the disposable in-memory fixture, never from a publisher dataset.
+        for idx in range(1, 5):
+            conn.execute(
+                "INSERT INTO synthetic_address_index VALUES (?,?,?,?)",
+                (f"fictional-{idx}", f"{idx:014d}",
+                 f"{100 + idx} Fictional Way, Demonstration District",
+                 f"{100 + idx} fictional way demonstration district"),
+            )
         conn.commit()
         return conn, SyntheticInvestigationStore(conn, build_id=BUILD_ID)
     except Exception:

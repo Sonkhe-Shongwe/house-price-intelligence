@@ -10,6 +10,8 @@
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
   const currency = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2});
   let lastInvestigation = null;
+  let addressSearchRevision = 0;
+  let addressSelectionRevision = 0;
 
   function text(node, value) { node.textContent = value == null ? '' : String(value); }
   function element(tag, className, content) {
@@ -137,6 +139,82 @@
     return body;
   }
 
+  // Search returns only possible fictional addresses, never an inferred PIN.
+  // A second request resolves an explicitly selected address ID server-side.
+  const addressForm = id('address-search-form');
+  const addressResults = id('address-results');
+  const addressFeedback = id('address-search-feedback');
+  const selectedAddress = id('selected-address');
+  const addressButton = id('address-search-button');
+  function resetAddressSelection() {
+    addressSelectionRevision += 1;
+    selectedAddress.hidden = true;
+    text(selectedAddress, '');
+  }
+  id('pin').addEventListener('input', resetAddressSelection);
+
+  addressForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const query = id('address-query').value.trim();
+    const revision = ++addressSearchRevision;
+    resetAddressSelection();
+    id('pin').value = ''; // Do not silently investigate a previous subject.
+    clear(addressResults);
+    addressResults.hidden = true;
+    addressButton.disabled = true;
+    text(addressFeedback, 'Searching fictional addresses…');
+    try {
+      const response = await requestJson('/v1/addresses/search', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({query})
+      });
+      if (revision !== addressSearchRevision) return;
+      if (response?.source_kind !== 'synthetic_fixture' || !Array.isArray(response.candidates)) {
+        throw Error('Unexpected address source. No property was selected.');
+      }
+      if (response.candidates.length === 0) {
+        text(addressFeedback, 'No invented address matched. Try Fictional Way or enter a synthetic PIN.');
+        return;
+      }
+      text(addressFeedback, response.candidates.length + ' fictional address option(s). Select one. No automatic identity guess.');
+      for (const candidate of response.candidates) {
+        if (typeof candidate.address_id !== 'string' || typeof candidate.display_address !== 'string') {
+          throw Error('Address search returned an invalid candidate.');
+        }
+        const option = element('button', 'address-option', candidate.display_address);
+        option.type = 'button';
+        option.addEventListener('click', async () => {
+          const selectionRevision = ++addressSelectionRevision;
+          text(addressFeedback, 'Resolving the selected fictional address…');
+          try {
+            const resolved = await requestJson('/v1/addresses/' + encodeURIComponent(candidate.address_id));
+            if (selectionRevision !== addressSelectionRevision || revision !== addressSearchRevision) return;
+            if (resolved?.source_kind !== 'synthetic_fixture'
+                || resolved?.identity_status !== 'synthetic_mapping_only'
+                || resolved.address_id !== candidate.address_id
+                || !/^\d{14}$/.test(resolved.pin)) {
+              throw Error('The selected address did not resolve to a synthetic parcel.');
+            }
+            id('pin').value = resolved.pin;
+            id('label').value = resolved.display_address.slice(0, 120);
+            selectedAddress.hidden = false;
+            text(selectedAddress, 'Selected: ' + resolved.display_address + ' (fictional address)');
+            text(addressFeedback, 'Property selected. Review your inputs and investigate.');
+            clear(addressResults);
+            addressResults.hidden = true;
+          } catch (error) {
+            if (selectionRevision === addressSelectionRevision)
+              text(addressFeedback, 'Could not select fictional address: ' + error.message);
+          }
+        });
+        addressResults.appendChild(option);
+      }
+      addressResults.hidden = false;
+    } catch (error) {
+      if (revision === addressSearchRevision) text(addressFeedback, 'Address search failed: ' + error.message);
+    } finally { if (revision === addressSearchRevision) addressButton.disabled = false; }
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!form.reportValidity()) return;
@@ -174,8 +252,8 @@
     event.preventDefault();
     await reopen(id('reopen-id').value.trim());
   });
-  id('example-known').addEventListener('click', () => { id('pin').value = '00000000000001'; id('area').value = '1600'; id('price').value = '500000.00'; id('label').value = 'My example property'; id('analysis-date').value = '2024-07-01'; setFeedback('Known invented parcel loaded.', true); });
-  id('example-unknown').addEventListener('click', () => { id('pin').value = '00000000000099'; id('area').value = '1600'; id('price').value = '500000.00'; id('label').value = 'Unknown synthetic parcel'; id('analysis-date').value = '2024-07-01'; setFeedback('Unknown parcel loaded. Submit to observe an abstention.', true); });
+  id('example-known').addEventListener('click', () => { resetAddressSelection(); id('pin').value = '00000000000001'; id('area').value = '1600'; id('price').value = '500000.00'; id('label').value = 'My example property'; id('analysis-date').value = '2024-07-01'; setFeedback('Known invented parcel loaded.', true); });
+  id('example-unknown').addEventListener('click', () => { resetAddressSelection(); id('pin').value = '00000000000099'; id('area').value = '1600'; id('price').value = '500000.00'; id('label').value = 'Unknown synthetic parcel'; id('analysis-date').value = '2024-07-01'; setFeedback('Unknown parcel loaded. Submit to observe an abstention.', true); });
   id('copy-link').addEventListener('click', async () => {
     if (!lastInvestigation) return;
     try {

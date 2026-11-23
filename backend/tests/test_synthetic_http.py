@@ -56,6 +56,59 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertEqual(r["headers"]["X-Synthetic-Only"], "true")
         self.assertNotIn("Access-Control-Allow-Origin", r["headers"])
 
+    def test_address_search_returns_multiple_options_without_guessing(self):
+        found = self.invoke("POST", "/v1/addresses/search",
+                            payload={"query": "FICTIONAL   WAY"})
+        self.assertEqual(found["status"], 200)
+        self.assertEqual(found["body"]["source_kind"], "synthetic_fixture")
+        self.assertEqual(found["body"]["status"], "matches")
+        self.assertEqual(len(found["body"]["candidates"]), 4)
+        self.assertEqual(len({x["address_id"] for x in found["body"]["candidates"]}), 4)
+        self.assertTrue(all("pin" not in x for x in found["body"]["candidates"]))
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
+
+    def test_selected_address_resolves_to_server_owned_parcel_and_investigates(self):
+        found = self.invoke("POST", "/v1/addresses/search", payload={"query": "101 fictional"})
+        self.assertEqual(len(found["body"]["candidates"]), 1)
+        aid = found["body"]["candidates"][0]["address_id"]
+        result = self.invoke(path="/v1/addresses/" + aid)
+        self.assertEqual(result["status"], 200)
+        self.assertEqual(result["body"]["identity_status"], "synthetic_mapping_only")
+        self.assertEqual(result["body"]["pin"], SUBJECT_PIN)
+        request = example_request()
+        request["subject"]["pin"] = result["body"]["pin"]
+        created = self.invoke("POST", "/v1/investigations", payload=request)
+        self.assertEqual(created["status"], 201)
+        self.assertEqual(created["body"]["selected_count"], 3)
+        self.assertIsNone(created["body"]["valuation"])
+        self.assertEqual(self.invoke(path=created["headers"]["Location"])["body"], created["body"])
+
+    def test_unknown_and_malformed_address_fail_safely(self):
+        none = self.invoke("POST", "/v1/addresses/search",
+                           payload={"query": "Nonexistent Imaginary Road"})
+        self.assertEqual(none["status"], 200)
+        self.assertEqual(none["body"]["status"], "no_match")
+        self.assertEqual(none["body"]["candidates"], [])
+        self.assertEqual(self.invoke(path="/v1/addresses/not-indexed")["status"], 404)
+        for body in ({}, {"query": "a"}, {"query": "xx' OR 1=1 --"},
+                     {"query": "Fictional", "pin": SUBJECT_PIN},
+                     {"query": ["fictional"]}, {"query": "a" * 81}):
+            with self.subTest(body=body):
+                self.assertEqual(self.invoke("POST", "/v1/addresses/search", payload=body)["status"], 422)
+        self.assertEqual(self.invoke("GET", "/v1/addresses/search")["status"], 405)
+        self.assertEqual(self.invoke("POST", "/v1/addresses/fictional-1")["status"], 405)
+        self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
+
+    def test_address_search_respects_fixture_and_origin_guards(self):
+        self.assertEqual(self.invoke("POST", "/v1/addresses/search",
+                                     payload={"query": "Fictional Way"},
+                                     origin="http://untrusted.invalid")["status"], 403)
+        self.db.execute("UPDATE curated_builds SET build_kind='historical_research'")
+        result = self.invoke("POST", "/v1/addresses/search",
+                             payload={"query": "Fictional Way"})
+        self.assertEqual(result["status"], 503)
+        self.assertEqual(result["body"], {"error": "evidence_unavailable"})
+
     def test_create_then_get_reopens_exact_database_evidence(self):
         create = self.invoke("POST", "/v1/investigations", payload=example_request())
         self.assertEqual(create["status"], 201)

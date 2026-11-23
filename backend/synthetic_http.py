@@ -49,6 +49,8 @@ def _static_response(start_response, asset):
     return [payload]
 
 ID_ROUTE = re.compile(r"^/v1/investigations/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$")
+ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
+ADDRESS_SEARCH_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 .,\-']{1,79}$")
 ALLOWED_HOST = re.compile(r"^(?:127\.0\.0\.1|localhost|\[::1\])(?::[0-9]{1,5})?$", re.IGNORECASE)
 
 
@@ -121,7 +123,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _response(start_response, 200, {"status": "ok", "mode": "synthetic_fixture_only"})
 
-        if path == "/v1/investigations":
+        if path in ("/v1/investigations", "/v1/addresses/search"):
             if method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
@@ -149,6 +151,21 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if path == "/v1/addresses/search":
+                if (not isinstance(payload, dict) or set(payload) != {"query"}
+                        or not isinstance(payload.get("query"), str)):
+                    return _response(start_response, 422,
+                                     {"error": "invalid_request", "field": "query",
+                                      "code": "query_required"})
+                query = payload["query"].strip()
+                if not ADDRESS_SEARCH_PATTERN.fullmatch(query):
+                    return _response(start_response, 422,
+                                     {"error": "invalid_request", "field": "query",
+                                      "code": "invalid_search_query"})
+                try:
+                    return _response(start_response, 200, store.search_synthetic_addresses(query))
+                except (EvidenceStoreError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "evidence_unavailable"})
             try:
                 result = store.create(payload, today=today)
             except ContractError as exc:
@@ -161,6 +178,19 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 return _response(start_response, 500, {"error": "internal_error"})
             return _response(start_response, 201, result,
                              location=f"/v1/investigations/{result['investigation_id']}")
+
+        address_match = ADDRESS_ROUTE.fullmatch(path)
+        if address_match:
+            if method != "GET":
+                return _response(start_response, 405,
+                                 {"error": "method_not_allowed"}, allow="GET")
+            try:
+                found = store.resolve_synthetic_address(address_match.group(1))
+            except (EvidenceStoreError, sqlite3.Error):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            if found is None:
+                return _response(start_response, 404, {"error": "address_not_found"})
+            return _response(start_response, 200, found)
 
         match = ID_ROUTE.fullmatch(path)
         if match:

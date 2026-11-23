@@ -47,11 +47,25 @@
     <div class="workspace">
       <section class="input-panel" aria-labelledby="form-heading">
         <div class="section-topline"><span>01 / INVESTIGATION DETAILS</span><span class="stage-tag">P3 CONTRACT TEST</span></div>
-        <div class="panel-heading"><h2 id="form-heading">Start an investigation</h2><p>Use the supplied synthetic parcel identifier to test the complete enquiry workflow.</p></div>
+        <div class="panel-heading"><h2 id="form-heading">Start an investigation</h2><p>Find an invented demonstration address or use a synthetic PIN. Select the property before investigating its evidence.</p></div>
+        <section class="address-finder" aria-labelledby="address-heading">
+          <h3 id="address-heading">Find a fictional address</h3>
+          <form id="address-search-form">
+            <label for="address-query" class="visually-hidden">Search invented addresses</label>
+            <div class="address-search-row">
+              <input id="address-query" name="address-query" type="search" value="Fictional Way" maxlength="80" required placeholder="e.g. Fictional Way" autocomplete="off">
+              <button type="submit" class="secondary-button" id="address-search-button">Search</button>
+            </div>
+          </form>
+          <p class="address-hint">Synthetic index only. Address suggestions are not real property records.</p>
+          <p id="address-search-feedback" role="status" aria-live="polite" class="address-feedback"></p>
+          <div id="address-results" class="address-results" aria-label="Possible invented addresses" hidden></div>
+          <p id="selected-address" class="address-selected" role="status" hidden></p>
+        </section>
         <form id="investigation-form" novalidate>
           <div class="field"><label for="pin">Parcel PIN <span class="required">*</span></label>
             <input id="pin" name="pin" required maxlength="14" pattern="[0-9]{14}" value="00000000000001" autocomplete="off" inputmode="numeric" spellcheck="false" aria-describedby="pin-hint">
-            <div class="field-hint" id="pin-hint">14 digits. Technical lookup key, not an address search.</div>
+            <div class="field-hint" id="pin-hint">14-digit internal synthetic parcel key. Address selection fills this automatically; source attributes remain server-controlled.</div>
           </div>
           <div class="field"><label for="label">Property label <span class="optional">OPTIONAL</span></label>
             <input id="label" name="label" maxlength="120" value="My example property" autocomplete="off" placeholder="e.g. Property A">

@@ -97,6 +97,15 @@ CREATE TABLE curated_build_transactions (
     PRIMARY KEY (build_id, transaction_id)
 );
 
+-- Disposable invented-address index for P3 browser identity tests only.
+-- No publisher address feed, geocoding or real parcel-address assertion.
+CREATE TABLE synthetic_address_index (
+    address_id TEXT PRIMARY KEY,
+    pin TEXT NOT NULL UNIQUE REFERENCES parcels(pin),
+    display_address TEXT NOT NULL,
+    search_key TEXT NOT NULL
+);
+
 -- User-entered enquiries are distinct from verified publisher attributes.
 CREATE TABLE investigations (
     investigation_id TEXT PRIMARY KEY,

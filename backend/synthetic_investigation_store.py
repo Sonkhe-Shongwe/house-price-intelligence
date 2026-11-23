@@ -16,6 +16,7 @@ from decimal import Decimal, InvalidOperation
 from datetime import date, datetime, timezone
 import hashlib
 import json
+import re
 import sqlite3
 import uuid
 from typing import Any, Mapping
@@ -98,6 +99,38 @@ class SyntheticInvestigationStore:
         snapshots = sorted({snapshot_id for snapshot_id, _, _, _ in source_rows})
         return {"build_id": build_id, "built_at_utc": built_at,
                 "source_kind": kind, "source_snapshot_ids": snapshots}
+
+    def search_synthetic_addresses(self, query: str) -> dict[str, Any]:
+        """Return possible invented addresses; never guess a chosen property."""
+        self._build()  # Refuse non-fixture curated builds.
+        key = " ".join(re.findall(r"[a-z0-9]+", query.casefold()))
+        rows = self.connection.execute(
+            """SELECT address_id, display_address
+               FROM synthetic_address_index
+               WHERE instr(search_key, ?) > 0
+               ORDER BY display_address, address_id LIMIT 9""",
+            (key,),
+        ).fetchall()
+        candidates = [{"address_id": aid, "display_address": label}
+                      for aid, label in rows[:8]]
+        return {"source_kind": "synthetic_fixture",
+                "status": "matches" if candidates else "no_match",
+                "candidates": candidates, "truncated": len(rows) > 8}
+
+    def resolve_synthetic_address(self, address_id: str) -> dict[str, Any] | None:
+        """Resolve an explicitly selected invented ID to an existing parcel."""
+        self._build()
+        row = self.connection.execute(
+            """SELECT a.address_id, a.display_address, a.pin
+               FROM synthetic_address_index a
+               JOIN parcels p ON p.pin = a.pin
+               WHERE a.address_id = ?""", (address_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return {"source_kind": "synthetic_fixture",
+                "identity_status": "synthetic_mapping_only",
+                "address_id": row[0], "display_address": row[1], "pin": row[2]}
 
     def _assessment(self, pin: str, tax_year: int):
         rows = self.connection.execute(
