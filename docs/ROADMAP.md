@@ -33,3 +33,6 @@ Canonical Year Correction and Chronological Qualification V1: [3bd6232](https://
 
 
 Real-Data Integration V1: Owner approved Real-Data Integration V1 and the 85.7% milestone reassessment, with P1 95% and P2 75%; all other phase scores and exit gates unchanged. No additional live extraction, valuation, main merge or public deployment. External contact is not a prerequisite for controlled non-commercial development; public availability is not proof of unrestricted redistribution. See [contract](engineering/REAL_DATA_INTEGRATION_V1.md).
+
+
+Real-Data Integration V1 verified: inactive historical PostgreSQL intake, exact private address review, revision isolation, rollback and V4 fictional browser replay verified at [91d8872](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/91d8872342b10ba673c067a83d6fe6f1b0177871). Recorded owner-approved 85.7% remains unchanged; proposed next evidence-based milestone review 86.5% (P1 97%, P4 93%, P5 89%, P7 81%, other stages unchanged), no full phase exit. Actual real records, production import/display and public deployment remain open; see [checkpoint](CHECKPOINT.md).
