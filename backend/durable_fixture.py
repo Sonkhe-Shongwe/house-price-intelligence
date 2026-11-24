@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import stat
 import tempfile
 
 from backend.schema_migrations import CURRENT_SCHEMA_VERSION, SchemaMigrationError, migrate_fixture
@@ -119,7 +120,7 @@ def _verify_durable_fixture(conn: sqlite3.Connection) -> SyntheticInvestigationS
     return store
 
 
-def open_file_demo(path: str | Path) -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
+def open_file_demo(path: str | Path, *, private_file: bool = False) -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
     """Open a fictional database and retain investigations across restarts.
 
     The default server still uses :memory:. A new path is seeded from the
@@ -130,6 +131,8 @@ def open_file_demo(path: str | Path) -> tuple[sqlite3.Connection, SyntheticInves
         raise FixturePersistenceError("Fixture database must be a regular, non-symlink file")
     if not target.parent.is_dir():
         raise FixturePersistenceError("Fixture database parent directory must already exist")
+    if private_file and target.parent.is_symlink():
+        raise FixturePersistenceError("Fixture database parent must not be a symlink")
     if not target.exists():
         memory, _ = in_memory_demo()
         temporary = None
@@ -151,7 +154,14 @@ def open_file_demo(path: str | Path) -> tuple[sqlite3.Connection, SyntheticInves
 
     if target.is_symlink() or not target.is_file():
         raise FixturePersistenceError("Fixture database path changed during opening")
-    conn = sqlite3.connect(target)
+    if private_file:
+        details = target.stat(follow_symlinks=False)
+        if (not stat.S_ISREG(details.st_mode) or details.st_nlink != 1
+                or target.parent.is_symlink()
+                or (os.name == "posix" and (details.st_mode & 0o077
+                    or details.st_uid != os.getuid()))):
+            raise FixturePersistenceError("Fixture file must be private, regular and owned")
+    conn = sqlite3.connect(target.as_uri() + "?mode=rw", uri=True)
     try:
         store = _verify_durable_fixture(conn)
         return conn, store

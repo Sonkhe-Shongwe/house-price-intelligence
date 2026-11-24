@@ -15,6 +15,7 @@ from wsgiref.simple_server import make_server
 from backend.durable_fixture import open_file_demo
 from backend.synthetic_demo import in_memory_demo
 from backend.synthetic_http import create_app
+from backend.react_assets import load_react_assets
 
 
 def main():
@@ -23,19 +24,22 @@ def main():
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--fixture-db", type=Path, metavar="PATH",
                         help="Explicit opt-in: persist invented fixture evidence at this local SQLite file")
+    parser.add_argument("--frontend", choices=("legacy", "react"), default="legacy",
+                        help="Explicitly choose the integrated React candidate; legacy remains available")
     args = parser.parse_args()
     if not args.fixture_only:
         parser.error("This demonstrator requires the explicit --fixture-only opt-in")
     if not 1024 <= args.port <= 65535:
         parser.error("Port must be between 1024 and 65535")
     try:
+        assets = load_react_assets() if args.frontend == 'react' else None
         conn, store = (in_memory_demo() if args.fixture_db is None
-                       else open_file_demo(args.fixture_db))
+                       else open_file_demo(args.fixture_db, private_file=args.frontend == 'react'))
     except (RuntimeError, ValueError, sqlite3.Error, OSError) as exc:
         parser.error(f"Refusing fixture database: {exc}")
     try:
         # Deliberately no option to bind to 0.0.0.0 or a remote interface.
-        with make_server("127.0.0.1", args.port, create_app(store)) as server:
+        with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets)) as server:
             print(f"Fixture-only API at http://127.0.0.1:{args.port}/health")
             print("WARNING: invented records, no auth, no CORS, NOT FOR DEPLOYMENT")
             if args.fixture_db is not None:

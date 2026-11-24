@@ -1,0 +1,68 @@
+.buyer-shell{background:#f6f7f2}.buyer-columns{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(310px,.75fr);gap:18px;align-items:stretch}.buyer-forms{display:grid;gap:17px;min-width:0}
+.buyer-pane,.buyer-progress{background:#fff;border:1px solid #dfe6dc;border-radius:14px;padding:24px 27px;box-shadow:0 12px 40px #2c49350d;min-width:0}
+.buyer-section-number{font-size:10px;font-weight:810;letter-spacing:.15em;color:#4e8069;margin-bottom:10px}
+.buyer-pane h2,.buyer-progress h2{font:normal 29px/1.18 Georgia,'Times New Roman',serif;letter-spacing:-.04em;margin:0 0 9px;color:#233e33}
+.buyer-pane>p,.buyer-progress>p{font-size:12px;color:#79897f;margin:0 0 22px;max-width:530px;line-height:1.7}
+.buyer-pane label,.buyer-reopen-card label{display:block;font-size:11px;font-weight:780;color:#4d6655;margin:0 0 7px}
+.buyer-pane input,.buyer-reopen-card input{border:1px solid #cfded1;background:#fbfdf9;color:#213e30;border-radius:8px;min-height:43px;padding:10px 12px;font-size:12px;width:100%;min-width:0}
+.buyer-pane input:focus,.buyer-reopen-card input:focus{outline:3px solid #d4a35c;outline-offset:1px}
+.buyer-input-row{display:flex;gap:8px;align-items:stretch}
+.buyer-input-row button,.buyer-save,.buyer-reopen-card button{background:#285e4c;color:#fff;font-weight:740;font-size:12px;border:1px solid #285e4c;border-radius:8px;padding:9px 15px;white-space:nowrap}
+.buyer-input-row button:hover,.buyer-save:hover,.buyer-reopen-card button:hover{background:#377b60}
+.buyer-constraint{margin-top:17px;background:#f6f9f5;border-radius:7px;border-left:2px solid #9dbfac;padding:11px 12px;color:#6b8170;font-size:11px}
+.buyer-candidates{display:grid;gap:7px;margin-top:15px}
+.buyer-candidates button{border:1px solid #dce6db;background:#fdfefa;display:flex;align-items:center;gap:12px;border-radius:9px;padding:12px;text-align:left;color:#2c4737}
+.buyer-candidates button:hover{border-color:#72a087;background:#eef6ed}
+.buyer-candidate-symbol{width:33px;height:33px;display:grid;place-items:center;flex-shrink:0;border-radius:8px;background:#eaf1e9;color:#2c7356;font-size:24px}
+.buyer-candidates button>span:nth-child(2){min-width:0;flex:1}
+.buyer-candidates strong{display:block;font-size:12px;overflow-wrap:anywhere}
+.buyer-candidates small{display:block;font-size:11px;color:#778b7e;margin-top:3px}
+.buyer-candidate-select{font-size:11px;font-weight:740;color:#34785e}
+.buyer-chosen{background:#eef6ee;border:1px solid #b9d5bd;padding:13px 16px;margin-top:14px;border-radius:9px}
+.buyer-chosen b{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#4f8564;margin-bottom:5px}
+.buyer-chosen strong{font-size:13px;display:block;overflow-wrap:anywhere}
+.buyer-chosen p{font-size:11px;margin:4px 0;color:#456850;overflow-wrap:anywhere}
+.buyer-chosen span{font-size:10px;color:#59806c}
+.buyer-two-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-bottom:14px}
+.buyer-save{margin-top:18px;width:100%;min-height:46px}
+.buyer-progress{background:#183f34;color:#f7fdfa;display:flex;flex-direction:column;gap:0}
+.buyer-progress .buyer-section-number{color:#dbb983}
+.buyer-progress h2{color:#fff;font-size:34px}
+.buyer-progress>p{color:#c0d5c8}
+.buyer-progress-line{display:flex;gap:14px;align-items:flex-start;margin:15px 0}
+.buyer-progress-line>span{border:1px solid #648477;border-radius:50%;font-weight:750;width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;color:#bbd2c4;font-size:12px}
+.buyer-progress-line>span.buyer-done{background:#b8d9bc;color:#193f33}
+.buyer-progress-line b{font-size:13px;display:block;line-height:1.5}
+.buyer-progress-line small{font-size:11px;color:#b9d0c3;display:block;margin-top:5px;line-height:1.5}
+.buyer-reopen-card{margin-top:auto;padding:16px;background:#2e594a;border:1px solid #668578;border-radius:12px}
+.buyer-reopen-card label{color:#e0efe4;margin-bottom:8px}
+.buyer-reopen-card form{display:flex;gap:7px;min-width:0;align-items:stretch}
+.buyer-reopen-card input{background:#f8fbf9;font-size:10px}
+.buyer-reopen-card button{background:#e5b87c;border-color:#e5b87c;color:#253b30}
+.buyer-reopen-card small{display:block;color:#c3d6ca;margin-top:9px;font-size:10px}
+.buyer-feedback{background:#eff7ed;border:1px solid #bed7c0;color:#315f47;border-radius:9px;padding:13px 17px;margin-top:16px;font-size:12px;font-weight:640;overflow-wrap:anywhere}
+.buyer-result{background:#fff;border:1px solid #dbe6dd;border-radius:15px;padding:24px;margin-top:18px;box-shadow:0 12px 42px #263f3410}
+.buyer-result-title{display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid #e0e9df;padding-bottom:18px;margin-bottom:19px}
+.buyer-result-title h2{font:normal 30px/1.15 Georgia,'Times New Roman',serif;letter-spacing:-.036em;margin:0 0 6px}
+.buyer-result-title p{margin:0;font-size:11px;color:#7b8a7e}
+.buyer-result-title>div:last-child{text-align:right}
+.buyer-result-title>div:last-child b{display:block;font-size:18px;color:#2e7055}
+.buyer-result-title>div:last-child small{display:block;font-size:11px;color:#758779;margin-top:4px}
+.buyer-result-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(240px,1fr);gap:14px}
+.buyer-sale-pane{border:1px solid #dce7de;border-radius:11px;overflow:hidden;min-width:0;display:flex;flex-direction:column}
+.buyer-map-disabled{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:310px;padding:24px;background:repeating-linear-gradient(45deg,#e7eee7 0,#e7eee7 1px,#eef3ec 1px,#eef3ec 21px);border:1px solid #d2dfd2;border-radius:11px}
+.buyer-disabled-icon{font-size:43px;color:#3f8264;width:68px;height:68px;border:1px solid #a8c6a9;border-radius:15px;background:#f8fbf8;display:grid;place-items:center;margin-bottom:15px}
+.buyer-map-disabled>span{font-weight:810;letter-spacing:.12em;font-size:9px;color:#537d60}
+.buyer-map-disabled h3{font:normal 30px Georgia,serif;letter-spacing:-.04em;margin:11px 0 8px}
+.buyer-map-disabled p{font-size:12px;color:#657968;line-height:1.7;max-width:360px}
+.buyer-map-disabled strong{font-size:10px;color:#3f7659;border:1px solid #b7ceb9;background:#fff9;padding:7px 12px;border-radius:16px}
+.buyer-provenance{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:16px;border:1px solid #e0e9dd;border-radius:10px;overflow:hidden}
+.buyer-provenance>div{padding:13px 12px;min-width:0;border-right:1px solid #e1e9df}
+.buyer-provenance>div:last-child{border:0}
+.buyer-provenance small{display:block;font-size:10px;color:#78897b;margin-bottom:5px}
+.buyer-provenance strong{font-size:11px;overflow-wrap:anywhere;color:#2f5c45;display:block}
+.buyer-warning{border-left:2px solid #ccab70;color:#84704b;font-size:11px;margin:13px 0 0;padding:6px 11px;background:#fffcf5}
+@media(max-width:1100px){.buyer-columns{grid-template-columns:1fr}.buyer-progress{gap:4px}.buyer-progress-line{margin:9px 0}.buyer-reopen-card{margin-top:15px}.buyer-provenance{grid-template-columns:repeat(3,minmax(0,1fr))}.buyer-provenance>div:nth-child(3){border:0}}
+@media(max-width:740px){.buyer-pane,.buyer-progress{padding:19px}.buyer-two-fields{grid-template-columns:1fr}.buyer-input-row{flex-direction:column}.buyer-input-row button{min-height:43px}.buyer-result{padding:15px}.buyer-result-title{display:block}.buyer-result-title>div:last-child{text-align:left;margin-top:15px}.buyer-result-grid{grid-template-columns:1fr}.buyer-provenance{grid-template-columns:repeat(2,minmax(0,1fr))}.buyer-provenance>div:nth-child(3){border-right:1px solid #e1e9df}.buyer-provenance>div:nth-child(even){border-right:0}.buyer-reopen-card form{flex-direction:column}.buyer-reopen-card button{min-height:42px}}
+@media(max-width:370px){.buyer-sale-pane .source-sale-list button{flex-wrap:wrap}.buyer-sale-pane .source-sale-price{margin-left:37px;text-align:left}.buyer-candidates button{flex-wrap:wrap}.buyer-candidate-select{margin-left:46px}.buyer-provenance{grid-template-columns:1fr}.buyer-provenance>div{border-right:0;border-bottom:1px solid #e1e9df}}
+@media(prefers-reduced-motion:reduce){.buyer-shell *, .buyer-shell *::before, .buyer-shell *::after{transition:none!important;animation:none!important}}

@@ -52,3 +52,11 @@ A source-backed [P3.1–P3.11 acceptance matrix](DECISIONS.md#p31p311-contract-r
 **Windows state:** The repository's GitHub connection cannot see an uninspected Windows checkout or uncommitted files. Never overwrite, delete or force-reset those files.
 
 **Source-of-truth rule:** This checkpoint is the *current-state* document, [P_PHASE_ROADMAP.md](P_PHASE_ROADMAP.md) defines work packages, phase weights and gates, [DECISIONS.md](DECISIONS.md) records owner decisions, and dated research/review reports retain their historical findings. Future updates replace obsolete checkpoint status here rather than appending another conflicting current-status section.
+
+## 24 November: owner-authorised React Application Integration V1 (candidate)
+
+Draft [PR #8](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/8) targets development from the short-lived feature branch, based on f0ba1e3. This is not merged, owner-accepted or deployed. The owner explicitly authorised source integration and CI on this branch, not production adoption or release.
+
+The candidate places the buyer frontend under frontend/react, uses the canonical backend.run_synthetic_api launcher and existing durable_fixture service, preserves the v0.3 HTTP/SQLite/price and source boundaries, and retains the legacy frontend as default. The prototype renderer and fake map geometry are not part of the integrated UI. Manual fictional PIN lookup, abstention, shortlist discovery/removal, note editing and comparison provenance are included. See [candidate runbook](../frontend/react/README.md).
+
+At candidate f21821da625222af90778a3357730938c2fee8e1, [React CI 45342990140](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45342990140) passed the locked build and WSGI adapter checks and 25 of 26 acceptance tests, with one 320px horizontal-overflow failure. The follow-up fixes wrapping in recent-shortlist controls and comparison details, adds an 80-character label stress case, and rejects symlink parents before private fixture creation. Verify the latest exact PR head CI, including these regressions, before accepting the candidate. No progress change: P3 10%, weighted MVP 22.8%; all existing phase/rights/security/visual gates and PR #4 remain unchanged.
