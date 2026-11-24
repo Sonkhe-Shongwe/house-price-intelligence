@@ -91,17 +91,26 @@ export default function SavedComparison({active}: WorkspaceProps) {
     {availableError && <p role="alert">{availableError}</p>}
   </section>;
 
-  function install(next:ShortlistView) {
+  function install(next:ShortlistView, preserveDrafts = false, savedNoteId?:string) {
     if (!live.current) return;
+    // Confirmed writes update the server snapshot without silently discarding
+    // unsaved edits on other cards. Explicit reopen resets local drafts.
+    setNotes(previous => Object.fromEntries(next.entries.map(entry => {
+      const before = workspace?.entries.find(e => e.investigationId === entry.investigationId);
+      const draft = previous[entry.investigationId];
+      const keepDraft = preserveDrafts && before && entry.investigationId !== savedNoteId &&
+        typeof draft === 'string' && draft !== before.noteText;
+      return [entry.investigationId, keepDraft ? draft : entry.noteText];
+    })));
     setWorkspace(next);
     setReopenId(next.shortlistId);
-    setNotes(Object.fromEntries(next.entries.map(e => [e.investigationId,e.noteText])));
   }
 
   async function perform(
     op: () => Promise<ShortlistView>,
     expected: (result:ShortlistView) => void,
     success: string,
+    savedNoteId?: string,
   ) {
     if (locked.current) return;
     locked.current = true;setBusy(true);setError('');setStatus('');
@@ -115,7 +124,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
         throw Error('write_not_confirmed_by_frozen_get');
       }
       evidenceWasPreserved(workspace,reopened);
-      install(reopened);
+      install(reopened,true,savedNoteId);
       if (live.current) setStatus(success);
     } catch (e) {
       if (live.current) {
@@ -200,6 +209,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
         }
       },
       'Note saved in Python SQLite and verified by reopening the shortlist.',
+      investigationId,
     );
   }
 
