@@ -62,7 +62,7 @@ def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
     # A reviewed source-shaped replay has no reviewed display positions.
     # Do not attach another build's position-source identity or permit unknown builds.
     from backend.curated_ingestion_candidate import _plan
-    replay = build["build_id"] == _plan("v4")[2]
+    replay = build["build_id"] in {_plan(revision)[2] for revision in ("v4","v5")}
     if replay:
         if build["source_kind"] != "synthetic_fixture":
             raise EvidenceStoreError("Unexpected replay map evidence source")

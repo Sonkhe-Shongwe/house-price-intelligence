@@ -7,6 +7,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const PIN = /^[0-9]{14}$/;
 const EXACT_USD = /^(?:0|[1-9][0-9]*)\.[0-9]{2}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+// The canonical matcher returns 3–5 sales; shortlist capacity is independent.
+const MAX_COMPARABLES = 5;
 
 export type ActualStatus = 'supported_neighbourhood' | 'exploratory_spatial' |
   'insufficient_data' | 'out_of_coverage';
@@ -21,7 +23,7 @@ export type InvestigationView = {
   status:ActualStatus; reason:string|null; tier:string; analysisDate:string;
   subjectLabel:string; subjectPin:string|null; askingPriceText:string; buildingAreaText:string;
   selectedCount:number; comparables:ComparableView[]; warnings:string[];
-  sourceBuildId:string; sourceSnapshotIds:string[]; valuation:null;
+  sourceBuildId:string; sourceSnapshotIds:string[]; sourceBuiltAtUtc:string; valuation:null;
   buildingIdentityVerified:false; location:UnavailableLocation;
 };
 export type ShortlistView = {
@@ -70,6 +72,8 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
   const build=obj(raw.data_build,'missing_build');
   if(build.source_kind!=='synthetic_fixture')fail('non_fixture_source');
   const sourceBuildId=txt(build.build_id,'missing_build_id');
+  const sourceBuiltAtUtc=txt(build.built_at_utc,'missing_build_time');
+  if(!/T.*(?:Z|[+-]\d{2}:\d{2})$/.test(sourceBuiltAtUtc)||!Number.isFinite(Date.parse(sourceBuiltAtUtc)))fail('invalid_build_time');
   if(!Array.isArray(build.source_snapshot_ids)||
      !build.source_snapshot_ids.every(s=>typeof s==='string'&&s.length>0)){
     fail('missing_source_snapshots');
@@ -88,7 +92,7 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
   const buildingAreaText=area===null||area===undefined?'Not available':
     typeof area==='number'&&Number.isFinite(area)&&area>0?String(area)+' sq ft (buyer-reported)':fail('invalid_building_area');
   const count=raw.selected_count;
-  if(typeof count!=='number'||!Number.isInteger(count)||count<0||count>3){
+  if(typeof count!=='number'||!Number.isInteger(count)||count<0||count>MAX_COMPARABLES){
     fail('invalid_selected_count');
   }
   const rawComparables=raw.comparables;
@@ -133,7 +137,7 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
   return {investigationId,contractVersion:'p3-draft-v0.3',status,reason,tier,
     analysisDate:iso(raw.analysis_date,'invalid_analysis_date'),subjectLabel,subjectPin,
     askingPriceText,buildingAreaText,selectedCount:count as number,comparables,warnings:[...(rawWarnings as string[])],
-    sourceBuildId,sourceSnapshotIds,valuation:null,buildingIdentityVerified:false,
+    sourceBuildId,sourceSnapshotIds,sourceBuiltAtUtc,valuation:null,buildingIdentityVerified:false,
     location:{available:false,reason:'no_verified_map_feature_contract'}};
 }
 export function adaptShortlist(payload:unknown):ShortlistView{
@@ -193,7 +197,7 @@ export function adaptHistory(payload:unknown):HistoryIndex{
     const createdAt=txt(row.created_at_utc,'invalid_history_time');
     if(seen.has(id)||label.length>120||(pin!==null&&!PIN.test(pin))||
        !STATUSES.has(String(row.status))||typeof count!=='number'||!Number.isInteger(count)||
-       count<0||count>3||!Number.isFinite(Date.parse(createdAt))||
+       count<0||count>MAX_COMPARABLES||!Number.isFinite(Date.parse(createdAt))||
        (row.status==='out_of_coverage'&&count!==0))return fail('invalid_history_item');
     seen.add(id);
     return {id,label,pin,analysisDate:iso(row.analysis_date,'invalid_history_date'),

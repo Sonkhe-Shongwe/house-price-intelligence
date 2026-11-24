@@ -372,7 +372,7 @@ export default function BuyerWorkflow(){
           <div><small>Fixture build</small><strong data-testid="buyer-build">{record.sourceBuildId}</strong></div>
           <div><small>Frozen snapshots</small><strong data-testid="buyer-snapshots">{record.sourceSnapshotIds.join(', ')}</strong></div>
           <div><small>Valuation</small><strong>Not produced</strong></div></div>
-          <p>Matching tier: {record.tier} · Building identity unverified · Historical source availability not established</p></details>
+          <p data-testid="buyer-build-time">Fixture build timestamp: {record.sourceBuiltAtUtc} (not a source publication date).</p><p>Matching tier: {record.tier} · Building identity unverified · Historical source availability not established</p><p>All displayed sales are invented. No publisher property records or current market valuations are shown.</p></details>
         {record.warnings.map((w,i)=><p key={i} className="buyer-warning">{w}</p>)}
       </section>}
       </section>

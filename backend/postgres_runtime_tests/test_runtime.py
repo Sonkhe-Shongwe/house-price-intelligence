@@ -225,6 +225,44 @@ class RuntimeTests(unittest.TestCase):
                 finally:browser.close()
         finally:activate(ADMIN,old_build,generation)
 
+    def test_release_five_comparables_history_and_shortlist(self):
+        with psycopg.connect(ADMIN,autocommit=True) as conn:
+            old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
+        generation=activate(ADMIN,BUILDS[5],generation)
+        try:
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                try:
+                    page=browser.new_page(http_credentials={"username":"bob","password":self.passwords["bob"]})
+                    page.goto(self.base+"/buyer-workflow")
+                    page.get_by_test_id("buyer-query").fill("10 Fictional Release Lane")
+                    page.get_by_test_id("buyer-search").click()
+                    page.get_by_test_id("buyer-candidate").first.click()
+                    page.get_by_test_id("buyer-create").click()
+                    expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("buyer-sale")).to_have_count(5)
+                    expect(page.get_by_test_id("buyer-build")).to_have_text(BUILDS[5])
+                    expect(page.get_by_test_id("buyer-build-time")).to_contain_text("not a source publication date")
+                    for price in ("$487,500.01","$542,750.02","$519,900.03","$508,400.04","$534,200.05"):
+                        expect(page.get_by_test_id("buyer-result")).to_contain_text(price)
+                    iid=page.get_by_test_id("buyer-saved-id").inner_text()
+                    page.get_by_test_id("geo-load").click()
+                    expect(page.get_by_test_id("geo-unavailable")).to_be_visible(timeout=15000)
+                    page.get_by_test_id("nav-saved").click()
+                    page.get_by_test_id("history-search").fill("10 Fictional Release Lane")
+                    expect(page.get_by_test_id("history-list")).to_contain_text("5 earlier sales")
+                    page.get_by_test_id("history-open").first.click()
+                    expect(page.get_by_test_id("buyer-saved-id")).to_have_text(iid)
+                    expect(page.get_by_test_id("buyer-sale")).to_have_count(5)
+                    page.get_by_test_id("dossier-compare").click()
+                    page.get_by_test_id("workspace-label").fill("Five comparable release rehearsal")
+                    page.get_by_test_id("workspace-create").click()
+                    page.get_by_test_id("workspace-add-current").click()
+                    expect(page.get_by_test_id("workspace-entry")).to_contain_text("5 earlier sales")
+                    self.assertEqual(self.call("alice","GET","/v1/investigations/"+iid)[0],404)
+                finally:browser.close()
+        finally:activate(ADMIN,old_build,generation)
+
     def test_source_shaped_replay_from_intake_through_react(self):
         with psycopg.connect(ADMIN,autocommit=True) as conn:
             old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()

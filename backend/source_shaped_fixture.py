@@ -5,11 +5,18 @@ Persisted fixture manifests are synthetic and never claim publisher provenance.
 from copy import deepcopy
 from backend.real_source_intake import DATASETS, REQUIRED, OPTIONAL, prepare_intake
 
-def replay_rows():
+def replay_rows(revision="v4"):
+    if revision not in ("v4","v5"):
+        raise ValueError("Unreviewed source-shaped fixture")
     rows={role:[] for role in DATASETS}
     prices=("550000.00","487500.01","542750.02","519900.03")
     dates=("2024-06-01","2024-01-18","2024-03-12","2024-05-09")
     areas=(1600,1500,1720,1650)
+    street="Replay" if revision=="v4" else "Release"
+    if revision=="v5":
+        prices+=("508400.04","534200.05")
+        dates+=("2024-04-10","2024-05-24")
+        areas+=(1580,1620)
     for i,(price,when,area) in enumerate(zip(prices,dates,areas),1):
         pin=f"{i:014d}"
         rows["sales"].append(dict(pin=pin,sale_date=when+"T00:00:00",sale_price=price,doc_no=f"REPLAY-FICT-{i}",
@@ -18,7 +25,7 @@ def replay_rows():
         rows["assessment"].append(dict(pin=pin,year="2023.0",card="1",**{"class":"203"},
             township_code="17",char_bldg_sf=str(area)))
         rows["geography"].append(dict(pin=pin,year="2023.0",nbhd_code="FICT",lat="42.04",lon="-87.68"))
-        rows["address"].append(dict(pin=pin,year="2023.0",prop_address_full=f"{i*10} Fictional Replay Lane, Demonstration District"))
+        rows["address"].append(dict(pin=pin,year="2023.0",prop_address_full=f"{i*10} Fictional {street} Lane, Demonstration District"))
     meta={dataset:{"epoch":1,"fields":sorted(REQUIRED[role]|OPTIONAL[role])} for role,dataset in DATASETS.items()}
     plan=prepare_intake(rows=rows,metadata_before=meta,metadata_after=deepcopy(meta),
                         extracted_at_utc="2026-11-24T00:00:00Z")

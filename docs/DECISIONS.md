@@ -215,3 +215,7 @@ Aggregate source collection at 2026-11-24T10:32:36.930897+00:00: sales 2,107, as
 The single authorised live collection is consumed. Preserve marker and run history; no rerun, new extraction, durable real data storage, provider provisioning, public property display, deployment, valuation or main merge under this authority. Historical availability, physical building identity, public display terms and actual production security/recovery remain unverified. All full phase exits remain open. Owner-approved weighted progress remains 87.1%; do not assign additional credit without score review.
 
 Next highest-value work: production release contract and buyer evidence field projection, then separately approved controlled durable real-data ingestion and real buyer API/browser acceptance (with public release as a distinct decision). Prepare offline using existing V4 synthetic source-shaped records and the verified historical reader; avoid another speculative architecture or unapproved extraction. Real property data were removed after rehearsal, so there is no live database to activate now.
+
+
+## 24 November 2026: Buyer Product Release Preparation V1
+Continue offline release preparation after verified private rehearsal. Correct client comparable cardinality without changing matcher or shortlist capacity; verify five source-shaped invented comparables through existing buyer runtime. Proposed field display contract, no actual release grant. See [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md).
