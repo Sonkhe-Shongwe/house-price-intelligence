@@ -3,6 +3,7 @@ import {useEffect, useRef, useState} from 'react';
 import {adaptInvestigation, type InvestigationView} from './evidenceBridge';
 import './sourceReview.css';
 import './buyerWorkflow.css';
+import SavedComparison from './SavedComparison';
 
 type Candidate = {
   addressId: string; label: string; hint: string | null; ambiguous: boolean;
@@ -314,6 +315,7 @@ export default function BuyerWorkflow(){
           <div><small>Valuation</small><strong>Not produced</strong></div></div>
         {record.warnings.map((w,i)=><p key={i} className="buyer-warning">{w}</p>)}
       </section>}
+      <SavedComparison active={record}/>
       <footer className="source-footer"><b>HOUSE PRICE INTELLIGENCE / BUYER WORKFLOW PROOF</b>
         <span>Fictional · Loopback only · Exact cents · No geographic map</span></footer>
     </div>
