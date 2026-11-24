@@ -72,92 +72,11 @@ def _utc(timestamp: datetime | None) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-class SyntheticInvestigationStore:
-    """Proof of database -> matcher -> persisted evidence, with no real source data."""
-
-    POLICY_VERSION = "phase2-research-v1"
-
-    def __init__(self, connection: sqlite3.Connection, *, build_id: str):
-        if not isinstance(build_id, str) or not build_id:
-            raise EvidenceStoreError("A trusted curated build ID is required")
+class CuratedReadQueries:
+    """Shared build-scoped reads. Callers must establish their own trust boundary."""
+    def __init__(self, connection, build_id):
         self.connection = connection
         self.build_id = build_id
-        if connection.execute("PRAGMA foreign_keys").fetchone()[0] != 1:
-            raise EvidenceStoreError("SQLite foreign key enforcement must be enabled")
-
-    def _build(self) -> dict[str, Any]:
-        row = self.connection.execute(
-            "SELECT build_id, built_at_utc, build_kind FROM curated_builds WHERE build_id = ?",
-            (self.build_id,),
-        ).fetchone()
-        if row is None:
-            raise EvidenceStoreError("Curated build not found")
-        build_id, built_at, kind = row
-        if kind != "synthetic_fixture":
-            raise EvidenceStoreError("Real-source builds are disabled in this candidate")
-        source_rows = self.connection.execute(
-            """SELECT bs.snapshot_id, bs.source_role, ss.dataset_id, ss.source_query
-               FROM curated_build_sources bs
-               JOIN source_snapshots ss ON ss.snapshot_id = bs.snapshot_id
-               WHERE bs.build_id = ? ORDER BY bs.snapshot_id, bs.source_role""",
-            (self.build_id,),
-        ).fetchall()
-        # A database build_kind assertion is not, by itself, evidence that the
-        # referenced publisher data were fabricated. This extra fixture-only
-        # marker rejects accidentally imported real source snapshots. It is
-        # still NOT a general proof that arbitrary data is synthetic.
-        try:
-            require_fixture_build(kind,[(dataset,query) for _,_,dataset,query in source_rows])
-        except DisclosureDenied as exc:
-            raise EvidenceStoreError(str(exc)) from exc
-        roles = {role for _, role, _, _ in source_rows}
-        if not {"sales", "assessment", "geography"}.issubset(roles):
-            raise EvidenceStoreError("Synthetic build is missing source role(s)")
-        snapshots = sorted({snapshot_id for snapshot_id, _, _, _ in source_rows})
-        return {"build_id": build_id, "built_at_utc": built_at,
-                "source_kind": kind, "source_snapshot_ids": snapshots}
-
-    def search_synthetic_addresses(self, query: str) -> dict[str, Any]:
-        """Return distinct parcel candidates; identical addresses remain ambiguous."""
-        self._build()
-        key = " ".join(re.findall(r"[a-z0-9]+", query.casefold()))
-        rows = self.connection.execute(
-            """SELECT c.candidate_id, c.display_address, c.parcel_hint,
-                      (SELECT COUNT(*) FROM synthetic_address_candidates other
-                       WHERE other.search_key = c.search_key)
-               FROM synthetic_address_candidates c
-               WHERE instr(c.search_key, ?) > 0
-               ORDER BY c.display_address, c.candidate_id LIMIT 9""",
-            (key,),
-        ).fetchall()
-        candidates = [
-            {"address_id": aid, "display_address": label,
-             "ambiguous_address": count > 1,
-             "parcel_hint": hint if count > 1 else None,
-             "identity_scope": "parcel_only"}
-            for aid, label, hint, count in rows[:8]
-        ]
-        return {"source_kind": "synthetic_fixture",
-                "status": "matches" if candidates else "no_match",
-                "candidates": candidates, "truncated": len(rows) > 8}
-
-    def resolve_synthetic_address(self, address_id: str) -> dict[str, Any] | None:
-        """Resolve a selected fictional candidate to one parcel, never a building."""
-        self._build()
-        row = self.connection.execute(
-            """SELECT c.candidate_id, c.display_address, c.pin, c.parcel_hint
-               FROM synthetic_address_candidates c
-               JOIN parcels p ON p.pin = c.pin
-               WHERE c.candidate_id = ?""", (address_id,),
-        ).fetchone()
-        if row is None:
-            return None
-        return {"source_kind": "synthetic_fixture",
-                "identity_status": "synthetic_mapping_only",
-                "identity_scope": "parcel_only",
-                "building_identity_verified": False,
-                "address_id": row[0], "display_address": row[1], "pin": row[2],
-                "parcel_hint": row[3]}
 
     def _assessment(self, pin: str, tax_year: int):
         rows = self.connection.execute(
@@ -252,6 +171,94 @@ class SyntheticInvestigationStore:
             candidates.append(row)
             transaction_ids[(pin, doc, when)].append((txn, snapshot_id, cents))
         return candidates, transaction_ids
+
+
+class SyntheticInvestigationStore(CuratedReadQueries):
+    """Proof of database -> matcher -> persisted evidence, with no real source data."""
+
+    POLICY_VERSION = "phase2-research-v1"
+
+    def __init__(self, connection: sqlite3.Connection, *, build_id: str):
+        if not isinstance(build_id, str) or not build_id:
+            raise EvidenceStoreError("A trusted curated build ID is required")
+        self.connection = connection
+        self.build_id = build_id
+        if connection.execute("PRAGMA foreign_keys").fetchone()[0] != 1:
+            raise EvidenceStoreError("SQLite foreign key enforcement must be enabled")
+
+    def _build(self) -> dict[str, Any]:
+        row = self.connection.execute(
+            "SELECT build_id, built_at_utc, build_kind FROM curated_builds WHERE build_id = ?",
+            (self.build_id,),
+        ).fetchone()
+        if row is None:
+            raise EvidenceStoreError("Curated build not found")
+        build_id, built_at, kind = row
+        if kind != "synthetic_fixture":
+            raise EvidenceStoreError("Real-source builds are disabled in this candidate")
+        source_rows = self.connection.execute(
+            """SELECT bs.snapshot_id, bs.source_role, ss.dataset_id, ss.source_query
+               FROM curated_build_sources bs
+               JOIN source_snapshots ss ON ss.snapshot_id = bs.snapshot_id
+               WHERE bs.build_id = ? ORDER BY bs.snapshot_id, bs.source_role""",
+            (self.build_id,),
+        ).fetchall()
+        # A database build_kind assertion is not, by itself, evidence that the
+        # referenced publisher data were fabricated. This extra fixture-only
+        # marker rejects accidentally imported real source snapshots. It is
+        # still NOT a general proof that arbitrary data is synthetic.
+        try:
+            require_fixture_build(kind,[(dataset,query) for _,_,dataset,query in source_rows])
+        except DisclosureDenied as exc:
+            raise EvidenceStoreError(str(exc)) from exc
+        roles = {role for _, role, _, _ in source_rows}
+        if not {"sales", "assessment", "geography"}.issubset(roles):
+            raise EvidenceStoreError("Synthetic build is missing source role(s)")
+        snapshots = sorted({snapshot_id for snapshot_id, _, _, _ in source_rows})
+        return {"build_id": build_id, "built_at_utc": built_at,
+                "source_kind": kind, "source_snapshot_ids": snapshots}
+
+    def search_synthetic_addresses(self, query: str) -> dict[str, Any]:
+        """Return distinct parcel candidates; identical addresses remain ambiguous."""
+        self._build()
+        key = " ".join(re.findall(r"[a-z0-9]+", query.casefold()))
+        rows = self.connection.execute(
+            """SELECT c.candidate_id, c.display_address, c.parcel_hint,
+                      (SELECT COUNT(*) FROM synthetic_address_candidates other
+                       WHERE other.search_key = c.search_key)
+               FROM synthetic_address_candidates c
+               WHERE instr(c.search_key, ?) > 0
+               ORDER BY c.display_address, c.candidate_id LIMIT 9""",
+            (key,),
+        ).fetchall()
+        candidates = [
+            {"address_id": aid, "display_address": label,
+             "ambiguous_address": count > 1,
+             "parcel_hint": hint if count > 1 else None,
+             "identity_scope": "parcel_only"}
+            for aid, label, hint, count in rows[:8]
+        ]
+        return {"source_kind": "synthetic_fixture",
+                "status": "matches" if candidates else "no_match",
+                "candidates": candidates, "truncated": len(rows) > 8}
+
+    def resolve_synthetic_address(self, address_id: str) -> dict[str, Any] | None:
+        """Resolve a selected fictional candidate to one parcel, never a building."""
+        self._build()
+        row = self.connection.execute(
+            """SELECT c.candidate_id, c.display_address, c.pin, c.parcel_hint
+               FROM synthetic_address_candidates c
+               JOIN parcels p ON p.pin = c.pin
+               WHERE c.candidate_id = ?""", (address_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return {"source_kind": "synthetic_fixture",
+                "identity_status": "synthetic_mapping_only",
+                "identity_scope": "parcel_only",
+                "building_identity_verified": False,
+                "address_id": row[0], "display_address": row[1], "pin": row[2],
+                "parcel_hint": row[3]}
 
     def create(self, payload: Mapping[str, Any], *, today: date | None = None,
                investigation_id: str | None = None, recorded_at: datetime | None = None) -> dict[str, Any]:

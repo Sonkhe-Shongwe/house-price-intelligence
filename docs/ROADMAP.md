@@ -2,13 +2,13 @@
 
 **Current governing roadmap:** [P0–P8 phase-gated delivery plan](P_PHASE_ROADMAP.md).
 
-**Status reviewed 24 November 2026:** approximately **84.0%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
+**Status reviewed 24 November 2026:** approximately **85.7%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
 
 | Phase | Focus | Weight | Estimated completion |
 | --- | --- | ---: | ---: |
 | P0 | Discovery, market and source viability | 6% | 94% |
-| P1 | Data quality, ingestion and provenance | 12% | 93% |
-| P2 | Explainable historical comparables | 14% | 65% |
+| P1 | Data quality, ingestion and provenance | 12% | 95% |
+| P2 | Explainable historical comparables | 14% | 75% |
 | P3 | Domain, architecture and API contracts | 10% | 96% |
 | P4 | Backend API and database | 16% | 91% |
 | P5 | Buyer-facing browser investigation | 16% | 88% |
@@ -30,3 +30,6 @@ FR1–FR3: 84.0% (83.6% prior). Owner selected original real-property release. E
 
 
 Canonical Year Correction and Chronological Qualification V1: [3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) all eight workflows passed, [2025 holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 eligible later subjects. Current matcher lower MAE than township on paired 59; 1 km not better. No valuation or policy adoption, no historical as-of proof or display rights. 84.0% remains recorded pending milestone review. See [checkpoint](CHECKPOINT.md).
+
+
+Real-Data Integration V1: Owner approved Real-Data Integration V1 and the 85.7% milestone reassessment, with P1 95% and P2 75%; all other phase scores and exit gates unchanged. No additional live extraction, valuation, main merge or public deployment. External contact is not a prerequisite for controlled non-commercial development; public availability is not proof of unrestricted redistribution. See [contract](engineering/REAL_DATA_INTEGRATION_V1.md).

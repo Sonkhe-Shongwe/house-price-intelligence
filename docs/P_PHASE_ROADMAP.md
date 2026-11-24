@@ -1,6 +1,6 @@
 # House Price Intelligence: P0–P8 phase-gated delivery plan
 
-**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **84.0% weighted MVP progress** (previous 83.6%; initial 22.8%).
+**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **85.7% weighted MVP progress** (previous 84.0%; initial 22.8%).
 
 ## Origin and scope
 
@@ -19,19 +19,23 @@ House Price Intelligence has a different product, market, platform and release t
 | P-stage | Focus | Weight | Estimated done | Contribution |
 | --- | --- | ---: | ---: | ---: |
 | P0 | Product discovery, supported buyer/market, feasibility | 6% | 94% | 5.6 pts |
-| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 93% | 11.2 pts |
-| P2 | Explainable comparable-selection and evaluation | 14% | 65% | 9.1 pts |
+| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 95% | 11.4 pts |
+| P2 | Explainable comparable-selection and evaluation | 14% | 75% | 10.5 pts |
 | P3 | Product contracts, domain model, architecture decisions | 10% | 96% | 9.6 pts |
 | P4 | Database, ingestion-to-storage, backend API | 16% | 91% | 14.6 pts |
 | P5 | Browser property investigation experience | 16% | 88% | 14.1 pts |
 | P6 | Saved investigations, shortlist, side-by-side comparison | 12% | 95% | 11.4 pts |
 | P7 | Integrated quality, rights, security and operational readiness | 8% | 80% | 6.4 pts |
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 35% | 2.1 pts |
-| **Total** | **Bounded flagship MVP** | **100%** | **84.0% weighted** | **84.0 pts** |
+| **Total** | **Bounded flagship MVP** | **100%** | **85.7% weighted** | **85.7 pts** |
 
-## 24 November 2026: Canonical Year Correction and Chronological Qualification V1 (verified deliverable; score review pending)
+## 24 November 2026: Real-Data Integration V1 authorised
 
-[Code 3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) passed all eight triggered workflows. [Fixed 2025 holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 subjects with 83 earlier eligible sales, current matcher MAE $152,615.81 vs township $183,415.81 on the same 59. Current MdAPE 22.53%; 1 km no paired improvement, strict neighbourhood covers 41/59, spatial fallback remains exploratory. P1.3 canonical parsing correction verified; P2.7 chronological evaluation executed, historical publication-time evidence still open. No policy/valuation adoption. All full exit gates open. Recorded scores remain P1 93%, P2 65%, weighted 84.0%, pending separate milestone review. See [checkpoint](CHECKPOINT.md) for full evidence and next release qualification boundary.
+Owner approved Real-Data Integration V1 and the 85.7% milestone reassessment, with P1 95% and P2 75%; all other phase scores and exit gates unchanged. No additional live extraction, valuation, main merge or public deployment. External contact is not a prerequisite for controlled non-commercial development; public availability is not proof of unrestricted redistribution. The canonical correction and fixed holdout justify P1 +2 and P2 +10 percentage points, moving weighted progress from 84.0% to 85.7%. New implementation credit awaits verification. See [integration contract](engineering/REAL_DATA_INTEGRATION_V1.md).
+
+## 24 November 2026: Canonical Year Correction and Chronological Qualification V1 (historical verified deliverable)
+
+[Code 3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) passed all eight triggered workflows. [Fixed 2025 holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 subjects with 83 earlier eligible sales, current matcher MAE $152,615.81 vs township $183,415.81 on the same 59. Current MdAPE 22.53%; 1 km no paired improvement, strict neighbourhood covers 41/59, spatial fallback remains exploratory. P1.3 canonical parsing correction verified; P2.7 chronological evaluation executed, historical publication-time evidence still open. No policy/valuation adoption. All full exit gates open. At that review, recorded scores remained P1 93%, P2 65%, weighted 84.0%; superseded by the owner-approved 85.7% reassessment above. See [checkpoint](CHECKPOINT.md) for full evidence and next release qualification boundary.
 
 ## 24 November 2026: Full Product Release Qualification V1 milestone reassessment (historical baseline)
 
@@ -150,7 +154,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Granular deliverable and acceptance matrix (planning proposal, 23 November 2026)
 
-**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **84.0%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
+**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **85.7%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
 
 **Progress vocabulary for this matrix:**
 
@@ -315,7 +319,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Owner release direction:** full original real-property product selected. Canonical exact-year correction and fixed 2025 holdout verified; next source-specific rights, evidence-only/fallback disclosure and production gates. No further live extraction, contact, provisioning, real display or deployment without scoped approval.
 
-**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **84.0%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
+**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **85.7%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
 ## Full process and phase exit gates
 
@@ -329,7 +333,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Approved bounded product brief, source register, class/geography decisions, permitted field display policy and a documented go/no-go decision. No claim of live listings or commercial appraisals.
 
-### P1: Data engineering — 12% weight; 93% estimated complete
+### P1: Data engineering — 12% weight; 95% estimated complete
 
 **Goal:** A repeatable extraction-to-cleaned-data pipeline with credible record grain, stable IDs and source/version lineage.
 
