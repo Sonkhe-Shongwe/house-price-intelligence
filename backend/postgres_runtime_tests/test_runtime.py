@@ -15,7 +15,7 @@ from urllib.error import HTTPError
 import psycopg
 from psycopg.conninfo import make_conninfo
 from playwright.sync_api import sync_playwright,expect
-from backend.postgres_runtime import bootstrap,ROLE,make_pool,application,ThreadedServer,QuietHandler
+from backend.postgres_runtime import bootstrap,ROLE,make_pool,application,ThreadedServer,QuietHandler,load_runtime_settings
 from backend.postgres_consolidation import BUILDS,activate
 from backend.react_assets import load_react_assets
 from wsgiref.simple_server import make_server
@@ -148,14 +148,15 @@ class RuntimeTests(unittest.TestCase):
         server=make_server("127.0.0.1",0,application(pool,self.passwords,load_react_assets()),server_class=ThreadedServer,handler_class=QuietHandler)
         thread=Thread(target=server.serve_forever,daemon=True);thread.start()
         base="http://127.0.0.1:"+str(server.server_port)
-        def request():
+        def request(path="/health"):
             auth=base64.b64encode(("alice:"+self.passwords["alice"]).encode()).decode()
-            req=Request(base+"/health",headers={"Authorization":"Basic "+auth})
+            req=Request(base+path,headers={"Authorization":"Basic "+auth})
             try:
                 with urlopen(req,timeout=10) as res:return res.status,json.load(res)
             except HTTPError as exc:return exc.code,json.load(exc)
         try:
             with pool.connection() as held:
+                self.assertEqual(request("/health/live"),(200,{"status":"alive","mode":"synthetic_fixture_only"}))
                 start=time.monotonic()
                 self.assertEqual(request(),(503,{"error":"evidence_unavailable"}))
                 self.assertLess(time.monotonic()-start,9)
@@ -174,6 +175,44 @@ class RuntimeTests(unittest.TestCase):
             else:self.fail("Pool did not recover")
         finally:
             server.shutdown();server.server_close();thread.join(timeout=5);pool.close()
+    def test_runtime_settings_and_effective_privilege_drift(self):
+        settings=load_runtime_settings(self.env,8766)
+        self.assertEqual(settings.pool_size,4)
+        self.assertNotIn(self.passwords["alice"],repr(settings))
+        for key,value in (("HPI_RUNTIME_MODE","production"),("HPI_RUNTIME_BIND","0.0.0.0"),
+                          ("HPI_RUNTIME_POOL_SIZE","9"),("HPI_RUNTIME_DSN",ADMIN),
+                          ("HPI_FIXTURE_BOB_PASSWORD",self.passwords["alice"])):
+            with self.subTest(key=key),self.assertRaises(ValueError):
+                load_runtime_settings(dict(self.env,**{key:value}),8766)
+        self.assertEqual(self.call(None,"GET","/health/live")[0],401)
+        self.assertEqual(self.call("alice","GET","/health/live")[1],{"status":"alive","mode":"synthetic_fixture_only"})
+        self.assertEqual(self.call("alice","POST","/health/live",{})[0],405)
+        self.assertEqual(self.call("alice","GET","/health/live?x=1")[0],400)
+        with psycopg.connect(ADMIN,autocommit=True) as admin:
+            admin.execute("SET search_path TO hpi_candidate, pg_catalog")
+            for change,restore in (
+                ("GRANT UPDATE(price_usd_cents) ON sale_transactions TO "+ROLE,
+                 "REVOKE UPDATE(price_usd_cents) ON sale_transactions FROM "+ROLE),
+                ("GRANT SELECT(owner_id) ON workspace_owners TO "+ROLE,
+                 "REVOKE SELECT(owner_id) ON workspace_owners FROM "+ROLE),
+                ("ALTER POLICY own_investigations ON investigations USING (true)",
+                 "ALTER POLICY own_investigations ON investigations USING (owner_id = nullif(current_setting('hpi.owner_id',true),''))"),
+                ("CREATE POLICY unexpected_allow ON shortlists USING (true)",
+                 "DROP POLICY unexpected_allow ON shortlists"),
+                ("GRANT TEMPORARY ON DATABASE hpi_fixture TO "+ROLE,
+                 "REVOKE TEMPORARY ON DATABASE hpi_fixture FROM "+ROLE),
+            ):
+                admin.execute(change)
+                try:
+                    self.assertEqual(self.call("bob","GET","/health"),(503,{"error":"evidence_unavailable"}))
+                    self.assertEqual(self.call("alice","GET","/health/live")[0],200)
+                finally:admin.execute(restore)
+                deadline=time.monotonic()+15
+                while time.monotonic()<deadline:
+                    if self.call("bob","GET","/health")[0]==200:break
+                    time.sleep(.2)
+                else:self.fail("Readiness did not recover after privilege restoration")
+
     def test_bounded_parallel_smoke_and_source_control_permissions(self):
         def sample(i):
             start=time.monotonic()

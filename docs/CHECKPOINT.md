@@ -1,5 +1,9 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: Production Runtime Preparation V1 (offline implementation)
+
+Geographic implementation ceaa239 and map-column fix 360216c: all ten exact-head workflows passed; runtime 45382271478 job 138404058531 passed 15 scenarios including test_centroid_rehearsal_frozen_build_and_browser. 215 Python tests passed at ceaa239 (15/12/14/4/170); no new extraction. Approved baseline 87.1%. Existing runtime hardened with explicit configuration, effective least-privilege and ownership-policy verification, separate authenticated liveness/readiness. Hosted verification pending. See [runtime preparation contract](engineering/PRODUCTION_RUNTIME_PREPARATION_V1.md). No live extraction, durable real data, provider provisioning, hosting, deployment, valuation or main merge.
+
 ## 24 November 2026: Geographic Evidence Integration V1 (offline implementation)
 
 Approved baseline 87.1%. Evidence preview correction 8a3364e passed all 10 triggered workflows. New fixture-only rank/year-bound centroid schematic, V6 distinct fictional points and V5 overlap abstention implemented; hosted verification pending. See [contract](engineering/GEOGRAPHIC_EVIDENCE_INTEGRATION_V1.md). No additional live extraction, real property release, durable real data, deployment, valuation or main merge.

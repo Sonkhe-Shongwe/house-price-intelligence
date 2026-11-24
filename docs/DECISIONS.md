@@ -223,3 +223,7 @@ Continue offline release preparation after verified private rehearsal. Correct c
 
 ## Buyer evidence preview continuation
 Five-sale correction 55d6799 passed 11/11. Implement an explicit minimised read-only fixture projection from verified frozen evidence under existing owner boundary; reject historical source and approval flags. No real route, extra collection, release or matcher change. See [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md).
+
+
+## 24 November 2026: Production Runtime Preparation V1
+Geographic implementation ceaa239 and map-column fix 360216c: all ten exact-head workflows passed; runtime 45382271478 job 138404058531 passed 15 scenarios including test_centroid_rehearsal_frozen_build_and_browser. 215 Python tests passed at ceaa239 (15/12/14/4/170); no new extraction. Continue existing fixture-only runtime rather than add another launcher. Verify explicit runtime configuration and effective table, column, sequence and ownership-policy restrictions, separate authenticated liveness and readiness, drift denial/recovery. See [contract](engineering/PRODUCTION_RUNTIME_PREPARATION_V1.md). No public/production mode introduced.
