@@ -1,6 +1,6 @@
 # House Price Intelligence: P0–P8 phase-gated delivery plan
 
-**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Owner-authorised reassessment:** 24 November 2026, **62.9% weighted estimated MVP progress** (previous baseline 22.8%).
+**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **66.5% weighted MVP progress** (previous 62.9%; initial 22.8%).
 
 ## Origin and scope
 
@@ -18,18 +18,34 @@ House Price Intelligence has a different product, market, platform and release t
 
 | P-stage | Focus | Weight | Estimated done | Contribution |
 | --- | --- | ---: | ---: | ---: |
-| P0 | Product discovery, supported buyer/market, feasibility | 6% | 90% | 5.4 pts |
-| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 80% | 9.6 pts |
+| P0 | Product discovery, supported buyer/market, feasibility | 6% | 92% | 5.5 pts |
+| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 88% | 10.6 pts |
 | P2 | Explainable comparable-selection and evaluation | 14% | 65% | 9.1 pts |
-| P3 | Product contracts, domain model, architecture decisions | 10% | 75% | 7.5 pts |
-| P4 | Database, ingestion-to-storage, backend API | 16% | 55% | 8.8 pts |
+| P3 | Product contracts, domain model, architecture decisions | 10% | 80% | 8.0 pts |
+| P4 | Database, ingestion-to-storage, backend API | 16% | 65% | 10.4 pts |
 | P5 | Browser property investigation experience | 16% | 65% | 10.4 pts |
 | P6 | Saved investigations, shortlist, side-by-side comparison | 12% | 75% | 9.0 pts |
-| P7 | Integrated quality, rights, security and operational readiness | 8% | 35% | 2.8 pts |
+| P7 | Integrated quality, rights, security and operational readiness | 8% | 40% | 3.2 pts |
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 5% | 0.3 pts |
-| **Total** | **Bounded flagship MVP** | **100%** | **62.9% weighted** | **62.9 pts** |
+| **Total** | **Bounded flagship MVP** | **100%** | **66.5% weighted** | **66.5 pts** |
 
-## 24 November 2026: owner-authorised milestone reassessment
+## 24 November 2026: RD1–RD7 verified milestone reassessment
+
+The owner authorised bounded live cohort research and synthetic ingestion/disclosure implementation, with progress reassessment after verification. Application commit [a24ce43](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/a24ce43f5d97adf6af50646e9430ea38dfa459d1). [Python regression job](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485580) passed 189 Python tests including seven new ingestion/guard scenarios; [React push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485778) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351492795) passed 33 browser tests; [PostgreSQL push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485518) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351492770) passed five existing compatibility tests. Verify remaining full regression workflow results separately.
+
+[Exact cohort audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485804) at a24ce43 ran 9 offline safeguards and replayed 3,539 sales, 39,401 building rows, 273 Class 203 sales, 262 distinct PIN/prior-year keys. All 262 had one nonblank address row, zero missing/blank/multiple, zero shared normalised labels among same-year single-row cohort keys. Metadata stable within run. Extracted 2026-11-24 07:53:33 UTC; source update epochs wvhk-k5uv 1794745762, x54s-btds 1794760638, 3723-97qp 1794745694. Counts coincide with previous audit; not proof of identical membership, market-wide uniqueness, physical building identity or historical availability. No property-level output.
+
+| Stage | Previous | Revised | Evidence and remaining constraint |
+| --- | ---: | ---: | --- |
+| Discovery | 90% | 92% | Exact cohort address coverage measured; rights and final market still blocked |
+| Data | 80% | 88% | Bounded replay, identity counts, synthetic manifests, idempotence and conflict rejection; real import and as-of unproven |
+| Architecture | 75% | 80% | Candidate version-specific address resolution and default-deny source/field guard; production auth and approved identity/rights still open |
+| Backend | 55% | 65% | Atomic canonical SQL candidate import, separate revisions and old frozen investigation/notes preserved; no production importer/runtime switch |
+| Quality | 35% | 40% | New negative tests and actual source safeguards; release security, operational controls and full acceptance outstanding |
+
+P2, P5, P6 and P8 unchanged: no independent comparable accuracy validation, new buyer UI, production account flow or release. Weighted estimate 62.9% → **66.5%**, +3.6 percentage points (rounded). No phase exit closes. Real property fields remain disabled; synthetic import candidate is isolated, not a deployed PostgreSQL importer. Indicative 70.1% target not awarded because source rights, production import/identity and independent evaluation remain open. See [RD contract](engineering/REAL_DATA_READINESS_V1.md).
+
+## 24 November 2026: prior owner-authorised milestone reassessment (historical 62.9% baseline)
 
 Evidence baseline: development [1cedf378e806f5fafc18639ba72207a70f2b4195](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/1cedf378e806f5fafc18639ba72207a70f2b4195). Six push/PR workflows passed: [regression](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348798465), [React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348798449), [PostgreSQL](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348798707), [PR regression](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348805722), [PR React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348805701), [PR PostgreSQL](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348805672). 182 Python + 16 legacy browser + 33 React + 5 PostgreSQL tests passed at this head; 4 address safeguards and the aggregate-only audit passed at earlier commit c6a16aa ([run](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45348627334)), unchanged audit code. 240 test executions across these distinct suites, not doubled for PRs. No new feature is credited for this documentation commit.
 
@@ -61,7 +77,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Granular deliverable and acceptance matrix (planning proposal, 23 November 2026)
 
-**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **62.9%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
+**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **66.5%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
 
 **Progress vocabulary for this matrix:**
 
@@ -73,32 +89,32 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Every item must eventually be accompanied by:** concrete output or code reference, the exact tested commit/CI or dated research evidence, owner review where necessary, and its resulting state: *proposed → implemented → verified → integrated → accepted → released*. For future progress reviews, record both **candidate implementation** and **accepted phase credit**. A long checklist is not itself evidence of completion. The historical Phase 0–2 audits remain distinct from delivery stages P0–P2.
 
-### P0 | Buyer, market and product feasibility | Weight 6% | Recorded completion 90%
+### P0 | Buyer, market and product feasibility | Weight 6% | Recorded completion 92%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
 | P0.1 | Define buyer decision and narrow value proposition | RESEARCH | Owner accepts Investigate → Compare → Decide for a single buyer comparing two or three homes, not a listings marketplace |
 | P0.2 | Define explicit first-MVP inclusion/exclusion list | PARTIAL | Owner approves flagship features and non-goals, including conditional-only ML and no unverified live listings |
 | P0.3 | Research one candidate geography and property segment | RESEARCH | Record market, source IDs, eligible-sale counts, supported class and limitations for the pilot |
-| P0.4 | Validate source availability and property-entry feasibility | PARTIAL | Live city-level aggregate address feasibility passed; exact township/Class 203 cohort, permitted identity and ambiguous-address audit remain open |
+| P0.4 | Validate source availability and property-entry feasibility | PARTIAL | Bounded exact township 17/Class 203 current-source replay: 262 of 262 keys had one nonblank address row; market-wide identity/rights not approved |
 | P0.5 | Review field-by-field data rights, privacy and attribution | BLOCKED | Written reuse/display decision for each required source/field; define synthetic-only fallback if needed |
 | P0.6 | Approve final first-market/class and intended buyer scenario | BLOCKED | Owner signs off market and class or documents a deliberate no-go/pivot with reasons |
 | P0.7 | Issue bounded feasibility and release-path decision | BLOCKED | A go/no-go record reconciles coverage, quality, legal permissions, cost and the permitted demo mode |
 
 **P0 exit:** Approved scope, first supported market/class, source register, field policy and a clear permitted release approach. Current evidence: Evanston township 17 and Class 203 are **research pilot candidates**, not permanent geography or public-display approval.
 
-### P1 | Source extraction, cleaning and historical data | Weight 12% | Recorded completion 80%
+### P1 | Source extraction, cleaning and historical data | Weight 12% | Recorded completion 88%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
 | P1.1 | Source inventory and schema/field register | RESEARCH | Dataset IDs, field definitions, source URLs, licence status and schema metadata captured |
 | P1.2 | Deterministic bounded extraction in CI | RESEARCH | Re-running the documented query returns reproducible counts or explicitly explains any dataset revision |
 | P1.3 | Data type, null, duplicate and exclusion policies | PARTIAL | Automated quality log tracks conversions, exclusions and source changes, including historical numeric parser issue |
-| P1.4 | Preserve transaction, parcel, building and card grain | PARTIAL | Uniqueness and ambiguous/multi-parcel tests reconcile rows without allocating one sale to each parcel |
+| P1.4 | Preserve transaction, parcel, building and card grain | PARTIAL | Exact-cohort parcel/year and synthetic snapshot-specific address ambiguity verified; real building identity remains unverified |
 | P1.5 | Historical as-of availability and late/backfilled changes | BLOCKED | Archived snapshot/publication evidence or an explicitly conservative non-as-of policy is reviewed and implemented |
-| P1.6 | Versioned source manifest, drift/re-run comparison | PARTIAL | Extract timestamp, query, schema/source update time and drift assertions can be checked across two runs |
-| P1.7 | Idempotent curated application-ready import | OPEN | Duplicate import leaves stable record counts, durable IDs and valid source-build membership |
-| P1.8 | Publisher-safe output and operational reproducibility | PARTIAL | Aggregate-only source audit and safeguards verified; field reuse decision remains required |
+| P1.6 | Versioned source manifest, drift/re-run comparison | PARTIAL | Metadata compared before/after bounded cohort replay; synthetic content/build manifests and revision tests passed; real refresh/drift history remains |
+| P1.7 | Idempotent curated application-ready import | PARTIAL | Synthetic isolated canonical v3 import idempotence, stable identifiers and atomic conflicts verified; real permitted import still open |
+| P1.8 | Publisher-safe output and operational reproducibility | PARTIAL | Aggregate-only city and exact cohort audits passed; no raw rows emitted; reuse rights remain open |
 
 **P1 exit:** Reproducible ingestion, stable keys, explained exclusions, source lineage and legally safe curated storage. Research pilot counts include 3,539 sales, 39,401 building records and 1,285 accepted historical joins; those alone do not prove complete historical or legal validity.
 
@@ -118,7 +134,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P2 exit:** Reliable, explainable comparable selection with a justified fallback and independent assessment. **Known limitation:** on the 17 fallback cases, exploratory 2 km retrospective MAE was about $209,471, worse than township comparison at about $192,153. Do **not** present the sample median as a validated house-price prediction.
 
-### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 75%
+### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 80%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -131,12 +147,12 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P3.7 | Define schema evolution and recovery method | VERIFIED | Owner accepted provisional synthetic migration contract; SQLite restart and PostgreSQL candidate migration/restore verified; production plan open |
 | P3.8 | Select application stack, hosting and access approach | PARTIAL | PostgreSQL candidate owner-approved and CI-verified; production auth, hosting, concurrency and runtime not approved |
 | P3.9 | Define secure, permission-aware buyer experience | PARTIAL | React workspace, error/recovery and responsive keyboard checks passed; full UX/access/privacy review remains |
-| P3.10 | Decide real geography/identity/as-of/field-rights boundaries | BLOCKED | Specific source and rights evidence connects the final market to safe real property selection and display |
+| P3.10 | Decide real geography/identity/as-of/field-rights boundaries | BLOCKED | Exact cohort address coverage measured, synthetic parcel-only resolver and default-deny field policy tested; real identity/field rights/as-of remain unapproved |
 | P3.11 | Run formal P3 contract and design acceptance review | BLOCKED | Owner signs off ERD, migration, API, errors, evidence states, UX and threat/privacy plan with unresolved issues recorded |
 
 **P3 exit:** A **signed-off**, test-backed domain, data, API, error, security and first-journey specification. A good synthetic CI run is important evidence, but does not mean real identity, usage rights or production migration has been accepted.
 
-### P4 | Database, curated ingestion and backend APIs | Weight 16% | Recorded completion 55%
+### P4 | Database, curated ingestion and backend APIs | Weight 16% | Recorded completion 65%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -145,9 +161,9 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P4.3 | Join the existing pure matcher to curated SQL records | VERIFIED | End-to-end fixture run returns actual stored synthetic transactions, not hand-entered output totals |
 | P4.4 | Store, check and reopen frozen comparable evidence | VERIFIED | Fixture JSON, transaction IDs, snapshot IDs and exact cents remain consistent in memory **and in opt-in trusted local SQLite files** after restart |
 | P4.5 | Implement production-appropriate durable database | PARTIAL | PostgreSQL candidate canonical service parity and actual dump/restore verified; production runtime, pooling and operational recovery not accepted |
-| P4.6 | Implement idempotent source-to-curated import | OPEN | Re-importing one authorised data build avoids duplicate sale/property records and tracks exclusions |
-| P4.7 | Resolve real buyer properties without unsupported guesses | BLOCKED | Approved address/parcel/building resolver and clear ambiguous/not-found outcomes tested against allowed records |
-| P4.8 | Implement time-valid evidence and source refresh handling | BLOCKED | Revisions, retired builds and as-of limitations are explicit; old saved results remain reproducible |
+| P4.6 | Implement idempotent source-to-curated import | PARTIAL | Synthetic canonical relational importer idempotence and rollback verified; real adapter and production runtime not approved |
+| P4.7 | Resolve real buyer properties without unsupported guesses | BLOCKED | 262/262 cohort key address rows present, synthetic snapshot-specific ambiguity tested; permitted real resolver not implemented |
+| P4.8 | Implement time-valid evidence and source refresh handling | PARTIAL | Synthetic independent revision builds preserve original saved evidence and notes; production refresh and as-of policy still blocked |
 | P4.9 | Finalise API stability, error safety and operational boundaries | PARTIAL | Contract/response compatibility, safe errors, safe query handling and deployment-specific limits reviewed |
 | P4.10 | Run persistent database/API acceptance | PARTIAL | SQLite restart, frozen evidence/notes and PostgreSQL candidate restore verified; real import, refresh and access still open |
 
@@ -185,14 +201,14 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P6 exit:** An owner-accepted, responsible **Investigate → Compare → Decide** buyer workflow with two or three reopenable properties, notes, defensible evidence and appropriate data/access/retention and UX gates. The **implemented fictional-only P6 workflow** is verified, but it is not a production or formal P6 acceptance.
 
-### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 35%
+### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 40%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
-| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | Exact head 1cedf37: 182 Python, 16 legacy browser, 33 React and 5 PostgreSQL tests; six workflows passed |
+| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | a24ce43: 189 Python, 33 React, 5 PostgreSQL tests passed; nine cohort audit guards passed; verify latest full workflow status |
 | P7.2 | Validate hostile/invalid/unsupported requests | PARTIAL | Input validation, same-origin guards, error contracts and non-fabrication are checked and extended to real deployment assumptions |
-| P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Frozen evidence integrity, SQLite and PostgreSQL migration rollback plus actual candidate dump/restore tested; production recovery remains |
-| P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Extend research invariants to accepted end-to-end imports and dated data builds |
+| P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Synthetic revision preservation, import conflict rollback and reclassified-build denial added; production recovery remains |
+| P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Bounded cohort replay metadata stable; synthetic source revision/frozen evidence tests passed; chronological validation remains open |
 | P7.5 | Accessibility, responsiveness and buyer failure recovery | PARTIAL | Real Chromium responsive/keyboard and map failure recovery checks; full accessibility review open |
 | P7.6 | Authentication/privacy/retention and secrets review | PARTIAL | Two fictional owners isolated at PostgreSQL database level; authentication, pool identity and retention review remain blocked |
 | P7.7 | Load, rate, recovery and operational monitoring checks | OPEN | Representative latency, resource ceilings, backup drill and clear failure/runbook criteria recorded |
@@ -224,13 +240,13 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 4. **Review integrated P6 for owner acceptance before calling this a flagship product:** Two/three fictional enquiries, notes, side-by-side evidence and frozen-restart reopening are code-verified. Complete missing UX, access, retention, approved source display and release-like cases.
 5. **Treat P7 and P8 as independent release gates:** Security, rights, accessibility, performance, safe deployment and portfolio walkthrough. A green development build is not public release authorisation.
 
-**Suggested next milestone:** Real Data Integration Readiness V1 (separate owner authorisation required). Establish exact cohort address coverage, controlled idempotent ingestion, field-level disclosure and rights/as-of boundaries. Continue production access/runtime planning and final UX review separately.
+**Suggested next milestone:** choose a permitted release path and production runtime integration (separate owner authorisation required). Resolve field rights and retrospective disclosure policy, then integrate the PostgreSQL candidate with a controlled ingestion/access boundary. Do not expose real property records without specific approval.
 
-**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The owner-authorised 24 November reassessment is **62.9%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
+**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **66.5%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
 ## Full process and phase exit gates
 
-### P0: Discovery and feasibility — 6% weight; 90% estimated complete
+### P0: Discovery and feasibility — 6% weight; 92% estimated complete
 
 **Goal:** Define a credible buyer decision, one supported geography and housing segment, a useful first product scope and viability boundaries.
 
@@ -240,7 +256,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Approved bounded product brief, source register, class/geography decisions, permitted field display policy and a documented go/no-go decision. No claim of live listings or commercial appraisals.
 
-### P1: Data engineering — 12% weight; 80% estimated complete
+### P1: Data engineering — 12% weight; 88% estimated complete
 
 **Goal:** A repeatable extraction-to-cleaned-data pipeline with credible record grain, stable IDs and source/version lineage.
 
@@ -260,7 +276,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Deterministic eligibility and no-future-sale rules, one-property-one-comparable accounting, complete explanation/provenance, independent evaluation, justified fallback rules and truthful insufficiency response. Do not promote experimental median to a validated price estimate.
 
-### P3: Product architecture and contracts — 10% weight; 75% estimated complete
+### P3: Product architecture and contracts — 10% weight; 80% estimated complete
 
 **Goal:** Translate the research engine into explicit, testable business objects and contracts for a real application.
 
@@ -270,7 +286,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Accepted database ERD and migration plan, endpoint/request/response contract, error and unsupported states, first end-to-end journey specification, security/privacy rules and contract-test fixtures.
 
-### P4: Backend API and database — 16% weight; 55% estimated complete
+### P4: Backend API and database — 16% weight; 65% estimated complete
 
 **Goal:** Running server and durable application storage connecting curated data to enquiries and evidence.
 
@@ -294,7 +310,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** A returning buyer can open two saved properties, compare supported evidence and notes, and reopen identical source/rule-referenced results. An insufficient-data home is still savable.
 
-### P7: Integrated QA and readiness — 8% weight; 35% estimated complete
+### P7: Integrated QA and readiness — 8% weight; 40% estimated complete
 
 **Goal:** Prove the complete system is reliable, secure and honest.
 

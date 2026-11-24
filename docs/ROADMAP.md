@@ -2,21 +2,21 @@
 
 **Current governing roadmap:** [P0–P8 phase-gated delivery plan](P_PHASE_ROADMAP.md).
 
-**Status reviewed 24 November 2026:** approximately **62.9%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
+**Status reviewed 24 November 2026:** approximately **66.5%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
 
 | Phase | Focus | Weight | Estimated completion |
 | --- | --- | ---: | ---: |
-| P0 | Discovery, market and source viability | 6% | 90% |
-| P1 | Data quality, ingestion and provenance | 12% | 80% |
+| P0 | Discovery, market and source viability | 6% | 92% |
+| P1 | Data quality, ingestion and provenance | 12% | 88% |
 | P2 | Explainable historical comparables | 14% | 65% |
-| P3 | Domain, architecture and API contracts | 10% | 75% |
-| P4 | Backend API and database | 16% | 55% |
+| P3 | Domain, architecture and API contracts | 10% | 80% |
+| P4 | Backend API and database | 16% | 65% |
 | P5 | Buyer-facing browser investigation | 16% | 65% |
 | P6 | Save/reopen, shortlist and compare | 12% | 75% |
-| P7 | Integrated QA, privacy, rights, readiness | 8% | 35% |
+| P7 | Integrated QA, privacy, rights, readiness | 8% | 40% |
 | P8 | Release, demo and portfolio handoff | 6% | 5% |
 
-**Current delivery distinction:** Owner accepted P3.1–P3.7 provisionally for synthetic scope and PostgreSQL as a candidate. P3 contracts, synthetic P4 backend, P5 React workspace with history and optional fictional map, and P6 two-to-three-property shortlist/notes/comparison are integrated and verified on development. SQLite remains the local runtime; PostgreSQL candidate parity, dump/restore and ownership isolation passed. **No full P0–P8 phase exit is claimed.** The owner-authorised milestone reassessment recognises these partial deliverables, moving 22.8% to 62.9% without changing weights or exit gates. See [detailed roadmap](P_PHASE_ROADMAP.md), [current checkpoint](CHECKPOINT.md) and [production readiness](engineering/PRODUCTION_READINESS_V1.md).
+**Current delivery distinction:** Owner accepted P3.1–P3.7 provisionally for synthetic scope and PostgreSQL as a candidate. P3 contracts, synthetic P4 backend, P5 React workspace with history and optional fictional map, and P6 two-to-three-property shortlist/notes/comparison are integrated and verified on development. SQLite remains the local runtime; PostgreSQL candidate parity, dump/restore and ownership isolation passed. **No full P0–P8 phase exit is claimed.** The owner-authorised milestone reassessment recognises these partial deliverables, moving 22.8% to 62.9% without changing weights or exit gates. RD1–RD7 adds bounded exact-cohort address coverage (262/262 keys) and verified synthetic versioned import/disclosure, raising the estimate to 66.5%. Real data rights and production runtime remain open. See [detailed roadmap](P_PHASE_ROADMAP.md), [current checkpoint](CHECKPOINT.md) and [production readiness](engineering/PRODUCTION_READINESS_V1.md).
 
 **Critical boundaries:** The **42 offline tests** refer to the dated research pipeline, not the current application CI; see the [checkpoint](CHECKPOINT.md) for current test counts. Do not equate those historical audits with a finished app. Only 83 historical 2024 Class 203 subjects were evaluated; a 2 km fallback recovered 17 previously unsupported subjects but produced worse retrospective median-price MAE than the township baseline on those cases. No current-market valuation or trained ML model is authorized. Historical availability and public display rights remain unresolved.
 

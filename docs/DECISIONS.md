@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 62.9% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 66.5% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -123,3 +123,7 @@ Owner authorised formal review and updating the recorded estimate after meaningf
 
 ## 24 November 2026: real-data integration readiness authorisation
 Owner approved RD1–RD7 bounded live cohort research, synthetic curated ingestion/disclosure and verification on development. No real property publication, paid infrastructure, main merge or deployment. No source reuse grant or production runtime switch. See [readiness contract](engineering/REAL_DATA_READINESS_V1.md).
+
+
+## 24 November 2026: RD milestone progress review
+Owner-authorised RD1–RD7 verification supports 66.5% weighted planning progress (previous 62.9%, +3.6 points). Same weights and gates. Exact cohort address audit passed; synthetic idempotent ingestion, source revision retention and guard verified. Real-data rights and production runtime remain blocked. See [RD contract](engineering/REAL_DATA_READINESS_V1.md) and [roadmap](P_PHASE_ROADMAP.md). No release approval.

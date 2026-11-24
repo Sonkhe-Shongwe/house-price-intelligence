@@ -15,3 +15,9 @@ Import v2 with corrected fictional sale cents under new snapshot/build identifie
 
 ## RD7 handoff
 Verify exact-head CI and live aggregate output, record failure if source unavailable. Estimate partial progress in [roadmap](../P_PHASE_ROADMAP.md) only after verification; no phase exit closes from this candidate alone. See [checkpoint](../CHECKPOINT.md).
+
+
+## Verified hosted evidence and progress (24 November 2026)
+[Exact cohort audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485804) at a24ce43 ran 9 offline safeguards and replayed 3,539 sales, 39,401 building rows, 273 Class 203 sales, 262 distinct PIN/prior-year keys. All 262 had one nonblank address row, zero missing/blank/multiple, zero shared normalised labels among same-year single-row cohort keys. Metadata stable within run. Extracted 2026-11-24 07:53:33 UTC; source update epochs wvhk-k5uv 1794745762, x54s-btds 1794760638, 3723-97qp 1794745694. Counts coincide with previous audit; not proof of identical membership, market-wide uniqueness, physical building identity or historical availability. No property-level output.
+
+Application a24ce43: 189 Python including seven candidate tests, 33 React and five PostgreSQL tests passed. Nine separate cohort safeguards passed. Full legacy-browser workflow status must be checked separately. Verified partial deliverables support 66.5% from 62.9%, +3.6 points; see [roadmap](../P_PHASE_ROADMAP.md). No whole-phase exit, production importer, public property rights or deployment approval.

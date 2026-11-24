@@ -1,7 +1,10 @@
 # House Price Intelligence: current checkpoint
 
-## 24 November 2026: Real Data Integration Readiness V1
-Owner authorised RD1–RD7, bounded live cohort research and synthetic curated ingestion/disclosure, commits and CI on development. See [readiness contract](engineering/REAL_DATA_READINESS_V1.md). Prior planning estimate 62.9%; reassess only after verification. No real records published, no main merge or deployment. Verify exact current head and aggregate audit.
+## 24 November 2026: Real Data Integration Readiness V1 (latest milestone)
+
+**Current authoritative weighted planning estimate 66.5% (62.9% prior, +3.6 percentage points).** P0 92%, P1 88%, P2 65%, P3 80%, P4 65%, P5 65%, P6 75%, P7 40%, P8 5%. All gates open. Latest implementation a24ce43: 189 Python, 33 React, 5 PostgreSQL tests passed; nine separate cohort guard tests passed. [Exact cohort audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45351485804) at a24ce43 ran 9 offline safeguards and replayed 3,539 sales, 39,401 building rows, 273 Class 203 sales, 262 distinct PIN/prior-year keys. All 262 had one nonblank address row, zero missing/blank/multiple, zero shared normalised labels among same-year single-row cohort keys. Metadata stable within run. Extracted 2026-11-24 07:53:33 UTC; source update epochs wvhk-k5uv 1794745762, x54s-btds 1794760638, 3723-97qp 1794745694. Counts coincide with previous audit; not proof of identical membership, market-wide uniqueness, physical building identity or historical availability. No property-level output. Synthetic import/revision/field guard tested in isolated canonical SQLite candidate; no real importer or production runtime switch. No new live audit on documentation-only change. Next review: permitted release route, production runtime/access; separate authorisation needed. Previous 62.9% and 22.8% records below are dated historical estimates. See [roadmap](P_PHASE_ROADMAP.md).
+
+Owner authorised RD1–RD7, bounded live cohort research and synthetic curated ingestion/disclosure, commits and CI on development. See [readiness contract](engineering/REAL_DATA_READINESS_V1.md). Prior planning estimate 62.9%; revised after verified RD milestone above. No real records published, no main merge or deployment. Verify exact current head and aggregate audit.
 
 ## 24 November 2026: authoritative progress reconciliation
 
