@@ -12,6 +12,7 @@ from backend.historical_postgres import _plan_rows, _verify, _address_options, _
 from backend.postgres_fixture import FixtureConnection
 from backend.postgres_ingestion import _check
 from backend.real_source_intake import DATASETS, POLICY, digest, prepare_intake
+from backend.historical_seal_config import load_historical_seal
 
 ROLE="hpi_historical_reader"
 SCHEMA="hpi_candidate"
@@ -128,6 +129,9 @@ class PrivateHistoricalReader:
     def __init__(self,conn,seal):
         self.conn=conn
         self.seal=dict(seal)
+    @classmethod
+    def from_seal_file(cls,conn,path):
+        return cls(conn,load_historical_seal(path))
     def search(self,query,analysis_date):
         if not isinstance(query,str) or not query.strip() or len(query)>240:
             raise ImportRefused("Invalid historical address query")

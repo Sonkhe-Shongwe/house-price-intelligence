@@ -446,3 +446,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 **Verified as of 22 November 2026:** GitHub Actions [run 45046687782](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782); [Phase 2 retrospective results](research/PHASE2_CLOUD_AUDIT_RESULTS.md); [project checkpoint](CHECKPOINT.md).
 
 **Progress tracking:** On every meaningful verified milestone review, update this file's stage figures, explain evidence and changed assumptions, and update `docs/CHECKPOINT.md`. Document rejected experiments rather than reporting them as successful features. No automatic %-increase per commit or test count. The original House Price Intelligence exploratory roadmap is preserved at [docs/archive/INITIAL_ROADMAP_2026-11-22.md](archive/INITIAL_ROADMAP_2026-11-22.md).
+
+
+## 24 November 2026: Controlled Product Activation Preparation V1
+Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. Historic recovery drill and private seal configuration pending. See [activation decision register](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). All full release gates open; 87.1% approved.

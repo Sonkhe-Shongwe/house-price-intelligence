@@ -76,3 +76,5 @@ Current active workstream: [Real-Data Integration V1](engineering/REAL_DATA_INTE
 Current verified workstream: [Production Data Activation Preparation V1](engineering/PRODUCTION_DATA_ACTIVATION_V1.md). Private bounded real rehearsal requires separate execution approval; no actual data acquired in this milestone.
 
 Latest verified workstream: [Private Real-Data Integration Rehearsal V1](engineering/PRIVATE_REAL_REHEARSAL_V1.md). Live run 45375702613 passed; one-time extraction consumed, aggregate-only evidence. Next: release contract and controlled activation preparation.
+
+Latest activation handoff: [Controlled Product Activation Preparation V1](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Real-source collection approval consumed; separate private beta and public release decisions.

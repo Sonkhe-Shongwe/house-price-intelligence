@@ -68,3 +68,6 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 **Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 
 The [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) is a separate, preserved source of graduate recruitment research. This repository is the standalone software project.
+
+
+**Latest runtime preparation:** Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. [Controlled activation decision register](docs/engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). No actual deployment or public real-data release.

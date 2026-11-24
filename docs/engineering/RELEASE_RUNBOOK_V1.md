@@ -17,3 +17,6 @@ Dedicated release-check CI uses pinned axe-core against actual browser views and
 
 ## Operational preparation follow-up
 See [Production Runtime Preparation V1](PRODUCTION_RUNTIME_PREPARATION_V1.md). Existing fixture-only launcher has explicit validated environment configuration; authenticated `/health/live` reports process liveness independent of DB, existing `/health` checks source integrity, active revision and effective database permissions. Never expose fixture Basic or offline OIDC on a public interface. No actual provider or production configuration approved.
+
+## Controlled activation and recovery
+See [activation decision register](CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Rehearse two historical revisions with private operator seals and backup/restore without owner/ACL restoration, then fresh restricted reader. No real backup, cloud or production approval.

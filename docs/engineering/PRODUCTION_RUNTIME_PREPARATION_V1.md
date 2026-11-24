@@ -11,3 +11,6 @@ Authenticated GET /health/live returns fixed process liveness without taking a D
 
 ## Acceptance
 Hosted PostgreSQL 17: reject unsafe configuration and admin credentials; readiness denied under source column write grant, owner-table column read grant, altered or extra RLS policy and temporary privilege; recover after restoration; liveness during pool exhaustion; preserve existing buyer workflow and all regression tests. Actual production credentials/TLS, external issuer, backup and operational monitoring still require reviewed configuration and separate approval. Record exact-head evidence before credit.
+
+## Verified result
+Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction.

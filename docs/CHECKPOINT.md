@@ -1,5 +1,9 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: Controlled Product Activation Preparation V1
+
+Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. Approved baseline 87.1%. Historical recovery and private seal configuration implemented for invented inputs; hosted verification pending. See [activation decision register](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Real data removed after prior rehearsal. No new extraction, durable real storage, real disclosure, provider provisioning, deployment, valuation or main merge.
+
 ## 24 November 2026: Production Runtime Preparation V1 (offline implementation)
 
 Geographic implementation ceaa239 and map-column fix 360216c: all ten exact-head workflows passed; runtime 45382271478 job 138404058531 passed 15 scenarios including test_centroid_rehearsal_frozen_build_and_browser. 215 Python tests passed at ceaa239 (15/12/14/4/170); no new extraction. Approved baseline 87.1%. Existing runtime hardened with explicit configuration, effective least-privilege and ownership-policy verification, separate authenticated liveness/readiness. Hosted verification pending. See [runtime preparation contract](engineering/PRODUCTION_RUNTIME_PREPARATION_V1.md). No live extraction, durable real data, provider provisioning, hosting, deployment, valuation or main merge.

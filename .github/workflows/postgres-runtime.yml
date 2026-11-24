@@ -37,6 +37,7 @@ jobs:
       - name: Real PostgreSQL, HTTP concurrency, ownership, revision and Chromium
         env:
           HPI_RELEASE_SCREENSHOTS: ${{ runner.temp }}/hpi-release
+          HPI_PG_CONTAINER: ${{ job.services.postgres.id }}
           HPI_PG_DSN: postgresql://postgres:fictional-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/hpi_fixture
         run: python -m unittest discover -s backend/postgres_runtime_tests -v
 

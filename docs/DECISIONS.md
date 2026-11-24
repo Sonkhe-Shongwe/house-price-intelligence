@@ -227,3 +227,7 @@ Five-sale correction 55d6799 passed 11/11. Implement an explicit minimised read-
 
 ## 24 November 2026: Production Runtime Preparation V1
 Geographic implementation ceaa239 and map-column fix 360216c: all ten exact-head workflows passed; runtime 45382271478 job 138404058531 passed 15 scenarios including test_centroid_rehearsal_frozen_build_and_browser. 215 Python tests passed at ceaa239 (15/12/14/4/170); no new extraction. Continue existing fixture-only runtime rather than add another launcher. Verify explicit runtime configuration and effective table, column, sequence and ownership-policy restrictions, separate authenticated liveness and readiness, drift denial/recovery. See [contract](engineering/PRODUCTION_RUNTIME_PREPARATION_V1.md). No public/production mode introduced.
+
+
+## 24 November 2026: Controlled Product Activation Preparation V1
+Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. Historical backup/restore and private seal configuration rehearsal, no new real collection or storage. See [activation decision register](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Next controlled private real beta requires explicit scope, no public release by implication.
