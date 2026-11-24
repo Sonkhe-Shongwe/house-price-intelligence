@@ -30,6 +30,21 @@ Run the isolated cross-layer check as part of [.github/workflows/react-map-full-
 
 **Verified** by [GitHub Actions 45300580369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45300580369): the actual WSGI API JSON and 13 integrity/tamper guards passed, alongside six real Chrome journeys and the clean Vite build. See the [source/geometry integration contract](../../docs/design/READ_ONLY_REACT_EVIDENCE_ADAPTER_2026-11-24.md). **That adapter-only test does not itself establish browser-to-Python connectivity.** The separate source-connected preview below does; real geometry, live application changes, framework acceptance and release remain unapproved.
 
+## Explicit parcel selection and saved investigation workflow (24 November)
+
+The separate **/buyer-workflow** route is an opt-in fixture-only React -> Python WSGI -> SQLite integration proof. It searches invented addresses, distinguishes two synthetic parcels sharing one address, requires selection and server-side PIN verification, accepts buyer-reported area/asking price/date, saves through the original POST investigation route, and immediately reopens the frozen evidence with a GET. Exact sale strings, warnings and provenance remain Python-owned. The map stays **unavailable** because there is no verified geographic feature contract.
+
+Run from the repository root:
+
+```bash
+npm ci --prefix design-prototypes/react-map-spike
+npm run build --prefix design-prototypes/react-map-spike
+python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8797 --enable-buyer-workflow
+```
+
+Then open **http://127.0.0.1:8797/buyer-workflow**. Test searches: **101 Fictional Way** (one parcel) and **105 Fictional Court** (two distinct parcel options). The flag explicitly permits only address search and investigation creation. Remove it to restore the original GET-only preview; no shortlist mutations are allowed in either mode.
+
+An additional [eight-scenario browser test](tests/test_buyer_workflow.py) covers creation, exact cents, frozen reopening, ambiguous parcel identity, stale search clearing, denial of other writes, mobile and screenshots. It runs in the isolated [React CI workflow](../../.github/workflows/react-map-full-source-ci.yml). The result is **not** proof of production readiness or public security. See the [buyer-workflow integration gate](../../docs/design/REACT_BUYER_WORKFLOW_CREATE_REOPEN_GATE_2026-11-24.md).
 ## Working read-only React -> local Python/SQLite preview (24 November)
 
 The new source-connected investigation screen is separate from the invented-map style lab. It performs **real same-origin GET requests** to HPI's existing WSGI `GET /v1/investigations/{uuid}` and `GET /v1/shortlists/{uuid}`, using fresh fictional records seeded by the isolated Python runner. It displays exact cents, source snapshots and matching explanations, with a deliberate **Location unavailable** panel and no fictitious property pins.
