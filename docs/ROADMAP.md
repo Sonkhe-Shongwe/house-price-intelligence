@@ -27,3 +27,6 @@ FA1–FA8 milestone: 83.6% (79.2% prior). V3 rich fictional revision, offline HT
 
 
 FR1–FR3: 84.0% (83.6% prior). Owner selected original real-property release. Exact-integral assessment-year encoding defect identified; diagnostic recovered 59 eligible 2025 subjects, no canonical correction or holdout evaluation yet. Four source licence IDs unspecified; real release blocked. See [qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+
+
+Canonical Year Correction and Chronological Qualification V1: [3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) all eight workflows passed, [2025 holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 eligible later subjects. Current matcher lower MAE than township on paired 59; 1 km not better. No valuation or policy adoption, no historical as-of proof or display rights. 84.0% remains recorded pending milestone review. See [checkpoint](CHECKPOINT.md).

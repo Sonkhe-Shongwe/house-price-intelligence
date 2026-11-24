@@ -29,7 +29,11 @@ House Price Intelligence has a different product, market, platform and release t
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 35% | 2.1 pts |
 | **Total** | **Bounded flagship MVP** | **100%** | **84.0% weighted** | **84.0 pts** |
 
-## 24 November 2026: Full Product Release Qualification V1 milestone reassessment
+## 24 November 2026: Canonical Year Correction and Chronological Qualification V1 (verified deliverable; score review pending)
+
+[Code 3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) passed all eight triggered workflows. [Fixed 2025 holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 subjects with 83 earlier eligible sales, current matcher MAE $152,615.81 vs township $183,415.81 on the same 59. Current MdAPE 22.53%; 1 km no paired improvement, strict neighbourhood covers 41/59, spatial fallback remains exploratory. P1.3 canonical parsing correction verified; P2.7 chronological evaluation executed, historical publication-time evidence still open. No policy/valuation adoption. All full exit gates open. Recorded scores remain P1 93%, P2 65%, weighted 84.0%, pending separate milestone review. See [checkpoint](CHECKPOINT.md) for full evidence and next release qualification boundary.
+
+## 24 November 2026: Full Product Release Qualification V1 milestone reassessment (historical baseline)
 
 [Qualification commit 0381780](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/0381780edab61e004b15610ef6f9d402b531487b) passed all eight triggered workflows, including [aggregate qualification](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365766942), 21 offline research safeguards, [regression push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365766924), [React PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365777610), [runtime PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365777516), [PostgreSQL compatibility PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365777436), [OIDC PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365777369), [release audit PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365777461) and regression PR 45365777386. First two bounded attempts failed at extraction/strict scope guard (45365278469, 45365558596), diagnosed and corrected using whole_count exact integer validation. No application code or frozen evidence changed.
 
@@ -178,7 +182,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | --- | --- | --- | --- |
 | P1.1 | Source inventory and schema/field register | RESEARCH | Dataset IDs, field definitions, source URLs, licence status and schema metadata captured |
 | P1.2 | Deterministic bounded extraction in CI | RESEARCH | Re-running the documented query returns reproducible counts or explicitly explains any dataset revision |
-| P1.3 | Data type, null, duplicate and exclusion policies | PARTIAL | Exact 2024 assessment-year encoding defect identified: all 13,151 rejected by legacy int parser; exact-year diagnostic recovers 59 eligible 2025 sales; canonical fix pending |
+| P1.3 | Data type, null, duplicate and exclusion policies | PARTIAL | Canonical exact-integral assessment and geographic year correction verified at 3bd6232; recovered 59 eligible later sales, broader real import/source policy still open |
 | P1.4 | Preserve transaction, parcel, building and card grain | PARTIAL | Exact-cohort parcel/year and synthetic snapshot-specific address ambiguity verified; real building identity remains unverified |
 | P1.5 | Historical as-of availability and late/backfilled changes | BLOCKED | Archived snapshot/publication evidence or an explicitly conservative non-as-of policy is reviewed and implemented |
 | P1.6 | Versioned source manifest, drift/re-run comparison | PARTIAL | Same-runtime reviewed synthetic revisions, immutable manifests and activation history verified; real refresh/drift history remains |
@@ -194,10 +198,10 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P2.1 | Deterministic eligibility and exclusion rules | RESEARCH | Earlier-only sales, correct class/township, area tolerance, valid window and excluded shared transactions tested |
 | P2.2 | Prevent duplicate property/document comparables | RESEARCH | Each selected comparable is unique under defined PIN/document/source grain and explainable |
 | P2.3 | Same-neighbourhood selection and stable ranking | RESEARCH | Rank and explain relevant previous sales without using sale price as a ranking input |
-| P2.4 | Evaluate bounded geographic fallback | PARTIAL | Compare error, support and failure risks independently; current 2 km fallback must remain labelled exploratory |
-| P2.5 | Validate insufficiency and abstention policy | PARTIAL | Canonical matcher abstention and zero-evidence states verified across SQLite/React and PostgreSQL candidate; real holdout remains open |
-| P2.6 | Test better similarity and sale-quality factors | OPEN | Fixed 1 km ablation preregistered; 59 later eligible subjects recoverable by parser diagnostic; evaluation and policy adoption pending |
-| P2.7 | Independent later chronological holdout | BLOCKED | Canonical 2025 cohort zero due to exact-integral year parsing defect; diagnostic recovers 59 without changing rules. Canonical fix and independent evaluation pending |
+| P2.4 | Evaluate bounded geographic fallback | PARTIAL | Fixed 2025 comparison completed: 18 fallback subjects, 28.10% MdAPE; 1 km not better on paired cases; retain exploratory label pending acceptance |
+| P2.5 | Validate insufficiency and abstention policy | PARTIAL | Canonical matcher abstention and zero-evidence states verified across SQLite/React and PostgreSQL candidate; 59/59 eligible 2025 subjects supported under fixed policy; broader market/generalisation not established |
+| P2.6 | Test better similarity and sale-quality factors | PARTIAL | Fixed 1 km ablation completed, no paired improvement and two fewer supported subjects; no policy change; other factors untested |
+| P2.7 | Independent later chronological holdout | PARTIAL | Fixed 2025 retrospective completed at 3bd6232 on 59 eligible subjects; publication-time/as-of evidence and owner acceptance remain open |
 | P2.8 | Prove time-valid source provenance and interpretability | BLOCKED | Every displayed sale has a traceable, permitted record and appropriate as-of/revision limitation |
 | P2.9 | Accept evidence-only versus price-estimation boundary | BLOCKED | Owner approves when fallback may be displayed and how unsupported predictions/weak evidence are labelled |
 
@@ -309,7 +313,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 4. **Review integrated P6 for owner acceptance before calling this a flagship product:** Two/three fictional enquiries, notes, side-by-side evidence and frozen-restart reopening are code-verified. Complete missing UX, access, retention, approved source display and release-like cases.
 5. **Treat P7 and P8 as independent release gates:** Security, rights, accessibility, performance, safe deployment and portfolio walkthrough. A green development build is not public release authorisation.
 
-**Owner release direction:** full original real-property product selected. Next: separately authorise exact-year parser correction and fixed 2025 holdout, then resolve release rights and production gates. Diagnostic recovered 59 later subjects, not evaluated. No further live extraction, contact, provisioning, real display or deployment without scoped approval.
+**Owner release direction:** full original real-property product selected. Canonical exact-year correction and fixed 2025 holdout verified; next source-specific rights, evidence-only/fallback disclosure and production gates. No further live extraction, contact, provisioning, real display or deployment without scoped approval.
 
 **Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **84.0%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
