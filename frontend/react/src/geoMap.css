@@ -10,3 +10,8 @@
 .geo-controls button,.geo-load{border:1px solid #245648;border-radius:7px;background:#fff;color:#245648;min-width:36px;min-height:36px;font-weight:600;cursor:pointer;padding:8px}
 .geo-provenance{font-size:.75rem}.geo-load{margin:8px 0;max-width:100%}
 @media(max-width:480px){.geo-canvas{height:250px}.geo-panel{padding:10px}}
+
+/* Keep the two distinct geographic evidence panels in the existing map column. */
+.geo-evidence-stack{display:grid;gap:14px;align-content:start;min-width:0}
+.geo-evidence-stack .hpi-provenance{margin:0;min-width:0}
+.geo-evidence-stack .geo-controls{flex-wrap:wrap}
