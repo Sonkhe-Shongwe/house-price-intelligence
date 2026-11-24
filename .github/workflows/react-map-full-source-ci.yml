@@ -85,6 +85,10 @@ jobs:
         env:
           HPI_SOURCE_SCREENSHOTS: ${{ runner.temp }}/hpi-source-connected-screenshots
         run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_source_review.py' -v
+      - name: Explicit parcel selection, saved investigation and frozen reopen in real Chrome
+        env:
+          HPI_BUYER_SCREENSHOTS: ${{ runner.temp }}/hpi-buyer-workflow-screenshots
+        run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_buyer_workflow.py' -v
       - name: Publish visual-review evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -93,6 +97,7 @@ jobs:
           path: |
             ${{ runner.temp }}/hpi-react-full-spike-screenshots/*.png
             ${{ runner.temp }}/hpi-source-connected-screenshots/*.png
+            ${{ runner.temp }}/hpi-buyer-workflow-screenshots/*.png
             design-prototypes/react-map-spike/dist/**
           if-no-files-found: warn
           retention-days: 7
