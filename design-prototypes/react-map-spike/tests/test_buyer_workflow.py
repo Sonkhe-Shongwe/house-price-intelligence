@@ -184,12 +184,12 @@ class ReactBuyerWorkflowBrowserTests(unittest.TestCase):
 
     def test_security_investigation_writes_only_with_opt_in(self):
         with closing(http.client.HTTPConnection("127.0.0.1",self.port,timeout=8)) as conn:
-            def http(method,path,body=None,headers=None):
+            def send_request(method,path,body=None,headers=None):
                 conn.request(method,path,body=body,headers=headers or {})
                 response=conn.getresponse()
                 content=response.read()
                 return response,content
-            page,body=http("GET","/buyer-workflow")
+            page,body=send_request("GET","/buyer-workflow")
             self.assertEqual(page.status,200)
             headers=dict(page.getheaders())
             self.assertEqual(headers["X-Proof-Mode"],"fixture-investigation-writes")
@@ -199,18 +199,18 @@ class ReactBuyerWorkflowBrowserTests(unittest.TestCase):
                                 ("PATCH","/v1/shortlists/11111111-1111-1111-1111-111111111111/entries/11111111-1111-1111-1111-111111111111"),
                                 ("DELETE","/v1/investigations"),
                                 ("POST","/some-random-path")):
-                result,_=http(method,path,b"{}",{"Content-Type":"application/json"})
+                result,_=send_request(method,path,b"{}",{"Content-Type":"application/json"})
                 self.assertEqual(result.status,405,(method,path))
-            fail,_=http("POST","/v1/addresses/search",b'{"query":"Fictional Way"}',
+            fail,_=send_request("POST","/v1/addresses/search",b'{"query":"Fictional Way"}',
                         {"Content-Type":"application/json","Origin":"http://attacker.invalid"})
             self.assertEqual(fail.status,403)
-            fail,_=http("POST","/v1/addresses/search",b'{"query":"Fictional Way"}',
+            fail,_=send_request("POST","/v1/addresses/search",b'{"query":"Fictional Way"}',
                         {"Content-Type":"application/json","X-Forwarded-Host":"external.invalid"})
             self.assertEqual(fail.status,403)
-            fail,_=http("POST","/v1/investigations",b"{broken",
+            fail,_=send_request("POST","/v1/investigations",b"{broken",
                         {"Content-Type":"application/json"})
             self.assertEqual(fail.status,400)
-            fail,_=http("GET","/assets/../../.env")
+            fail,_=send_request("GET","/assets/../../.env")
             self.assertEqual(fail.status,404)
 
     def test_narrow_mobile_and_accessible_controls(self):
