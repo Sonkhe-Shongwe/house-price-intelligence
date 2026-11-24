@@ -1,0 +1,25 @@
+name: Independent chronological holdout
+on:
+  push:
+    branches: [development]
+    paths: ['audit/source_readiness/holdout_audit.py', '.github/workflows/holdout.yml']
+permissions:
+  contents: read
+jobs:
+  holdout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s audit/source_readiness/tests -v
+      - run: python -m audit.source_readiness.holdout_audit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: holdout-aggregate
+          path: reports/holdout-aggregate.json
+          if-no-files-found: warn
+          retention-days: 14
