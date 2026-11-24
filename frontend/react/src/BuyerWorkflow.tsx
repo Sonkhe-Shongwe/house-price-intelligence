@@ -92,7 +92,14 @@ function statusLabel(s:InvestigationView['status']):string{
 export default function BuyerWorkflow(){
   const [view,setView]=useState<View>(window.location.pathname==='/buyer-workflow'?'investigate':'home');
   const [historyRevision,setHistoryRevision]=useState(0);
-  const navFocus=useRef<HTMLButtonElement|null>(null);
+  const contentFocus=useRef<HTMLElement|null>(null);
+  const previousView=useRef(view);
+  useEffect(()=>{
+    if(previousView.current!==view){
+      previousView.current=view;
+      contentFocus.current?.focus({preventScroll:true});
+    }
+  },[view]);
   const [query,setQuery]=useState('');
   const [candidates,setCandidates]=useState<Candidate[]>([]);
   const [chosen,setChosen]=useState<Chosen|null>(null);
@@ -246,7 +253,7 @@ export default function BuyerWorkflow(){
       <aside className="hpi-sidebar"><div className="hpi-nav-title">RESEARCH WORKSPACE</div>
         <nav aria-label="Main navigation">{NAV.map(item=><button key={item.id} type="button"
           data-testid={'nav-'+item.id} aria-current={view===item.id?'page':undefined} disabled={writing}
-          ref={view===item.id?navFocus:undefined} onClick={()=>navigate(item.id)}>
+          onClick={()=>navigate(item.id)}>
           <span aria-hidden="true">{item.symbol}</span>{item.label}</button>)}</nav>
         <div className="hpi-sidebar-note"><b>Local fixture</b><p>Fictional data only. No valuation or real locations.</p></div></aside>
       <main id="hpi-content" className="source-container hpi-main" ref={contentFocus} tabIndex={-1}>

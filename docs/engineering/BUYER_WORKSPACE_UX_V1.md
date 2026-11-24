@@ -13,3 +13,6 @@ Preserve frozen response, exact cents, source provenance, map identity, shortlis
 
 ## Handoff
 See [checkpoint](../CHECKPOINT.md), [P3 contract](P3_APPLICATION_CONTRACT.md), [geographic contract](SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). No new source data or release rights.
+
+## Hosted verification history
+Initial workspace commit 273262fb24023ce3b4bb9d9b63c30d8cbfc70fba: [React CI 45346682544](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45346682544) ran 33 tests, 32 passed including the new returning-buyer scenario; one old shortlist test attempted a hidden Compare control after reload. 182 Python tests passed. Actual desktop and 320px workspace screenshots were inspected. Follow-up 3efb1235231a8e2b373507ea550cc4ab8dd4e24c fixed the navigation test but [React CI 45346959931](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45346959931) detected a missing focus ref declaration. The next revision corrects the focus ref, preserves the full regression, and must pass CI before acceptance.
