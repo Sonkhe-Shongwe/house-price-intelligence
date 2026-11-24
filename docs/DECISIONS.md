@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 79.2% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 83.6% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -155,3 +155,7 @@ Owner approved bounded 2025 holdout and fixed research ablation, UI refinement, 
 
 ## 24 November 2026: FA authorisation
 Owner approved FA1–FA8 bounded fictional development/CI, aggregate coverage diagnostics, offline OIDC HTTP and persistent sessions, accessibility/release preparation. No provider account, real records, valuation, external contact, deployment or main merge. See [FA contract](engineering/FINAL_ACCEPTANCE_V1.md).
+
+
+## 24 November 2026: FA milestone review
+83.6% weighted estimate (79.2% prior, +4.4 points), fixed weights and open full phase gates. Rich V3 and offline HTTPS persisted sessions/React writes verified; axe four views zero detected violations, manual review pending; npm production audit zero reported vulnerabilities. Count-only diagnostic does not resolve holdout eligibility. No actual provider, real record release, contact, hosting, deployment or main merge. See [FA contract](engineering/FINAL_ACCEPTANCE_V1.md).
