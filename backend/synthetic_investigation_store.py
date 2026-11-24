@@ -22,6 +22,7 @@ import uuid
 from typing import Any, Mapping
 
 from backend.investigation_contract import ContractError, build_investigation, validate_request
+from backend.disclosure_guard import require_fixture_build, DisclosureDenied
 
 
 class EvidenceStoreError(RuntimeError):
@@ -105,9 +106,10 @@ class SyntheticInvestigationStore:
         # referenced publisher data were fabricated. This extra fixture-only
         # marker rejects accidentally imported real source snapshots. It is
         # still NOT a general proof that arbitrary data is synthetic.
-        if any(not dataset.startswith("synthetic-") or query != "fabricated"
-               for _, _, dataset, query in source_rows):
-            raise EvidenceStoreError("Build references a non-fixture source snapshot")
+        try:
+            require_fixture_build(kind,[(dataset,query) for _,_,dataset,query in source_rows])
+        except DisclosureDenied as exc:
+            raise EvidenceStoreError(str(exc)) from exc
         roles = {role for _, role, _, _ in source_rows}
         if not {"sales", "assessment", "geography"}.issubset(roles):
             raise EvidenceStoreError("Synthetic build is missing source role(s)")
@@ -419,4 +421,7 @@ class SyntheticInvestigationStore:
                     or "sale_price" in comp
                     or _exact_money_cents(comp.get("sale_price_usd")) != saved_cents):
                 raise EvidenceStoreError("Persisted comparable sale price or source snapshot changed")
+        # Recheck the current build before returning frozen property evidence.
+        # This also denies real/reclassified builds on ID-only reopen.
+        self._build()
         return {"investigation_id": investigation_id, **result}

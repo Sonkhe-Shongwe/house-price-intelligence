@@ -1,0 +1,27 @@
+name: Exact cohort address readiness
+on:
+  push:
+    branches: [development]
+    paths: ['.github/workflows/cohort-readiness.yml', 'audit/source_readiness/cohort_audit.py']
+permissions:
+  contents: read
+jobs:
+  bounded-cohort:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline privacy and cohort guards
+        run: python -m unittest discover -s audit/source_readiness/tests -v
+      - name: Bounded in-memory replay and aggregate address coverage
+        run: python -m audit.source_readiness.cohort_audit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cohort-readiness-aggregate
+          path: reports/cohort-aggregate.json
+          if-no-files-found: warn
+          retention-days: 14

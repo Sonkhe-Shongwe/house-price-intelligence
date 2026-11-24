@@ -35,6 +35,8 @@
 | See earlier cleanup | [22 Nov documentation audit](reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | **Retained historical audit** |
 | Review old scope/origins | [Pinnacle vision](product/PINNACLE_VISION.md), [Migration manifest](MIGRATION_MANIFEST.md), [archived roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) | **Historical/reference**, not current status |
 
+**Current RD1–RD7 contract:** [Real Data Integration Readiness V1](engineering/REAL_DATA_READINESS_V1.md), bounded cohort audit and synthetic-only ingestion/guard.
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

@@ -119,3 +119,7 @@ Owner approved PostgreSQL as a production database candidate and authorised PA1�
 
 ## 24 November 2026: milestone progress reassessment
 Owner authorised formal review and updating the recorded estimate after meaningful verified milestones. Current weighted estimate 62.9%, previous 22.8%, +40.1 percentage points. Original weights, product scope and phase exit gates retained. Evidence and remaining blockers are recorded in [P0–P8 roadmap](P_PHASE_ROADMAP.md) and [checkpoint](CHECKPOINT.md). Partial credit recognises verified integrated deliverables; this is not production approval, whole-phase acceptance, permission to deploy or a new code implementation instruction. Earlier scores in dated decisions are historical.
+
+
+## 24 November 2026: real-data integration readiness authorisation
+Owner approved RD1–RD7 bounded live cohort research, synthetic curated ingestion/disclosure and verification on development. No real property publication, paid infrastructure, main merge or deployment. No source reuse grant or production runtime switch. See [readiness contract](engineering/REAL_DATA_READINESS_V1.md).

@@ -1,5 +1,8 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: Real Data Integration Readiness V1
+Owner authorised RD1–RD7, bounded live cohort research and synthetic curated ingestion/disclosure, commits and CI on development. See [readiness contract](engineering/REAL_DATA_READINESS_V1.md). Prior planning estimate 62.9%; reassess only after verification. No real records published, no main merge or deployment. Verify exact current head and aggregate audit.
+
 ## 24 November 2026: authoritative progress reconciliation
 
 **Current weighted MVP planning estimate: 62.9% (previous 22.8%, +40.1 percentage points).** P0 90%, P1 80%, P2 65%, P3 75%, P4 55%, P5 65%, P6 75%, P7 35%, P8 5%. Owner authorised reassessment of verified partial deliverables; weights and all phase exit gates unchanged. This is not production readiness or acceptance of all features. Read [roadmap](P_PHASE_ROADMAP.md) for evidence, contributions and blockers. All earlier 22.8%/P3 10% references below are dated historical snapshots, superseded for progress reporting only.

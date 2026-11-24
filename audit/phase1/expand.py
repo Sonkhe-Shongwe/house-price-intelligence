@@ -21,9 +21,14 @@ import sys
 from urllib.parse import urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'phase0'))
-from audit import (BASE, SALES_ID, BUILDINGS_ID, building_rows_by_key,
-                   fetch_json, join_sale_to_prior_building, metadata,
-                   normalize_pin, sale_reject_reasons)
+if __package__:
+    from audit.phase0.audit import (BASE, SALES_ID, BUILDINGS_ID, building_rows_by_key,
+                                   fetch_json, join_sale_to_prior_building, metadata,
+                                   normalize_pin, sale_reject_reasons)
+else:
+    from audit import (BASE, SALES_ID, BUILDINGS_ID, building_rows_by_key,
+                       fetch_json, join_sale_to_prior_building, metadata,
+                       normalize_pin, sale_reject_reasons)
 
 UNIVERSE_ID = 'nj4t-kc8j'
 UNIVERSE_WANTED = {'pin', 'year', 'nbhd_code', 'lat', 'lon', 'class'}
