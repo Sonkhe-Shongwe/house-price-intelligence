@@ -187,3 +187,7 @@ Owner approved Real-Data Integration V1 and the 85.7% milestone reassessment, wi
 All input records invented; no additional live extraction, no real data persisted or publicly served, no deployment or main merge, no valuation or matcher change. Historical operator-side functions remain in disposable loopback PostgreSQL ingestion DB; source completeness/authenticity, production migration/least-privilege service, actual real-source import, approved field projection and public activation remain open. V4 is the existing fictional HTTP/React runtime, not a public historical-data endpoint. External contact not a prerequisite for controlled development; public release still separate.
 
 Recorded owner-approved 85.7% remains unchanged; proposed next evidence-based milestone review 86.5% (P1 97%, P4 93%, P5 89%, P7 81%, other stages unchanged), no full phase exit. See [checkpoint](CHECKPOINT.md) and [integration contract](engineering/REAL_DATA_INTEGRATION_V1.md).
+
+
+## 24 November 2026: Production Data Activation Preparation V1
+Owner directs continuation of the offline workstream. Scope: versioned historical migration, dedicated restricted read role, external relational seal and private read-only service, synthetic verification and development commits. No live extraction, public release, valuation, provider provisioning or main merge. See [contract](engineering/PRODUCTION_DATA_ACTIVATION_V1.md).

@@ -12,21 +12,8 @@ from backend.postgres_fixture import FixtureConnection
 from backend.investigation_contract import build_investigation, validate_request
 from backend.synthetic_investigation_store import CuratedReadQueries
 
-DDL = """
-CREATE TABLE historical_build_manifests (
-    build_id TEXT PRIMARY KEY REFERENCES curated_builds(build_id),
-    policy TEXT NOT NULL, source_manifests_json TEXT NOT NULL
-);
-CREATE TABLE historical_address_states (
-    snapshot_id TEXT NOT NULL REFERENCES source_snapshots(snapshot_id),
-    pin TEXT NOT NULL REFERENCES parcels(pin),
-    tax_year INTEGER NOT NULL,
-    address_state TEXT NOT NULL CHECK(address_state IN ('one_nonblank','ambiguous','missing','blank')),
-    display_address TEXT,
-    CHECK ((address_state='one_nonblank') = (display_address IS NOT NULL)),
-    PRIMARY KEY(snapshot_id,pin,tax_year)
-);
-"""
+from backend.historical_migration import migrate_historical
+
 
 def _plan_rows(plan):
     """Use canonical tables, with build-bound source IDs and no fixture aliases."""
@@ -99,8 +86,7 @@ def import_historical(conn, **intake):
         adapter=FixtureConnection(conn)
         if conn.execute("SELECT to_regclass('candidate_manifests')").fetchone()[0] is None:
             raise ImportRefused("Unknown ingestion candidate")
-        if conn.execute("SELECT to_regclass('historical_build_manifests')").fetchone()[0] is None:
-            conn.execute(DDL,prepare=False)
+        migrate_historical(conn)
         if adapter.execute("SELECT 1 FROM curated_builds WHERE build_id=?",(build,)).fetchone() is not None:
             _verify(adapter,build,ids,rows)
             return build
@@ -160,26 +146,29 @@ def review_historical(conn, request, **intake):
         conn.execute("SELECT pg_advisory_xact_lock(194323)")
         adapter=FixtureConnection(conn)
         _verify(adapter,build,ids,rows)
-        # Shared read queries have no create/reopen or disclosure capability.
-        store=CuratedReadQueries(adapter,build)
-        validated=validate_request(request)
-        token=validated["subject"].get("address_id")
-        if token is not None:
-            year=int(validated["analysis_date"][:4])-1
-            groups=_address_options(adapter,build,ids["address"],year)
-            found=[pin for group in groups.values() if len(group)==1 for pin,aid in group if aid==token]
-            if len(found)!=1:
-                raise ImportRefused("Historical address candidate not resolved in build/year")
-            submitted=validated["subject"]["pin"]
-            if submitted is not None and submitted!=found[0]:
-                raise ImportRefused("Historical address identity conflict")
-            validated["subject"]["pin"]=found[0]
-        subject=store._resolved_subject(validated)
-        candidates,_=store._candidates(validated)
-        provenance={"build_id":build,"built_at_utc":plan["source_manifests"]["sales"]["extracted_at_utc"],
-                    "source_kind":"historical_research","source_snapshot_ids":sorted(ids.values())}
-        result=build_investigation(validated,resolved_subject=subject,candidate_sales=candidates,data_build=provenance)
-        return {"status":result["status"],"reason":result["reason"],"selected_count":result["selected_count"],
-                "tier":result["tier"],"warnings":result["warnings"],"evidence_details_redacted":True,
-                "valuation":None,"source_kind":"historical_research","historical_asof_verified":False,
-                "public_display_approved":False}
+        return _review_verified(adapter,build,ids,plan["source_manifests"]["sales"]["extracted_at_utc"],request)
+
+def _review_verified(adapter,build,ids,stamp,request):
+    # Shared read queries have no create/reopen or disclosure capability.
+    store=CuratedReadQueries(adapter,build)
+    validated=validate_request(request)
+    token=validated["subject"].get("address_id")
+    if token is not None:
+        year=int(validated["analysis_date"][:4])-1
+        groups=_address_options(adapter,build,ids["address"],year)
+        found=[pin for group in groups.values() if len(group)==1 for pin,aid in group if aid==token]
+        if len(found)!=1:
+            raise ImportRefused("Historical address candidate not resolved in build/year")
+        submitted=validated["subject"]["pin"]
+        if submitted is not None and submitted!=found[0]:
+            raise ImportRefused("Historical address identity conflict")
+        validated["subject"]["pin"]=found[0]
+    subject=store._resolved_subject(validated)
+    candidates,_=store._candidates(validated)
+    provenance={"build_id":build,"built_at_utc":stamp,
+                "source_kind":"historical_research","source_snapshot_ids":sorted(ids.values())}
+    result=build_investigation(validated,resolved_subject=subject,candidate_sales=candidates,data_build=provenance)
+    return {"status":result["status"],"reason":result["reason"],"selected_count":result["selected_count"],
+            "tier":result["tier"],"warnings":result["warnings"],"evidence_details_redacted":True,
+            "valuation":None,"source_kind":"historical_research","historical_asof_verified":False,
+            "public_display_approved":False}
