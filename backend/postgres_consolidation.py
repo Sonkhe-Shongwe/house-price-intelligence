@@ -8,7 +8,7 @@ from backend.synthetic_demo import BUILD_ID,in_memory_demo
 from backend.durable_fixture import _IMMUTABLE_SOURCE_TABLES
 from backend.synthetic_investigation_store import SyntheticInvestigationStore,EvidenceStoreError
 
-REVISIONS={_plan(r)[2]:r for r in ("v1","v2","v3")}
+REVISIONS={_plan(r)[2]:r for r in ("v1","v2","v3","v4")}
 BUILDS=(BUILD_ID,*REVISIONS)
 SOURCE_LOCK=194324
 TABLES=(*_IMMUTABLE_SOURCE_TABLES,"candidate_manifests","candidate_addresses")

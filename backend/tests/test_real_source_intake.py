@@ -66,6 +66,14 @@ class IntakeTests(unittest.TestCase):
         args=sample(); args["rows"]["geography"][0]["pin"]="00000000000002"
         with self.assertRaisesRegex(IntakeRefused,"unexpected_enrichment_key"): prepare_intake(**args)
 
+    def test_generated_source_replay_uses_exact_cents_and_fixture_provenance(self):
+        from backend.curated_ingestion_candidate import fixture_rows, _plan
+        rows=fixture_rows("v4")
+        self.assertEqual({r["sale_price_usd_cents"] for r in rows["sales"]},{55000000,48750001,54275002,51990003})
+        self.assertEqual({r["tax_year"] for r in rows["assessment"]},{2023})
+        self.assertEqual(_plan("v4"),_plan("v4"))
+        self.assertTrue(all(m["snapshot_id"].startswith("fixture-") for m in _plan("v4")[1].values()))
+
     def test_revised_source_fingerprint_changes(self):
         args=sample(); old=prepare_intake(**args)
         args["rows"]["sales"][0]["sale_price"]="525000.02"

@@ -225,6 +225,42 @@ class RuntimeTests(unittest.TestCase):
                 finally:browser.close()
         finally:activate(ADMIN,old_build,generation)
 
+    def test_source_shaped_replay_from_intake_through_react(self):
+        with psycopg.connect(ADMIN,autocommit=True) as conn:
+            old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
+        original=self.create("alice","00000000000001")
+        generation=activate(ADMIN,BUILDS[4],generation)
+        try:
+            code,matches=self.call("alice","POST","/v1/addresses/search",{"query":"10 Fictional Replay Lane"})
+            self.assertEqual(code,200)
+            self.assertEqual(len(matches["candidates"]),1)
+            request=example_request()
+            request["subject"]={"address_id":matches["candidates"][0]["address_id"],"building_area_sqft":1600}
+            code,result=self.call("alice","POST","/v1/investigations",request)
+            self.assertEqual(code,201)
+            self.assertEqual(result["data_build"]["build_id"],BUILDS[4])
+            self.assertEqual(result["data_build"]["source_kind"],"synthetic_fixture")
+            self.assertEqual({c["sale_price_usd"] for c in result["comparables"]},{"487500.01","542750.02","519900.03"})
+            self.assertIsNone(result["valuation"])
+            self.assertEqual(self.call("alice","GET","/v1/investigations/"+original["investigation_id"])[1],original)
+            self.assertFalse(self.call("alice","GET","/v1/investigations/"+result["investigation_id"]+"/map")[1]["map_available"])
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                try:
+                    page=browser.new_page(http_credentials={"username":"alice","password":self.passwords["alice"]})
+                    page.goto(self.base+"/buyer-workflow")
+                    page.get_by_test_id("buyer-query").fill("10 Fictional Replay Lane")
+                    page.get_by_test_id("buyer-search").click()
+                    page.get_by_test_id("buyer-candidate").first.click()
+                    page.get_by_test_id("buyer-create").click()
+                    expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("buyer-build")).to_have_text(BUILDS[4])
+                    expect(page.get_by_test_id("buyer-result")).to_contain_text("$487,500.01")
+                    expect(page.get_by_test_id("buyer-result")).to_contain_text("$542,750.02")
+                    expect(page.get_by_test_id("buyer-result")).to_contain_text("$519,900.03")
+                finally:browser.close()
+        finally:activate(ADMIN,old_build,generation)
+
     def test_offline_oidc_https_persistence_and_owner_isolation(self):
         import ssl
         from pathlib import Path

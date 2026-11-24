@@ -343,7 +343,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Reproducible dataset build with explicit inclusion/exclusion logs, validated grain and keys, provenance, tests for schema change and stable re-runs; raw records excluded from public repository/artifacts.
 
-### P2: Comparable-sales intelligence — 14% weight; 65% estimated complete
+### P2: Comparable-sales intelligence — 14% weight; 75% estimated complete
 
 **Goal:** Explainable, conservative same-market historical comparables, ranking, evidence and abstention.
 
