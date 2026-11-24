@@ -125,9 +125,10 @@ class RestartProof(unittest.TestCase):
                 self.assertTrue(db_path.exists())
                 self.assertFalse(db_path.stat().st_mode & 0o077)
                 page.goto(server.base+"/buyer-workflow")
-                expect(page.get_by_test_id("workspace")).to_be_visible(timeout=15000)
+                expect(page.get_by_test_id("buyer-workflow")).to_be_visible(timeout=15000)
 
                 def create(address, choice):
+                    page.get_by_test_id("nav-investigate").click()
                     page.get_by_test_id("buyer-query").fill(address)
                     page.get_by_test_id("buyer-search").click()
                     expect(page.get_by_test_id("buyer-candidate")).to_have_count(
@@ -136,7 +137,9 @@ class RestartProof(unittest.TestCase):
                     expect(page.get_by_test_id("buyer-selected-parcel")).to_be_visible()
                     page.get_by_test_id("buyer-create").click()
                     expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
-                    return page.get_by_test_id("buyer-saved-id").inner_text()
+                    iid=page.get_by_test_id("buyer-saved-id").inner_text()
+                    page.get_by_test_id("nav-compare").click()
+                    return iid
 
                 first=create("101 Fictional Way",0)
                 page.get_by_test_id("workspace-create").click()
@@ -190,19 +193,20 @@ class RestartProof(unittest.TestCase):
                     reopened=browser.new_page(viewport={"width":1280,"height":840})
                     try:
                         reopened.goto(restarted.base+"/buyer-workflow")
-                        expect(reopened.get_by_test_id("workspace")).to_be_visible()
+                        expect(reopened.get_by_test_id("buyer-workflow")).to_be_visible()
                         reopened.get_by_test_id("buyer-reopen-id").fill(first)
                         reopened.get_by_test_id("buyer-reopen").click()
                         expect(reopened.get_by_test_id("buyer-saved-id")).to_have_text(first)
                         expect(reopened.get_by_test_id("buyer-sale").first).to_contain_text(
                             "$525,000.00")
+                        expect(reopened.get_by_test_id("buyer-no-geometry")).to_be_visible()
+                        reopened.get_by_test_id("nav-compare").click()
                         reopened.get_by_test_id("workspace-open-recent").click()
                         expect(reopened.get_by_test_id("workspace-entry")).to_have_count(2)
                         expect(reopened.get_by_test_id("workspace-note").nth(0)).to_have_value(
                             "Review fictional price history first")
                         expect(reopened.get_by_test_id("workspace-note").nth(1)).to_have_value(
                             "Check the other parcel candidate")
-                        expect(reopened.get_by_test_id("buyer-no-geometry")).to_be_visible()
                         self.assertEqual(reopened.locator("canvas.maplibregl-canvas").count(),0)
                     finally:reopened.close()
                 finally:restarted.close()

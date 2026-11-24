@@ -5,6 +5,15 @@ import './sourceReview.css';
 import './buyerWorkflow.css';
 import SavedComparison from './SavedComparison';
 import GeoMapPanel from './GeoMapPanel';
+import HistoryPanel from './HistoryPanel';
+import Methodology from './Methodology';
+import './workspaceShell.css';
+
+type View='home'|'investigate'|'saved'|'compare'|'methodology';
+const NAV:readonly {id:View;label:string;symbol:string}[]=[
+  {id:'home',label:'Workspace',symbol:'⌂'},{id:'investigate',label:'Investigate',symbol:'⌕'},
+  {id:'saved',label:'Saved properties',symbol:'▤'},{id:'compare',label:'Compare',symbol:'▥'},
+  {id:'methodology',label:'Methodology',symbol:'ⓘ'}];
 
 type Candidate = {
   addressId: string; label: string; hint: string | null; ambiguous: boolean;
@@ -81,6 +90,9 @@ function statusLabel(s:InvestigationView['status']):string{
 }
 
 export default function BuyerWorkflow(){
+  const [view,setView]=useState<View>(window.location.pathname==='/buyer-workflow'?'investigate':'home');
+  const [historyRevision,setHistoryRevision]=useState(0);
+  const navFocus=useRef<HTMLButtonElement|null>(null);
   const [query,setQuery]=useState('');
   const [candidates,setCandidates]=useState<Candidate[]>([]);
   const [chosen,setChosen]=useState<Chosen|null>(null);
@@ -185,38 +197,64 @@ export default function BuyerWorkflow(){
         ||JSON.stringify(reopened)!==JSON.stringify(view))
         throw Error('Saved investigation did not reopen with identical evidence');
       if(!active(seq,controller))return;
-      setRecord(reopened);
+      setRecord(reopened);setHistoryRevision(n=>n+1);
       setMessage('Saved and reopened through the Python fixture service. No valuation produced.');
     }catch(e){if(active(seq,controller))setError('Investigation unavailable: '+presentError(e)
-      +'. If the server saved before an interruption, reopen using the displayed investigation ID.');}
+      +'. If the server saved before an interruption, check Saved properties before repeating the write.');}
     finally{
       pendingWrite.current=false;
       if(active(seq,controller))setPhase('idle');
     }
   }
-  async function reopen(event:React.FormEvent<HTMLFormElement>){
-    event.preventDefault();
+  async function reopen(event?:React.FormEvent<HTMLFormElement>,id?:string){
+    event?.preventDefault();
     if(pendingWrite.current)return;
-    if(!UUID.test(reopenInput.trim())){setError('Enter a valid lowercase saved investigation UUID.');return;}
+    const target=(id??reopenInput).trim();
+    if(!UUID.test(target)){setError('Enter a valid lowercase saved investigation UUID.');return;}
     const {controller,seq}=newOperation();
     setError('');setRecord(null);setActiveRank(null);setPhase('reopening');
     try{
-      const view=adaptInvestigation(await request('/v1/investigations/'+reopenInput.trim(),controller.signal));
-      if(view.investigationId!==reopenInput.trim())throw Error('Reopened the wrong saved investigation');
+      const view=adaptInvestigation(await request('/v1/investigations/'+target,controller.signal));
+      if(view.investigationId!==target)throw Error('Reopened the wrong saved investigation');
       if(!active(seq,controller))return;
-      setRecord(view);setSavedId(view.investigationId);
+      setRecord(view);setSavedId(view.investigationId);setReopenInput(view.investigationId);
       setChosen(null);setManualPin('');setCandidates([]);
       setMessage('Frozen investigation reopened without re-running matching.');
     }catch(e){if(active(seq,controller))setError('Could not reopen saved evidence: '+presentError(e));}
     finally{if(active(seq,controller))setPhase('idle');}
   }
+  function navigate(next:View){
+    if(pendingWrite.current)return;
+    setView(next);
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  function newInvestigation(){
+    if(pendingWrite.current)return;
+    cancel();setQuery('');setManualPin('');setChosen(null);setCandidates([]);
+    setRecord(null);setActiveRank(null);setMessage('');setError('');setPhase('idle');
+    setArea('1600');setPrice('500000.00');setAnalysisDate('2024-07-01');
+    navigate('investigate');
+  }
+  function openHistory(id:string){navigate('investigate');void reopen(undefined,id);}
   const selected=record?.comparables.find(x=>x.rank===activeRank);
   return <div className="source-shell buyer-shell" data-testid="buyer-workflow">
     <header className="source-topbar"><div className="source-brand"><span className="source-mark">▥</span>
       <span>houseprice <b>INTELLIGENCE</b></span></div>
       <div className="source-server-badge">LOCAL-ONLY · FICTIONAL WORKSPACE</div></header>
-    <div className="source-container">
-      <nav className="source-breadcrumb" aria-label="Workspace"><b>Investigate / Compare / Decide</b><span>·</span><span>Fictional integration candidate</span></nav>
+    <a className="hpi-skip" href="#hpi-content">Skip to content</a>
+    <div className="hpi-app-layout">
+      <aside className="hpi-sidebar"><div className="hpi-nav-title">RESEARCH WORKSPACE</div>
+        <nav aria-label="Main navigation">{NAV.map(item=><button key={item.id} type="button"
+          data-testid={'nav-'+item.id} aria-current={view===item.id?'page':undefined} disabled={writing}
+          ref={view===item.id?navFocus:undefined} onClick={()=>navigate(item.id)}>
+          <span aria-hidden="true">{item.symbol}</span>{item.label}</button>)}</nav>
+        <div className="hpi-sidebar-note"><b>Local fixture</b><p>Fictional data only. No valuation or real locations.</p></div></aside>
+      <main id="hpi-content" className="source-container hpi-main">
+        <div className="hpi-top-warning" role="note">Fictional data · Local-only workspace · No real property records or valuations</div>
+        {(view==='home'||view==='saved')&&<HistoryPanel mode={view} revision={historyRevision} disabled={writing}
+          onOpen={openHistory} onNew={newInvestigation} onCompare={()=>navigate('compare')} onHistory={()=>navigate('saved')}/>}
+        {view==='methodology'&&<Methodology/>}
+        <section hidden={view!=='investigate'} className="hpi-view" aria-label="Investigate">
       <section className="source-intro"><div><div className="source-eyebrow">The buyer journey / 02</div>
         <h1>Find a parcel.<br/><em>Examine the evidence.</em></h1>
         <p>A real browser-to-Python investigation flow using imaginary properties and historical-sale fixtures, with no predictions or claimed geographic accuracy.</p>
@@ -298,6 +336,13 @@ export default function BuyerWorkflow(){
           <p>Parcel {record.subjectPin??'unresolved'} · {record.analysisDate}</p></div>
         <div><b data-testid="buyer-count">{record.selectedCount} eligible sale{record.selectedCount===1?'':'s'}</b>
           <small data-testid="buyer-status">{statusLabel(record.status)}</small></div></div>
+        <div className="hpi-dossier-summary" data-testid="dossier-summary">
+          <div><small>BUYER-REPORTED ASKING</small><strong>{record.askingPriceText}</strong></div>
+          <div><small>BUYER-REPORTED AREA</small><strong>{record.buildingAreaText}</strong></div>
+          <div><small>EVIDENCE QUALITY</small><strong>{statusLabel(record.status)}</strong></div>
+          <div><small>CURRENT VALUATION</small><strong>Not produced</strong></div>
+        </div>
+        <div className="hpi-dossier-actions"><button type="button" onClick={()=>navigate('compare')} data-testid="dossier-compare">Continue to comparison</button></div>
         <div className="buyer-result-grid"><article className="buyer-sale-pane"><div className="source-panel-head"><strong>Completed sale evidence</strong><small>ORIGINAL SERVER ORDER</small></div>
           {record.comparables.length? <div className="source-sale-list" data-testid="buyer-sales">
             {record.comparables.map(s=><button key={s.uiKey} type="button" data-testid="buyer-sale"
@@ -312,17 +357,24 @@ export default function BuyerWorkflow(){
             <p data-testid="buyer-explanation">{selected?selected.explanation:record.comparables.length
               ?'Choose a sale to inspect its exact original matching explanation.'
               :'No qualified comparable sales were returned by the Python matcher.'}</p></div></article>
-          <GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/></div>
-        <div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
+          {view==='investigate'&&<GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/>}</div>
+        <details className="hpi-provenance" open><summary>Source record and investigation details</summary><div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
           <div><small>User-reported asking price</small><strong>{record.askingPriceText}</strong></div>
           <div><small>Fixture build</small><strong data-testid="buyer-build">{record.sourceBuildId}</strong></div>
           <div><small>Frozen snapshots</small><strong data-testid="buyer-snapshots">{record.sourceSnapshotIds.join(', ')}</strong></div>
           <div><small>Valuation</small><strong>Not produced</strong></div></div>
+          <p>Matching tier: {record.tier} · Building identity unverified · Historical source availability not established</p></details>
         {record.warnings.map((w,i)=><p key={i} className="buyer-warning">{w}</p>)}
       </section>}
-      <SavedComparison active={record}/>
+      </section>
+      <section hidden={view!=='compare'} className="hpi-view" aria-label="Compare">
+        <div className="hpi-page-heading"><div><p className="hpi-eyebrow">PROPERTY DECISION WORKSPACE</p><h1>Compare with confidence.</h1><p>Preserve independent evidence and your own research notes.</p></div>
+          <button type="button" className="hpi-primary" onClick={()=>navigate('saved')}>Find saved properties</button></div>
+        <SavedComparison active={record}/>
+      </section>
       <footer className="source-footer"><b>HOUSE PRICE INTELLIGENCE / BUYER WORKSPACE</b>
         <span>Fictional · Loopback only · Exact cents · No real geographic map</span></footer>
+      </main>
     </div>
   </div>;
 }

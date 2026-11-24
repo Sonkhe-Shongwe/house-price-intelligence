@@ -16,3 +16,6 @@ Use --frontend legacy (or omit the option) for the existing UI. Neither frontend
 ### Optional fictional map
 
 Use the same build and launcher with `--synthetic-map`: `python -m backend.run_synthetic_api --fixture-only --frontend react --synthetic-map --port 8765`. Save/reopen an investigation and choose **Explore fictional map**. Positions come from a versioned virtual display source, not real coordinates, and do not affect matching. No external tiles, geocoder, distance or valuation. Existing `--fixture-db` files remain valid; omit the flag to disable the map. See [contract](../../docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md).
+
+
+Open `/` for the workspace landing page or `/buyer-workflow` for direct investigation. Use Saved properties to search the latest 30 verified investigations and Compare to reopen existing shortlists. See [workspace contract](../../docs/engineering/BUYER_WORKSPACE_UX_V1.md).

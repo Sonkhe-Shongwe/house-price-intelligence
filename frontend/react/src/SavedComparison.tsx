@@ -77,6 +77,13 @@ export default function SavedComparison({active}: WorkspaceProps) {
   function hasDrafts() {
     return workspace?.entries.some(e=>notes[e.investigationId]!==e.noteText)??false;
   }
+  const dirty=hasDrafts();
+  useEffect(()=>{
+    if(!dirty&&!busy&&!recoveryRequired)return;
+    const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};
+    window.addEventListener('beforeunload',warn);
+    return ()=>window.removeEventListener('beforeunload',warn);
+  },[dirty,busy,recoveryRequired]);
 
   function install(next:ShortlistView, preserveDrafts = false, savedNoteId?:string) {
     if (!live.current) return;

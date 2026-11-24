@@ -48,6 +48,46 @@ class SyntheticHttpTests(unittest.TestCase):
         observed["raw"] = data
         return observed
 
+    def test_history_is_bounded_read_only_and_preserves_weak_evidence(self):
+        path="/v1/investigations/history"
+        self.assertEqual(self.invoke(path=path)["body"]["investigations"], [])
+        ids=[]
+        for index in range(31):
+            payload=example_request()
+            payload["subject"]["label"]=f"Fictional enquiry {index}"
+            if index == 30:
+                payload["subject"]["pin"]="99999999999999"
+            result=self.invoke("POST","/v1/investigations",payload=payload)
+            self.assertEqual(result["status"],201)
+            ids.append(result["body"]["investigation_id"])
+        changes=self.db.total_changes
+        history=self.invoke(path=path)
+        self.assertEqual(history["status"],200)
+        body=history["body"]
+        self.assertEqual(body["contract_version"],"synthetic-history-v1")
+        self.assertTrue(body["truncated"])
+        self.assertEqual(len(body["investigations"]),30)
+        self.assertEqual(len({i["investigation_id"] for i in body["investigations"]}),30)
+        for item in body["investigations"]:
+            original=self.invoke(path="/v1/investigations/"+item["investigation_id"])["body"]
+            self.assertEqual(item["selected_count"],original["selected_count"])
+            self.assertEqual(item["status"],original["status"])
+            self.assertEqual(item["asking_price_usd"],original["subject"]["asking_price_usd"])
+            self.assertNotIn("comparables",item)
+        self.assertEqual(self.db.total_changes,changes)
+        self.assertEqual(self.invoke("POST",path,payload={})["status"],405)
+        self.assertEqual(self.invoke(path=path,query="limit=1000")["status"],400)
+        self.assertEqual(self.invoke(path=path,origin="http://evil.invalid")["status"],403)
+
+    def test_history_rejects_corrupt_frozen_result(self):
+        result=self.invoke("POST","/v1/investigations",payload=example_request())
+        iid=result["body"]["investigation_id"]
+        self.db.execute("UPDATE investigation_results SET result_sha256=? WHERE investigation_id=?",
+                        ("f"*64,iid))
+        response=self.invoke(path="/v1/investigations/history")
+        self.assertEqual(response["status"],503)
+        self.assertEqual(response["body"],{"error":"evidence_unavailable"})
+
     def test_health_local_no_data_leak(self):
         r = self.invoke()
         self.assertEqual(r["status"], 200)

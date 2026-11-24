@@ -145,6 +145,14 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _response(start_response, 200, {"status": "ok", "mode": "synthetic_fixture_only"})
 
+        if path == "/v1/investigations/history":
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, store.history())
+            except (EvidenceStoreError, sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+
         shortlist_match = SHORTLIST_ROUTE.fullmatch(path)
         members_match = SHORTLIST_MEMBERS_ROUTE.fullmatch(path)
         entry_match = SHORTLIST_ENTRY_ROUTE.fullmatch(path)

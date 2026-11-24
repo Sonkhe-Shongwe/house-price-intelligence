@@ -331,6 +331,32 @@ class SyntheticInvestigationStore:
                 )
         return {"investigation_id": identifier, **response}
 
+    def history(self) -> dict[str, Any]:
+        """Bounded local discovery of verified, frozen results; never rematch."""
+        self._build()
+        rows = self.connection.execute(
+            """SELECT investigation_id, created_at_utc, analysis_date
+               FROM investigations WHERE build_id = ?
+               ORDER BY created_at_utc DESC, investigation_id DESC LIMIT 31""",
+            (self.build_id,),
+        ).fetchall()
+        items = []
+        for iid, created, analysis_date in rows[:30]:
+            result = self.reopen(iid)
+            if result["analysis_date"] != analysis_date:
+                raise EvidenceStoreError("History analysis date differs from saved result")
+            subject = result["subject"]
+            items.append({
+                "investigation_id": iid, "created_at_utc": created,
+                "analysis_date": analysis_date, "label": subject.get("label"),
+                "pin": subject["pin"], "status": result["status"],
+                "selected_count": result["selected_count"],
+                "asking_price_usd": subject["asking_price_usd"],
+            })
+        return {"contract_version": "synthetic-history-v1",
+                "source_kind": "synthetic_fixture", "limit": 30,
+                "truncated": len(rows) > 30, "investigations": items}
+
     def reopen(self, investigation_id: str) -> dict[str, Any]:
         row = self.connection.execute(
             """SELECT i.build_id, i.evidence_status, r.response_json, r.result_sha256

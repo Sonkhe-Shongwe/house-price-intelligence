@@ -166,3 +166,32 @@ export function adaptShortlistIndex(payload:unknown):ShortlistSummary[]{
     return {id,label,count};
   });
 }
+
+export type HistoryItem={id:string;label:string;pin:string|null;analysisDate:string;createdAt:string;
+  status:ActualStatus;count:number;askingPriceText:string};
+export type HistoryIndex={items:HistoryItem[];truncated:boolean};
+export function adaptHistory(payload:unknown):HistoryIndex{
+  const raw=obj(payload,'invalid_history');
+  if(raw.contract_version!=='synthetic-history-v1'||raw.source_kind!=='synthetic_fixture'||
+    raw.limit!==30||typeof raw.truncated!=='boolean'||!Array.isArray(raw.investigations)||
+    raw.investigations.length>30||(raw.truncated&&raw.investigations.length!==30))return fail('invalid_history');
+  const seen=new Set<string>();
+  const items=raw.investigations.map((item:unknown):HistoryItem=>{
+    const row=obj(item,'invalid_history_item');
+    const id=guid(row.investigation_id,'invalid_history_id');
+    const label=row.label===null?'Unlabelled fictional parcel':txt(row.label,'invalid_history_label');
+    const pin=row.pin===null?null:txt(row.pin,'invalid_history_pin');
+    const count=row.selected_count;
+    const createdAt=txt(row.created_at_utc,'invalid_history_time');
+    if(seen.has(id)||label.length>120||(pin!==null&&!PIN.test(pin))||
+       !STATUSES.has(String(row.status))||typeof count!=='number'||!Number.isInteger(count)||
+       count<0||count>3||!Number.isFinite(Date.parse(createdAt))||
+       (row.status==='out_of_coverage'&&count!==0))return fail('invalid_history_item');
+    seen.add(id);
+    return {id,label,pin,analysisDate:iso(row.analysis_date,'invalid_history_date'),
+      createdAt,status:row.status as ActualStatus,count,
+      askingPriceText:row.asking_price_usd===null?'Not supplied':
+        formatExactUsd(money(row.asking_price_usd,'invalid_history_price'))};
+  });
+  return {items,truncated:raw.truncated};
+}

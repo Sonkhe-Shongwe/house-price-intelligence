@@ -81,6 +81,7 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.page.on("request",lambda req:self.gpu.append(req.url)
                      if "VectorMap-" in req.url or "maplibre-gl-worker-" in req.url else None)
         self.page.goto(self.base+"/buyer-workflow")
+        self.page.get_by_test_id("nav-compare").click()
         expect(self.page.get_by_test_id("workspace")).to_be_visible(timeout=15000)
         expect(self.page.get_by_test_id("workspace-create")).to_be_enabled()
 
@@ -91,6 +92,7 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.context.close()
 
     def create_investigation(self, address="101 Fictional Way", option=0):
+        self.page.get_by_test_id("nav-investigate").click()
         self.page.get_by_test_id("buyer-query").fill(address)
         self.page.get_by_test_id("buyer-search").click()
         count=2 if "Court" in address else 1
@@ -99,7 +101,9 @@ class ReactSavedComparisonTests(unittest.TestCase):
         expect(self.page.get_by_test_id("buyer-selected-parcel")).to_be_visible()
         self.page.get_by_test_id("buyer-create").click()
         expect(self.page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
-        return self.page.get_by_test_id("buyer-saved-id").inner_text()
+        iid=self.page.get_by_test_id("buyer-saved-id").inner_text()
+        self.page.get_by_test_id("nav-compare").click()
+        return iid
 
     def create_workspace(self,label="My fictional homes"):
         self.page.get_by_test_id("workspace-label").fill(label)
@@ -159,6 +163,7 @@ class ReactSavedComparisonTests(unittest.TestCase):
             self.assertEqual(old["investigation"],new["investigation"])
             self.assertEqual(old["match_policy_version"],new["match_policy_version"])
         self.page.reload()
+        self.page.get_by_test_id("nav-compare").click()
         expect(self.page.get_by_test_id("workspace-create")).to_be_visible()
         self.page.get_by_test_id("workspace-reopen-id").fill(sid)
         self.page.get_by_test_id("workspace-reopen").click()

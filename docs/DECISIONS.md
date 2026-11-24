@@ -107,3 +107,7 @@ Owner approved React Application Integration V1 implementation, commits on a sho
 ## 24 November 2026 owner authorisation
 
 PR #8 synthetic React accepted and merged to development after exact-head CI success. Synthetic Geographic Evidence Integration V1 authorised on development, using versioned read-only virtual display positions, separate from the original matcher and frozen SQLite records. See [contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). No approval of real geography, external providers, main merge, deployment or publication. P3 10%, weighted MVP 22.8% unchanged.
+
+
+## 24 November 2026: provisional P3 contract and UX approval
+Owner explicitly approved P3.1–P3.7 as the provisional synthetic application contract, and authorised UX1–UX7 commits and CI on development. This supersedes the pending synthetic approval entries in the dated review, not the production gaps. P3.8–P3.11 and real data rights remain open. See [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md). No main merge, deployment or real property publication. P3 10%, weighted MVP 22.8% pending formal phase reconciliation.
