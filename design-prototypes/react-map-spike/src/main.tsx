@@ -6,6 +6,7 @@ import './style.css';
 
 const VectorMap = lazy(() => import('./VectorMap'));
 const SourceReview = lazy(() => import('./SourceReview'));
+const BuyerWorkflow = lazy(() => import('./BuyerWorkflow'));
 type View = 'investigate' | 'compare' | 'methodology';
 type Theme = 'editorial' | 'intelligence';
 type Renderer = 'schematic' | 'vector';
@@ -109,5 +110,7 @@ function App() {
 createRoot(document.getElementById('root')!).render(
   window.location.pathname === '/source-review'
     ? <Suspense fallback={<main role="status" className="source-info-state">Loading local evidence interface…</main>}><SourceReview /></Suspense>
-    : <App />
+    : window.location.pathname === '/buyer-workflow'
+      ? <Suspense fallback={<main role="status" className="source-info-state">Loading fictional buyer workflow…</main>}><BuyerWorkflow /></Suspense>
+      : <App />
 );
