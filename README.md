@@ -63,7 +63,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next:** [Real-Data Integration V1](docs/engineering/REAL_DATA_INTEGRATION_V1.md) authorised; controlled ingestion and synthetic verification, with public release separate. No provider account, real-data display, hosting or deployment authorised. Stable `main` requires owner merge approval.
+**Latest:** [Production Data Activation Preparation V1](docs/engineering/PRODUCTION_DATA_ACTIVATION_V1.md) verified migration, sealed private reader and offline bounded collection at [2310a2e](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2310a2e519b3a55d5ba167b1ab7ea58fcce0ee59); actual real extraction, public display and deployment remain separate. **Next:** separately authorised private live rehearsal, aggregate-only evidence. Stable `main` requires owner merge approval.
 
 **Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
 

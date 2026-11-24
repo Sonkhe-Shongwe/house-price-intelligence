@@ -36,3 +36,6 @@ Real-Data Integration V1: Owner approved Real-Data Integration V1 and the 85.7% 
 
 
 Real-Data Integration V1 verified: inactive historical PostgreSQL intake, exact private address review, revision isolation, rollback and V4 fictional browser replay verified at [91d8872](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/91d8872342b10ba673c067a83d6fe6f1b0177871). Recorded owner-approved 85.7% remains unchanged; proposed next evidence-based milestone review 86.5% (P1 97%, P4 93%, P5 89%, P7 81%, other stages unchanged), no full phase exit. Actual real records, production import/display and public deployment remain open; see [checkpoint](CHECKPOINT.md).
+
+
+Production Data Activation Preparation V1: [2310a2e](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2310a2e519b3a55d5ba167b1ab7ea58fcce0ee59) verified historical migration, sealed restricted reader and offline complete collection contract (208 Python, 12 runtime scenarios). Owner-authorised estimate remains **85.7%**. Prior 86.5% proposal not adopted. Combined proposed evidence-based reassessment 87.1% (P1 98%, P4 95%, P5 89%, P7 83%; other scores and fixed weights unchanged), pending owner score review. All full gates open. See [activation contract](engineering/PRODUCTION_DATA_ACTIVATION_V1.md). Actual live rehearsal and production release remain separate.

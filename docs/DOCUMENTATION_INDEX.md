@@ -72,3 +72,5 @@
 **Phase scores:** P3 **96%**, weighted MVP **85.7%**, owner-authorised partial-deliverable reassessment; future evidence-backed milestone reviews update the same roadmap. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.
 
 Current active workstream: [Real-Data Integration V1](engineering/REAL_DATA_INTEGRATION_V1.md).
+
+Current verified workstream: [Production Data Activation Preparation V1](engineering/PRODUCTION_DATA_ACTIVATION_V1.md). Private bounded real rehearsal requires separate execution approval; no actual data acquired in this milestone.
