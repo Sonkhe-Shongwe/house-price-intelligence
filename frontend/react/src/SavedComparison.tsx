@@ -6,6 +6,7 @@ import {
 } from './evidenceBridge';
 import './savedComparison.css';
 import {evidenceLabel} from './HistoryPanel';
+import {fixtureFetch} from './fixtureFetch';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -13,7 +14,7 @@ type WorkspaceProps = { active: InvestigationView | null };
 
 async function api(path: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object): Promise<unknown> {
   if (!path.startsWith('/v1/') || path.includes('//')) throw Error('invalid_source_route');
-  const response = await fetch(path, {
+  const response = await fixtureFetch(path, {
     method, credentials: 'same-origin', cache: 'no-store',
     ...(body === undefined ? {} : {
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),

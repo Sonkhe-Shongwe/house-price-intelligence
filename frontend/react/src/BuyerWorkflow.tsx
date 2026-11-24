@@ -8,6 +8,7 @@ import GeoMapPanel from './GeoMapPanel';
 import HistoryPanel from './HistoryPanel';
 import Methodology from './Methodology';
 import './workspaceShell.css';
+import {fixtureFetch} from './fixtureFetch';
 
 type View='home'|'investigate'|'saved'|'compare'|'methodology';
 const NAV:readonly {id:View;label:string;symbol:string}[]=[
@@ -27,7 +28,7 @@ const PRICE = /^(?:0|[1-9]\d{0,8})(?:\.\d{1,2})?$/;
 
 async function request(path: string, signal: AbortSignal, payload?:unknown): Promise<unknown> {
   if(!path.startsWith('/') || path.startsWith('//')) throw Error('Invalid local route');
-  const response = await fetch(path,{
+  const response = await fixtureFetch(path,{
     method:payload === undefined ? 'GET' : 'POST',
     cache:'no-store',credentials:'same-origin',signal,
     ...(payload === undefined ? {} : {headers:{'Content-Type':'application/json'},

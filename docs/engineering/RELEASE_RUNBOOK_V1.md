@@ -12,3 +12,5 @@ Run existing regression, PostgreSQL compatibility and runtime, React browser and
 
 ## Operational failure
 If evidence validation fails, 503; refuse unreviewed builds. If the identity session file is unavailable, fail closed with 503. Session bearer token hashes and CSRF values stored in a private local POSIX SQLite file; identity pending state is in memory, login restart requires starting again. This is an offline test candidate, not an approved distributed production session design. Do not restore session databases into a new deployment; require login after restore. User data retention and provider revocation remain open.
+
+Dedicated release-check CI uses pinned axe-core against actual browser views and npm audit of locked production dependencies, reporting aggregate counts only. Review all findings before declaring accessibility or dependency acceptance. Python transitive advisory review still required.

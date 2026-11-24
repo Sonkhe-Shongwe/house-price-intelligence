@@ -297,6 +297,32 @@ class RuntimeTests(unittest.TestCase):
                 self.assertEqual(request("GET",route,bob)[0],404)
                 server.set_app(setup()) # reconstruct identity boundary from persistent storage
                 self.assertEqual(request("GET",route,alice)[2],saved)
+                # Test authenticated React writes over real local TLS. The only
+                # certificate exception is in this disposable browser context.
+                with sync_playwright() as pw:
+                    browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                    try:
+                        ctx=browser.new_context(ignore_https_errors=True)
+                        name,value=alice.split("=",1)
+                        ctx.add_cookies([{"name":name,"value":value,"url":base,"secure":True,"httpOnly":True,"sameSite":"Lax"}])
+                        page=ctx.new_page()
+                        page.goto(base+"/")
+                        page.get_by_test_id("workspace-new-investigation").click()
+                        page.get_by_test_id("buyer-manual-pin").fill("00000000000001")
+                        page.get_by_test_id("buyer-create").click()
+                        expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+                        page.get_by_test_id("dossier-compare").click()
+                        page.get_by_test_id("workspace-create").click()
+                        expect(page.get_by_test_id("workspace-count")).to_have_text("0 / 3")
+                        page.get_by_test_id("workspace-add-current").click()
+                        expect(page.get_by_test_id("workspace-count")).to_have_text("1 / 3")
+                        page.get_by_test_id("workspace-note").first.fill("Offline session note")
+                        page.get_by_test_id("workspace-save-note").first.click()
+                        expect(page.get_by_test_id("workspace-note-state").first).to_have_text("Saved note verified")
+                        sid=page.get_by_test_id("workspace-id").inner_text()
+                        self.assertEqual(request("GET","/v1/shortlists/"+sid,bob)[0],404)
+                        ctx.close()
+                    finally:browser.close()
                 self.assertEqual(request("POST","/auth/logout",alice,csrf)[0],200)
                 self.assertEqual(request("GET",route,alice)[0],401)
                 self.assertEqual(request("GET","/health",bob)[0],200)

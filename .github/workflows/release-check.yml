@@ -1,0 +1,69 @@
+name: Release candidate accessibility and dependencies
+on:
+  push:
+    branches: [development]
+    paths: ['frontend/react/**','.github/workflows/release-check.yml']
+  pull_request:
+    branches: [development,main]
+    paths: ['frontend/react/**','.github/workflows/release-check.yml']
+permissions:
+  contents: read
+jobs:
+  release-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --prefix frontend/react
+      - run: npm run build --prefix frontend/react
+      - name: Install pinned audit-only dependency
+        run: |
+          mkdir -p "$RUNNER_TEMP/axe"
+          npm pack axe-core@4.10.3 --pack-destination "$RUNNER_TEMP/axe"
+          tar -xzf "$RUNNER_TEMP/axe/axe-core-4.10.3.tgz" -C "$RUNNER_TEMP/axe"
+          python -m pip install 'playwright==1.56.0'
+          if command -v google-chrome >/dev/null; then
+            echo "HPI_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            python -m playwright install chromium
+          fi
+      - name: Locked frontend production dependency review
+        working-directory: frontend/react
+        run: |
+          mkdir -p "$RUNNER_TEMP/release-audit"
+          set +e
+          npm audit --omit=dev --json > "$RUNNER_TEMP/npm-audit.json"
+          result=$?
+          set -e
+          python - "$RUNNER_TEMP/npm-audit.json" "$RUNNER_TEMP/release-audit/npm-audit.json" "$result" <<'PY'
+          import json,sys
+          from pathlib import Path
+          raw=json.loads(Path(sys.argv[1]).read_text())
+          counts=raw.get("metadata",{}).get("vulnerabilities")
+          if not isinstance(counts,dict):
+              print("Registry audit unavailable")
+              raise SystemExit(1)
+          report={"exit_code":int(sys.argv[3]),"vulnerabilities":counts}
+          Path(sys.argv[2]).write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          if report["exit_code"]:raise SystemExit(1)
+          PY
+      - name: Accessibility scan
+        if: success() || failure()
+        env:
+          HPI_AXE_SCRIPT: ${{ runner.temp }}/axe/package/axe.min.js
+          HPI_ACCESSIBILITY_REPORT: ${{ runner.temp }}/release-audit/accessibility.json
+        run: python frontend/react/tests/accessibility_release_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aggregate-release-review
+          path: ${{ runner.temp }}/release-audit/*.json
+          if-no-files-found: warn
+          retention-days: 7
