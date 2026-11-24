@@ -81,6 +81,10 @@ jobs:
           HPI_SPIKE_SCREENSHOTS: ${{ runner.temp }}/hpi-react-full-spike-screenshots
           HPI_REQUIRE_WEBGL: '1'
         run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_*.py' -v
+      - name: React source review on same-origin READ-ONLY Python WSGI + frozen SQLite
+        env:
+          HPI_SOURCE_SCREENSHOTS: ${{ runner.temp }}/hpi-source-connected-screenshots
+        run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_source_review.py' -v
       - name: Publish visual-review evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -88,6 +92,7 @@ jobs:
           name: hpi-react-map-full-source-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/hpi-react-full-spike-screenshots/*.png
+            ${{ runner.temp }}/hpi-source-connected-screenshots/*.png
             design-prototypes/react-map-spike/dist/**
           if-no-files-found: warn
           retention-days: 7
