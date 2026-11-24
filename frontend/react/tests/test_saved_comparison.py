@@ -312,8 +312,9 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.page.get_by_test_id("workspace-add-id").click()
         expect(self.page.get_by_test_id("workspace-entry")).to_have_count(1)
         expect(self.page.get_by_test_id("workspace-entry").first).to_contain_text(
-            "insufficient_data")
+            "Insufficient evidence")
         saved=self.get_shortlist(sid)["entries"][0]["investigation"]
+        self.assertEqual(saved["status"],"insufficient_data")
         self.assertEqual(saved["selected_count"],0)
         self.assertEqual(saved["comparables"],[])
         self.assertIsNone(saved["valuation"])

@@ -17,3 +17,6 @@ Run existing browser/accessibility regression, new richer fixture and offline TL
 
 ## Browser session and automated review extension
 HTTPS-only browser mutations retrieve a current session-bound CSRF token from the same origin, never store it in browser persistence. TLS CI exercises creating an investigation, saving a shortlist and a note via React and cross-account denial. Legacy HTTP path unchanged. Dedicated axe-core audit of actual desktop workspace/dossier/comparison and mobile comparison emits aggregate rule IDs, impacts and counts, failing on violations; npm production dependency registry audit emits aggregate severity counts. These do not certify production security or accessibility. See CI results before awarding credit.
+
+
+Initial 48b45dc runtime suite passed the rich V3 browser/map and eight of nine scenarios; offline session denial attempted an unsupported legacy response code 401, fixed with the dedicated no-store identity reply. React test still expected the raw insufficient_data label; change visible expectation to Insufficient evidence and preserve explicit API status assertion. No security guard relaxed. Reverify corrected SHA.

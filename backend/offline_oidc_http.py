@@ -60,6 +60,6 @@ def application(pool,assets,boundary,exchange):
             if path.startswith("/auth/"):return _response(start,405,{"error":"method_not_allowed"})
             owner=boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=csrf)
             return serve_owner(pool,assets,env,start,owner)
-        except (AuthDenied,ValueError):return _response(start,401,{"error":"fictional_authentication_required"})
+        except (AuthDenied,ValueError):return reply(start,"401 Unauthorized",{"error":"fictional_authentication_required"})
         except (sqlite3.Error,OSError):return _response(start,503,{"error":"session_unavailable"})
     return app
