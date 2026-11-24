@@ -45,6 +45,8 @@
 
 **Final acceptance contract:** [FA1–FA8](engineering/FINAL_ACCEPTANCE_V1.md); [local release runbook](engineering/RELEASE_RUNBOOK_V1.md).
 
+**Full product qualification:** [FR1–FR3](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

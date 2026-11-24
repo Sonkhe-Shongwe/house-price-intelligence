@@ -159,3 +159,7 @@ Owner approved FA1–FA8 bounded fictional development/CI, aggregate coverage di
 
 ## 24 November 2026: FA milestone review
 83.6% weighted estimate (79.2% prior, +4.4 points), fixed weights and open full phase gates. Rich V3 and offline HTTPS persisted sessions/React writes verified; axe four views zero detected violations, manual review pending; npm production audit zero reported vulnerabilities. Count-only diagnostic does not resolve holdout eligibility. No actual provider, real record release, contact, hosting, deployment or main merge. See [FA contract](engineering/FINAL_ACCEPTANCE_V1.md).
+
+
+## 24 November 2026: Full product release selected
+Owner selects original real-property product, with Evanston Township/Class 203 as candidate. Authorised FR1–FR3 bounded eligibility diagnostics, fixed chronological validation, source rights research and development CI. No real display, provider, contact, hosting, deployment or main merge. [Qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).

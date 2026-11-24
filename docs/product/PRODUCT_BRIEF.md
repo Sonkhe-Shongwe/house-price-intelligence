@@ -2,6 +2,8 @@
 
 **Source:** The pre-existing Project 2 brief in `Sonkhe-Shongwe/sa-tech-grad-playbook.` at `docs/portfolio/house-price-intelligence.md` (reviewed 22 November 2026). This is a standalone adapted copy retaining the prior requirements and unresolved decisions. The original source remains intact.
 
+**Owner decision (24 November 2026):** pursue the original full real-property release. Evanston Township/Class 203 remains the initial candidate pending qualification and source-specific rights. Fictional fixtures remain development/test data; no production display or deployment approved. See [FR1–FR3](../engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+
 ## Problem and buyer
 
 A prospective homebuyer has shortlisted houses whose asking prices are visible, but needs evidence of recorded completed sales, relevant physical characteristics, differences among candidate homes and the limits of available information. The product should help a buyer understand which recently sold properties offer a defensible comparison and why.
