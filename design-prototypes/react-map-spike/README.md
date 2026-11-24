@@ -22,6 +22,14 @@ Navigate to the displayed `http://127.0.0.1:5173/` URL. The app requires Node 22
 
 Run `npm run typecheck` to check typed TSX and `python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_*.py' -v` from the repository root **after `npm run build`**, with Playwright and Chromium available. The isolated feature branch is committed as editable source; [full-source CI run 45298710007](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45298710007) passed a clean `npm ci`, production ESM build, actual MapLibre WebGL-ready and six real browser tests. Do not infer approval to replace the existing Python/SQLite frontend or deploy.
 
+## Source-backed P3/P6 adapter validation (24 November)
+
+The separate **evidenceBridge.ts** module is a read-only candidate for presenting the *actual* Python fixture API, not the example data in data.ts. It validates p3-draft-v0.3 exact-decimal sale prices, synthetic build and snapshot provenance, evidence status, and up to three verified shortlist entries. Crucially, adapted API investigations always report **no verified map geometry**; the invented SVG/MapLibre positions in this prototype are never reused for source-backed records.
+
+Run the isolated cross-layer check as part of [.github/workflows/react-map-full-source-ci.yml](../../.github/workflows/react-map-full-source-ci.yml), or reproduce after npm ci from the repository root by exporting fixture-only WSGI JSON with tests/export_real_api_contract.py, compiling evidenceBridge.ts with the pinned TypeScript compiler, and executing tests/test_evidence_bridge.mjs. This test is deliberately separate from the six browser UI tests.
+
+**Verified** by [GitHub Actions 45300580369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45300580369): the actual WSGI API JSON and 13 integrity/tamper guards passed, alongside six real Chrome journeys and the clean Vite build. See the [source/geometry integration contract](../../docs/design/READ_ONLY_REACT_EVIDENCE_ADAPTER_2026-11-24.md). **No browser-to-Python integration, real geometry, map API, live application change, framework acceptance or release** is implied.
+
 ## Map accuracy and privacy boundary
 
 `src/data.ts` uses **diagram x/y percentages**. The MapLibre adapter converts these percentages to entirely virtual positions near the origin to exercise GeoJSON and WebGL. Those numbers are **not** verified longitude/latitude for any subject, sale, neighbourhood or parcel. They must never be passed to the HPI matcher, used to calculate real distance, or published as geographic evidence.
