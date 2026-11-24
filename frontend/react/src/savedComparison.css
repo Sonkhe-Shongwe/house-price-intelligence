@@ -41,3 +41,16 @@
 @media(max-width:720px){.workspace-shell{padding:18px}.workspace-header{flex-direction:column;gap:9px}.workspace-flag{white-space:normal}.workspace-add{grid-template-columns:1fr}.workspace-grid{grid-template-columns:1fr}.workspace-input-line{flex-direction:column}.workspace-input-line button{white-space:normal}.workspace-summary{flex-direction:column}.workspace-summary>div:last-child{text-align:left}}
 @media(max-width:360px){.workspace-summary h3{font-size:21px}.workspace-card-bottom{align-items:flex-start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.workspace-shell *, .workspace-shell *::before, .workspace-shell *::after{animation:none!important;transition:none!important}}
+
+/* Recent labels and source comparison values are untrusted variable-length text. */
+.workspace-shell [aria-label="Recent saved shortlists"]{min-width:0;margin-bottom:18px}
+.workspace-shell [data-testid="workspace-recent"]{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;max-height:240px;overflow-y:auto}
+.workspace-shell [data-testid="workspace-recent"] li{min-width:0}
+.workspace-shell [data-testid="workspace-recent"] button{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left}
+.workspace-summary>div:first-child{min-width:0;overflow-wrap:anywhere}
+.workspace-grid[data-testid="workspace-comparison"]{margin-top:14px}
+.workspace-grid[data-testid="workspace-comparison"] dl{min-width:0;margin:8px 0 0;font-size:12px;line-height:1.6}
+.workspace-grid[data-testid="workspace-comparison"] dt{font-weight:750;margin-top:10px;color:#48674f}
+.workspace-grid[data-testid="workspace-comparison"] dd{margin:2px 0 0;overflow-wrap:anywhere}
+.workspace-shell button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.workspace-card,.workspace-money,.workspace-card-bottom span{overflow-wrap:anywhere}

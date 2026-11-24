@@ -40,3 +40,15 @@ class ReactAssetTests(unittest.TestCase):
             path.chmod(0o644)
             with self.assertRaisesRegex(FixturePersistenceError,"private"):
                 open_file_demo(path,private_file=True)
+
+    @unittest.skipUnless(os.name=="posix","POSIX symlink check")
+    def test_private_fixture_does_not_create_through_symlink_parent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            real=root/"real"
+            real.mkdir()
+            link=root/"link"
+            link.symlink_to(real,target_is_directory=True)
+            with self.assertRaisesRegex(FixturePersistenceError,"parent must not be a symlink"):
+                open_file_demo(link/"new.sqlite3",private_file=True)
+            self.assertFalse((real/"new.sqlite3").exists())

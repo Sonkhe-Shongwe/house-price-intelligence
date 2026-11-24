@@ -131,6 +131,8 @@ def open_file_demo(path: str | Path, *, private_file: bool = False) -> tuple[sql
         raise FixturePersistenceError("Fixture database must be a regular, non-symlink file")
     if not target.parent.is_dir():
         raise FixturePersistenceError("Fixture database parent directory must already exist")
+    if private_file and target.parent.is_symlink():
+        raise FixturePersistenceError("Fixture database parent must not be a symlink")
     if not target.exists():
         memory, _ = in_memory_demo()
         temporary = None

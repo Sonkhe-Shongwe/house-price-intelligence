@@ -244,7 +244,7 @@ class ReactSavedComparisonTests(unittest.TestCase):
 
     def test_responsive_workspace_has_no_horizontal_scroll(self):
         self.create_investigation()
-        self.create_workspace()
+        self.create_workspace("F"*80)
         self.add_current(1)
         self.create_investigation("105 Fictional Court",option=0)
         self.add_current(2)
@@ -253,7 +253,10 @@ class ReactSavedComparisonTests(unittest.TestCase):
             self.page.get_by_test_id("workspace").scroll_into_view_if_needed()
             self.assertFalse(self.page.evaluate(
                 "document.documentElement.scrollWidth > innerWidth + 2"),
-                f"Horizontal overflow at {width}px")
+                f"Horizontal overflow at {width}px; overflowing elements: " +
+                str(self.page.evaluate("""() => [...document.querySelectorAll('*')]
+                  .filter(el => el.getBoundingClientRect().right > innerWidth + 2)
+                  .slice(0,12).map(el => [el.tagName,el.className,el.getBoundingClientRect().right])""")))
             expect(self.page.get_by_test_id("workspace-entry")).to_have_count(2)
         self.page.emulate_media(reduced_motion="reduce")
         self.assertEqual(self.page.get_by_test_id("workspace-add-current").evaluate(
