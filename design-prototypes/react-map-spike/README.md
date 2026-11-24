@@ -42,9 +42,25 @@ npm run build --prefix design-prototypes/react-map-spike
 python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8797 --enable-buyer-workflow
 ```
 
-Then open **http://127.0.0.1:8797/buyer-workflow**. Test searches: **101 Fictional Way** (one parcel) and **105 Fictional Court** (two distinct parcel options). The flag explicitly permits only address search and investigation creation. Remove it to restore the original GET-only preview; no shortlist mutations are allowed in either mode.
+Then open **http://127.0.0.1:8797/buyer-workflow**. Test searches: **101 Fictional Way** (one parcel) and **105 Fictional Court** (two distinct parcel options). The flag explicitly permits only address search and investigation creation. Remove it to restore the original GET-only preview; **shortlist mutations are not allowed in either of these two modes**. A third, separately gated shortlist-write mode is described below.
 
 An additional [eight-scenario browser test](tests/test_buyer_workflow.py) covers creation, exact cents, frozen reopening, ambiguous parcel identity, stale search clearing, denial of other writes, mobile and screenshots. It runs in the isolated [React CI workflow](../../.github/workflows/react-map-full-source-ci.yml). The result is **not** proof of production readiness or public security. See the [buyer-workflow integration gate](../../docs/design/REACT_BUYER_WORKFLOW_CREATE_REOPEN_GATE_2026-11-24.md).
+
+## Saved shortlist and notes, additional opt-in (24 November)
+
+The buyer view now contains a real source-backed **Saved comparison** section. It creates a Python/SQLite shortlist (maximum three distinct fictional properties), adds a selected or UUID-reopened saved investigation, edits up to 800 characters of buyer notes per entry, and verifies each write by reopening the saved shortlist. Notes are stored separately from original frozen sale evidence, and the browser guards against sale/source-policy changes. Other uncommitted note drafts remain visible when saving one note.
+
+From the repository root:
+
+```bash
+npm ci --prefix design-prototypes/react-map-spike
+npm run build --prefix design-prototypes/react-map-spike
+python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8797 --enable-buyer-workflow --enable-shortlist-workflow
+```
+
+Open **http://127.0.0.1:8797/buyer-workflow**, create a fictional investigation, scroll to **Saved comparison**, create the shortlist, add the investigation, and save a note. Create or reopen a second investigation to compare two distinct parcels. This **third** preview mode must be explicitly enabled: the existing read-only and investigation-only modes still reject shortlist writes. DELETE remains disabled even in the third mode, and all writes go through the existing Python shortlist contract.
+
+Browser acceptance: [test_saved_comparison.py](tests/test_saved_comparison.py) exercises source-backed create/add/note/save/reopen, duplicate PIN and ID, three-property limit, invalid notes, denied writes, responsive layouts and screenshot review. The [source-integrity and permission report](../../docs/design/REACT_P6_SHORTLIST_NOTE_WRITE_GATE_2026-11-24.md) records the remaining approval gates. The local in-memory database disappears when the server stops; there are no accounts, private notes, real property data or production authorisation.
 ## Working read-only React -> local Python/SQLite preview (24 November)
 
 The new source-connected investigation screen is separate from the invented-map style lab. It performs **real same-origin GET requests** to HPI's existing WSGI `GET /v1/investigations/{uuid}` and `GET /v1/shortlists/{uuid}`, using fresh fictional records seeded by the isolated Python runner. It displays exact cents, source snapshots and matching explanations, with a deliberate **Location unavailable** panel and no fictitious property pins.
