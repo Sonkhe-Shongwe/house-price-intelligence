@@ -1,6 +1,6 @@
 # House Price Intelligence: P0–P8 phase-gated delivery plan
 
-**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **85.7% weighted MVP progress** (previous 84.0%; initial 22.8%).
+**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
 ## Origin and scope
 
@@ -19,15 +19,19 @@ House Price Intelligence has a different product, market, platform and release t
 | P-stage | Focus | Weight | Estimated done | Contribution |
 | --- | --- | ---: | ---: | ---: |
 | P0 | Product discovery, supported buyer/market, feasibility | 6% | 94% | 5.6 pts |
-| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 95% | 11.4 pts |
+| P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 98% | 11.8 pts |
 | P2 | Explainable comparable-selection and evaluation | 14% | 75% | 10.5 pts |
 | P3 | Product contracts, domain model, architecture decisions | 10% | 96% | 9.6 pts |
-| P4 | Database, ingestion-to-storage, backend API | 16% | 91% | 14.6 pts |
-| P5 | Browser property investigation experience | 16% | 88% | 14.1 pts |
+| P4 | Database, ingestion-to-storage, backend API | 16% | 95% | 15.2 pts |
+| P5 | Browser property investigation experience | 16% | 89% | 14.2 pts |
 | P6 | Saved investigations, shortlist, side-by-side comparison | 12% | 95% | 11.4 pts |
-| P7 | Integrated quality, rights, security and operational readiness | 8% | 80% | 6.4 pts |
+| P7 | Integrated quality, rights, security and operational readiness | 8% | 83% | 6.6 pts |
 | P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 35% | 2.1 pts |
-| **Total** | **Bounded flagship MVP** | **100%** | **85.7% weighted** | **85.7 pts** |
+| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weighted** | **87.1 pts** |
+
+## 24 November 2026: Private Real-Data Integration Rehearsal V1 (authorised)
+
+Owner approved 87.1% weighted milestone reassessment (P0 94%, P1 98%, P2 75%, P3 96%, P4 95%, P5 89%, P6 95%, P7 83%, P8 35%) and one bounded private live rehearsal. All full gates remain open. No public property publication, permanent hosting, deployment, valuation or main merge. See [contract](engineering/PRIVATE_REAL_REHEARSAL_V1.md). No new score credit for code-only preparation.
 
 ## 24 November 2026: Production Data Activation Preparation V1 (verified deliverable)
 
@@ -168,7 +172,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Granular deliverable and acceptance matrix (planning proposal, 23 November 2026)
 
-**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **85.7%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
+**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **87.1%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
 
 **Progress vocabulary for this matrix:**
 
@@ -347,7 +351,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Approved bounded product brief, source register, class/geography decisions, permitted field display policy and a documented go/no-go decision. No claim of live listings or commercial appraisals.
 
-### P1: Data engineering — 12% weight; 95% estimated complete
+### P1: Data engineering — 12% weight; 98% estimated complete
 
 **Goal:** A repeatable extraction-to-cleaned-data pipeline with credible record grain, stable IDs and source/version lineage.
 
@@ -377,7 +381,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Accepted database ERD and migration plan, endpoint/request/response contract, error and unsupported states, first end-to-end journey specification, security/privacy rules and contract-test fixtures.
 
-### P4: Backend API and database — 16% weight; 91% estimated complete
+### P4: Backend API and database — 16% weight; 95% estimated complete
 
 **Goal:** Running server and durable application storage connecting curated data to enquiries and evidence.
 
@@ -385,7 +389,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** A client can submit a supported subject, retrieve ranked and explained earlier comparable sales, retrieve truthful insufficient-data results, and recover an investigation from persisted storage. Tests demonstrate these behaviours without handwritten fake totals.
 
-### P5: Property investigation frontend — 16% weight; 88% estimated complete
+### P5: Property investigation frontend — 16% weight; 89% estimated complete
 
 **Goal:** A usable browser experience rather than a notebook or audit dashboard.
 
@@ -401,7 +405,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** A returning buyer can open two saved properties, compare supported evidence and notes, and reopen identical source/rule-referenced results. An insufficient-data home is still savable.
 
-### P7: Integrated QA and readiness — 8% weight; 80% estimated complete
+### P7: Integrated QA and readiness — 8% weight; 83% estimated complete
 
 **Goal:** Prove the complete system is reliable, secure and honest.
 

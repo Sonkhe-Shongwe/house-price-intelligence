@@ -22,3 +22,7 @@ Owner-authorised estimate remains **85.7%**. Prior 86.5% proposal not adopted. C
 
 ## Next gate (not authorised for execution)
 Next highest-value gate: separately authorised single bounded private real-data rehearsal, using existing township 17/class203 scope, sales 2024–2025, assessments 2023–2024, four datasets, fixed selected fields and existing caps (sales 5,000, assessments 40,000, max 500 distinct keys, 35/key batch, enrichment count <500/batch and aggregate <7,500/role). Reconcile counts, terminal pages and source revisions; import into disposable PostgreSQL, verify source membership, exact cents, seal and restricted-reader redacted outcomes. No row-level output, artifacts, raw query URLs, seal values or sensitive logs; aggregate counts/status only. No workflow dispatch under existing authority. Do not equate a successful rehearsal with durable production storage, real property release or as-of proof.
+
+
+## Subsequent owner decision
+Owner approved 87.1% weighted milestone reassessment (P0 94%, P1 98%, P2 75%, P3 96%, P4 95%, P5 89%, P6 95%, P7 83%, P8 35%) and one bounded private live rehearsal. All full gates remain open. No public property publication, permanent hosting, deployment, valuation or main merge. See [rehearsal contract](PRIVATE_REAL_REHEARSAL_V1.md). Historical restrictions above applied to the prior milestone.

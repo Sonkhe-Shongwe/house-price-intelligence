@@ -2,18 +2,18 @@
 
 **Current governing roadmap:** [P0–P8 phase-gated delivery plan](P_PHASE_ROADMAP.md).
 
-**Status reviewed 24 November 2026:** approximately **85.7%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
+**Status reviewed 24 November 2026:** approximately **87.1%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
 
 | Phase | Focus | Weight | Estimated completion |
 | --- | --- | ---: | ---: |
 | P0 | Discovery, market and source viability | 6% | 94% |
-| P1 | Data quality, ingestion and provenance | 12% | 95% |
+| P1 | Data quality, ingestion and provenance | 12% | 98% |
 | P2 | Explainable historical comparables | 14% | 75% |
 | P3 | Domain, architecture and API contracts | 10% | 96% |
-| P4 | Backend API and database | 16% | 91% |
-| P5 | Buyer-facing browser investigation | 16% | 88% |
+| P4 | Backend API and database | 16% | 95% |
+| P5 | Buyer-facing browser investigation | 16% | 89% |
 | P6 | Save/reopen, shortlist and compare | 12% | 95% |
-| P7 | Integrated QA, privacy, rights, readiness | 8% | 80% |
+| P7 | Integrated QA, privacy, rights, readiness | 8% | 83% |
 | P8 | Release, demo and portfolio handoff | 6% | 35% |
 
 **Current delivery distinction:** Owner accepted P3.1–P3.7 provisionally for synthetic scope and PostgreSQL as a candidate. P3 contracts, synthetic P4 backend, P5 React workspace with history and optional fictional map, and P6 two-to-three-property shortlist/notes/comparison are integrated and verified on development. SQLite remains the local runtime; PostgreSQL candidate parity, dump/restore and ownership isolation passed. **No full P0–P8 phase exit is claimed.** The owner-authorised milestone reassessment recognises these partial deliverables, moving 22.8% to 62.9% without changing weights or exit gates. RD1–RD7 adds bounded exact-cohort address coverage (262/262 keys) and verified synthetic versioned import/disclosure, raising the estimate to 66.5%. PR1–PR8 verified actual fictional PostgreSQL HTTP, pooled identity, concurrent shortlist and restart, separate versioned importer and two-context Chromium, raising the estimate to 71.4%. PC1–PC8 verified same-runtime fictional build activation/rollback, mixed-build history and shortlists, revised browser map and connection recovery, raising progress to 76.1%. PI1–PI8 verified refined evidence/comparison, offline OIDC/session and recruiter walkthrough; 2025 holdout blocked by too few eligible subjects. Progress 79.2%. Real rights, actual provider, production operations and deployment remain open. See [detailed roadmap](P_PHASE_ROADMAP.md), [current checkpoint](CHECKPOINT.md) and [production readiness](engineering/PRODUCTION_READINESS_V1.md).
@@ -39,3 +39,6 @@ Real-Data Integration V1 verified: inactive historical PostgreSQL intake, exact 
 
 
 Production Data Activation Preparation V1: [2310a2e](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2310a2e519b3a55d5ba167b1ab7ea58fcce0ee59) verified historical migration, sealed restricted reader and offline complete collection contract (208 Python, 12 runtime scenarios). Owner-authorised estimate remains **85.7%**. Prior 86.5% proposal not adopted. Combined proposed evidence-based reassessment 87.1% (P1 98%, P4 95%, P5 89%, P7 83%; other scores and fixed weights unchanged), pending owner score review. All full gates open. See [activation contract](engineering/PRODUCTION_DATA_ACTIVATION_V1.md). Actual live rehearsal and production release remain separate.
+
+
+Owner approved 87.1% weighted milestone reassessment (P0 94%, P1 98%, P2 75%, P3 96%, P4 95%, P5 89%, P6 95%, P7 83%, P8 35%) and one bounded private live rehearsal. All full gates remain open. No public property publication, permanent hosting, deployment, valuation or main merge. [Rehearsal contract](engineering/PRIVATE_REAL_REHEARSAL_V1.md).

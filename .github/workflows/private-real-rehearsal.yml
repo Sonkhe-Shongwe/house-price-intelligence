@@ -1,0 +1,61 @@
+name: Private real-data integration rehearsal V1
+on:
+  push:
+    branches: [development]
+    paths: ['.github/authorisations/private-real-rehearsal-v1.txt']
+permissions:
+  contents: read
+concurrency:
+  group: private-real-rehearsal-v1
+  cancel-in-progress: false
+jobs:
+  rehearsal:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify one-time owner authorisation marker addition
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -eu
+          marker=.github/authorisations/private-real-rehearsal-v1.txt
+          test "$(git diff --name-status "$BEFORE" "$GITHUB_SHA" -- "$marker")" = "$(printf 'A\t%s' "$marker")"
+          test "$(cat "$marker")" = "owner-approved-2026-11-24-private-real-rehearsal-v1"
+          test "$(git diff --name-only "$BEFORE" "$GITHUB_SHA")" = "$marker"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'psycopg[binary]==3.2.9'
+      - name: Offline gates then single private live rehearsal
+        shell: bash
+        run: |
+          set -euo pipefail
+          export HPI_PG_DSN="postgresql://postgres:$(python -c 'import secrets; print(secrets.token_hex(32))')@127.0.0.1:54329/hpi_fixture"
+          password="${HPI_PG_DSN#postgresql://postgres:}"
+          password="${password%@*}"
+          echo "::add-mask::$password"
+          # No service-container diagnostic logs, no persistent volumes or artifact
+          # upload. Raw rows stay in process memory and disposable tmpfs database.
+          docker run --rm -d --name hpi-private-rehearsal --log-driver none \
+            --tmpfs /var/lib/postgresql/data:rw,size=512m \
+            -e POSTGRES_PASSWORD="$password" -e POSTGRES_DB=hpi_fixture \
+            -p 127.0.0.1:54329:5432 postgres:17 \
+            -c log_statement=none -c log_min_error_statement=panic >/dev/null 2>&1
+          trap 'docker rm -f hpi-private-rehearsal >/dev/null 2>&1 || true' EXIT
+          ready=false
+          for i in $(seq 1 60); do
+            if docker exec hpi-private-rehearsal pg_isready -U postgres -d hpi_fixture >/dev/null 2>&1; then ready=true; break; fi
+            sleep 1
+          done
+          test "$ready" = true
+          python -m unittest discover -s backend/tests -p 'test_real_source*.py' -v
+          python -m unittest discover -s backend/postgres_runtime_tests -p 'test_private_real_rehearsal.py' -v
+          HPI_PRIVATE_REHEARSAL_TOKEN=owner-approved-2026-11-24-private-real-rehearsal-v1 python -m backend.private_real_rehearsal
+      - name: Remove disposable database container
+        if: always()
+        run: docker rm -f hpi-private-rehearsal >/dev/null 2>&1 || true
