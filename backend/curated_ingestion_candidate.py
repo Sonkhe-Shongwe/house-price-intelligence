@@ -39,8 +39,22 @@ def open_candidate():
     return conn
 
 def fixture_rows(revision):
-    if revision not in ("v1","v2"):raise ImportRefused("Only reviewed invented revisions")
+    if revision not in ("v1","v2","v3"):raise ImportRefused("Only reviewed invented revisions")
     pins=[f"{n:014d}" for n in range(1,7)]
+    if revision=="v3":
+        # New independent fictional revision; v1/v2 manifests and IDs unchanged.
+        labels=("12 Imaginary Cedar Lane, Demonstration District","24 Imaginary Cedar Lane, Demonstration District",
+                "8 Imaginary Oak Close, Demonstration District","36 Imaginary Birch Way, Demonstration District",
+                "50 Imaginary Grove, Demonstration District","50 Imaginary Grove, Demonstration District")
+        return {
+            "sales":[{"pin":pins[n-1],"source_row_id":f"row-{n}","document_number":f"DOC-{n}",
+                      "sale_date":when,"sale_price_usd_cents":price}
+                     for n,when,price in ((2,"2024-01-18",48750000),(3,"2024-03-12",54275000),(4,"2024-05-09",51990000))],
+            "assessment":[{"pin":p,"tax_year":2023,"card_number":"1","assessor_class":"203","building_area_sqft":a}
+                          for p,a in zip(pins,(1600,1500,1720,1650,1900,1580))],
+            "geography":[{"pin":p,"tax_year":2023,"neighborhood_code":"17","latitude":42.04,"longitude":-87.68} for p in pins],
+            "address":[{"pin":p,"tax_year":2023,"display_address":label} for p,label in zip(pins,labels)]
+        }
     return {
         "sales":[{"pin":p,"source_row_id":f"row-{i}","document_number":f"DOC-{i}",
                   "sale_date":"2024-02-01","sale_price_usd_cents":52500000+(12500 if revision=="v2" and i==2 else 0)}

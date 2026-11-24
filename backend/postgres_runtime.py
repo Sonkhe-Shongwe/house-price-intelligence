@@ -118,32 +118,38 @@ def application(pool,passwords,assets):
                 ("X-Content-Type-Options","nosniff"),("Content-Length",str(len(body))),
                 ("WWW-Authenticate",'Basic realm="Fictional HPI", charset="UTF-8"')])
             return [body]
-        captured=[]
-        def capture(status,headers,exc_info=None):
-            captured[:]=[status,headers]
-        try:
-            with pool.connection() as conn:
-                try:
-                    with conn.transaction():
-                        verify_role(conn)
-                        conn.execute("SET LOCAL statement_timeout='4000ms'")
-                        conn.execute("SET LOCAL lock_timeout='3000ms'")
-                        conn.execute("SELECT set_config('hpi.owner_id',%s,true)",(owner,))
-                        # Coarse owner-level serialisation keeps all read/check/write
-                        # operations atomic. Different owners can proceed concurrently.
-                        conn.execute("SELECT pg_advisory_xact_lock(%s)",(194330 if owner==OWNERS["alice"] else 194331,))
-                        conn.execute("SELECT pg_advisory_xact_lock_shared(%s)",(SOURCE_LOCK,))
-                        store=ConsolidatedStore(conn)
-                        payload=list(create_app(store,react_assets=assets,synthetic_map=True)(environ,capture))
-                        if int(captured[0][:3])>=400:raise _Abort()
-                except _Abort:pass
-            if int(captured[0][:3])==500:
-                return _response(start_response,503,{"error":"evidence_unavailable"})
-            start_response(*captured)
-            return payload
-        except (psycopg.Error,PoolTimeout,EvidenceStoreError,ValueError,RuntimeError):
-            return _response(start_response,503,{"error":"evidence_unavailable"})
+        return serve_owner(pool,assets,environ,start_response,owner)
     return app
+
+def serve_owner(pool,assets,environ,start_response,owner):
+    """Internal trusted identity boundary; never read owner from request."""
+    if owner not in OWNERS.values():return _response(start_response,403,{"error":"identity_denied"})
+    captured=[]
+    def capture(status,headers,exc_info=None):
+        captured[:]=[status,headers]
+    try:
+        with pool.connection() as conn:
+            try:
+                with conn.transaction():
+                    verify_role(conn)
+                    conn.execute("SET LOCAL statement_timeout='4000ms'")
+                    conn.execute("SET LOCAL lock_timeout='3000ms'")
+                    conn.execute("SELECT set_config('hpi.owner_id',%s,true)",(owner,))
+                    # Coarse owner-level serialisation keeps all read/check/write
+                    # operations atomic. Different owners can proceed concurrently.
+                    conn.execute("SELECT pg_advisory_xact_lock(%s)",(194330 if owner==OWNERS["alice"] else 194331,))
+                    conn.execute("SELECT pg_advisory_xact_lock_shared(%s)",(SOURCE_LOCK,))
+                    store=ConsolidatedStore(conn)
+                    payload=list(create_app(store,react_assets=assets,synthetic_map=True)(environ,capture))
+                    if int(captured[0][:3])>=400:raise _Abort()
+            except _Abort:pass
+        if int(captured[0][:3])==500:
+            return _response(start_response,503,{"error":"evidence_unavailable"})
+        start_response(*captured)
+        return payload
+    except (psycopg.Error,PoolTimeout,EvidenceStoreError,ValueError,RuntimeError):
+        return _response(start_response,503,{"error":"evidence_unavailable"})
+
 
 class ThreadedServer(ThreadingMixIn,WSGIServer):
     daemon_threads=True

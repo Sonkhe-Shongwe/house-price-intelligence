@@ -275,7 +275,7 @@ export default function BuyerWorkflow(){
               <label htmlFor="buyer-query">Address or street</label>
               <div className="buyer-input-row"><input data-testid="buyer-query" id="buyer-query"
                 value={query} onChange={e=>changeQuery(e.target.value)}
-                placeholder="Try 105 Fictional Court" autoComplete="off" maxLength={80}
+                placeholder="Try an address in the active fictional build" autoComplete="off" maxLength={80}
                 disabled={writing} required/>
                 <button type="submit" data-testid="buyer-search" disabled={phase!=='idle'}>Search addresses</button>
               </div>
@@ -376,7 +376,7 @@ export default function BuyerWorkflow(){
       </section>}
       </section>
       <section hidden={view!=='compare'} className="hpi-view" aria-label="Compare">
-        <div className="hpi-page-heading"><div><p className="hpi-eyebrow">PROPERTY DECISION WORKSPACE</p><h1>Compare with confidence.</h1><p>Preserve independent evidence and your own research notes.</p></div>
+        <div className="hpi-page-heading"><div><p className="hpi-eyebrow">PROPERTY DECISION WORKSPACE</p><h1>Compare the evidence.</h1><p>Preserve independent evidence and your own research notes.</p></div>
           <button type="button" className="hpi-primary" onClick={()=>navigate('saved')}>Find saved properties</button></div>
         <SavedComparison active={record}/>
       </section>

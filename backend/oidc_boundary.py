@@ -102,6 +102,9 @@ class OidcBoundary:
         try:token=exchange(code=code,verifier=pending.verifier,redirect_uri=self.redirect)
         except Exception:raise AuthDenied("Identity exchange unavailable") from None
         owner=self._verify(token,pending.nonce)
+        return self._issue_session(owner)
+
+    def _issue_session(self,owner):
         with self.lock:
             self._prune()
             if len(self.sessions)>=128:raise AuthDenied("Session unavailable")

@@ -190,6 +190,118 @@ class RuntimeTests(unittest.TestCase):
                 conn.execute("UPDATE hpi_candidate.active_fixture_build SET generation=0")
             with self.assertRaises(psycopg.errors.InsufficientPrivilege):
                 conn.execute("DELETE FROM hpi_candidate.fixture_build_events")
+    def test_rich_revision_preserves_frozen_evidence(self):
+        with psycopg.connect(ADMIN,autocommit=True) as conn:
+            old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
+        original=self.create("alice","00000000000001")
+        generation=activate(ADMIN,BUILDS[3],generation)
+        try:
+            result=self.create("alice","00000000000001")
+            self.assertEqual(result["data_build"]["build_id"],BUILDS[3])
+            self.assertEqual(len({r["sale_price_usd"] for r in result["comparables"]}),3)
+            self.assertEqual(len({r["age_days"] for r in result["comparables"]}),3)
+            self.assertEqual(len({r["size_difference_pct"] for r in result["comparables"]}),3)
+            self.assertEqual(self.call("alice","GET","/v1/investigations/"+original["investigation_id"])[1],original)
+            self.assertTrue(self.call("alice","GET","/v1/investigations/"+result["investigation_id"]+"/map")[1]["map_available"])
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox","--enable-unsafe-swiftshader","--use-angle=swiftshader"])
+                try:
+                    page=browser.new_page(http_credentials={"username":"alice","password":self.passwords["alice"]})
+                    page.goto(self.base+"/buyer-workflow")
+                    page.get_by_test_id("buyer-query").fill("12 Imaginary Cedar")
+                    page.get_by_test_id("buyer-search").click()
+                    page.get_by_test_id("buyer-candidate").first.click()
+                    page.get_by_test_id("buyer-create").click()
+                    expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("buyer-result")).to_contain_text("12 Imaginary Cedar Lane")
+                    page.get_by_test_id("geo-load").click()
+                    expect(page.get_by_test_id("geo-ready")).to_be_visible(timeout=20000)
+                    page.get_by_test_id("buyer-sale").first.click()
+                    expect(page.get_by_test_id("sale-evidence-detail")).to_be_visible()
+                    if os.environ.get("HPI_RELEASE_SCREENSHOTS"):
+                        from pathlib import Path
+                        folder=Path(os.environ["HPI_RELEASE_SCREENSHOTS"]);folder.mkdir(parents=True,exist_ok=True)
+                        page.get_by_test_id("buyer-result").screenshot(path=str(folder/"rich-fictional-evidence.png"))
+                finally:browser.close()
+        finally:activate(ADMIN,old_build,generation)
+
+    def test_offline_oidc_https_persistence_and_owner_isolation(self):
+        import ssl
+        from pathlib import Path
+        from urllib.parse import urlencode,parse_qs,urlsplit
+        from urllib.request import build_opener,HTTPSHandler,HTTPRedirectHandler
+        import jwt
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from backend.persistent_oidc import PersistentBoundary
+        from backend.offline_oidc_http import application as session_application
+        from backend.oidc_boundary import COOKIE
+        from wsgiref.simple_server import WSGIRequestHandler
+        class TLSHandler(QuietHandler):
+            def get_environ(self):
+                env=super().get_environ();env["HTTPS"]="on";return env
+        class NoRedirect(HTTPRedirectHandler):
+            def redirect_request(self,*args,**kwargs):return None
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp);cert=path/"cert.pem";keyfile=path/"key.pem"
+            subprocess.run(["openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1","-subj","/CN=127.0.0.1","-addext","subjectAltName=IP:127.0.0.1","-keyout",str(keyfile),"-out",str(cert)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            sslserver=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);sslserver.load_cert_chain(cert,keyfile)
+            client=ssl.create_default_context(cafile=str(cert))
+            opener=build_opener(HTTPSHandler(context=client),NoRedirect())
+            pool=make_pool(self.dsn,max_size=2)
+            private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+            issued={}
+            server=make_server("127.0.0.1",0,lambda e,s:[],server_class=ThreadedServer,handler_class=TLSHandler)
+            base="https://127.0.0.1:"+str(server.server_port)
+            config=dict(session_file=path/"sessions.sqlite",issuer="https://fictional-idp.invalid/",client_id="hpi-fixture",
+                authorize_endpoint="https://fictional-idp.invalid/authorize",redirect_uri=base+"/auth/callback",
+                public_keys={"local":private.public_key()},owner_map={("https://fictional-idp.invalid/",n):"fictional-"+n for n in ("alice","bob")})
+            def exchange(**args):
+                subject,nonce=issued.pop(args["code"])
+                now=int(time.time())
+                return jwt.encode({"iss":config["issuer"],"aud":config["client_id"],"sub":subject,"nonce":nonce,"iat":now,"exp":now+300},private,algorithm="RS256",headers={"kid":"local"})
+            def setup():
+                return session_application(pool,load_react_assets(),PersistentBoundary(**config),exchange)
+            server.set_app(setup());server.socket=sslserver.wrap_socket(server.socket,server_side=True)
+            thread=Thread(target=server.serve_forever,daemon=True);thread.start()
+            def request(method,route,cookie="",csrf=None,payload=None,origin=True):
+                headers={"Cookie":cookie}
+                if origin:headers["Origin"]=base
+                if csrf:headers["X-HPI-CSRF"]=csrf
+                if payload is not None:headers["Content-Type"]="application/json"
+                req=Request(base+route,method=method,headers=headers,data=json.dumps(payload).encode() if payload is not None else None)
+                try:
+                    with opener.open(req,timeout=10) as res:return res.status,res.headers,json.load(res)
+                except HTTPError as exc:return exc.code,exc.headers,json.load(exc)
+            def login(owner):
+                status,headers,body=request("POST","/auth/start")
+                self.assertEqual(status,200)
+                bind=headers.get("Set-Cookie").split(";")[0]
+                params=parse_qs(urlsplit(body["authorize_url"]).query)
+                code=secrets.token_urlsafe(32);issued[code]=(owner,params["nonce"][0])
+                route="/auth/callback?"+urlencode({"state":params["state"][0],"code":code})
+                status,headers,_=request("GET",route,bind)
+                self.assertEqual(status,303)
+                session=headers.get_all("Set-Cookie")[0]
+                self.assertIn("Secure; HttpOnly; SameSite=Lax",session)
+                self.assertEqual(request("GET",route,bind)[0],401)
+                cookie=session.split(";")[0]
+                csrf=request("GET","/auth/session",cookie)[2]["csrf"]
+                return cookie,csrf
+            try:
+                self.assertEqual(request("GET","/health")[0],401)
+                alice,csrf=login("alice");bob,bcsrf=login("bob")
+                self.assertEqual(request("POST","/v1/investigations",alice,payload=example_request())[0],401)
+                status,_,saved=request("POST","/v1/investigations",alice,csrf,example_request())
+                self.assertEqual(status,201)
+                route="/v1/investigations/"+saved["investigation_id"]
+                self.assertEqual(request("GET",route,bob)[0],404)
+                server.set_app(setup()) # reconstruct identity boundary from persistent storage
+                self.assertEqual(request("GET",route,alice)[2],saved)
+                self.assertEqual(request("POST","/auth/logout",alice,csrf)[0],200)
+                self.assertEqual(request("GET",route,alice)[0],401)
+                self.assertEqual(request("GET","/health",bob)[0],200)
+            finally:server.shutdown();server.server_close();thread.join(timeout=5);pool.close()
+
     def test_tampered_source_refused_then_restored(self):
         with psycopg.connect(ADMIN,autocommit=True) as conn:
             conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents+1 WHERE transaction_id='txn-2'")

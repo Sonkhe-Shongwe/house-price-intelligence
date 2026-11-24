@@ -35,3 +35,5 @@
 .pi-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:540px){.source-shell .source-topbar{padding-inline:12px}.source-shell .source-server-badge{font-size:9px;white-space:normal;text-align:center;max-width:130px}.source-shell .buyer-pane,.source-shell .buyer-result,.source-shell .workspace-shell{padding:14px}.source-shell .hpi-main{padding-inline:12px}.pi-sale-facts{gap:3px}.pi-sale-facts span{font-size:10px}.source-shell .buyer-pane>p,.source-shell .workspace-shell p{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.source-shell *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+@media(max-width:540px){.source-shell .hpi-sidebar nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.source-shell .hpi-sidebar nav button{justify-content:center;padding:7px 3px;text-align:center;white-space:normal;line-height:1.25;min-height:40px}.source-shell .source-brand{font-size:16px}}

@@ -43,6 +43,8 @@
 
 **Product intelligence contract:** [PI1–PI8](engineering/PRODUCT_INTELLIGENCE_V1.md); [recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md).
 
+**Final acceptance contract:** [FA1–FA8](engineering/FINAL_ACCEPTANCE_V1.md); [local release runbook](engineering/RELEASE_RUNBOOK_V1.md).
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

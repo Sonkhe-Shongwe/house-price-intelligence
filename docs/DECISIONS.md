@@ -151,3 +151,7 @@ Owner approved bounded 2025 holdout and fixed research ablation, UI refinement, 
 
 ## 24 November 2026: PI milestone review
 79.2% weighted estimate (76.1% prior, +3.1 points); fixed weights and open gates. 2025 independent holdout blocked by insufficient eligible subjects, no policy or valuation adopted. Refined comparison/keyboard UI and offline OIDC session tests passed; recruiter walkthrough documented. No live provider integration, real publication, external contact or deployment. See [PI contract](engineering/PRODUCT_INTELLIGENCE_V1.md).
+
+
+## 24 November 2026: FA authorisation
+Owner approved FA1–FA8 bounded fictional development/CI, aggregate coverage diagnostics, offline OIDC HTTP and persistent sessions, accessibility/release preparation. No provider account, real records, valuation, external contact, deployment or main merge. See [FA contract](engineering/FINAL_ACCEPTANCE_V1.md).

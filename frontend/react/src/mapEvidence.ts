@@ -12,10 +12,11 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
     r.position_source_sha256==='c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9';
   const revisedSource=['candidate-e758c7da195b3ac129a70614','candidate-b693166e4803634e513f41d2'].includes(record.sourceBuildId)&&
     r.position_source_id==='synthetic-display-geography-v2'&&r.position_source_sha256==='411cd6d2403b0b520e52d67f8c1ea99daa1f7fbdf8f61a1bffdb17ecbc9735f8';
+  const richSource=record.sourceBuildId==='candidate-12d7698f01e5de3078c4d754'&&r.position_source_id==='synthetic-display-geography-v3'&&r.position_source_sha256==='f3c44ac291dc4bdf008f9ec0685ea60f5392cb81fc9a071d766e442c7385c2b5';
   if(r.contract_version!=='synthetic-map-v1'||r.investigation_id!==record.investigationId||
      r.build_id!==record.sourceBuildId||r.source_kind!=='synthetic_fixture'||
      r.geometry_kind!=='virtual_display_point'||r.real_geography_verified!==false||
-     r.distance_supported!==false||(!legacySource&&!revisedSource))
+     r.distance_supported!==false||(!legacySource&&!revisedSource&&!richSource))
     throw Error('Map provenance rejected');
   const collection=object(r.feature_collection);
   if(collection.type!=='FeatureCollection'||!Array.isArray(collection.features))

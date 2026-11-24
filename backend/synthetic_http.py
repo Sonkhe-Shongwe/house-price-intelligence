@@ -117,7 +117,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
         # A browser's same-origin JSON POST sends Origin. Keep those requests
         # working while rejecting unrelated web pages and DNS-rebinding hosts.
         if (remote not in ("127.0.0.1", "::1") or not ALLOWED_HOST.fullmatch(host)
-                or (origin is not None and origin.lower() != "http://" + host.lower())
+                or (origin is not None and origin.lower() != environ.get("wsgi.url_scheme","http") + "://" + host.lower())
                 or environ.get("HTTP_SEC_FETCH_SITE") in ("cross-site", "same-site")
                 or environ.get("HTTP_X_FORWARDED_FOR")
                 or environ.get("HTTP_X_FORWARDED_HOST") or environ.get("HTTP_X_FORWARDED_PROTO")

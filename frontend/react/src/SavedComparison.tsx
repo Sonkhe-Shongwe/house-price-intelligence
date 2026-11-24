@@ -5,6 +5,7 @@ import {
   type InvestigationView, type ShortlistView,
 } from './evidenceBridge';
 import './savedComparison.css';
+import {evidenceLabel} from './HistoryPanel';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -321,7 +322,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
             <div className="workspace-card-top"><span>PROPERTY {String(index+1).padStart(2,'0')}</span>
               <span className="workspace-evidence-badge">{entry.investigation.selectedCount} earlier sales</span></div>
             <h3>{entry.investigation.subjectLabel}</h3>
-            <p>{entry.investigation.subjectPin??'Unresolved parcel'} · {entry.investigation.status}</p>
+            <p>{entry.investigation.subjectPin??'Unresolved parcel'} · {evidenceLabel(entry.investigation.status)}</p>
             <div className="workspace-money">{entry.investigation.askingPriceText}
               <small>Buyer-reported asking price, not a valuation</small></div>
             <label htmlFor={'workspace-note-'+index}>Buyer research note (stored separately)</label>
@@ -349,7 +350,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
           <tbody>{([
             ['Asking price (buyer-reported)',(e:ShortlistView['entries'][number])=>e.investigation.askingPriceText],
             ['Area',e=>e.investigation.buildingAreaText],
-            ['Evidence status / tier',e=>e.investigation.status+' / '+e.investigation.tier],
+            ['Evidence quality',e=>evidenceLabel(e.investigation.status)],
             ['Earlier sales',e=>String(e.investigation.selectedCount)],
             ['Analysis date',e=>e.investigation.analysisDate],
             ['Frozen build',e=>e.investigation.sourceBuildId],
