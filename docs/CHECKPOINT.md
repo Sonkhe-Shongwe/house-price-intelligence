@@ -1,5 +1,8 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: production architecture candidate
+Workspace exact head f01ef49 passed 182 Python, 16 existing browser and 33 React acceptance tests ([React CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45347130062), [regression CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45347130119)); both PR runs also passed. Owner authorised PA1–PA7, PostgreSQL candidate, synthetic compatibility/recovery/ownership tests and bounded aggregate-only source feasibility on development. See [production readiness contract](engineering/PRODUCTION_READINESS_V1.md). SQLite remains canonical local runtime. Verify current exact-head candidate CI and aggregate artifact; no hosting, authentication integration, real display or P3 exit approved. Main unchanged. Official P3 10%, weighted MVP 22.8%.
+
 ## 24 November 2026: workspace consolidation
 Owner approved P3.1–P3.7 as provisional synthetic application contract only, and authorised UX1–UX7 directly on development. Geographic hardening b829307 passed 180 Python, 16 existing browser and 32 React acceptance tests ([React CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45345490919), [regression CI](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45345490915)). New [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md) defines integrated navigation, verified history, dossier, comparison and methodology. Verify exact current CI and visual acceptance. No production scope accepted; P3 10%, weighted MVP 22.8% unchanged. Main remains untouched.
 

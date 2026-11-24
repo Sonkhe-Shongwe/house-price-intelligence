@@ -111,3 +111,7 @@ PR #8 synthetic React accepted and merged to development after exact-head CI suc
 
 ## 24 November 2026: provisional P3 contract and UX approval
 Owner explicitly approved P3.1–P3.7 as the provisional synthetic application contract, and authorised UX1–UX7 commits and CI on development. This supersedes the pending synthetic approval entries in the dated review, not the production gaps. P3.8–P3.11 and real data rights remain open. See [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md). No main merge, deployment or real property publication. P3 10%, weighted MVP 22.8% pending formal phase reconciliation.
+
+
+## 24 November 2026: PostgreSQL and source-readiness authorisation
+Owner approved PostgreSQL as a production database candidate and authorised PA1–PA4 synthetic implementation/CI and PA5–PA7 bounded aggregate-only research/documentation. Existing SQLite runtime preserved; no provider, deployment, real market, production authentication or publication rights approved. See [readiness contract](engineering/PRODUCTION_READINESS_V1.md). Formal P3 exit open, P3 10% and weighted MVP 22.8% unchanged.

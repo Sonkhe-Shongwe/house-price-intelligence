@@ -25,3 +25,7 @@
 - Keep publisher URL, dataset ID, extraction timestamp, query, schema and source update timestamp in the internal research layer; raw records never go in Git or public audit artifacts.
 - Review data rights **by source and by displayed field** before storing/distributing property-level records in the buyer-facing app. An open-data catalogue listing alone does not settle permitted use.
 - Original fallback-source leads came from the separate SA Tech Graduate Playbook. No fallback dataset has been quietly substituted for Cook County.
+
+
+## 24 November 2026: address candidate and reuse review
+Parcel Addresses `3723-97qp`: https://catalog.data.gov/dataset/assessor-parcel-addresses; first published March 2026 according to catalogue. Contains sensitive-to-product owner/taxpayer/mailing fields; excluded from research queries. Only aggregate-only feasibility authorised. See [production readiness contract](../engineering/PRODUCTION_READINESS_V1.md) for field policy, publisher sources, separate bulk agreement caveat and temporal limitations. No property-level display approval.
