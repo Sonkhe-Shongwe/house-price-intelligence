@@ -217,6 +217,48 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.assertEqual(reply.json()["error"],"shortlist_full")
         self.assertEqual(len(self.get_shortlist(sid)["entries"]),3)
 
+    def test_saving_one_note_preserves_another_unsaved_draft(self):
+        self.create_investigation()
+        sid=self.create_workspace()
+        self.add_current(1)
+        self.create_investigation("105 Fictional Court",option=1)
+        self.add_current(2)
+        cards=self.page.get_by_test_id("workspace-entry")
+        first=cards.nth(0)
+        second=cards.nth(1)
+        first.get_by_test_id("workspace-note").fill("First note committed")
+        second.get_by_test_id("workspace-note").fill("Second note still a draft")
+        first.get_by_test_id("workspace-save-note").click()
+        expect(first.get_by_test_id("workspace-note-state")).to_have_text("Saved note verified")
+        expect(second.get_by_test_id("workspace-note")).to_have_value("Second note still a draft")
+        expect(second.get_by_test_id("workspace-note-state")).to_have_text("Unsaved changes")
+        recorded=self.get_shortlist(sid)
+        self.assertEqual(recorded["entries"][0]["note_text"],"First note committed")
+        self.assertEqual(recorded["entries"][1]["note_text"],"")
+        second.get_by_test_id("workspace-save-note").click()
+        expect(second.get_by_test_id("workspace-note-state")).to_have_text("Saved note verified")
+        saved=self.get_shortlist(sid)
+        self.assertEqual(saved["entries"][1]["note_text"],"Second note still a draft")
+        for before,after in zip(recorded["entries"],saved["entries"]):
+            self.assertEqual(before["investigation"],after["investigation"])
+
+    def test_responsive_workspace_has_no_horizontal_scroll(self):
+        self.create_investigation()
+        self.create_workspace()
+        self.add_current(1)
+        self.create_investigation("105 Fictional Court",option=0)
+        self.add_current(2)
+        for width in (375,320):
+            self.page.set_viewport_size({"width":width,"height":800})
+            self.page.get_by_test_id("workspace").scroll_into_view_if_needed()
+            self.assertFalse(self.page.evaluate(
+                "document.documentElement.scrollWidth > innerWidth + 2"),
+                f"Horizontal overflow at {width}px")
+            expect(self.page.get_by_test_id("workspace-entry")).to_have_count(2)
+        self.page.emulate_media(reduced_motion="reduce")
+        self.assertEqual(self.page.get_by_test_id("workspace-add-current").evaluate(
+            "el => getComputedStyle(el).transitionDuration"),"0s")
+
     def test_note_limit_and_bad_uuid_do_not_mutate_frozen_evidence(self):
         self.create_investigation()
         sid=self.create_workspace()
