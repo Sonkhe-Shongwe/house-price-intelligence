@@ -87,14 +87,16 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
   if(typeof count!=='number'||!Number.isInteger(count)||count<0||count>3){
     fail('invalid_selected_count');
   }
-  if(!Array.isArray(raw.comparables)||raw.comparables.length!==count){
+  const rawComparables=raw.comparables;
+  if(!Array.isArray(rawComparables)||rawComparables.length!==count){
     fail('comparable_count_mismatch');
   }
-  if(!Array.isArray(raw.warnings)||!raw.warnings.every(w=>typeof w==='string')){
+  const rawWarnings=raw.warnings;
+  if(!Array.isArray(rawWarnings)||!rawWarnings.every(w=>typeof w==='string')){
     fail('invalid_warnings');
   }
   const seen=new Set<string>();
-  const comparables=raw.comparables.map((itemUnknown,index):ComparableView=>{
+  const comparables=(rawComparables as unknown[]).map((itemUnknown:unknown,index:number):ComparableView=>{
     const item=obj(itemUnknown,'invalid_comparable');
     if(Object.hasOwn(item,'sale_price'))fail('legacy_float_price');
     const pin=txt(item.pin,'invalid_sale_pin');
@@ -119,7 +121,7 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
     'Unlabelled fictional parcel':txt(subject.label,'invalid_subject_label');
   return {investigationId,contractVersion:'p3-draft-v0.3',status,reason,tier,
     analysisDate:iso(raw.analysis_date,'invalid_analysis_date'),subjectLabel,subjectPin,
-    askingPriceText,selectedCount:count,comparables,warnings:[...raw.warnings],
+    askingPriceText,selectedCount:count as number,comparables,warnings:[...(rawWarnings as string[])],
     sourceBuildId,sourceSnapshotIds,valuation:null,buildingIdentityVerified:false,
     location:{available:false,reason:'no_verified_map_feature_contract'}};
 }
@@ -128,8 +130,9 @@ export function adaptShortlist(payload:unknown):ShortlistView{
   if(raw.source_kind!=='synthetic_fixture')fail('non_fixture_shortlist');
   const shortlistId=guid(raw.shortlist_id,'invalid_shortlist_id');
   if(raw.max_entries!==3)fail('unexpected_shortlist_limit');
-  if(!Array.isArray(raw.entries)||raw.entries.length>3)fail('invalid_shortlist_entries');
-  const entries=raw.entries.map((unk)=>{
+  const rawEntries=raw.entries;
+  if(!Array.isArray(rawEntries)||rawEntries.length>3)fail('invalid_shortlist_entries');
+  const entries=(rawEntries as unknown[]).map((unk:unknown)=>{
     const e=obj(unk,'invalid_shortlist_entry');
     const investigationId=guid(e.investigation_id,'invalid_member_id');
     const investigation=adaptInvestigation(e.investigation);
