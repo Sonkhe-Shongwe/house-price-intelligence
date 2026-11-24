@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 66.5% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 71.4% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -131,3 +131,7 @@ Owner-authorised RD1–RD7 verification supports 66.5% weighted planning progres
 
 ## 24 November 2026: production runtime candidate authorisation
 Owner approved PR1–PR8 on development, actual PostgreSQL HTTP and fictional authentication/ownership/concurrency tests, synthetic revision import and CI. No provider, public deployment, real-data display or main merge. See [runtime contract](engineering/PRODUCTION_RUNTIME_V1.md).
+
+
+## 24 November 2026: runtime milestone progress review
+Owner-authorised PR1–PR8 verified all eight workflows at 240f5ce. Weighted estimate 71.4% (66.5% prior, +4.9 points); unchanged phase weights and open exit gates. Fictional loopback Basic authentication is not a production provider; PostgreSQL revision importer remains separate from HTTP runtime. No production hosting, real-data rights or release approval. See [runtime contract](engineering/PRODUCTION_RUNTIME_V1.md) and [roadmap](P_PHASE_ROADMAP.md).
