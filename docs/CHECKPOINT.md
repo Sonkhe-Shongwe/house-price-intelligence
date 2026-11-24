@@ -73,3 +73,6 @@ At candidate f21821da625222af90778a3357730938c2fee8e1, [React CI 45342990140](ht
 
 
 Workspace integration initial hosted evidence: 273262f passed 182 Python tests and 32/33 React acceptance tests; returning-buyer scenario passed. The failed old shortlist regression after reload and subsequent TypeScript focus-ref build error are being corrected. See [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md) for exact run IDs and verify current head.
+
+
+Production-readiness first live address audit passed (45348627334): Evanston situs city only, not township 17; 2023 26,587 rows and 2024 26,582 rows; see [contract](engineering/PRODUCTION_READINESS_V1.md) for address counts, rights/as-of caveats and PostgreSQL first SQL parse failure/correction. No real-property publication.

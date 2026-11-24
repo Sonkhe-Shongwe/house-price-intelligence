@@ -19,7 +19,7 @@ I2 = "22222222-2222-4222-8222-222222222222"
 class PostgresCandidateTests(unittest.TestCase):
     def setUp(self):
         self.conn=psycopg.connect(DSN,autocommit=True)
-        self.assertEqual(self.conn.info.dbname,"hpi_fixture")
+        self.assertEqual((self.conn.info.host,self.conn.info.dbname,self.conn.info.user),("127.0.0.1","hpi_fixture","postgres"))
         self.conn.execute("DROP SCHEMA IF EXISTS hpi_candidate CASCADE")
     def tearDown(self):
         self.conn.close()
@@ -36,6 +36,16 @@ class PostgresCandidateTests(unittest.TestCase):
         self.assertEqual(self.conn.execute("SELECT pin FROM synthetic_address_candidates").fetchone()[0],"00000000000001")
         self.conn.execute("UPDATE schema_migrations SET script_sha256='bad' WHERE version=1")
         with self.assertRaises(EvidenceStoreError):migrate(self.conn)
+    def test_migration_failure_is_atomic(self):
+        migrate(self.conn,1)
+        self.conn.execute("SET search_path TO hpi_candidate, pg_catalog")
+        self.conn.execute("CREATE TABLE synthetic_address_candidates (unexpected INT)")
+        with self.assertRaises(psycopg.errors.DuplicateTable):
+            migrate(self.conn,3)
+        self.assertEqual(self.conn.execute("SELECT version FROM schema_migrations").fetchall(),[(1,)])
+        self.assertIsNone(self.conn.execute("SELECT to_regclass('hpi_candidate.idx_fixture_sale_link_parcel')").fetchone()[0])
+        self.conn.execute("DROP TABLE synthetic_address_candidates")
+        migrate(self.conn,3)
     def test_unknown_schema_and_foreign_key_rollback(self):
         self.conn.execute("CREATE SCHEMA hpi_candidate")
         self.conn.execute("CREATE TABLE hpi_candidate.unrecognised (x INT)")
