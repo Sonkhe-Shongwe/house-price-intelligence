@@ -93,6 +93,8 @@ jobs:
         env:
           HPI_SHORTLIST_SCREENSHOTS: ${{ runner.temp }}/hpi-shortlist-workflow-screenshots
         run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_saved_comparison.py' -v
+      - name: Real-process SQLite restart, frozen sale hashes and shortlist note recovery
+        run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_persistent_restart.py' -v
       - name: Publish visual-review evidence
         if: always()
         uses: actions/upload-artifact@v4
