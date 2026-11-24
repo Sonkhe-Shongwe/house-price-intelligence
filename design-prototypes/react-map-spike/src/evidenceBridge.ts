@@ -137,8 +137,9 @@ export function adaptShortlist(payload:unknown):ShortlistView{
     const investigationId=guid(e.investigation_id,'invalid_member_id');
     const investigation=adaptInvestigation(e.investigation);
     if(investigation.investigationId!==investigationId)fail('member_identity_mismatch');
-    if(typeof e.note_text!=='string'||e.note_text.length>800)fail('invalid_note');
-    return {investigationId,noteText:e.note_text,
+    const noteText=e.note_text;
+    if(typeof noteText!=='string'||noteText.length>800)fail('invalid_note');
+    return {investigationId,noteText:noteText as string,
       matchPolicyVersion:txt(e.match_policy_version,'missing_policy_version'),investigation};
   });
   if(new Set(entries.map(e=>e.investigationId)).size!==entries.length)fail('duplicate_members');
