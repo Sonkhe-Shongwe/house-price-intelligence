@@ -5,6 +5,7 @@ import { subjects, type SaleId, type SubjectId, type ExampleSale } from './data'
 import './style.css';
 
 const VectorMap = lazy(() => import('./VectorMap'));
+const SourceReview = lazy(() => import('./SourceReview'));
 type View = 'investigate' | 'compare' | 'methodology';
 type Theme = 'editorial' | 'intelligence';
 type Renderer = 'schematic' | 'vector';
@@ -105,4 +106,8 @@ function App() {
   </div>;
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(
+  window.location.pathname === '/source-review'
+    ? <Suspense fallback={<main role="status" className="source-info-state">Loading local evidence interface…</main>}><SourceReview /></Suspense>
+    : <App />
+);
