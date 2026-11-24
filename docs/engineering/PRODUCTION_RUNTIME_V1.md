@@ -1,0 +1,17 @@
+# Production Runtime Integration V1
+Owner-authorised 24 November 2026: PR1–PR8, directly on development; fictional data/accounts and CI only. No main merge, hosting, paid infrastructure or publication. Prior estimate 66.5%.
+
+## Requirements and runtime contract
+Preserve the existing React application, canonical matcher, WSGI routes, SQLite launcher and persisted local files. Separate opt-in loopback launcher backend.postgres_runtime --fixture-only, PostgreSQL 17 only, bounded pool (1–4, max allowed 8), independent low-privilege login role and one transaction per request. Bootstrap only explicitly fresh disposable hpi_fixture database on loopback; refuses existing schema/role, never run on startup. Random CI-only passwords; no credentials in logs, repository or artifacts. Existing canonical seed verified before serving, source tables read-only for runtime. Same virtual map uses native PostgreSQL trusted-row verification rather than SQLite schema introspection. No real data path.
+
+## Access and transactions
+Two controlled fictional accounts via HTTP Basic on loopback only, no registration or production credential provider. Browser HTTP authentication is a test harness, NOT production auth; do not use over public HTTP. Origin required for mutations; host/remote/proxy and cross-site checks remain. Server maps verified credential to fixed owner; no client-selected owner. Per-request transaction-local owner setting and pool reset checks; non-superuser/non-owner/NOBYPASSRLS login, RLS enabled on five buyer tables, no source write grants. Coarse owner-level advisory transaction lock serialises read/check/write operations, including shortlist capacity and duplicate identity; different owners can proceed independently. Captures canonical response before commit; aborts transaction on error response; errors sanitized and unavailable pool/DB returns 503. Bounded lock/statement timeouts. No production load, account deletion, revocation or external provider acceptance implied.
+
+## Versioned ingestion
+Shared canonical import algorithm extracted behind SQLite and PostgreSQL transaction wrappers. PostgreSQL ingestion explicitly limited to separate hpi_ingest_fixture disposable database and reviewed synthetic revisions. Atomic advisory lock, manifests and no overwrite; frozen evidence tested across source revisions. Not a production runtime source switch: buyer HTTP uses original trusted synthetic build, revision importer exercises canonical services in a separate database. No real ingestion adapter, no role migration of existing saved buyers. 
+
+## Verification
+New CI uses ephemeral PostgreSQL service, locked React build and Chromium. Tests exercise actual HTTP process, two fictional users, cross-owner read/write/map/association rejection, unauthenticated and missing-Origin denial, four concurrent adds constrained to three, no owner residue on fresh role connection, source writes refused, process restart, browser note save and two authenticated contexts, PostgreSQL revision import and retained frozen evidence. Existing SQLite, React and database suites remain. Check exact-head CI before progress reassessment. Actual production identity provider, multi-process/load/recovery review, safe connection/network configuration, real rights and final UX/release gates remain open.
+
+## Handoff
+See [previous readiness](REAL_DATA_READINESS_V1.md), [architecture candidate](PRODUCTION_READINESS_V1.md), [checkpoint](../CHECKPOINT.md), [roadmap](../P_PHASE_ROADMAP.md). No phase exit accepted.

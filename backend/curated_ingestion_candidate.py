@@ -17,10 +17,7 @@ class ImportRefused(ValueError):pass
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
-def open_candidate():
-    conn=sqlite3.connect(":memory:")
-    migrate_fixture(conn)
-    conn.executescript("""
+CANDIDATE_DDL="""
     CREATE TABLE candidate_manifests (
       snapshot_id TEXT PRIMARY KEY REFERENCES source_snapshots(snapshot_id),
       role TEXT NOT NULL, revision TEXT NOT NULL, selected_fields_json TEXT NOT NULL,
@@ -33,7 +30,12 @@ def open_candidate():
       display_address TEXT NOT NULL, search_key TEXT NOT NULL,
       PRIMARY KEY(snapshot_id,pin,tax_year,search_key)
     );
-    """)
+    """
+
+def open_candidate():
+    conn=sqlite3.connect(":memory:")
+    migrate_fixture(conn)
+    conn.executescript(CANDIDATE_DDL)
     return conn
 
 def fixture_rows(revision):
@@ -77,43 +79,47 @@ def import_fixture(conn,revision):
         raise ImportRefused("Clean foreign-key-enabled transaction required")
     if conn.execute("SELECT name FROM sqlite_master WHERE name='candidate_manifests'").fetchone() is None:
         raise ImportRefused("Not an isolated ingestion candidate")
+    with conn:
+        conn.execute("BEGIN IMMEDIATE")
+        return _import_rows(conn,revision)
+
+def _import_rows(conn,revision):
+    """Internal common implementation; caller holds an atomic import lock."""
     rows,manifests,build_id,build_hash=_plan(revision)
     def put(table,columns,values,keys):
         _verify_or_insert(conn,table,columns.split(),tuple(values),keys.split())
-    with conn:
-        conn.execute("BEGIN IMMEDIATE")
-        # An incomplete/tampered existing build must not be silently repaired.
-        existing=conn.execute("SELECT 1 FROM curated_builds WHERE build_id=?",(build_id,)).fetchone()
-        if existing:_verify_build(conn,revision)
-        put("curated_builds","build_id built_at_utc build_hash_sha256 build_kind",
-            (build_id,STAMP,build_hash,"synthetic_fixture"),"build_id")
-        for role,m in manifests.items():
-            sid=m["snapshot_id"]
-            put("source_snapshots","snapshot_id dataset_id extracted_at_utc source_query source_updated_at_utc data_sha256 historical_asof_verified public_display_approved",
-                (sid,"synthetic-"+role,STAMP,"fabricated",None,m["content_sha256"],0,0),"snapshot_id")
-            put("candidate_manifests","snapshot_id role revision selected_fields_json row_count content_sha256 publication_date",
-                (sid,role,revision,m["selected_fields_json"],m["row_count"],m["content_sha256"],None),"snapshot_id")
-            put("curated_build_sources","build_id snapshot_id source_role",(build_id,sid,"other" if role=="address" else role),"build_id snapshot_id source_role")
-            for record in rows[role]:
-                p=record["pin"]
-                put("parcels","pin township_code",(p,"17"),"pin")
-                if role=="sales":
-                    txn=sid+"-"+record["source_row_id"]
-                    put("sale_transactions","transaction_id snapshot_id source_row_id document_number sale_date price_usd_cents",
-                        (txn,sid,record["source_row_id"],record["document_number"],record["sale_date"],record["sale_price_usd_cents"]),"transaction_id")
-                    put("sale_transaction_parcels","transaction_id pin",(txn,p),"transaction_id pin")
-                    put("curated_build_transactions","build_id transaction_id",(build_id,txn),"build_id transaction_id")
-                elif role=="assessment":
-                    put("assessment_records","assessment_id snapshot_id pin tax_year card_number building_id assessor_class building_area_sqft",
-                        (sid+"-"+p,sid,p,record["tax_year"],record["card_number"],None,record["assessor_class"],record["building_area_sqft"]),"assessment_id")
-                elif role=="geography":
-                    put("parcel_geographies","snapshot_id pin tax_year neighborhood_code latitude longitude derived_or_backfilled",
-                        (sid,p,record["tax_year"],record["neighborhood_code"],record["latitude"],record["longitude"],1),"snapshot_id pin tax_year")
-                else:
-                    label=record["display_address"]
-                    put("candidate_addresses","snapshot_id pin tax_year display_address search_key",
-                        (sid,p,record["tax_year"],label," ".join(label.casefold().split())),"snapshot_id pin tax_year search_key")
-        _verify_build(conn,revision)
+    # An incomplete/tampered existing build must not be silently repaired.
+    existing=conn.execute("SELECT 1 FROM curated_builds WHERE build_id=?",(build_id,)).fetchone()
+    if existing:_verify_build(conn,revision)
+    put("curated_builds","build_id built_at_utc build_hash_sha256 build_kind",
+        (build_id,STAMP,build_hash,"synthetic_fixture"),"build_id")
+    for role,m in manifests.items():
+        sid=m["snapshot_id"]
+        put("source_snapshots","snapshot_id dataset_id extracted_at_utc source_query source_updated_at_utc data_sha256 historical_asof_verified public_display_approved",
+            (sid,"synthetic-"+role,STAMP,"fabricated",None,m["content_sha256"],0,0),"snapshot_id")
+        put("candidate_manifests","snapshot_id role revision selected_fields_json row_count content_sha256 publication_date",
+            (sid,role,revision,m["selected_fields_json"],m["row_count"],m["content_sha256"],None),"snapshot_id")
+        put("curated_build_sources","build_id snapshot_id source_role",(build_id,sid,"other" if role=="address" else role),"build_id snapshot_id source_role")
+        for record in rows[role]:
+            p=record["pin"]
+            put("parcels","pin township_code",(p,"17"),"pin")
+            if role=="sales":
+                txn=sid+"-"+record["source_row_id"]
+                put("sale_transactions","transaction_id snapshot_id source_row_id document_number sale_date price_usd_cents",
+                    (txn,sid,record["source_row_id"],record["document_number"],record["sale_date"],record["sale_price_usd_cents"]),"transaction_id")
+                put("sale_transaction_parcels","transaction_id pin",(txn,p),"transaction_id pin")
+                put("curated_build_transactions","build_id transaction_id",(build_id,txn),"build_id transaction_id")
+            elif role=="assessment":
+                put("assessment_records","assessment_id snapshot_id pin tax_year card_number building_id assessor_class building_area_sqft",
+                    (sid+"-"+p,sid,p,record["tax_year"],record["card_number"],None,record["assessor_class"],record["building_area_sqft"]),"assessment_id")
+            elif role=="geography":
+                put("parcel_geographies","snapshot_id pin tax_year neighborhood_code latitude longitude derived_or_backfilled",
+                    (sid,p,record["tax_year"],record["neighborhood_code"],record["latitude"],record["longitude"],1),"snapshot_id pin tax_year")
+            else:
+                label=record["display_address"]
+                put("candidate_addresses","snapshot_id pin tax_year display_address search_key",
+                    (sid,p,record["tax_year"],label," ".join(label.casefold().split())),"snapshot_id pin tax_year search_key")
+    _verify_build(conn,revision)
     return build_id
 
 def _verify_build(conn,revision):

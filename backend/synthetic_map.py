@@ -47,12 +47,17 @@ def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
         return response
     if build["build_id"] != BUILD_ID or build["source_kind"] != "synthetic_fixture":
         raise EvidenceStoreError("Unexpected map evidence build")
-    expected, _ = in_memory_demo()
-    try:
-        if _fixture_signature(store.connection) != _fixture_signature(expected):
-            raise EvidenceStoreError("Map fixture source differs from trusted seed")
-    finally:
-        expected.close()
+    # PostgreSQL candidate checks the same immutable source rows with its
+    # native schema/history validation; SQLite retains the original signature.
+    if hasattr(store, "verify_map_fixture"):
+        store.verify_map_fixture()
+    else:
+        expected, _ = in_memory_demo()
+        try:
+            if _fixture_signature(store.connection) != _fixture_signature(expected):
+                raise EvidenceStoreError("Map fixture source differs from trusted seed")
+        finally:
+            expected.close()
     stored = store.connection.execute(
         "SELECT subject_pin, analysis_date FROM investigations WHERE investigation_id = ?",
         (investigation_id,),

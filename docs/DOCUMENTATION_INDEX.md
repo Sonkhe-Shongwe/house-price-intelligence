@@ -37,6 +37,8 @@
 
 **Current RD1–RD7 contract:** [Real Data Integration Readiness V1](engineering/REAL_DATA_READINESS_V1.md), bounded cohort audit and synthetic-only ingestion/guard.
 
+**Current runtime contract:** [Production Runtime Integration V1](engineering/PRODUCTION_RUNTIME_V1.md), fictional accounts, PostgreSQL HTTP and revision candidate.
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

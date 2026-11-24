@@ -107,6 +107,11 @@ class PostgresFixtureStore(SyntheticInvestigationStore):
         expected = [(i, sha256(p.read_bytes()).hexdigest()) for i,p in SCRIPTS.items()]
         if history != expected:
             raise EvidenceStoreError("Candidate migration history rejected")
+        self.verify_map_fixture()
+        self._build()
+
+    def verify_map_fixture(self):
+        conn = self.connection.raw
         source, _ = in_memory_demo()
         try:
             for table in _IMMUTABLE_SOURCE_TABLES:
@@ -116,4 +121,3 @@ class PostgresFixtureStore(SyntheticInvestigationStore):
                     raise EvidenceStoreError("Candidate source differs from trusted synthetic seed")
         finally:
             source.close()
-        self._build()

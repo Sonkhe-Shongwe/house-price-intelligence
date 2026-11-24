@@ -127,3 +127,7 @@ Owner approved RD1–RD7 bounded live cohort research, synthetic curated ingesti
 
 ## 24 November 2026: RD milestone progress review
 Owner-authorised RD1–RD7 verification supports 66.5% weighted planning progress (previous 62.9%, +3.6 points). Same weights and gates. Exact cohort address audit passed; synthetic idempotent ingestion, source revision retention and guard verified. Real-data rights and production runtime remain blocked. See [RD contract](engineering/REAL_DATA_READINESS_V1.md) and [roadmap](P_PHASE_ROADMAP.md). No release approval.
+
+
+## 24 November 2026: production runtime candidate authorisation
+Owner approved PR1–PR8 on development, actual PostgreSQL HTTP and fictional authentication/ownership/concurrency tests, synthetic revision import and CI. No provider, public deployment, real-data display or main merge. See [runtime contract](engineering/PRODUCTION_RUNTIME_V1.md).
