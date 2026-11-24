@@ -37,3 +37,28 @@
 @media(prefers-reduced-motion:reduce){.source-shell *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 @media(max-width:540px){.source-shell .hpi-sidebar nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.source-shell .hpi-sidebar nav button{justify-content:center;padding:7px 3px;text-align:center;white-space:normal;line-height:1.25;min-height:40px}.source-shell .source-brand{font-size:16px}}
+
+
+/* Contrast corrections on light surfaces; preserve the dark panel palette. */
+.source-shell .source-footer,.source-shell .source-panel-head small,
+.source-shell .source-sale-detail small,.source-shell .source-empty p,
+.source-shell .source-geo-footer,.source-shell .source-breadcrumb,
+.source-shell .source-toolbar-caption,.source-shell .source-summary p,
+.source-shell .source-money span,.source-shell .source-stat span,
+.source-shell .source-bottom-card dt,.source-shell .source-bottom-card p,
+.source-shell .source-note small,.source-shell .source-shortlist-heading p,
+.source-shell .buyer-section-number,.source-shell .buyer-map-disabled p,
+.source-shell .buyer-map-disabled>span,.source-shell .buyer-map-disabled strong,
+.source-shell .buyer-chosen b,.source-shell .buyer-chosen span,
+.source-shell .workspace-card-top,.source-shell .workspace-card-bottom span,
+.source-shell .workspace-provenance,.source-shell .geo-provenance{color:#3b594a}
+.source-shell .workspace-disclaimer{color:#405b50!important}
+.source-shell .source-empty small{color:#735320}
+.source-shell .buyer-progress .buyer-section-number{color:#f0d2a0}
+.source-shell .buyer-progress>p{color:#d2e3d9}
+.source-shell .workspace-shell h2 em{color:#376849}
+.source-shell .workspace-flag{color:#285b3f}
+.source-shell .source-separator{color:#557064}
+.source-shell .buyer-candidate-select{color:#265f48}
+.source-shell .source-empty>span{color:#735320}
+.source-shell .buyer-disabled-icon{color:#285d46}

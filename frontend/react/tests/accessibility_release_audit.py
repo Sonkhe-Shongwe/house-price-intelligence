@@ -26,7 +26,7 @@ def main():
                     raw=page.evaluate("""async () => {
                         const result=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
                         return {passes:result.passes.length,incomplete:result.incomplete.length,
-                          violations:result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))};
+                          violations:result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,colors:[...new Set(v.nodes.flatMap(n=>n.any.map(c=>c.data&&typeof c.data.fgColor==='string'&&typeof c.data.bgColor==='string'?c.data.fgColor+'/'+c.data.bgColor:null).filter(Boolean)))]}))};
                     }""")
                     result["views"].append({"view":label,**raw})
                 expect(page.get_by_test_id("history-panel")).to_be_visible()

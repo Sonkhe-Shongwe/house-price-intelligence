@@ -20,3 +20,5 @@ HTTPS-only browser mutations retrieve a current session-bound CSRF token from th
 
 
 Initial 48b45dc runtime suite passed the rich V3 browser/map and eight of nine scenarios; offline session denial attempted an unsupported legacy response code 401, fixed with the dedicated no-store identity reply. React test still expected the raw insufficient_data label; change visible expectation to Insufficient evidence and preserve explicit API status assertion. No security guard relaxed. Reverify corrected SHA.
+
+Release-check 45361792484 found zero npm production vulnerabilities but reported serious color-contrast violations on all four scanned views. Darken muted text on light surfaces and retain suitable dark-panel contrast. Add only color-pair diagnostics (no DOM, HTML or record values) for any remaining failures. No accessibility gate waiver.
