@@ -340,25 +340,29 @@ export default function SavedComparison({active}: WorkspaceProps) {
           </article>;
         })}
       </div>
-      {!recoveryRequired&&workspace.entries.length>=2&&<div className="workspace-grid" data-testid="workspace-comparison">
-        {workspace.entries.map(entry=><article className="workspace-card" key={entry.investigationId}>
-          <h3>{entry.investigation.subjectLabel}</h3>
-          <dl><dt>Asking price (buyer-reported)</dt><dd>{entry.investigation.askingPriceText}</dd>
-          <dt>Area</dt><dd>{entry.investigation.buildingAreaText}</dd>
-          <dt>Evidence status / tier</dt><dd>{entry.investigation.status} / {entry.investigation.tier}</dd>
-          <dt>Earlier sales</dt><dd>{entry.investigation.selectedCount}</dd>
-          <dt>Analysis date</dt><dd>{entry.investigation.analysisDate}</dd>
-          <dt>Snapshots</dt><dd>{entry.investigation.sourceSnapshotIds.join(', ')}</dd>
-          <dt>Matching rules</dt><dd>{entry.matchPolicyVersion}</dd>
-          <dt>Warnings</dt><dd>{entry.investigation.warnings.join(' | ')||'None'}</dd>
-          <dt>Valuation</dt><dd>Not produced</dd></dl>
-        </article>)}
-      </div>}
+      {!recoveryRequired&&workspace.entries.length>=2&&<section data-testid="workspace-comparison" className="pi-comparison">
+        <h3>Evidence side by side</h3>
+        <p>Compare the recorded facts, not an estimated selling price. Different source builds and analysis dates remain visible.</p>
+        <div className="pi-table-scroll" role="region" aria-label="Property evidence comparison, scroll horizontally if needed" tabIndex={0}>
+        <table><caption className="pi-sr-only">Saved property comparison</caption>
+          <thead><tr><th scope="col">Decision factor</th>{workspace.entries.map(e=><th scope="col" key={e.investigationId}>{e.investigation.subjectLabel}</th>)}</tr></thead>
+          <tbody>{([
+            ['Asking price (buyer-reported)',(e:typeof workspace.entries[number])=>e.investigation.askingPriceText],
+            ['Area',e=>e.investigation.buildingAreaText],
+            ['Evidence status / tier',e=>e.investigation.status+' / '+e.investigation.tier],
+            ['Earlier sales',e=>String(e.investigation.selectedCount)],
+            ['Analysis date',e=>e.investigation.analysisDate],
+            ['Frozen build',e=>e.investigation.sourceBuildId],
+            ['Snapshots',e=>e.investigation.sourceSnapshotIds.join(', ')],
+            ['Matching rules',e=>e.matchPolicyVersion],
+            ['Warnings',e=>e.investigation.warnings.join(' | ')||'None'],
+            ['Valuation',()=> 'Not produced']
+          ] as [string,(e:typeof workspace.entries[number])=>string][]).map(([label,value])=><tr key={label}><th scope="row">{label}</th>{workspace.entries.map(e=><td key={e.investigationId}>{value(e)}</td>)}</tr>)}</tbody>
+        </table></div></section>}
     </>}
     {busy&&<p role="status" data-testid="workspace-busy">Confirming the change with the Python fixture service…</p>}
     {status&&<p role="status" data-testid="workspace-status" className="workspace-success">{status}</p>}
     {error&&<p role="alert" data-testid="workspace-error" className="source-error">{error}</p>}
-    <p className="workspace-disclaimer">Stored notes belong to the local fictional SQLite database. Persistence requires explicit fixture-file mode.
-      There are no accounts, private user data, source-publisher rights, real property valuations or geographic coordinates.</p>
+    <p className="workspace-disclaimer">Stored notes belong to the selected local fictional database. SQLite persistence requires explicit fixture-file mode; PostgreSQL uses isolated fictional accounts. No production identity service, approved real property records, valuations or real geographic coordinates.</p>
   </section>;
 }

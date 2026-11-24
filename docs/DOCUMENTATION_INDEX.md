@@ -41,6 +41,8 @@
 
 **Consolidation contract:** [Production Consolidation V1](engineering/PRODUCTION_CONSOLIDATION_V1.md).
 
+**Product intelligence contract:** [PI1–PI8](engineering/PRODUCT_INTELLIGENCE_V1.md); [recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md).
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

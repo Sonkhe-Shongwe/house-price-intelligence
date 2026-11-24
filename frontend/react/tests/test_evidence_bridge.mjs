@@ -88,4 +88,7 @@ assert.throws(() => adaptShortlist({
   }],
 }), e => e instanceof EvidenceBridgeError && e.code === 'invalid_note');
 
+rejects('invalid_sale_chronology',r=>{r.comparables[0].age_days=0;});
+rejects('invalid_area_difference',r=>{r.comparables[0].size_difference_pct=26;});
+rejects('invalid_neighbourhood_evidence',r=>{r.comparables[0].same_neighborhood='yes';});
 console.log('PASS: actual WSGI P3/P6 responses, exact cents, unsupported states, 13 tamper guards, geometry unavailable');

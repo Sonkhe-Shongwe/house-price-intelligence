@@ -14,6 +14,7 @@ export type UnavailableLocation = Readonly<{available:false;reason:'no_verified_
 export type ComparableView = {
   uiKey:string; rank:number; pin:string; document:string; saleDate:string;
   exactPriceUsd:string; priceText:string; explanation:string;
+  ageDays:number; areaDifferencePct:number; sameNeighbourhood:boolean;
 };
 export type InvestigationView = {
   investigationId:string; contractVersion:'p3-draft-v0.3';
@@ -99,6 +100,7 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
     fail('invalid_warnings');
   }
   const seen=new Set<string>();
+  const analysisDate=iso(raw.analysis_date,'invalid_analysis_date');
   const comparables=(rawComparables as unknown[]).map((itemUnknown:unknown,index:number):ComparableView=>{
     const item=obj(itemUnknown,'invalid_comparable');
     if(Object.hasOwn(item,'sale_price'))fail('legacy_float_price');
@@ -110,9 +112,15 @@ export function adaptInvestigation(payload:unknown):InvestigationView{
     if(seen.has(key))fail('duplicate_sale_identity');
     seen.add(key);
     const exactPriceUsd=money(item.sale_price_usd,'invalid_sale_money');
+    const age=item.age_days, difference=item.size_difference_pct;
+    const elapsed=(Date.parse(analysisDate+'T00:00:00Z')-Date.parse(saleDate+'T00:00:00Z'))/86400000;
+    if(typeof age!=='number'||!Number.isInteger(age)||age<1||age>365||age!==elapsed)fail('invalid_sale_chronology');
+    if(typeof difference!=='number'||!Number.isFinite(difference)||difference<0||difference>25)fail('invalid_area_difference');
+    if(typeof item.same_neighborhood!=='boolean')fail('invalid_neighbourhood_evidence');
     return {uiKey:investigationId+':ui-rank:'+(index+1),rank:index+1,pin,document,
       saleDate,exactPriceUsd,priceText:formatExactUsd(exactPriceUsd),
-      explanation:txt(item.explanation,'missing_sale_explanation')};
+      explanation:txt(item.explanation,'missing_sale_explanation'),
+      ageDays:age as number,areaDifferencePct:difference as number,sameNeighbourhood:item.same_neighborhood as boolean};
   });
   const reason=raw.reason===null?null:
     typeof raw.reason==='string'?raw.reason:fail('invalid_reason');

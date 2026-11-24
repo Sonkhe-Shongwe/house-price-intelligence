@@ -1,0 +1,21 @@
+name: Offline identity and session boundary
+on:
+  push:
+    branches: [development]
+    paths: ['backend/oidc_boundary.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
+  pull_request:
+    branches: [development,main]
+    paths: ['backend/oidc_boundary.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
+permissions:
+  contents: read
+jobs:
+  identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'PyJWT[crypto]==2.15.1'
+      - run: python -m unittest discover -s backend/oidc_tests -v

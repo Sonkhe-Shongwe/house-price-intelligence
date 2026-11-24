@@ -143,3 +143,7 @@ Owner approved PC1–PC8 fictional runtime integration and bounded public-source
 
 ## 24 November 2026: consolidation milestone progress review
 PC1–PC8 verified same-database reviewed fictional source lifecycle, cross-build reopen and rollback, revised PostgreSQL map and bounded recovery checks; weighted estimate 76.1% (71.4% prior, +4.7 points). Auth0 is recommended first OIDC candidate, not selected/provisioned; real property disclosure remains unapproved. All weights and exit gates unchanged. See [consolidation](engineering/PRODUCTION_CONSOLIDATION_V1.md) and [roadmap](P_PHASE_ROADMAP.md). No release scope change, provider account, deployment or contact authorised.
+
+
+## 24 November 2026: PI1–PI8 authorisation
+Owner approved bounded 2025 holdout and fixed research ablation, UI refinement, offline OIDC/session, accessibility/security checks, recruiter preparation and scoped development commits/CI. No live provider, contact, real records, valuation, deployment or main merge. See [PI contract](engineering/PRODUCT_INTELLIGENCE_V1.md).

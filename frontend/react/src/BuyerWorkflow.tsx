@@ -263,10 +263,10 @@ export default function BuyerWorkflow(){
         {view==='methodology'&&<Methodology/>}
         <section hidden={view!=='investigate'} className="hpi-view" aria-label="Investigate">
       <section className="source-intro"><div><div className="source-eyebrow">The buyer journey / 02</div>
-        <h1>Find a parcel.<br/><em>Examine the evidence.</em></h1>
-        <p>A real browser-to-Python investigation flow using imaginary properties and historical-sale fixtures, with no predictions or claimed geographic accuracy.</p>
-      </div><div className="source-meta"><span>API · p3-draft-v0.3</span><span>Writes · local synthetic SQLite</span></div></section>
-      <div className="source-warning" role="note">This is a fictional-only local application. Saved investigations use the selected local fixture database; do not enter personal information. A shared street address may represent two different parcels. No login, real property records, real map positions or current value estimates.</div>
+        <h1>Investigate a property.<br/><em>Understand the evidence.</em></h1>
+        <p>Identify a parcel, inspect earlier completed sales and save a traceable investigation. This workspace uses fictional records only.</p>
+      </div><div className="source-meta"><span>API · p3-draft-v0.3</span><span>Storage · local fixture database</span></div></section>
+      <div className="source-warning" role="note">This is a fictional-only local application. Saved investigations use the selected local fixture database; do not enter personal information. A shared street address may represent two different parcels. No production account service, real property records, real map positions or current value estimates.</div>
       <section className="buyer-columns">
         <div className="buyer-forms">
           <article className="buyer-pane"><div className="buyer-section-number">01 / SEARCH</div>
@@ -355,7 +355,8 @@ export default function BuyerWorkflow(){
             {record.comparables.map(s=><button key={s.uiKey} type="button" data-testid="buyer-sale"
               aria-pressed={activeRank===s.rank} onClick={()=>setActiveRank(s.rank)}>
               <span className="source-sale-rank">{String(s.rank).padStart(2,'0')}</span>
-              <span className="source-sale-main"><strong>{s.document}</strong><small>{s.saleDate} · Parcel {s.pin}</small></span>
+              <span className="source-sale-main"><strong>{s.sameNeighbourhood?'Same neighbourhood':'Spatial evidence'}</strong><small>{s.saleDate} · Parcel {s.pin}</small>
+              <span className="pi-sale-facts"><span>{s.areaDifferencePct}% area difference</span><span>{s.ageDays} days earlier</span></span></span>
               <span className="source-sale-price">{s.priceText}<small>Earlier completed sale</small></span>
             </button>)}</div>:<div className="source-empty" data-testid="buyer-insufficient"><span>∅</span>
               <h3>Not enough eligible earlier sales</h3><p>No sale-based valuation can be inferred from this result.</p>
@@ -363,7 +364,7 @@ export default function BuyerWorkflow(){
           <div className="source-sale-detail" role="status" aria-live="polite"><small>SERVER MATCHING EXPLANATION</small>
             <p data-testid="buyer-explanation">{selected?selected.explanation:record.comparables.length
               ?'Choose a sale to inspect its exact original matching explanation.'
-              :'No qualified comparable sales were returned by the Python matcher.'}</p></div></article>
+              :'No qualified comparable sales were returned by the Python matcher.'}</p>{selected&&<dl className="pi-evidence-detail" data-testid="sale-evidence-detail"><div><dt>Recorded document</dt><dd>{selected.document}</dd></div><div><dt>Earlier sale</dt><dd>{selected.saleDate}</dd></div><div><dt>Area difference</dt><dd>{selected.areaDifferencePct}%</dd></div><div><dt>Age at analysis</dt><dd>{selected.ageDays} days</dd></div></dl>}</div></article>
           {view==='investigate'&&<GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/>}</div>
         <details className="hpi-provenance" open><summary>Source record and investigation details</summary><div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
           <div><small>User-reported asking price</small><strong>{record.askingPriceText}</strong></div>
