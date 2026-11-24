@@ -6,6 +6,7 @@ new backend endpoints. Tests exercise the compiled ESM React source-review path.
 from __future__ import annotations
 
 import http.client
+from contextlib import closing
 import json
 import os
 from pathlib import Path
@@ -157,9 +158,13 @@ class ReadOnlySourceReviewBrowserTests(unittest.TestCase):
             "el => getComputedStyle(el).transitionDuration"), "0s")
 
     def test_security_no_write_no_cross_site_no_arbitrary_static(self):
-        with http.client.HTTPConnection("127.0.0.1", self.port, timeout=8) as conn:
-            conn.request("GET", "/source-review")
-            response = conn.getresponse()
+        with closing(http.client.HTTPConnection("127.0.0.1", self.port, timeout=8)) as conn:
+            def request(method, path, *, body=None, headers=None):
+                conn.request(method, path, body=body, headers=headers or {})
+                response = conn.getresponse()
+                response.read()
+                return response
+            response = request("GET", "/source-review")
             self.assertEqual(response.status, 200)
             headers = dict(response.getheaders())
             self.assertEqual(headers.get("X-Synthetic-Only"), "true")
@@ -172,20 +177,16 @@ class ReadOnlySourceReviewBrowserTests(unittest.TestCase):
                            "style-src 'self'", "worker-src 'self'", "frame-ancestors 'none'"):
                 self.assertIn(phrase, csp)
             self.assertNotIn("'unsafe-inline'", csp)
-            response.read()
-            conn.request("POST", "/v1/investigations", body=b"{}",
-                         headers={"Content-Type": "application/json"})
-            self.assertEqual(conn.getresponse().status, 405)
-            conn.request("GET", "/.env")
-            self.assertEqual(conn.getresponse().status, 404)
-            conn.request("GET", "/_study/cases?debug=true")
-            self.assertEqual(conn.getresponse().status, 400)
-            conn.request("GET", "/source-review", headers={"Host": "attacker.example"})
-            self.assertEqual(conn.getresponse().status, 403)
-            conn.request("GET", "/_study/cases", headers={"X-Forwarded-Host": "public.example"})
-            self.assertEqual(conn.getresponse().status, 403)
-            conn.request("GET", "/source-review", headers={"Origin": "http://attacker.example"})
-            self.assertEqual(conn.getresponse().status, 403)
+            self.assertEqual(request("POST", "/v1/investigations",
+                                     body=b"{}", headers={"Content-Type": "application/json"}).status, 405)
+            self.assertEqual(request("GET", "/.env").status, 404)
+            self.assertEqual(request("GET", "/_study/cases?debug=true").status, 400)
+            self.assertEqual(request("GET", "/source-review",
+                                     headers={"Host": "attacker.example"}).status, 403)
+            self.assertEqual(request("GET", "/_study/cases",
+                                     headers={"X-Forwarded-Host": "public.example"}).status, 403)
+            self.assertEqual(request("GET", "/source-review",
+                                     headers={"Origin": "http://attacker.example"}).status, 403)
 
     def test_rejects_tampered_source_response_without_stale_evidence(self):
         first = self.page.get_by_test_id("source-case-insufficient")
