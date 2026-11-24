@@ -91,7 +91,8 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
     return [payload]
 
 
-def create_app(store: SyntheticInvestigationStore, *, today: date | None = None):
+def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
+               react_assets: dict[str, tuple[bytes, str]] | None = None):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -120,7 +121,15 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
         if environ.get("QUERY_STRING"):
             return _response(start_response, 400, {"error": "query_parameters_not_supported"})
 
-        if path in STATIC_ASSETS:
+        if react_assets is not None and path in react_assets:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            payload, content_type = react_assets[path]
+            start_response("200 OK", [("Content-Type", content_type),
+                                      ("Content-Length", str(len(payload))), *SECURITY_HEADERS])
+            return [payload]
+
+        if react_assets is None and path in STATIC_ASSETS:
             if method != "GET":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _static_response(start_response, STATIC_ASSETS[path])

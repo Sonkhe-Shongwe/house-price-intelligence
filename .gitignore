@@ -52,3 +52,7 @@ node_modules/
 
 /audit/phase2/output/
 /audit/phase2/outputs/
+
+# React integration build outputs
+frontend/react/node_modules/
+frontend/react/dist/
