@@ -1,4 +1,4 @@
-"""Isolated loopback-only proof: Vite dist + READ-ONLY HPI fixture WSGI.
+"""Isolated loopback proof: Vite dist + strictly gated HPI fixture WSGI.
 
 Not part of backend/ or the approved frontend. Does not relax the app's
 local-host, forwarded-header, same-origin, source-kind or privacy restrictions.
@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
 
 from backend.synthetic_demo import example_request, in_memory_demo  # noqa: E402
 from backend.synthetic_http import (  # noqa: E402
-    ALLOWED_HOST, ID_ROUTE, SHORTLIST_ROUTE,
+    ALLOWED_HOST, ID_ROUTE, SHORTLIST_ROUTE, ADDRESS_ROUTE,
     SECURITY_HEADERS, create_app,
 )
 from backend.synthetic_shortlists import SyntheticShortlistService  # noqa: E402
@@ -54,23 +54,23 @@ def _allowed_request(environ) -> bool:
     ))
 
 
-def _send(start_response, code: int, body: bytes, content_type: str):
+def _send(start_response, code: int, body: bytes, content_type: str, *, mode: str = "read-only"):
     statuses = {200: "200 OK", 400: "400 Bad Request", 403: "403 Forbidden",
                 404: "404 Not Found", 405: "405 Method Not Allowed",
                 503: "503 Service Unavailable"}
     start_response(statuses[code], [
         ("Content-Type", content_type),
         ("Content-Length", str(len(body))),
-        *STRICT_HEADERS,
+        *((key, mode if key == "X-Proof-Mode" else value) for key, value in STRICT_HEADERS),
     ])
     return [body]
 
 
-def _json(start_response, code: int, value):
+def _json(start_response, code: int, value, *, mode: str = "read-only"):
     return _send(
         start_response, code,
         json.dumps(value, separators=(",", ":"), ensure_ascii=True).encode("utf-8"),
-        "application/json; charset=utf-8",
+        "application/json; charset=utf-8", mode=mode,
     )
 
 
@@ -94,7 +94,7 @@ def approved_assets(directory: Path) -> dict[str, tuple[bytes, str]]:
     return assets
 
 
-def seeded_readonly_preview(directory: Path = DIST):
+def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bool = False):
     db, store = in_memory_demo()
     try:
         verified = store.create(example_request(), today=date(2026, 11, 24))
@@ -125,22 +125,28 @@ def seeded_readonly_preview(directory: Path = DIST):
         raise
 
     def app(environ, start_response):
+        mode = "fixture-investigation-writes" if enable_buyer_workflow else "read-only"
         if not _allowed_request(environ):
-            return _json(start_response, 403, {"error": "local_fixture_only"})
+            return _json(start_response, 403, {"error": "local_fixture_only"}, mode=mode)
         if environ.get("QUERY_STRING"):
-            return _json(start_response, 400, {"error": "query_parameters_not_supported"})
+            return _json(start_response, 400, {"error": "query_parameters_not_supported"}, mode=mode)
         path = environ.get("PATH_INFO", "")
         method = environ.get("REQUEST_METHOD", "")
-        if method != "GET":
-            return _json(start_response, 405, {"error": "read_only_fixture_preview"})
-        if path in assets:
-            body, mime = assets[path]
-            return _send(start_response, 200, body, mime)
-        if path == "/_study/cases":
-            return _json(start_response, 200, cases)
-        if path == "/health" or ID_ROUTE.fullmatch(path) or SHORTLIST_ROUTE.fullmatch(path):
+        if (enable_buyer_workflow and method == "POST"
+                and path in ("/v1/addresses/search", "/v1/investigations")):
+            # Preserve every original JSON validation, source check and error code.
             return backend_app(environ, start_response)
-        return _json(start_response, 404, {"error": "not_found"})
+        if method != "GET":
+            return _json(start_response, 405, {"error": "read_only_fixture_preview"}, mode=mode)
+        if path in assets or (enable_buyer_workflow and path == "/buyer-workflow"):
+            body, mime = assets[path if path in assets else "/"]
+            return _send(start_response, 200, body, mime, mode=mode)
+        if path == "/_study/cases":
+            return _json(start_response, 200, cases, mode=mode)
+        if (path == "/health" or ID_ROUTE.fullmatch(path) or SHORTLIST_ROUTE.fullmatch(path)
+                or (enable_buyer_workflow and ADDRESS_ROUTE.fullmatch(path))):
+            return backend_app(environ, start_response)
+        return _json(start_response, 404, {"error": "not_found"}, mode=mode)
 
     return app, db
 
@@ -148,14 +154,16 @@ def seeded_readonly_preview(directory: Path = DIST):
 def main() -> None:
     parser = argparse.ArgumentParser(description="Isolated read-only React <-> Python fixture review")
     parser.add_argument("--port", type=int, default=8797)
+    parser.add_argument("--enable-buyer-workflow", action="store_true",
+                        help="Opt in to fictional address-search and investigation-create POSTs")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Use an unprivileged local port")
-    app, db = seeded_readonly_preview()
+    app, db = seeded_readonly_preview(enable_buyer_workflow=args.enable_buyer_workflow)
     try:
         with make_server("127.0.0.1", args.port, app) as server:
-            print(f"Fictional READ-ONLY source review: http://127.0.0.1:{args.port}/source-review",
-                  flush=True)
+            route = "/buyer-workflow" if args.enable_buyer_workflow else "/source-review"
+            print(f"Fictional local HPI preview: http://127.0.0.1:{args.port}{route}", flush=True)
             server.serve_forever()
     finally:
         db.close()
