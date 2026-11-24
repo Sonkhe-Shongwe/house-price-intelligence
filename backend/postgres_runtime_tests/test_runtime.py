@@ -15,7 +15,12 @@ from urllib.error import HTTPError
 import psycopg
 from psycopg.conninfo import make_conninfo
 from playwright.sync_api import sync_playwright,expect
-from backend.postgres_runtime import bootstrap,ROLE
+from backend.postgres_runtime import bootstrap,ROLE,make_pool,application,ThreadedServer,QuietHandler
+from backend.postgres_consolidation import BUILDS,activate
+from backend.react_assets import load_react_assets
+from wsgiref.simple_server import make_server
+from threading import Thread
+from statistics import median
 from backend.postgres_ingestion import initialise,import_revision,ImportedFixtureStore
 from backend.curated_ingestion_candidate import ImportRefused,address_candidates
 from backend.synthetic_demo import example_request
@@ -77,6 +82,120 @@ class RuntimeTests(unittest.TestCase):
         code,r=self.call(owner,"POST","/v1/investigations",p)
         self.assertEqual(code,201,r)
         return r
+    def test_build_activation_rollback_and_revision_browser_map(self):
+        original=self.create("alice","00000000000001")
+        old=original["investigation_id"]
+        _,short=self.call("alice","POST","/v1/shortlists",{"label":"Revision comparison"})
+        path="/v1/shortlists/"+short["shortlist_id"]
+        self.assertEqual(self.call("alice","POST",path+"/entries",{"investigation_id":old,"note_text":"Original evidence"})[0],201)
+        gen=activate(ADMIN,BUILDS[1],0)
+        self.assertEqual(gen,1)
+        try:
+            with self.assertRaises(ValueError):activate(ADMIN,BUILDS[2],0)
+            with self.assertRaises(ValueError):activate(ADMIN,"unknown",gen)
+            _,matches=self.call("alice","POST","/v1/addresses/search",{"query":"105 Fictional Way"})
+            self.assertEqual(len(matches["candidates"]),2)
+            chosen=matches["candidates"][0]["address_id"]
+            self.assertTrue(matches["candidates"][0]["ambiguous_address"])
+            p=example_request()
+            p["subject"]={"address_id":chosen,"building_area_sqft":1600}
+            code,new=self.call("alice","POST","/v1/investigations",p)
+            self.assertEqual(code,201,new)
+            self.assertEqual(new["data_build"]["build_id"],BUILDS[1])
+            self.assertEqual(self.call("alice","POST",path+"/entries",{"investigation_id":new["investigation_id"]})[0],201)
+            gen=activate(ADMIN,BUILDS[2],gen)
+            self.assertEqual(self.call("alice","GET","/v1/addresses/"+chosen)[0],404)
+            revised=self.create("alice","00000000000001")
+            self.assertEqual(revised["data_build"]["build_id"],BUILDS[2])
+            self.assertNotEqual([c["sale_price_usd"] for c in original["comparables"]],[c["sale_price_usd"] for c in revised["comparables"]])
+            self.assertEqual(self.call("alice","GET","/v1/investigations/"+old)[1],original)
+            self.assertEqual(self.call("bob","GET","/v1/investigations/"+old)[0],404)
+            self.assertEqual(self.call("bob","GET",path)[0],404)
+            history=self.call("alice","GET","/v1/investigations/history")[1]["investigations"]
+            self.assertTrue({old,new["investigation_id"],revised["investigation_id"]}<={i["investigation_id"] for i in history})
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox","--enable-unsafe-swiftshader","--use-angle=swiftshader"])
+                try:
+                    context=browser.new_context(http_credentials={"username":"alice","password":self.passwords["alice"]})
+                    page=context.new_page();external=[]
+                    page.on("request",lambda r:external.append(r.url) if not r.url.startswith(self.base+"/") else None)
+                    page.goto(self.base+"/buyer-workflow")
+                    page.get_by_test_id("buyer-manual-pin").fill("00000000000001")
+                    page.get_by_test_id("buyer-create").click()
+                    expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("buyer-build")).to_have_text(BUILDS[2])
+                    page.get_by_test_id("geo-load").click()
+                    expect(page.get_by_test_id("geo-ready")).to_be_visible(timeout=20000)
+                    page.get_by_test_id("geo-pin-2").click()
+                    expect(page.get_by_test_id("buyer-sale").nth(1)).to_have_attribute("aria-pressed","true")
+                    self.assertEqual(external,[])
+                    context.close()
+                finally:browser.close()
+            before=self.call("alice","GET",path)[1]
+            gen=activate(ADMIN,BUILDS[0],gen)
+            self.stop();self.start()
+            self.assertEqual(self.call("alice","GET",path)[1],before)
+            self.assertEqual(self.call("alice","GET","/v1/investigations/"+revised["investigation_id"])[1],revised)
+            self.assertEqual(self.create("alice","00000000000001")["data_build"]["build_id"],BUILDS[0])
+            self.assertTrue(self.call("alice","GET","/v1/investigations/"+revised["investigation_id"]+"/map")[1]["map_available"])
+        finally:
+            # Restore baseline for the existing runtime tests even on failure.
+            with psycopg.connect(ADMIN,autocommit=True) as conn:
+                row=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
+            if row[0]!=BUILDS[0]:activate(ADMIN,BUILDS[0],row[1])
+    def test_pool_exhaustion_connection_loss_and_recovery(self):
+        pool=make_pool(self.dsn,max_size=1)
+        server=make_server("127.0.0.1",0,application(pool,self.passwords,load_react_assets()),server_class=ThreadedServer,handler_class=QuietHandler)
+        thread=Thread(target=server.serve_forever,daemon=True);thread.start()
+        base="http://127.0.0.1:"+str(server.server_port)
+        def request():
+            auth=base64.b64encode(("alice:"+self.passwords["alice"]).encode()).decode()
+            req=Request(base+"/health",headers={"Authorization":"Basic "+auth})
+            try:
+                with urlopen(req,timeout=10) as res:return res.status,json.load(res)
+            except HTTPError as exc:return exc.code,json.load(exc)
+        try:
+            with pool.connection() as held:
+                start=time.monotonic()
+                self.assertEqual(request(),(503,{"error":"evidence_unavailable"}))
+                self.assertLess(time.monotonic()-start,9)
+                pid=held.info.backend_pid
+            self.assertEqual(request()[0],200)
+            # Terminate the single idle backend, not the database or any external session.
+            with psycopg.connect(ADMIN,autocommit=True) as admin:
+                self.assertTrue(admin.execute("SELECT pg_terminate_backend(%s)",(pid,)).fetchone()[0])
+            status,body=request()
+            self.assertIn(status,(200,503))
+            if status==503:self.assertEqual(body,{"error":"evidence_unavailable"})
+            deadline=time.monotonic()+15
+            while time.monotonic()<deadline:
+                if request()[0]==200:break
+                time.sleep(.2)
+            else:self.fail("Pool did not recover")
+        finally:
+            server.shutdown();server.server_close();thread.join(timeout=5);pool.close()
+    def test_bounded_parallel_smoke_and_source_control_permissions(self):
+        def sample(i):
+            start=time.monotonic()
+            code,_=self.call("alice" if i%2 else "bob","GET","/health")
+            return code,(time.monotonic()-start)*1000
+        with ThreadPoolExecutor(max_workers=4) as ex:results=list(ex.map(sample,range(24)))
+        self.assertTrue(all(code==200 for code,_ in results))
+        timings=sorted(t for _,t in results)
+        p95=timings[22]
+        print(f"Aggregate loopback smoke: n=24 workers=4 median_ms={median(timings):.1f} p95_ms={p95:.1f} max_ms={timings[-1]:.1f}",flush=True)
+        self.assertLess(timings[-1],10000)
+        with psycopg.connect(self.dsn,autocommit=True) as conn:
+            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                conn.execute("UPDATE hpi_candidate.active_fixture_build SET generation=0")
+            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                conn.execute("DELETE FROM hpi_candidate.fixture_build_events")
+    def test_tampered_source_refused_then_restored(self):
+        with psycopg.connect(ADMIN,autocommit=True) as conn:
+            conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents+1 WHERE transaction_id='txn-2'")
+            try:self.assertEqual(self.call("alice","GET","/health"),(503,{"error":"evidence_unavailable"}))
+            finally:conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents-1 WHERE transaction_id='txn-2'")
+        self.assertEqual(self.call("bob","GET","/health")[0],200)
     def test_http_isolation_and_concurrency(self):
         self.assertEqual(self.call(None,"GET","/v1/investigations/history")[0],401)
         self.assertEqual(self.call("alice","POST","/v1/investigations",example_request(),origin=False)[0],403)

@@ -39,6 +39,8 @@
 
 **Current runtime contract:** [Production Runtime Integration V1](engineering/PRODUCTION_RUNTIME_V1.md), fictional accounts, PostgreSQL HTTP and revision candidate.
 
+**Consolidation contract:** [Production Consolidation V1](engineering/PRODUCTION_CONSOLIDATION_V1.md).
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.

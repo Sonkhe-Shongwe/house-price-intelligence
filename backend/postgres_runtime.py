@@ -17,6 +17,7 @@ from backend.postgres_fixture import migrate, seed, PostgresFixtureStore, ROOT
 from backend.synthetic_http import create_app, ALLOWED_HOST, _response
 from backend.synthetic_investigation_store import EvidenceStoreError
 from backend.react_assets import load_react_assets
+from backend.postgres_consolidation import prepare, ConsolidatedStore, SOURCE_LOCK
 
 ROLE="hpi_runtime_fixture"
 OWNERS={"alice":"fictional-alice","bob":"fictional-bob"}
@@ -43,6 +44,7 @@ def bootstrap(admin_dsn, password):
             migrate(conn)
             seed(conn)
             conn.execute("SET LOCAL search_path TO hpi_candidate, pg_catalog")
+            prepare(conn)
             conn.execute((ROOT.parent/"postgres_ownership_candidate.sql").read_text(),prepare=False)
             conn.execute(sql.SQL("CREATE ROLE {} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD {}").format(sql.Identifier(ROLE),sql.Literal(password)))
             conn.execute(sql.SQL("GRANT USAGE ON SCHEMA hpi_candidate TO {}").format(sql.Identifier(ROLE)))
@@ -70,7 +72,7 @@ def make_pool(dsn, *, max_size=4):
     def configure(conn):
         conn.execute("SET search_path TO hpi_candidate, pg_catalog")
         verify_role(conn)
-        PostgresFixtureStore(conn)
+        ConsolidatedStore(conn)
     def reset(conn):
         # Identity always transaction-local; additionally refuse any session residue.
         verify_role(conn)
@@ -130,7 +132,8 @@ def application(pool,passwords,assets):
                         # Coarse owner-level serialisation keeps all read/check/write
                         # operations atomic. Different owners can proceed concurrently.
                         conn.execute("SELECT pg_advisory_xact_lock(%s)",(194330 if owner==OWNERS["alice"] else 194331,))
-                        store=PostgresFixtureStore(conn)
+                        conn.execute("SELECT pg_advisory_xact_lock_shared(%s)",(SOURCE_LOCK,))
+                        store=ConsolidatedStore(conn)
                         payload=list(create_app(store,react_assets=assets,synthetic_map=True)(environ,capture))
                         if int(captured[0][:3])>=400:raise _Abort()
                 except _Abort:pass

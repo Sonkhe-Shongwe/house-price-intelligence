@@ -135,3 +135,7 @@ Owner approved PR1–PR8 on development, actual PostgreSQL HTTP and fictional au
 
 ## 24 November 2026: runtime milestone progress review
 Owner-authorised PR1–PR8 verified all eight workflows at 240f5ce. Weighted estimate 71.4% (66.5% prior, +4.9 points); unchanged phase weights and open exit gates. Fictional loopback Basic authentication is not a production provider; PostgreSQL revision importer remains separate from HTTP runtime. No production hosting, real-data rights or release approval. See [runtime contract](engineering/PRODUCTION_RUNTIME_V1.md) and [roadmap](P_PHASE_ROADMAP.md).
+
+
+## 24 November 2026: consolidation authorisation
+Owner approved PC1–PC8 fictional runtime integration and bounded public-source research. No real data, external contact, provider provisioning, main merge or deployment. See [consolidation](engineering/PRODUCTION_CONSOLIDATION_V1.md).

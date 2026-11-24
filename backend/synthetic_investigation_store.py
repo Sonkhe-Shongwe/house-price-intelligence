@@ -333,15 +333,24 @@ class SyntheticInvestigationStore:
                 )
         return {"investigation_id": identifier, **response}
 
-    def history(self) -> dict[str, Any]:
-        """Bounded local discovery of verified, frozen results; never rematch."""
-        self._build()
-        rows = self.connection.execute(
+    def _history_rows(self):
+        return self.connection.execute(
             """SELECT investigation_id, created_at_utc, analysis_date
                FROM investigations WHERE build_id = ?
                ORDER BY created_at_utc DESC, investigation_id DESC LIMIT 31""",
             (self.build_id,),
         ).fetchall()
+
+    def shortlist_policy(self, iid):
+        return self.connection.execute(
+            "SELECT match_policy_version FROM investigations WHERE investigation_id=? AND build_id=?",
+            (iid,self.build_id),
+        ).fetchone()
+
+    def history(self) -> dict[str, Any]:
+        """Bounded local discovery of verified, frozen results; never rematch."""
+        self._build()
+        rows = self._history_rows()
         items = []
         for iid, created, analysis_date in rows[:30]:
             result = self.reopen(iid)

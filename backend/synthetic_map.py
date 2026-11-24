@@ -24,11 +24,19 @@ POSITION_SHA256 = hashlib.sha256(json.dumps(
 ).encode("ascii")).hexdigest()
 
 
+REVISION_BUILDS = ("candidate-e758c7da195b3ac129a70614","candidate-b693166e4803634e513f41d2")
+REVISION_GEOGRAPHY = dict(zip(REVISION_BUILDS,("fixture-geography-832ca8c3512516370966cd8a","fixture-geography-da7701adc4635ca152577027")))
+REVISION_SOURCE = "synthetic-display-geography-v2"
+REVISION_SHA256 = hashlib.sha256(json.dumps({"source":REVISION_SOURCE,"builds":REVISION_BUILDS,"positions":dict(POSITIONS)},sort_keys=True,separators=(",",":")).encode("ascii")).hexdigest()
+
 def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
     if POSITION_SHA256 != "c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9":
         raise EvidenceStoreError("Display source changed without a new version")
     result = store.reopen(investigation_id)
     build = result["data_build"]
+    revision = build["build_id"] in REVISION_BUILDS
+    if revision and REVISION_SHA256 != "411cd6d2403b0b520e52d67f8c1ea99daa1f7fbdf8f61a1bffdb17ecbc9735f8":
+        raise EvidenceStoreError("Revised display source changed")
     response = {
         "contract_version": "synthetic-map-v1",
         "investigation_id": investigation_id,
@@ -37,15 +45,15 @@ def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
         "geometry_kind": "virtual_display_point",
         "real_geography_verified": False,
         "distance_supported": False,
-        "position_source_id": POSITION_SOURCE,
-        "position_source_sha256": POSITION_SHA256,
+        "position_source_id": REVISION_SOURCE if revision else POSITION_SOURCE,
+        "position_source_sha256": REVISION_SHA256 if revision else POSITION_SHA256,
         "map_available": False,
         "reason": "map_disabled",
         "feature_collection": {"type": "FeatureCollection", "features": []},
     }
     if not enabled:
         return response
-    if build["build_id"] != BUILD_ID or build["source_kind"] != "synthetic_fixture":
+    if (build["build_id"] != BUILD_ID and not revision) or build["source_kind"] != "synthetic_fixture":
         raise EvidenceStoreError("Unexpected map evidence build")
     # PostgreSQL candidate checks the same immutable source rows with its
     # native schema/history validation; SQLite retains the original signature.
@@ -78,7 +86,8 @@ def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
         return response
     if len({pin for _, pin in members}) != len(members):
         raise EvidenceStoreError("Map contains duplicate parcel identities")
-    if "geo-snap" not in build["source_snapshot_ids"]:
+    expected_geo = REVISION_GEOGRAPHY[build["build_id"]] if revision else "geo-snap"
+    if expected_geo not in build["source_snapshot_ids"]:
         raise EvidenceStoreError("Missing frozen geography snapshot")
     # geo-snap is original matching provenance, NOT the virtual positions.
     response["feature_collection"]["features"] = [

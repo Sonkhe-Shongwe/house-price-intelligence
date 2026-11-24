@@ -8,11 +8,14 @@ const object=(v:unknown):Record<string,unknown>=>{
 };
 export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
   const r=object(raw);
+  const legacySource=record.sourceBuildId==='synthetic-build'&&r.position_source_id==='synthetic-display-geography-v1'&&
+    r.position_source_sha256==='c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9';
+  const revisedSource=['candidate-e758c7da195b3ac129a70614','candidate-b693166e4803634e513f41d2'].includes(record.sourceBuildId)&&
+    r.position_source_id==='synthetic-display-geography-v2'&&r.position_source_sha256==='411cd6d2403b0b520e52d67f8c1ea99daa1f7fbdf8f61a1bffdb17ecbc9735f8';
   if(r.contract_version!=='synthetic-map-v1'||r.investigation_id!==record.investigationId||
      r.build_id!==record.sourceBuildId||r.source_kind!=='synthetic_fixture'||
      r.geometry_kind!=='virtual_display_point'||r.real_geography_verified!==false||
-     r.distance_supported!==false||r.position_source_id!=='synthetic-display-geography-v1'||
-     r.position_source_sha256!=='c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9')
+     r.distance_supported!==false||(!legacySource&&!revisedSource))
     throw Error('Map provenance rejected');
   const collection=object(r.feature_collection);
   if(collection.type!=='FeatureCollection'||!Array.isArray(collection.features))
@@ -21,7 +24,7 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
     if(collection.features.length!==0||typeof r.reason!=='string'||
        !['map_disabled','geometry_unavailable','insufficient_or_unsupported_evidence'].includes(r.reason))
       throw Error('Invalid unavailable map');
-    return {source:r.position_source_id,digest:r.position_source_sha256,points:[],reason:r.reason};
+    return {source:r.position_source_id as string,digest:r.position_source_sha256 as string,points:[],reason:r.reason};
   }
   if(r.map_available!==true||r.reason!==null||record.selectedCount===0||
      !['supported_neighbourhood','exploratory_spatial'].includes(record.status)||
@@ -41,5 +44,5 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
     seen.add(key);
     return {rank,pin,coordinates};
   });
-  return {source:r.position_source_id,digest:r.position_source_sha256,points,reason:null};
+  return {source:r.position_source_id as string,digest:r.position_source_sha256 as string,points,reason:null};
 }

@@ -103,10 +103,7 @@ class SyntheticShortlistService:
             raise EvidenceStoreError("Stored shortlist exceeds three investigations")
         entries = []
         for iid, note in members:
-            policy_row = self.conn.execute(
-                "SELECT match_policy_version FROM investigations WHERE investigation_id=? AND build_id=?",
-                (iid, self.store.build_id),
-            ).fetchone()
+            policy_row = self.store.shortlist_policy(iid)
             if policy_row is None or policy_row[0] != self.store.POLICY_VERSION:
                 raise EvidenceStoreError("Stored shortlist refers to an unrecognised matching rule version")
             # Do not return cached or re-matched evidence. Verify the frozen
