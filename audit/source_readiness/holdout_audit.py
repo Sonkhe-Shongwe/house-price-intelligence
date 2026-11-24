@@ -85,17 +85,39 @@ def main():
     report={"status":"blocked","policy":POLICY_ID,"scope":"township 17, class 203, 2024-2025 sales; 2025 subjects; 2023-2024 prior tax years",
             "extracted_at_utc":datetime.now(timezone.utc).isoformat(),"historical_asof_verified":False,"publication_approved":False}
     try:
+        report["stage"]="metadata"
         before={d:meta(d) for d in (*SPECS,UNIVERSE_ID)}
+        report["stage"]="sales"
         sales=collect(SALES_ID,before[SALES_ID][0])
+        report["sales_rows"]=len(sales)
+        report["stage"]="buildings"
         buildings=collect(BUILDINGS_ID,before[BUILDINGS_ID][0])
+        report["building_rows"]=len(buildings)
+        report["stage"]="join"
         cohort=phase0_class203(sales,buildings)
         keys={(r["pin"],r["characteristics_year"]) for r in cohort}
+        report["class203_rows"]=len(cohort)
+        report["key_count"]=len(keys)
+        report["stage"]="universe"
         geo=universe(keys,before[UNIVERSE_ID][0])
+        report["universe_rows"]=len(geo)
+        report["stage"]="enrichment"
         enhanced,_=enrich_joined(cohort,geo,[])
+        report["stage"]="metadata_recheck"
         if before!={d:meta(d) for d in before}:raise ValueError("Source revision changed")
+        report["stage"]="evaluation"
         report.update(evaluate(enhanced),sales_rows=len(sales),building_rows=len(buildings),class203_rows=len(cohort),
                       universe_rows=len(geo),source_update_epochs={d:before[d][1] for d in before},status="completed")
-    except Exception as exc:report["error_type"]=type(exc).__name__
+    except Exception as exc:
+        report["error_type"]=type(exc).__name__
+        reasons={"Schema mismatch":"schema_mismatch","Incomplete capped extraction":"row_cap",
+                 "Universe scope refused":"universe_schema_or_scope","Invalid cohort keys":"key_scope",
+                 "Unexpected universe response":"unexpected_universe_response","Out-of-window row":"date_scope",
+                 "Insufficient later cohort":"too_few_subjects","Chronological leak":"chronology_guard",
+                 "Source revision changed":"revision_changed","Response exceeded cap":"response_bytes_cap",
+                 "Missing source revision":"missing_revision","Response bound exceeded":"response_row_cap",
+                 "Unexpected field in response":"unexpected_field"}
+        report["failure_category"]=reasons.get(str(exc),"unclassified_guard")
     Path("reports").mkdir(exist_ok=True)
     Path("reports/holdout-aggregate.json").write_text(json.dumps(report,indent=2)+"\n")
     print(json.dumps(report,indent=2))

@@ -347,7 +347,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
         <table><caption className="pi-sr-only">Saved property comparison</caption>
           <thead><tr><th scope="col">Decision factor</th>{workspace.entries.map(e=><th scope="col" key={e.investigationId}>{e.investigation.subjectLabel}</th>)}</tr></thead>
           <tbody>{([
-            ['Asking price (buyer-reported)',(e:typeof workspace.entries[number])=>e.investigation.askingPriceText],
+            ['Asking price (buyer-reported)',(e:ShortlistView['entries'][number])=>e.investigation.askingPriceText],
             ['Area',e=>e.investigation.buildingAreaText],
             ['Evidence status / tier',e=>e.investigation.status+' / '+e.investigation.tier],
             ['Earlier sales',e=>String(e.investigation.selectedCount)],
@@ -357,7 +357,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
             ['Matching rules',e=>e.matchPolicyVersion],
             ['Warnings',e=>e.investigation.warnings.join(' | ')||'None'],
             ['Valuation',()=> 'Not produced']
-          ] as [string,(e:typeof workspace.entries[number])=>string][]).map(([label,value])=><tr key={label}><th scope="row">{label}</th>{workspace.entries.map(e=><td key={e.investigationId}>{value(e)}</td>)}</tr>)}</tbody>
+          ] as [string,(e:ShortlistView['entries'][number])=>string][]).map(([label,value])=><tr key={label}><th scope="row">{label}</th>{workspace.entries.map(e=><td key={e.investigationId}>{value(e)}</td>)}</tr>)}</tbody>
         </table></div></section>}
     </>}
     {busy&&<p role="status" data-testid="workspace-busy">Confirming the change with the Python fixture service…</p>}

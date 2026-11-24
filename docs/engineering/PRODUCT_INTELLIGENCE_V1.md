@@ -12,3 +12,7 @@ Pinned issuer/client/RS256 keys; authorization code with S256 PKCE, state tied t
 
 ## PI7/PI8
 [Recruiter walkthrough](../product/RECRUITER_WALKTHROUGH_V1.md) uses actual local app and aggregate-only evidence, not a deployed link. Record CI and holdout before estimating progress. No final owner acceptance or phase exit implied.
+
+
+## Initial verification and correction
+Holdout run 45357613568: 13 offline tests passed; bounded live query failed closed with ValueError, no metrics or raw records. Add safe stage/guard categories and aggregate counts and retry the identical frozen window/caps once. No policy tuning or cohort expansion. Initial React PR run 45357935503 failed TypeScript nullable workspace type annotation; use non-null ShortlistView member type. Offline identity push and PR passed. No valuation or publication.
