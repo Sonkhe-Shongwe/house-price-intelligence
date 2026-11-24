@@ -1,0 +1,59 @@
+name: React application integration
+on:
+  push:
+    branches: ['feature/react-application-integration-v1-20261124', development]
+    paths: ['frontend/react/**', 'backend/**', '.github/workflows/react-application-integration-ci.yml']
+  pull_request:
+    branches: [development, main]
+    paths: ['frontend/react/**', 'backend/**', '.github/workflows/react-application-integration-ci.yml']
+permissions:
+  contents: read
+jobs:
+  react-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/react/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Locked build
+        working-directory: frontend/react
+        run: |
+          npm ci --no-fund --no-audit
+          npm run build
+      - name: Real WSGI response adapter
+        run: |
+          mkdir -p "$RUNNER_TEMP/hpi-bridge"
+          PYTHONPATH=. python frontend/react/tests/export_real_api_contract.py > "$RUNNER_TEMP/hpi-bridge/actual.json"
+          frontend/react/node_modules/.bin/tsc --target ES2022 --lib ES2022,DOM --module ESNext --moduleResolution Bundler --strict --skipLibCheck --noEmit false --outDir "$RUNNER_TEMP/hpi-bridge" frontend/react/src/evidenceBridge.ts
+          mv "$RUNNER_TEMP/hpi-bridge/evidenceBridge.js" "$RUNNER_TEMP/hpi-bridge/evidenceBridge.mjs"
+          node frontend/react/tests/test_evidence_bridge.mjs "$RUNNER_TEMP/hpi-bridge/actual.json" "$RUNNER_TEMP/hpi-bridge/evidenceBridge.mjs"
+      - name: Install browser test dependency
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          if command -v google-chrome >/dev/null; then
+            echo "HPI_BROWSER_EXECUTABLE=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            python -m playwright install chromium
+          fi
+      - name: Canonical launcher browser acceptance
+        env:
+          HPI_BUYER_SCREENSHOTS: ${{ runner.temp }}/hpi-react-buyer
+          HPI_SHORTLIST_SCREENSHOTS: ${{ runner.temp }}/hpi-react-shortlist
+        run: python -m unittest discover -s frontend/react/tests -p 'test_*.py' -v
+      - name: Publish fictional visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpi-react-integration-screenshots
+          path: |
+            ${{ runner.temp }}/hpi-react-buyer/*.png
+            ${{ runner.temp }}/hpi-react-shortlist/*.png
+          if-no-files-found: warn
+          retention-days: 7
