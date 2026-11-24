@@ -19,3 +19,6 @@ Exclude names, owner/taxpayer/mail addresses, contact details and photos. Propos
 
 ## Continuity
 Baseline 83.6%; all seven workflows at 638a303 passed. Update existing P-roadmap only after meaningful verified evidence, no automatic phase exits. FR4–FR8 need separate scoped authority. 
+
+## Initial CI result
+45365278469: 20 offline safeguards passed; live extraction stopped on ValueError before producing a funnel. One bounded diagnostic retry with identical scope, caps and original screening; add fixed safe error categories and split stage labels. No change to matching or source scope. No raw record output. Public data principles explicitly favour reuse where reasonable (https://datacatalog.cookcountyil.gov/stories/s/About-Open-Data/pvqg-z4sc/); the separate compiled database subscription has internal-use restrictions (https://cook-county.legistar.com/LegislationDetail.aspx?FullText=1&GUID=DDDC0556-2C14-48AE-8B2D-CE6BBE29CABA&ID=5146074). Neither settles the intended API-based release decision.

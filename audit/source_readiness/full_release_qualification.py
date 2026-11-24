@@ -89,9 +89,14 @@ def main():
         report["stage"]="metadata"
         rights=license_summary()
         before={d:meta(d) for d in (*holdout.SPECS,UNIVERSE_ID)}
-        report["stage"]="extraction"
+        report["source_metadata"]=rights
+        report["stage"]="sales_extraction"
         sales=holdout.collect(SALES_ID,before[SALES_ID][0])
+        report["sales_rows"]=len(sales)
+        report["stage"]="building_extraction"
         buildings=holdout.collect(BUILDINGS_ID,before[BUILDINGS_ID][0])
+        report["building_rows"]=len(buildings)
+        report["stage"]="building_scope"
         if any(str(b.get("township_code"))!="17" or str(b.get("year")) not in ("2023","2024") for b in buildings):
             raise ValueError("Unexpected building scope")
         report["stage"]="diagnosis"
@@ -115,7 +120,16 @@ def main():
             report["holdout_status"]="evaluated_fixed_policy"
         else:report["holdout_status"]="blocked_insufficient_subjects"
         report["status"]="completed"
-    except Exception as exc:report["error_type"]=type(exc).__name__
+    except Exception as exc:
+        report["error_type"]=type(exc).__name__
+        categories={"Schema mismatch":"schema_mismatch","Incomplete capped extraction":"row_cap",
+            "Response exceeded cap":"response_byte_cap","Response bound exceeded":"response_row_cap",
+            "Unexpected field in response":"unexpected_fields","Unexpected building scope":"building_scope_mismatch",
+            "Unexpected sales scope":"sales_scope_mismatch","Original policy parity failed":"parity_failed",
+            "Funnel reconciliation failed":"funnel_failed","Universe scope refused":"universe_scope",
+            "Invalid cohort keys":"invalid_keys","Unexpected universe response":"universe_response",
+            "Source revision changed":"revision_changed","Missing source revision":"missing_revision"}
+        report["failure_category"]=categories.get(str(exc),"unclassified_guard")
     Path("reports").mkdir(exist_ok=True)
     Path("reports/full-release-qualification.json").write_text(json.dumps(report,indent=2)+"\n")
     print(json.dumps(report,indent=2))
