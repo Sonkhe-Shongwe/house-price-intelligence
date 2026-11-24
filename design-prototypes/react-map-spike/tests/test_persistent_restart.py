@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 from pathlib import Path
 import socket
 import sqlite3
@@ -70,7 +71,12 @@ class LocalFixtureProcess:
 
     def close(self):
         if self.proc.poll() is None:
-            self.proc.terminate()
+            # Gracefully interrupt the Python serve_forever loop on Linux, so
+            # the WSGI context and SQLite connection finish their cleanup.
+            if os.name == 'posix':
+                self.proc.send_signal(signal.SIGINT)
+            else:
+                self.proc.terminate()
             try:self.proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 self.proc.kill()
@@ -223,6 +229,43 @@ class RestartProof(unittest.TestCase):
                 second.get("/v1/investigations/"+seed["cases"][0]["investigation_id"])
             self.assertEqual(caught.exception.code,404)
         finally:second.close()
+
+    def test_changed_source_sale_cents_refuse_restart_not_reseed(self):
+        with tempfile.TemporaryDirectory(prefix="hpi-fixture-tamper-") as folder:
+            path=Path(folder)/"tamper.sqlite3"
+            port=free_port()
+            original=LocalFixtureProcess(port,database=path)
+            try:
+                cases=original.get("/_study/cases")
+                supported=cases["cases"][0]["investigation_id"]
+                saved=original.get("/v1/investigations/"+supported)
+                self.assertEqual(saved["comparables"][0]["sale_price_usd"],"525000.00")
+            finally:
+                original.close()
+            before=frozen_database_rows(path)
+            db=sqlite3.connect(path)
+            try:
+                row=db.execute(
+                    "UPDATE sale_transactions SET price_usd_cents = price_usd_cents + 1 "
+                    "WHERE transaction_id = 'txn-2'"
+                )
+                self.assertEqual(row.rowcount,1)
+                db.commit()
+            finally:
+                db.close()
+            with self.assertRaisesRegex(RuntimeError,
+                    "Persisted comparable sale price or source snapshot changed"):
+                LocalFixtureProcess(port,database=path)
+            after=frozen_database_rows(path)
+            self.assertEqual(after,before,
+                "Fail-closed startup must not repair or reseed saved evidence")
+            db=sqlite3.connect(path)
+            try:
+                self.assertEqual(db.execute(
+                    "SELECT price_usd_cents FROM sale_transactions "
+                    "WHERE transaction_id='txn-2'").fetchone()[0],52500001)
+            finally:
+                db.close()
 
     def test_reject_unsafe_fixture_paths_and_unfamiliar_database(self):
         with tempfile.TemporaryDirectory(prefix="hpi-fixture-safety-") as folder:
