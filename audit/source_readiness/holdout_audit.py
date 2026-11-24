@@ -9,7 +9,7 @@ from statistics import mean,median
 from urllib.parse import urlencode
 import json
 import re
-from audit.phase0.audit import SALES_ID,BUILDINGS_ID,SALES_REQUIRED,SALES_OPTIONAL,BUILDINGS_REQUIRED,BUILDINGS_OPTIONAL,normalize_pin
+from audit.phase0.audit import SALES_ID,BUILDINGS_ID,SALES_REQUIRED,SALES_OPTIONAL,BUILDINGS_REQUIRED,BUILDINGS_OPTIONAL,normalize_pin,whole_count
 from audit.phase1.expand import phase0_class203,enrich_joined,prior_comparables,baseline_price,UNIVERSE_ID
 from audit.phase2.matcher import match_property,MatchPolicy
 from audit.source_readiness.cohort_audit import meta,query
@@ -44,7 +44,8 @@ def universe(keys,fields):
             batch=pins[i:i+35]
             where="year = "+str(y)+" AND pin IN ("+",".join("'"+p+"'" for p in batch)+")"
             rows=query(UNIVERSE_ID,{"$select":",".join(sorted(UNIVERSE_FIELDS)),"$where":where,"$order":"pin ASC,year ASC,:id ASC","$limit":500},UNIVERSE_FIELDS,500)
-            if len(rows)>=500 or any((normalize_pin(r.get("pin")),int(r["year"])) not in {(p,y) for p in batch} for r in rows):
+            expected={(p,y) for p in batch}
+            if len(rows)>=500 or any((normalize_pin(r.get("pin")),whole_count(r.get("year"))) not in expected for r in rows):
                 raise ValueError("Unexpected universe response")
             out.extend(rows)
     return out
@@ -83,7 +84,8 @@ def evaluate(rows):
         "policy_adopted":False,"valuation_approved":False}
 def main():
     report={"status":"blocked","policy":POLICY_ID,"scope":"township 17, class 203, 2024-2025 sales; 2025 subjects; 2023-2024 prior tax years",
-            "extracted_at_utc":datetime.now(timezone.utc).isoformat(),"historical_asof_verified":False,"publication_approved":False}
+            "extracted_at_utc":datetime.now(timezone.utc).isoformat(),"historical_asof_verified":False,"publication_approved":False,
+            "year_parser":"exact-integral-v1"}
     try:
         report["stage"]="metadata"
         before={d:meta(d) for d in (*SPECS,UNIVERSE_ID)}
@@ -93,16 +95,29 @@ def main():
         report["stage"]="buildings"
         buildings=collect(BUILDINGS_ID,before[BUILDINGS_ID][0])
         report["building_rows"]=len(buildings)
+        report["stage"]="scope"
+        if any(str(s.get("sale_date",""))[:4] not in ("2024","2025") or whole_count(s.get("township_code"))!=17 for s in sales):
+            raise ValueError("Unexpected sales scope")
+        if any(whole_count(b.get("year")) not in (2023,2024) or whole_count(b.get("township_code"))!=17 for b in buildings):
+            raise ValueError("Unexpected building scope")
         report["stage"]="join"
         cohort=phase0_class203(sales,buildings)
         keys={(r["pin"],r["characteristics_year"]) for r in cohort}
         report["class203_rows"]=len(cohort)
         report["key_count"]=len(keys)
+        report["eligible_by_sale_year"]={y:sum(r["sale_date"].startswith(y+"-") for r in cohort) for y in ("2024","2025")}
+        if report["eligible_by_sale_year"]["2025"]<MIN_REPORT:
+            raise ValueError("Insufficient later cohort")
         report["stage"]="universe"
         geo=universe(keys,before[UNIVERSE_ID][0])
         report["universe_rows"]=len(geo)
         report["stage"]="enrichment"
         enhanced,_=enrich_joined(cohort,geo,[])
+        report["geography_by_sale_year"]={y:{
+            "eligible":sum(r["sale_date"].startswith(y+"-") for r in enhanced),
+            "neighbourhood_present":sum(r["sale_date"].startswith(y+"-") and bool(r.get("nbhd_code")) for r in enhanced),
+            "coordinates_present":sum(r["sale_date"].startswith(y+"-") and r.get("lat") is not None and r.get("lon") is not None for r in enhanced)
+            } for y in ("2024","2025")}
         report["stage"]="metadata_recheck"
         if before!={d:meta(d) for d in before}:raise ValueError("Source revision changed")
         report["stage"]="evaluation"
@@ -110,7 +125,8 @@ def main():
                       universe_rows=len(geo),source_update_epochs={d:before[d][1] for d in before},status="completed")
     except Exception as exc:
         report["error_type"]=type(exc).__name__
-        reasons={"Schema mismatch":"schema_mismatch","Incomplete capped extraction":"row_cap",
+        reasons={"Unexpected sales scope":"sales_scope_mismatch","Unexpected building scope":"building_scope_mismatch",
+                 "Schema mismatch":"schema_mismatch","Incomplete capped extraction":"row_cap",
                  "Universe scope refused":"universe_schema_or_scope","Invalid cohort keys":"key_scope",
                  "Unexpected universe response":"unexpected_universe_response","Out-of-window row":"date_scope",
                  "Insufficient later cohort":"too_few_subjects","Chronological leak":"chronology_guard",

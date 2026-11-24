@@ -21,5 +21,24 @@ class HoldoutTests(unittest.TestCase):
     def test_rejects_wrong_period_and_empty(self):
         for rows in ([],[row(1,"2023-01-01")]):
             with self.assertRaises(ValueError):h.evaluate(rows)
+    def test_universe_exact_year_representation(self):
+        pin="00000000000001"
+        for year in (2024, 2024.0, "2024.0"):
+            with self.subTest(year=year):
+                record={"pin":pin,"year":year,"nbhd_code":"A","lat":42.04,"lon":-87.68}
+                with patch.object(h,"query",return_value=[record]):
+                    self.assertEqual(h.universe({(pin,2024)},h.UNIVERSE_FIELDS),[record])
+
+    def test_universe_refuses_fractional_or_out_of_scope_year(self):
+        pin="00000000000001"
+        for year in (2024.5, "2024.5", "2023.0", True, None, "NaN", "Infinity"):
+            with self.subTest(year=year):
+                with patch.object(h,"query",return_value=[{"pin":pin,"year":year}]):
+                    with self.assertRaisesRegex(ValueError,"Unexpected universe response"):
+                        h.universe({(pin,2024)},h.UNIVERSE_FIELDS)
+        with patch.object(h,"query",return_value=[{"pin":"00000000000002","year":"2024.0"}]):
+            with self.assertRaisesRegex(ValueError,"Unexpected universe response"):
+                h.universe({(pin,2024)},h.UNIVERSE_FIELDS)
+
     def test_unexpected_universe_fields(self):
         with self.assertRaises(ValueError):h.universe({("00000000000001",2023)},{"pin","year"})

@@ -146,11 +146,10 @@ def building_rows_by_key(buildings):
     lookup = defaultdict(list)
     for item in buildings:
         pin = normalize_pin(item.get("pin"))
-        try:
-            year = int(item["year"])
-        except (KeyError, TypeError, ValueError):
-            continue
-        if pin:
+        # Socrata numeric fields can be exact decimal strings (e.g. "2024.0").
+        # Never truncate a fractional year or round it into a valid join key.
+        year = whole_count(item.get("year"))
+        if pin and year is not None:
             lookup[(pin, year)].append(item)
     return lookup
 

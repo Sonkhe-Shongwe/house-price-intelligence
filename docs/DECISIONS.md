@@ -167,3 +167,7 @@ Owner selects original real-property product, with Evanston Township/Class 203 a
 
 ## 24 November 2026: FR qualification result
 84.0% weighted estimate (83.6% prior, +0.4 points). All eight workflows at 0381780 passed. Legacy year parser rejects all 13,151 assessment-year 2024 rows; exact-year diagnostic recovers 59 later subjects, without adopting a correction or evaluating outcomes. Four licence IDs null, rights not approved. No further live extraction, release or deployment under FR1–FR3. Next separately authorise correction and unchanged holdout. See [qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+
+
+## 24 November 2026: Canonical Year Correction and Chronological Qualification V1 authorisation
+Owner authorises scoped source changes, offline regressions, hosted CI and exactly one bounded live 2025 holdout under the existing fixed policy and source windows/caps. Reuse exact-integral parsing at the canonical building lookup and geographic response boundary; keep ambiguity, screening, matching and all historical results. No main merge, deployment, real-property publication or valuation approval. Progress remains 84.0% pending verified evidence and milestone review. The historical FR qualification is not rerun; the existing holdout workflow is the single authorised extraction path.
