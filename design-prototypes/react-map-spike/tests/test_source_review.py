@@ -111,7 +111,11 @@ class ReadOnlySourceReviewBrowserTests(unittest.TestCase):
             "No approved geographic features")
         self.assertEqual(self.page.locator("canvas.maplibregl-canvas").count(), 0)
         self.page.get_by_test_id("source-sale").first.click()
-        expect(self.page.get_by_test_id("source-sale-reason")).to_contain_text("Same")
+        index = self.page.request.get(self.url + "/_study/cases").json()
+        supported_id = index["cases"][0]["investigation_id"]
+        original = self.page.request.get(self.url + "/v1/investigations/" + supported_id).json()
+        expect(self.page.get_by_test_id("source-sale-reason")).to_have_text(
+            original["comparables"][0]["explanation"])
         expect(self.page.get_by_test_id("source-warning")).to_contain_text("no current valuation")
 
     def test_insufficient_evidence_clears_comparables_and_fakes_no_value(self):
