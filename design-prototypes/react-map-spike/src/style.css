@@ -201,7 +201,11 @@ h1 em { color: var(--forest); font-weight: 400; }
   .subject-bar { padding: 17px; }
   .subject-stats { flex-wrap: wrap; gap: 16px; }
   .subject-stats > div { padding: 0; border-left: 0; min-width: 0 !important; flex: 1 1 90px; }
-  .subject-stats strong { font-size: 15px; }
+  .subject-stats strong { font-size: 15px; white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
+  .subject-stats > div { min-width: 0; }
+  .evidence-option { min-width: 0; }
+  .evidence-price { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+  .evidence-title { overflow-wrap: anywhere; }
   .subject-persona h2 { font-size: 18px; }
   .house-icon { height: 45px; width: 45px; }
   .lab-toolbar { margin-top: 25px; align-items: flex-start; }
