@@ -26,6 +26,7 @@ from backend.synthetic_http import (  # noqa: E402
     SECURITY_HEADERS, create_app,
 )
 from backend.synthetic_shortlists import SyntheticShortlistService  # noqa: E402
+from fixture_persistence import open_or_seed_fixture_file  # noqa: E402
 
 DIST = Path(__file__).resolve().parents[1] / "dist"
 ASSET_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,62}-[A-Za-z0-9_-]{6,}\.(?:js|css)$")
@@ -95,33 +96,50 @@ def approved_assets(directory: Path) -> dict[str, tuple[bytes, str]]:
     return assets
 
 
+def _seed_fictional_cases(store):
+    """Seed only when a temporary new DB is created, never on reopening."""
+    verified = store.create(example_request(), today=date(2026, 11, 24))
+    missing_req = example_request()
+    missing_req["subject"]["pin"] = "00000000000099"
+    missing_req["subject"]["label"] = "Invented no-evidence parcel"
+    insufficient = store.create(missing_req, today=date(2026, 11, 24))
+    shortlist = SyntheticShortlistService(store)
+    sid = shortlist.create({"label": "Fictional buyer review"})["shortlist_id"]
+    shortlist.add(sid, {"investigation_id": verified["investigation_id"],
+                        "note_text": "Check the original recorded evidence"})
+    shortlist.add(sid, {"investigation_id": insufficient["investigation_id"],
+                        "note_text": "No eligible sales, do not infer a price"})
+    cases = {
+        "source_kind": "synthetic_fixture",
+        "cases": [
+            {"key": "supported", "label": verified["subject"]["label"],
+             "investigation_id": verified["investigation_id"]},
+            {"key": "insufficient", "label": insufficient["subject"]["label"],
+             "investigation_id": insufficient["investigation_id"]},
+        ],
+        "shortlist_id": sid,
+    }
+    return cases
+
+
 def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bool = False,
-                            enable_shortlist_workflow: bool = False):
+                            enable_shortlist_workflow: bool = False,
+                            fixture_db_path: Path | None = None):
     if enable_shortlist_workflow and not enable_buyer_workflow:
         raise ValueError('Shortlist write proof requires the separate buyer-workflow flag')
-    db, store = in_memory_demo()
+    if fixture_db_path is not None and not (enable_buyer_workflow and enable_shortlist_workflow):
+        raise ValueError('File restart proof requires BOTH explicit fictional write flags')
+    if fixture_db_path is not None:
+        # Known fixture-only file is either seeded atomically or reopened as-is.
+        db, store, cases = open_or_seed_fixture_file(fixture_db_path, _seed_fictional_cases)
+    else:
+        db, store = in_memory_demo()
+        try:
+            cases = _seed_fictional_cases(store)
+        except Exception:
+            db.close()
+            raise
     try:
-        verified = store.create(example_request(), today=date(2026, 11, 24))
-        missing_req = example_request()
-        missing_req["subject"]["pin"] = "00000000000099"
-        missing_req["subject"]["label"] = "Invented no-evidence parcel"
-        insufficient = store.create(missing_req, today=date(2026, 11, 24))
-        shortlist = SyntheticShortlistService(store)
-        sid = shortlist.create({"label": "Fictional buyer review"})["shortlist_id"]
-        shortlist.add(sid, {"investigation_id": verified["investigation_id"],
-                            "note_text": "Check the original recorded evidence"})
-        shortlist.add(sid, {"investigation_id": insufficient["investigation_id"],
-                            "note_text": "No eligible sales, do not infer a price"})
-        cases = {
-            "source_kind": "synthetic_fixture",
-            "cases": [
-                {"key": "supported", "label": verified["subject"]["label"],
-                 "investigation_id": verified["investigation_id"]},
-                {"key": "insufficient", "label": insufficient["subject"]["label"],
-                 "investigation_id": insufficient["investigation_id"]},
-            ],
-            "shortlist_id": sid,
-        }
         assets = approved_assets(directory)
         backend_app = create_app(store, today=date(2026, 11, 24))
     except Exception:
@@ -129,7 +147,8 @@ def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bo
         raise
 
     def app(environ, start_response):
-        mode = ("fixture-shortlist-writes" if enable_shortlist_workflow else
+        mode = ("fixture-file-restart" if fixture_db_path is not None else
+                "fixture-shortlist-writes" if enable_shortlist_workflow else
                 "fixture-investigation-writes" if enable_buyer_workflow else "read-only")
         if not _allowed_request(environ):
             return _json(start_response, 403, {"error": "local_fixture_only"}, mode=mode)
@@ -174,13 +193,18 @@ def main() -> None:
                         help="Opt in to fictional address-search and investigation-create POSTs")
     parser.add_argument("--enable-shortlist-workflow", action="store_true",
                         help="Separately opt in to fictional shortlist create/add/note writes")
+    parser.add_argument("--fixture-db", type=Path, default=None,
+                        help="Opt-in private absolute .sqlite3 file for a controlled fictional restart test")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Use an unprivileged local port")
     if args.enable_shortlist_workflow and not args.enable_buyer_workflow:
         parser.error("--enable-shortlist-workflow requires --enable-buyer-workflow")
+    if args.fixture_db is not None and not (args.enable_buyer_workflow and args.enable_shortlist_workflow):
+        parser.error("--fixture-db requires BOTH workflow flags")
     app, db = seeded_readonly_preview(enable_buyer_workflow=args.enable_buyer_workflow,
-                                      enable_shortlist_workflow=args.enable_shortlist_workflow)
+                                      enable_shortlist_workflow=args.enable_shortlist_workflow,
+                                      fixture_db_path=args.fixture_db)
     try:
         with make_server("127.0.0.1", args.port, app) as server:
             route = "/buyer-workflow" if args.enable_buyer_workflow else "/source-review"
