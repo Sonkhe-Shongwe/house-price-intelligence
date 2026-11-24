@@ -38,7 +38,7 @@ The isolated CI adds a Python exporter that runs the **real backend.synthetic_ht
 
 Test cases check supported and insufficient statuses, exact cents including very large numbers, source snapshots, unavailable map coordinates, note/child identity integrity, plus adversarial changes to prices, statuses, counts, contract versions, identity and provenance.
 
-**Verification source:** The branch's exact-SHA [isolated React CI workflow](../../.github/workflows/react-map-full-source-ci.yml). Results must be confirmed before declaring acceptance. These tests do not connect the React browser to a running Python HTTP listener. The already passing WebGL browser tests separately verify the prototype's original invented points, not API-based property geography.
+**Verified CI:** [isolated React / real P3-P6 bridge run 45300580369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45300580369) at exact isolated branch commit `ee5410e5d88203b41f8b9486bb8da6ea6498abcc` passed clean npm install, TypeScript, code-split Vite build, actual local WSGI-backed source JSON, exact dollars/cents and **13 negative/tamper assertions**, plus **6/6 real Chromium MapLibre/UI journeys**. The bridge test uses the pinned TypeScript compiler rather than requiring an extra esbuild package. These tests do not yet connect the React browser to a running Python HTTP listener. The WebGL browser tests separately exercise the prototype's original invented points, not API-based property geography.
 
 ## 5. Future owner-approved integration sequence
 
