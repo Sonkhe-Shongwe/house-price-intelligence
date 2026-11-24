@@ -2,12 +2,12 @@
 
 **Current governing roadmap:** [P0–P8 phase-gated delivery plan](P_PHASE_ROADMAP.md).
 
-**Status reviewed 24 November 2026:** approximately **83.6%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
+**Status reviewed 24 November 2026:** approximately **84.0%** weighted progress towards a bounded *property investigation and shortlist MVP*. This is an engineering planning estimate, not measured completion. The research audit's Phase 0/1/2 names are separate from the new P0–P8 project management stages.
 
 | Phase | Focus | Weight | Estimated completion |
 | --- | --- | ---: | ---: |
-| P0 | Discovery, market and source viability | 6% | 92% |
-| P1 | Data quality, ingestion and provenance | 12% | 90% |
+| P0 | Discovery, market and source viability | 6% | 94% |
+| P1 | Data quality, ingestion and provenance | 12% | 93% |
 | P2 | Explainable historical comparables | 14% | 65% |
 | P3 | Domain, architecture and API contracts | 10% | 96% |
 | P4 | Backend API and database | 16% | 91% |
@@ -24,3 +24,6 @@ The [earlier preliminary roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) is reta
 
 
 FA1–FA8 milestone: 83.6% (79.2% prior). V3 rich fictional revision, offline HTTPS persistent sessions, actual browser writes and zero detected axe violations across four views verified. Count-only coverage diagnostic did not resolve 2025 holdout. No live provider, publication or deployment. See [FA contract](engineering/FINAL_ACCEPTANCE_V1.md).
+
+
+FR1–FR3: 84.0% (83.6% prior). Owner selected original real-property release. Exact-integral assessment-year encoding defect identified; diagnostic recovered 59 eligible 2025 subjects, no canonical correction or holdout evaluation yet. Four source licence IDs unspecified; real release blocked. See [qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).

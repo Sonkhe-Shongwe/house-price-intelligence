@@ -9,7 +9,7 @@
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
 | Inspect latest documentation cleanup | [Post-P6 documentation reconciliation audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) | **Dated audit**, current-source corrections, unchanged phase scores, unresolved mapping and release gates; not another current checkpoint |
-| Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 83.6% estimated |
+| Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 84.0% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review UX research and visual concepts | [UX research and product direction, 23 Nov](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | **Exploratory, not approved**; inspiration, palettes, screen architecture, accessibility and design decisions |
@@ -50,7 +50,7 @@
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.
-- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current owner-authorised planning estimate is **83.6%** (24 November 2026); prior baselines 79.2%, 76.1%, 71.4%, 66.5%, 62.9% and 22.8%. P3 contract acceptance is open, while P4/P5/P6 *synthetic implementations* are CI-verified and integrated into `development`, not phase-accepted. Passing the Phase 0–2 data experiments does not mean delivery P0/P1/P2 are accepted or finished.
+- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current owner-authorised planning estimate is **84.0%** (24 November 2026); prior baselines 83.6%, 79.2%, 76.1%, 71.4%, 66.5%, 62.9% and 22.8%. P3 contract acceptance is open, while P4/P5/P6 *synthetic implementations* are CI-verified and integrated into `development`, not phase-accepted. Passing the Phase 0–2 data experiments does not mean delivery P0/P1/P2 are accepted or finished.
 
 ## Document precedence and maintenance
 
@@ -69,4 +69,4 @@
 
 **Current capability boundary:** Synthetic local React workspace, history, address choice, frozen evidence, virtual MapLibre display and restart-safe SQLite shortlist are integrated. PostgreSQL candidate service parity, dump/restore and RLS tests passed. No approved real address resolver, real display, integrated production access or deployment; all full phase gates remain open. See [checkpoint](CHECKPOINT.md), [workspace](engineering/BUYER_WORKSPACE_UX_V1.md) and [production readiness](engineering/PRODUCTION_READINESS_V1.md).
 
-**Phase scores:** P3 **96%**, weighted MVP **83.6%**, owner-authorised partial-deliverable reassessment; future evidence-backed milestone reviews update the same roadmap. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.
+**Phase scores:** P3 **96%**, weighted MVP **84.0%**, owner-authorised partial-deliverable reassessment; future evidence-backed milestone reviews update the same roadmap. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.

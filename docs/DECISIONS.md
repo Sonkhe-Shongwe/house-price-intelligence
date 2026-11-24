@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 83.6% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 84.0% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -163,3 +163,7 @@ Owner approved FA1–FA8 bounded fictional development/CI, aggregate coverage di
 
 ## 24 November 2026: Full product release selected
 Owner selects original real-property product, with Evanston Township/Class 203 as candidate. Authorised FR1–FR3 bounded eligibility diagnostics, fixed chronological validation, source rights research and development CI. No real display, provider, contact, hosting, deployment or main merge. [Qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+
+
+## 24 November 2026: FR qualification result
+84.0% weighted estimate (83.6% prior, +0.4 points). All eight workflows at 0381780 passed. Legacy year parser rejects all 13,151 assessment-year 2024 rows; exact-year diagnostic recovers 59 later subjects, without adopting a correction or evaluating outcomes. Four licence IDs null, rights not approved. No further live extraction, release or deployment under FR1–FR3. Next separately authorise correction and unchanged holdout. See [qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md).

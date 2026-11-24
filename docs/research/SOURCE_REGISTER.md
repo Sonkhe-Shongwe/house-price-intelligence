@@ -29,3 +29,7 @@
 
 ## 24 November 2026: address candidate and reuse review
 Parcel Addresses `3723-97qp`: https://catalog.data.gov/dataset/assessor-parcel-addresses; first published March 2026 according to catalogue. Contains sensitive-to-product owner/taxpayer/mailing fields; excluded from research queries. Only aggregate-only feasibility authorised. See [production readiness contract](../engineering/PRODUCTION_READINESS_V1.md) for field policy, publisher sources, separate bulk agreement caveat and temporal limitations. No property-level display approval.
+
+
+## 24 November 2026: FR source-specific metadata and year representation
+[Qualification run 45365766942](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45365766942) verified stable revision metadata: all four required source licence identifiers null (sales wvhk-k5uv, assessment x54s-btds, historical universe nj4t-kc8j, addresses 3723-97qp). Null is unspecified, not prohibition or a grant. Official [classification](https://www.cookcountyassessoril.gov/classifications-real-property) identifies Class 203 as one-storey residence, 1,000–1,800 sq ft. Legacy integer conversion rejected all 13,151 assessment-year 2024 rows; exact whole-year diagnostic recovered 59 eligible 2025 sales, no canonical correction yet. See [qualification and field-level proposed disclosure](../engineering/FULL_RELEASE_QUALIFICATION_V1.md). No real publication, as-of proof or external contact.
