@@ -18,6 +18,7 @@ from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticI
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
 from backend.buyer_evidence_preview import buyer_evidence_preview
+from backend.centroid_preview import centroid_preview
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -56,6 +57,7 @@ ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
 UUID_PART = r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
 MAP_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/map$")
 PREVIEW_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/evidence-preview$")
+CENTROID_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/centroid-preview$")
 SHORTLIST_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"$")
 SHORTLIST_MEMBERS_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries$")
 SHORTLIST_ENTRY_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries/" + UUID_PART + r"$")
@@ -272,11 +274,13 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
             return _response(start_response, 200, found)
 
         preview_match = PREVIEW_ROUTE.fullmatch(path)
-        if preview_match:
+        centroid_match = CENTROID_ROUTE.fullmatch(path)
+        if preview_match or centroid_match:
             if method != "GET":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             try:
-                return _response(start_response, 200, buyer_evidence_preview(store, preview_match.group(1)))
+                return _response(start_response, 200, centroid_preview(store, centroid_match.group(1)) if centroid_match
+                                 else buyer_evidence_preview(store, preview_match.group(1)))
             except EvidenceStoreError as exc:
                 if str(exc) == "Investigation not found":
                     return _response(start_response, 404, {"error": "investigation_not_found"})

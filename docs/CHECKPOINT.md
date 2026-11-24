@@ -1,5 +1,9 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: Geographic Evidence Integration V1 (offline implementation)
+
+Approved baseline 87.1%. Evidence preview correction 8a3364e passed all 10 triggered workflows. New fixture-only rank/year-bound centroid schematic, V6 distinct fictional points and V5 overlap abstention implemented; hosted verification pending. See [contract](engineering/GEOGRAPHIC_EVIDENCE_INTEGRATION_V1.md). No additional live extraction, real property release, durable real data, deployment, valuation or main merge.
+
 ## 24 November 2026: Buyer Product Release Preparation V1 (offline implementation)
 
 Approved baseline 87.1%. Previous documentation 08c62d2 passed 7/7. Successful private rehearsal remains the real-source evidence; one-time extraction consumed. Address the client 3-vs-5 comparable contract mismatch and document proposed release field projection; see [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md). No additional extraction, real display, durable ingestion, provider, deployment, valuation or main merge. Five-sale correction 55d6799 passed 11/11 workflows. New fixture-only minimised buyer evidence preview implemented in HTTP and React; hosted acceptance pending. See [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md).

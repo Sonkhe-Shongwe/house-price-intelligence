@@ -39,7 +39,7 @@ def open_candidate():
     return conn
 
 def fixture_rows(revision):
-    if revision in ("v4","v5"):
+    if revision in ("v4","v5","v6"):
         from backend.source_shaped_fixture import replay_rows
         return replay_rows(revision)
     if revision not in ("v1","v2","v3"):raise ImportRefused("Only reviewed invented revisions")

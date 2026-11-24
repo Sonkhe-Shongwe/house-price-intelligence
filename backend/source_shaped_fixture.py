@@ -6,14 +6,14 @@ from copy import deepcopy
 from backend.real_source_intake import DATASETS, REQUIRED, OPTIONAL, prepare_intake
 
 def replay_rows(revision="v4"):
-    if revision not in ("v4","v5"):
+    if revision not in ("v4","v5","v6"):
         raise ValueError("Unreviewed source-shaped fixture")
     rows={role:[] for role in DATASETS}
     prices=("550000.00","487500.01","542750.02","519900.03")
     dates=("2024-06-01","2024-01-18","2024-03-12","2024-05-09")
     areas=(1600,1500,1720,1650)
-    street="Replay" if revision=="v4" else "Release"
-    if revision=="v5":
+    street={"v4":"Replay","v5":"Release","v6":"Centroid"}[revision]
+    if revision in ("v5","v6"):
         prices+=("508400.04","534200.05")
         dates+=("2024-04-10","2024-05-24")
         areas+=(1580,1620)
@@ -24,7 +24,11 @@ def replay_rows(revision="v4"):
             sale_filter_deed_type=False,sale_filter_same_sale_within_365=False))
         rows["assessment"].append(dict(pin=pin,year="2023.0",card="1",**{"class":"203"},
             township_code="17",char_bldg_sf=str(area)))
-        rows["geography"].append(dict(pin=pin,year="2023.0",nbhd_code="FICT",lat="42.04",lon="-87.68"))
+        # V6 fictional points are deliberately distinct; prior builds unchanged.
+        offsets=((0,0),(2,-3),(4,3),(-3,2),(-4,-4),(1,5))
+        dy,dx=offsets[i-1] if revision=="v6" else (0,0)
+        lat,lon=(f"{42.04+dy/1000:.3f}",f"{-87.68+dx/1000:.3f}") if revision=="v6" else ("42.04","-87.68")
+        rows["geography"].append(dict(pin=pin,year="2023.0",nbhd_code="FICT",lat=lat,lon=lon))
         rows["address"].append(dict(pin=pin,year="2023.0",prop_address_full=f"{i*10} Fictional {street} Lane, Demonstration District"))
     meta={dataset:{"epoch":1,"fields":sorted(REQUIRED[role]|OPTIONAL[role])} for role,dataset in DATASETS.items()}
     plan=prepare_intake(rows=rows,metadata_before=meta,metadata_after=deepcopy(meta),

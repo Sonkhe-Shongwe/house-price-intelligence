@@ -225,6 +225,49 @@ class RuntimeTests(unittest.TestCase):
                 finally:browser.close()
         finally:activate(ADMIN,old_build,generation)
 
+    def test_centroid_rehearsal_frozen_build_and_browser(self):
+        with psycopg.connect(ADMIN,autocommit=True) as conn:
+            old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
+        generation=activate(ADMIN,BUILDS[5],generation)
+        try:
+            overlapping=self.create("bob","00000000000001")
+            path="/v1/investigations/"+overlapping["investigation_id"]+"/centroid-preview"
+            code,blocked=self.call("bob","GET",path)
+            self.assertEqual(code,200);self.assertEqual(blocked["reason"],"overlapping_centroids")
+            self.assertEqual(blocked["points"],[])
+            generation=activate(ADMIN,BUILDS[6],generation)
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                try:
+                    page=browser.new_page(http_credentials={"username":"bob","password":self.passwords["bob"]})
+                    page.goto(self.base+"/buyer-workflow")
+                    page.get_by_test_id("buyer-query").fill("10 Fictional Centroid Lane")
+                    page.get_by_test_id("buyer-search").click()
+                    page.get_by_test_id("buyer-candidate").first.click()
+                    page.get_by_test_id("buyer-create").click()
+                    expect(page.get_by_test_id("buyer-sale")).to_have_count(5,timeout=15000)
+                    iid=page.get_by_test_id("buyer-saved-id").inner_text()
+                    route="/v1/investigations/"+iid+"/centroid-preview"
+                    code,geo=self.call("bob","GET",route)
+                    self.assertEqual(code,200);self.assertTrue(geo["available"])
+                    self.assertEqual([p["rank"] for p in geo["points"]],list(range(6)))
+                    self.assertEqual(geo["points"][0],{"rank":0,"assessment_year":2023,"offset_x":0,"offset_y":0})
+                    for p in geo["points"]:
+                        self.assertEqual(set(p),{"rank","assessment_year","offset_x","offset_y"})
+                    self.assertFalse(geo["real_geography_verified"]);self.assertFalse(geo["distance_supported"])
+                    self.assertEqual(self.call("alice","GET",route)[0],404)
+                    self.assertEqual(self.call("bob","POST",route,{})[0],405)
+                    page.get_by_test_id("centroid-load").click()
+                    expect(page.get_by_test_id("centroid-ready")).to_be_visible(timeout=15000)
+                    page.get_by_test_id("centroid-rank-5").click()
+                    expect(page.get_by_test_id("buyer-sale").nth(4)).to_have_attribute("aria-pressed","true")
+                    expect(page.get_by_test_id("centroid-ready")).to_contain_text("original server order")
+                    generation=activate(ADMIN,old_build,generation)
+                    self.assertEqual(self.call("bob","GET",route)[1],geo)
+                    self.assertEqual(self.call("bob","GET",path)[1],blocked)
+                finally:browser.close()
+        finally:activate(ADMIN,old_build,generation)
+
     def test_release_five_comparables_history_and_shortlist(self):
         with psycopg.connect(ADMIN,autocommit=True) as conn:
             old_build,generation=conn.execute("SELECT build_id,generation FROM hpi_candidate.active_fixture_build").fetchone()
