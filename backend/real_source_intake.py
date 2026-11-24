@@ -97,11 +97,13 @@ def prepare_intake(*, rows, metadata_before, metadata_after, extracted_at_utc):
         allowed = REQUIRED[role] | OPTIONAL[role]
         fields = set(metadata_before[dataset]["fields"])
         for row in batch:
-            if not isinstance(row, dict) or not REQUIRED[role] <= set(row) or not set(row) <= allowed & fields:
+            # Socrata omits null-valued selected fields. Metadata proves
+            # schema presence; individual nulls follow canonical screening.
+            if not isinstance(row, dict) or not set(row) <= allowed & fields:
                 raise IntakeRefused("unexpected_source_fields")
-            if role in ("sales", "assessment") and whole_count(row["township_code"]) != 17:
+            if role in ("sales", "assessment") and whole_count(row.get("township_code")) != 17:
                 raise IntakeRefused("unexpected_township")
-            if role == "sales" and str(row["sale_date"])[:4] not in ("2024", "2025"):
+            if role == "sales" and str(row.get("sale_date",""))[:4] not in ("2024", "2025"):
                 raise IntakeRefused("unexpected_sale_year")
             if role != "sales" and (not _key(row)[0] or _key(row)[1] not in (2023, 2024)):
                 raise IntakeRefused("unexpected_parcel_year")
@@ -141,14 +143,16 @@ def prepare_intake(*, rows, metadata_before, metadata_after, extracted_at_utc):
     for row in enhanced:
         key = row["pin"], row["characteristics_year"]
         sale_key = row["pin"], row["doc_no"], row["sale_date"]
-        card = buildings[key][0]["card"]
+        card = buildings[key][0].get("card")
         if card is None or not str(card).strip():
             raise IntakeRefused("missing_assessment_card")
         sales.append({"pin": row["pin"], "sale_date": row["sale_date"],
                       "document_number": row["doc_no"], "sale_price_usd_cents": screened[sale_key],
                       "source_row_id": "derived-" + digest(sale_key), "assessment_year": key[1]})
         candidates = addresses[key]
-        label = candidates[0]["prop_address_full"] if len(candidates) == 1 else None
+        label = candidates[0].get("prop_address_full") if len(candidates) == 1 else None
+        if label is not None and not isinstance(label,str):
+            raise IntakeRefused("invalid_address_type")
         label = label.strip() if isinstance(label, str) else None
         state = "ambiguous" if len(candidates) > 1 else "missing" if not candidates else "one_nonblank" if label else "blank"
         parcels[key] = {"pin": key[0], "tax_year": key[1], "township_code": "17",

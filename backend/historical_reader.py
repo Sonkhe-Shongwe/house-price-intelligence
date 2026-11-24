@@ -49,10 +49,13 @@ def _reader(conn):
     rows=conn.execute("""SELECT c.relname,has_table_privilege(current_user,c.oid,'SELECT'),
         has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),
         has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE,REFERENCES'),
+        has_any_column_privilege(current_user,c.oid,'SELECT'),
         pg_get_userbyid(c.relowner)=current_user
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
         WHERE n.nspname='hpi_candidate' AND c.relkind IN ('r','p')""").fetchall()
-    if {name for name,read,*_ in rows if read}!=set(READ_TABLES) or any(write or column or owner for _,_,write,column,owner in rows):
+    if ({name for name,read,*_ in rows if read}!=set(READ_TABLES)
+            or any(write or column or owner or (column_read and name not in READ_TABLES)
+                   for name,_,write,column,column_read,owner in rows)):
         raise ImportRefused("Historical reader privilege drift")
     if conn.execute("SELECT EXISTS(SELECT 1 FROM pg_auth_members WHERE member=(SELECT oid FROM pg_roles WHERE rolname=current_user))").fetchone()[0]:
         raise ImportRefused("Historical reader role membership drift")

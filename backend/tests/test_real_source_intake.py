@@ -53,6 +53,21 @@ class IntakeTests(unittest.TestCase):
         item=prepare_intake(**args)["parcel_years"][0]
         self.assertEqual(item["address_state"],"missing"); self.assertIsNone(item["latitude"])
 
+    def test_omitted_null_fields_follow_source_screening(self):
+        args=sample()
+        rejected=dict(args["rows"]["sales"][0],doc_no="FICT-MISSING")
+        del rejected["sale_filter_deed_type"]
+        args["rows"]["sales"].append(rejected)
+        del args["rows"]["geography"][0]["lat"]
+        del args["rows"]["geography"][0]["nbhd_code"]
+        del args["rows"]["address"][0]["prop_address_full"]
+        plan=prepare_intake(**args)
+        self.assertEqual(len(plan["sales"]),1)
+        item=plan["parcel_years"][0]
+        self.assertEqual(item["address_state"],"blank")
+        self.assertIsNone(item["latitude"]);self.assertIsNone(item["neighborhood_code"])
+        self.assertEqual(plan["source_manifests"]["sales"]["row_count"],2)
+
     def test_wrong_scope_and_fractional_year(self):
         for field,val in [("township_code","18"),("year","2024.5")]:
             args=sample(); args["rows"]["assessment"][0][field]=val

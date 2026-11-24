@@ -56,6 +56,10 @@ class HistoricalReaderTests(unittest.TestCase):
                         with self.assertRaisesRegex(ImportRefused,"privilege drift"):
                             reader.review(req)
                         conn.execute("REVOKE SELECT ON hpi_candidate.investigations FROM "+ROLE)
+                        conn.execute("GRANT SELECT(investigation_id) ON hpi_candidate.investigations TO "+ROLE)
+                        with self.assertRaisesRegex(ImportRefused,"privilege drift"):
+                            reader.review(req)
+                        conn.execute("REVOKE SELECT(investigation_id) ON hpi_candidate.investigations FROM "+ROLE)
                         conn.execute("UPDATE hpi_candidate.historical_migrations SET script_sha256='wrong'")
                         with self.assertRaisesRegex(ImportRefused,"migration history"):
                             reader.review(req)
