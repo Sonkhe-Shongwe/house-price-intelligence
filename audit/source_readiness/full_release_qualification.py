@@ -8,13 +8,31 @@ from pathlib import Path
 import json
 import re
 from audit.phase0.audit import (SALES_ID,BUILDINGS_ID,normalize_pin,sale_reject_reasons,
-    building_rows_by_key,join_sale_to_prior_building)
+    building_rows_by_key,join_sale_to_prior_building,whole_count)
 from audit.phase1.expand import phase0_class203,enrich_joined,UNIVERSE_ID
 from audit.source_readiness import holdout_audit as holdout
 from audit.source_readiness.cohort_audit import meta
 from audit.source_readiness.address_audit import fetch
 YEARS=("2024","2025")
 ADDRESS="3723-97qp"
+
+def building_scope(rows):
+    """Validate exact integer-equivalent values, never round or widen geography/year."""
+    counts={y:Counter() for y in ("2023","2024")}
+    invalid=Counter()
+    for row in rows:
+        town=whole_count(row.get("township_code"))
+        year=whole_count(row.get("year"))
+        if town!=17:invalid["township"]+=1
+        if year not in (2023,2024):invalid["year"]+=1
+        if town==17 and year in (2023,2024):
+            count=counts[str(year)]
+            count["rows"]+=1
+            count["noncanonical_township_encoding"]+=str(row.get("township_code"))!="17"
+            try:legacy=int(row["year"])
+            except (ValueError,TypeError,KeyError):legacy=None
+            count["legacy_year_parser_rejects"]+=legacy!=year
+    return {"by_year":{y:dict(v) for y,v in counts.items()},"out_of_scope":dict(invalid)}
 
 def diagnose(sales,buildings):
     lookup=building_rows_by_key(buildings)
@@ -27,7 +45,7 @@ def diagnose(sales,buildings):
     class203={y:Counter() for y in YEARS}
     for sale in sales:
         y=str(sale.get("sale_date",""))[:4]
-        if y not in YEARS or str(sale.get("township_code"))!="17":raise ValueError("Unexpected sales scope")
+        if y not in YEARS or whole_count(sale.get("township_code"))!=17:raise ValueError("Unexpected sales scope")
         c=counts[y];c["source_rows"]+=1
         is203=str(sale.get("class","")).strip()=="203"
         if is203:class203[y]["reported_class203"]+=1
@@ -97,10 +115,19 @@ def main():
         buildings=holdout.collect(BUILDINGS_ID,before[BUILDINGS_ID][0])
         report["building_rows"]=len(buildings)
         report["stage"]="building_scope"
-        if any(str(b.get("township_code"))!="17" or str(b.get("year")) not in ("2023","2024") for b in buildings):
-            raise ValueError("Unexpected building scope")
+        scope=building_scope(buildings)
+        report["building_scope"]=scope
+        if scope["out_of_scope"]:raise ValueError("Unexpected building scope")
         report["stage"]="diagnosis"
         cohort,summary=diagnose(sales,buildings)
+        # Diagnostic counterfactual only. No modification of the canonical
+        # join or holdout policy. Exact numeric equivalents, no imputation.
+        normalized=[{**b,"year":whole_count(b["year"])} for b in buildings]
+        normalized_cohort,normalized_summary=diagnose(sales,normalized)
+        report["year_encoding_sensitivity"]={
+            "canonical":{y:summary[y]["funnel"]["eligible_class203"] for y in YEARS},
+            "normalized_exact_year":{y:normalized_summary[y]["funnel"]["eligible_class203"] for y in YEARS},
+            "not_adopted":True}
         keys={(r["pin"],r["characteristics_year"]) for r in cohort}
         geo=holdout.universe(keys,before[UNIVERSE_ID][0])
         enriched,_=enrich_joined(cohort,geo,[])

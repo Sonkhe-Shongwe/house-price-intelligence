@@ -35,3 +35,11 @@ class QualificationTests(unittest.TestCase):
             self.assertEqual(len(q.license_summary()),4)
         with patch.object(q,"fetch",return_value={"licenseId":"invalid text with spaces","rowsUpdatedAt":123}):
             with self.assertRaises(ValueError):q.license_summary()
+
+    def test_scope_exact_integer_equivalents_only(self):
+        r=q.building_scope([building(1,"2023.0",township_code="17.0"),building(2,2024)])
+        self.assertEqual(r["out_of_scope"],{})
+        self.assertEqual(r["by_year"]["2023"]["legacy_year_parser_rejects"],1)
+        self.assertEqual(r["by_year"]["2023"]["noncanonical_township_encoding"],1)
+        r=q.building_scope([building(1,"2024.2"),building(2,2024,township_code="18"),building(3,True)])
+        self.assertEqual(r["out_of_scope"],{"year":2,"township":1})
