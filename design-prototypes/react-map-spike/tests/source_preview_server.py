@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 from backend.synthetic_demo import example_request, in_memory_demo  # noqa: E402
 from backend.synthetic_http import (  # noqa: E402
     ALLOWED_HOST, ID_ROUTE, SHORTLIST_ROUTE, ADDRESS_ROUTE,
+    SHORTLIST_MEMBERS_ROUTE, SHORTLIST_ENTRY_ROUTE,
     SECURITY_HEADERS, create_app,
 )
 from backend.synthetic_shortlists import SyntheticShortlistService  # noqa: E402
@@ -94,7 +95,10 @@ def approved_assets(directory: Path) -> dict[str, tuple[bytes, str]]:
     return assets
 
 
-def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bool = False):
+def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bool = False,
+                            enable_shortlist_workflow: bool = False):
+    if enable_shortlist_workflow and not enable_buyer_workflow:
+        raise ValueError('Shortlist write proof requires the separate buyer-workflow flag')
     db, store = in_memory_demo()
     try:
         verified = store.create(example_request(), today=date(2026, 11, 24))
@@ -125,7 +129,8 @@ def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bo
         raise
 
     def app(environ, start_response):
-        mode = "fixture-investigation-writes" if enable_buyer_workflow else "read-only"
+        mode = ("fixture-shortlist-writes" if enable_shortlist_workflow else
+                "fixture-investigation-writes" if enable_buyer_workflow else "read-only")
         if not _allowed_request(environ):
             return _json(start_response, 403, {"error": "local_fixture_only"}, mode=mode)
         if environ.get("QUERY_STRING"):
@@ -136,6 +141,13 @@ def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bo
                 and path in ("/v1/addresses/search", "/v1/investigations")):
             # Preserve every original JSON validation, source check and error code.
             return backend_app(environ, start_response)
+        if (enable_shortlist_workflow and
+                ((method == "POST" and (path == "/v1/shortlists" or
+                     SHORTLIST_MEMBERS_ROUTE.fullmatch(path))) or
+                 (method == "PATCH" and SHORTLIST_ENTRY_ROUTE.fullmatch(path)))):
+            # Shortlist service enforces max 3, unique parcels and frozen source evidence.
+            # No DELETE routes or production persistence are exposed in this experiment.
+            return backend_app(environ, start_response)
         if method != "GET":
             return _json(start_response, 405, {"error": "read_only_fixture_preview"}, mode=mode)
         if path in assets or (enable_buyer_workflow and path == "/buyer-workflow"):
@@ -143,6 +155,10 @@ def seeded_readonly_preview(directory: Path = DIST, *, enable_buyer_workflow: bo
             return _send(start_response, 200, body, mime, mode=mode)
         if path == "/_study/cases":
             return _json(start_response, 200, cases, mode=mode)
+        if path == "/_study/capabilities":
+            return _json(start_response, 200, {"source_kind": "synthetic_fixture",
+                "buyer_writes": enable_buyer_workflow,
+                "shortlist_writes": enable_shortlist_workflow}, mode=mode)
         if (path == "/health" or ID_ROUTE.fullmatch(path) or SHORTLIST_ROUTE.fullmatch(path)
                 or (enable_buyer_workflow and ADDRESS_ROUTE.fullmatch(path))):
             return backend_app(environ, start_response)
@@ -156,10 +172,15 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8797)
     parser.add_argument("--enable-buyer-workflow", action="store_true",
                         help="Opt in to fictional address-search and investigation-create POSTs")
+    parser.add_argument("--enable-shortlist-workflow", action="store_true",
+                        help="Separately opt in to fictional shortlist create/add/note writes")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Use an unprivileged local port")
-    app, db = seeded_readonly_preview(enable_buyer_workflow=args.enable_buyer_workflow)
+    if args.enable_shortlist_workflow and not args.enable_buyer_workflow:
+        parser.error("--enable-shortlist-workflow requires --enable-buyer-workflow")
+    app, db = seeded_readonly_preview(enable_buyer_workflow=args.enable_buyer_workflow,
+                                      enable_shortlist_workflow=args.enable_shortlist_workflow)
     try:
         with make_server("127.0.0.1", args.port, app) as server:
             route = "/buyer-workflow" if args.enable_buyer_workflow else "/source-review"
