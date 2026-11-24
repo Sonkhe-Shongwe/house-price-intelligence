@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 76.1% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 79.2% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -147,3 +147,7 @@ PC1–PC8 verified same-database reviewed fictional source lifecycle, cross-buil
 
 ## 24 November 2026: PI1–PI8 authorisation
 Owner approved bounded 2025 holdout and fixed research ablation, UI refinement, offline OIDC/session, accessibility/security checks, recruiter preparation and scoped development commits/CI. No live provider, contact, real records, valuation, deployment or main merge. See [PI contract](engineering/PRODUCT_INTELLIGENCE_V1.md).
+
+
+## 24 November 2026: PI milestone review
+79.2% weighted estimate (76.1% prior, +3.1 points); fixed weights and open gates. 2025 independent holdout blocked by insufficient eligible subjects, no policy or valuation adopted. Refined comparison/keyboard UI and offline OIDC session tests passed; recruiter walkthrough documented. No live provider integration, real publication, external contact or deployment. See [PI contract](engineering/PRODUCT_INTELLIGENCE_V1.md).

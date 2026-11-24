@@ -1,6 +1,6 @@
 # House Price Intelligence: P0–P8 phase-gated delivery plan
 
-**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **76.1% weighted MVP progress** (previous 71.4%; initial 22.8%).
+**Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **79.2% weighted MVP progress** (previous 76.1%; initial 22.8%).
 
 ## Origin and scope
 
@@ -21,15 +21,31 @@ House Price Intelligence has a different product, market, platform and release t
 | P0 | Product discovery, supported buyer/market, feasibility | 6% | 92% | 5.5 pts |
 | P1 | Reproducible ingestion, cleaning, historical joins, provenance | 12% | 90% | 10.8 pts |
 | P2 | Explainable comparable-selection and evaluation | 14% | 65% | 9.1 pts |
-| P3 | Product contracts, domain model, architecture decisions | 10% | 92% | 9.2 pts |
+| P3 | Product contracts, domain model, architecture decisions | 10% | 94% | 9.4 pts |
 | P4 | Database, ingestion-to-storage, backend API | 16% | 87% | 13.9 pts |
-| P5 | Browser property investigation experience | 16% | 72% | 11.5 pts |
-| P6 | Saved investigations, shortlist, side-by-side comparison | 12% | 90% | 10.8 pts |
-| P7 | Integrated quality, rights, security and operational readiness | 8% | 62% | 5.0 pts |
-| P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 5% | 0.3 pts |
-| **Total** | **Bounded flagship MVP** | **100%** | **76.1% weighted** | **76.1 pts** |
+| P5 | Browser property investigation experience | 16% | 80% | 12.8 pts |
+| P6 | Saved investigations, shortlist, side-by-side comparison | 12% | 92% | 11.0 pts |
+| P7 | Integrated quality, rights, security and operational readiness | 8% | 68% | 5.4 pts |
+| P8 | Deployment, credible demo, documentation and portfolio handoff | 6% | 20% | 1.2 pts |
+| **Total** | **Bounded flagship MVP** | **100%** | **79.2% weighted** | **79.2 pts** |
 
-## 24 November 2026: Production Consolidation and Release Readiness V1 milestone reassessment
+## 24 November 2026: Product Intelligence and Release Preparation V1 milestone reassessment
+
+Verified application [fac1c3d](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/fac1c3d1afeef6118cda0cff525eff6c5bc526e7): [React push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358107746) passed 34 browser scenarios including keyboard sale evidence details, semantic comparison and 320px reflow; [React PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358116267) passed. [PostgreSQL runtime push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358107532) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358116393) each passed seven integrated scenarios; [PostgreSQL compatibility PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358116151) passed. [Offline OIDC PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358116199) passed seven tests, including signed RSA tokens, claim and replay denial, PKCE, CSRF, expiry/logout and separate owner mapping. Python/docs jobs passed; legacy full workflows still running at review. No claim of live provider, production sessions or deployment.
+
+[Preregistered holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45357613568) stopped safely after 13 offline safeguards passed; [diagnostic retry](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45358107672) used the same scope/caps and stopped at evaluation with too_few_subjects. Extracted 2026-11-24 08:40:04 UTC; 2,107 sales, 26,296 building rows, 83 eligible Class 203 sales across 2024–2025, 78 distinct parcel-year keys and 78 universe rows. Fewer than ten eligible 2025 subjects; no error metrics, policy adoption, raw record publication or historical availability proof. No more live extraction under this milestone. P2 remains 65%; investigate source coverage separately before another holdout.
+
+| Stage | Previous | Revised | Evidence and remaining constraint |
+| --- | ---: | ---: | --- |
+| Architecture | 92% | 94% | Offline OIDC/session verification implemented and passed; live provider, HTTP integration, persistent session store and production security remain |
+| Frontend | 72% | 80% | Evidence facts, aligned semantic comparison, keyboard and mobile checks passed; full accessibility/visual owner and real data approval remain |
+| Buyer workflow | 90% | 92% | Semantic comparison and preserved source details with existing runtime regression passed; final owner acceptance open |
+| Quality | 62% | 68% | Seven offline identity scenarios and new frontend checks passed; production security, accessibility and rights remain open |
+| Release preparation | 5% | 20% | Reproducible local buyer walkthrough, architecture and actual browser evidence; no public release, hosting or final acceptance |
+
+P0/P1/P2/P4 unchanged. PI1 attempted independent chronological holdout but blocked by eligible sample size; no improvement or valuation adopted (PI2). PI5 is an offline identity/session boundary, not wired into production HTTP. PI7 prepares a local recruiter demonstration only. Weighted estimate 76.1% to **79.2%**, +3.1 percentage points, fixed weights and open phase gates. No real data publication, release scope change, provider account, external contact or deployment. See [PI contract](engineering/PRODUCT_INTELLIGENCE_V1.md).
+
+## 24 November 2026: Production Consolidation and Release Readiness V1 milestone reassessment (historical baseline)
 
 Verified application [f7e0d96](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/f7e0d9673e8b2c5b9d1ca4a95a691548e99522cb): [PostgreSQL runtime PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355910408) passed seven integrated scenarios, including same-database activation, stale-generation rejection, cross-build history/shortlist and rollback preservation, actual Chromium revised-build map/card selection, pool exhaustion and connection-loss recovery, low-privilege activation write denial and source tamper rejection. 24 health requests at four concurrent workers succeeded, median 58.9 ms, p95 110.0 ms, max 121.2 ms on this CI job; bounded local smoke, not load/SLA evidence. [React push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355903991) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355910475) passed; [PostgreSQL compatibility push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355903951) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355910336) passed; offline Python and docs jobs passed on [regression push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355903827) and [PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355910575). Runtime push [45355903846](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45355903846) and full legacy browser workflows were still running at this review; verify exact final statuses separately. No new live-source extraction.
 
@@ -105,7 +121,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Granular deliverable and acceptance matrix (planning proposal, 23 November 2026)
 
-**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **76.1%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
+**Purpose:** This is the task-level execution map for the existing P0–P8 stages, not a second roadmap, a new phase system or permission to change acceptance percentages. It is based on the [product brief](product/PRODUCT_BRIEF.md), [source register](research/SOURCE_REGISTER.md), [research audits](research/PHASE2_CLOUD_AUDIT_RESULTS.md), [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md), [decisions](DECISIONS.md) and the current [development checkpoint](CHECKPOINT.md). The current stage summary and **79.2%** weighted assessment remain authoritative until the next evidence-backed milestone review. Each ID can be tracked independently as implementation advances.
 
 **Progress vocabulary for this matrix:**
 
@@ -155,14 +171,14 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P2.3 | Same-neighbourhood selection and stable ranking | RESEARCH | Rank and explain relevant previous sales without using sale price as a ranking input |
 | P2.4 | Evaluate bounded geographic fallback | PARTIAL | Compare error, support and failure risks independently; current 2 km fallback must remain labelled exploratory |
 | P2.5 | Validate insufficiency and abstention policy | PARTIAL | Canonical matcher abstention and zero-evidence states verified across SQLite/React and PostgreSQL candidate; real holdout remains open |
-| P2.6 | Test better similarity and sale-quality factors | OPEN | Evidence-backed candidate features, exclusion reasons and controlled paired ablations recorded |
-| P2.7 | Independent later chronological holdout | OPEN | A future withheld period measures coverage/error and protects against leakage or reuse of test cases in policy tuning |
+| P2.6 | Test better similarity and sale-quality factors | OPEN | Fixed 1 km ablation preregistered but later cohort too small; no adoption or evidence-backed improvement |
+| P2.7 | Independent later chronological holdout | BLOCKED | 2025 holdout attempted twice within same frozen scope; fewer than ten eligible subjects; no metrics; investigate later coverage |
 | P2.8 | Prove time-valid source provenance and interpretability | BLOCKED | Every displayed sale has a traceable, permitted record and appropriate as-of/revision limitation |
 | P2.9 | Accept evidence-only versus price-estimation boundary | BLOCKED | Owner approves when fallback may be displayed and how unsupported predictions/weak evidence are labelled |
 
 **P2 exit:** Reliable, explainable comparable selection with a justified fallback and independent assessment. **Known limitation:** on the 17 fallback cases, exploratory 2 km retrospective MAE was about $209,471, worse than township comparison at about $192,153. Do **not** present the sample median as a validated house-price prediction.
 
-### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 92%
+### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 94%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -173,8 +189,8 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P3.5 | Define provenance, snapshots and frozen evidence | VERIFIED | Owner accepted provisional synthetic frozen evidence contract; historical availability remains open |
 | P3.6 | Define exact-money and currency representation | VERIFIED | Owner accepted provisional synthetic integer cents and decimal USD contract; production limits remain open |
 | P3.7 | Define schema evolution and recovery method | VERIFIED | Owner accepted provisional synthetic migration contract; SQLite restart and PostgreSQL candidate migration/restore verified; production plan open |
-| P3.8 | Select application stack, hosting and access approach | PARTIAL | Fictional PostgreSQL HTTP, activation and recovery verified; Auth0 recommended candidate, real provider/hosting not approved |
-| P3.9 | Define secure, permission-aware buyer experience | PARTIAL | Two fictional owners, revised-build map, mixed shortlist and recovery tested; real privacy/UX/accessibility review remains |
+| P3.8 | Select application stack, hosting and access approach | PARTIAL | Offline pinned OIDC/session candidate passed; provider, production HTTP/HTTPS/session store and hosting remain |
+| P3.9 | Define secure, permission-aware buyer experience | PARTIAL | Semantic comparison, keyboard focus and verified offline identity/session controls; actual privacy/security and visual acceptance open |
 | P3.10 | Decide real geography/identity/as-of/field-rights boundaries | BLOCKED | Exact cohort address coverage measured, synthetic parcel-only resolver and default-deny field policy tested; real identity/field rights/as-of remain unapproved |
 | P3.11 | Run formal P3 contract and design acceptance review | BLOCKED | Owner signs off ERD, migration, API, errors, evidence states, UX and threat/privacy plan with unresolved issues recorded |
 
@@ -197,23 +213,23 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P4 exit:** A durable, safe, source-aware backend supporting real permitted data or a clearly scoped synthetic-only publicly labelled mode. In-memory fixture storage alone does not satisfy the phase.
 
-### P5 | Browser investigation experience | Weight 16% | Recorded completion 72%
+### P5 | Browser investigation experience | Weight 16% | Recorded completion 80%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
-| P5.1 | Establish workspace/navigation and buyer entry flow | PARTIAL | Integrated five-view React shell and functional navigation verified; final owner UX remains |
+| P5.1 | Establish workspace/navigation and buyer entry flow | PARTIAL | Refined existing five-view workspace, typography and readability; final owner UX remains |
 | P5.2 | Address search, ambiguous candidate selection and validation | VERIFIED | Synthetic browser asks for explicit parcel choice and prevents accidental previous-property submission |
-| P5.3 | Investigation result and comparable evidence cards | VERIFIED | Browser displays source-backed synthetic prices, selected comp count, dates and no numeric valuation |
+| P5.3 | Investigation result and comparable evidence cards | VERIFIED | Exact cents, server-owned recency and area difference validated in adapter, keyboard evidence details passed actual Chromium |
 | P5.4 | Buyer-reported asking price and source attribution | PARTIAL | Dossier separates asking price, sale cents and provenance; real-source permitted display not established |
-| P5.5 | Differences and comparison-quality explanations | PARTIAL | Actual PostgreSQL revised-build virtual MapLibre/card selection passed; real geographic data/quality remain open |
+| P5.5 | Differences and comparison-quality explanations | PARTIAL | Refined matching explanation and aligned comparison; real geography and independent quality evaluation remain |
 | P5.6 | Complete supported, exploratory, unknown and error states | PARTIAL | Synthetic ambiguity, abstention, network and optional map failure recovery verified; release-like coverage remains |
-| P5.7 | Responsive, accessible browser acceptance | PARTIAL | Responsive 320px, reduced-motion, keyboard navigation and focus tested; contrast/screen-reader and owner review remain |
+| P5.7 | Responsive, accessible browser acceptance | PARTIAL | Semantic table headers, keyboard activation and 320px scroll region tested; full WCAG/screen reader and owner review open |
 | P5.8 | Real-permitted market coverage and source explanation | BLOCKED | UI accurately states supported geography, as-of caveats and field-level reuse restrictions |
 | P5.9 | Approve final buyer workflow, styling and information hierarchy | BLOCKED | Owner reviews tasks with one supported and one insufficient case; branding/map remains optional pending separate evidence |
 
 **P5 exit:** A buyer can independently select a property, investigate eligible historical sales, understand why results are available or unavailable and act on the limitations, on the actual backend.
 
-### P6 | Save, shortlist, compare and decide | Weight 12% | Recorded completion 90%
+### P6 | Save, shortlist, compare and decide | Weight 12% | Recorded completion 92%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -221,41 +237,41 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P6.2 | Define shortlist and membership schema | PARTIAL | Integrated fictional two-owner HTTP and RLS with transaction-local identity verified; real provider and retention remain |
 | P6.3 | Build durable save and restore across restarts | VERIFIED | Both SQLite and fictional PostgreSQL application process restart preserve saved evidence/shortlists; no production guarantee |
 | P6.4 | Add and remove shortlist entries with notes | VERIFIED | Fixture-only add/remove and note editing preserve frozen response hash, original sale cents and comparable links |
-| P6.5 | Build two- or three-property side-by-side view | VERIFIED | Real Chromium verifies aligned fictional-property asking prices, evidence statuses, eligible-sale counts, rules and no valuation; owner final visual acceptance pending |
+| P6.5 | Build two- or three-property side-by-side view | VERIFIED | Aligned semantic comparison preserves asking prices, evidence, source builds and no valuation; owner review open |
 | P6.6 | Preserve weak-evidence and excluded properties in shortlist | VERIFIED | At least one insufficient-data fictional property (0 eligible sales) remains visible alongside a three-sale property; broader real-market coverage not accepted |
 | P6.7 | Keep immutable evidence/provenance alongside mutable notes | VERIFIED | Frozen evidence and mutable notes survive activation/rollback; mixed reviewed builds re-open through own source membership |
 | P6.8 | Decide safe access and optional export/report rules | PARTIAL | Fictional HTTP Basic access and database isolation verified; real provider, retention and export policy blocked |
-| P6.9 | Full returning-buyer comparison acceptance | PARTIAL | Cross-build history/shortlist, authenticated browser and restart recovery verified; owner/real access acceptance remains |
+| P6.9 | Full returning-buyer comparison acceptance | PARTIAL | Existing authenticated browser journey plus refined comparison reflow verified; final owner/access acceptance remains |
 
 **P6 exit:** An owner-accepted, responsible **Investigate → Compare → Decide** buyer workflow with two or three reopenable properties, notes, defensible evidence and appropriate data/access/retention and UX gates. The **implemented fictional-only P6 workflow** is verified, but it is not a production or formal P6 acceptance.
 
-### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 62%
+### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 68%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
-| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | f7e0d96 runtime PR seven scenarios passed; existing offline Python, React and PostgreSQL checks passed; verify latest full workflow statuses |
+| P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | fac1c3d: 34 React, seven PostgreSQL runtime, five compatibility and seven offline OIDC scenarios passed; Python/docs jobs passed |
 | P7.2 | Validate hostile/invalid/unsupported requests | PARTIAL | Stale activation, unknown builds, source tampering and low-privilege source-control writes refused; production security open |
 | P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Same-database activation/rollback, tamper refusal and lost connection recovery verified; real backup/operational drill open |
-| P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Reviewed source revision activation and frozen evidence preserved; real historical leakage and holdout validation remain |
-| P7.5 | Accessibility, responsiveness and buyer failure recovery | PARTIAL | Real revised PostgreSQL browser map/card selection and prior responsive checks passed; full accessibility/owner review open |
-| P7.6 | Authentication/privacy/retention and secrets review | PARTIAL | Fictional identity and ownership verified; Auth0 recommended with standards-based OIDC/session plan, actual provider and privacy retention open |
+| P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | Later holdout guarded against same/future dates; insufficient 2025 subjects prevented metrics; historical release proof open |
+| P7.5 | Accessibility, responsiveness and buyer failure recovery | PARTIAL | Keyboard sale selection, semantic row/column headers and 320px scrolling tested; full accessibility acceptance remains |
+| P7.6 | Authentication/privacy/retention and secrets review | PARTIAL | Offline signed-token, replay/nonce/PKCE, CSRF/session expiry and logout tests passed; actual provider, persistent sessions and retention open |
 | P7.7 | Load, rate, recovery and operational monitoring checks | PARTIAL | Pool exhaustion/backend termination recovery and 24 health requests/4 workers succeeded; production load, monitoring, restore and rate policies remain |
 | P7.8 | Licence, attribution and source-time release audit | BLOCKED | Publisher SOP supports analysis and joins; no source-specific real-field publication approval or historical availability guarantee |
 | P7.9 | Full user journey and release-readiness sign-off | BLOCKED | Separate P7 acceptance suite passes against release-like storage, APIs and browser; owner approves readiness |
 
 **P7 exit:** A reproducible and verified **release candidate**, with privacy/security/rights gates satisfied. CI-verified synthetic fixtures are not the same thing as a release security review.
 
-### P8 | Deployment, credible demonstration and recruiter handoff | Weight 6% | Recorded completion 5%
+### P8 | Deployment, credible demonstration and recruiter handoff | Weight 6% | Recorded completion 20%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
 | P8.1 | Decide public demonstration mode and data | BLOCKED | Owner approves licensed permitted field display or a clearly marked fabricated fixture-only demo |
 | P8.2 | Provide reproducible clean setup and deployment config | PARTIAL | Reproducible local fixture startup and locked React build; production deployment config not approved |
 | P8.3 | Configure authorised hosting and safe endpoints | OPEN | Deployment uses reviewed network/auth/configuration; no localhost-only fixture WSGI accidentally exposed publicly |
-| P8.4 | Demonstrate the complete buyer decision journey | PARTIAL | Full synthetic buyer journey tested with real Chromium and actual screenshots; recruiter demo and release mode remain open |
-| P8.5 | Publish clear architecture, data dictionary and evidence lineage | PARTIAL | Existing docs are condensed into an accurate reviewer-friendly diagram, API overview and limitations |
-| P8.6 | Prepare technical recruiter walkthrough and failure demonstration | OPEN | Explain a SQL join, matcher eligibility, one blocked data condition and an automated regression test |
-| P8.7 | Final project README, portfolio links and demo recording | OPEN | User can follow documented steps; video/screenshots show actual permitted, working features |
+| P8.4 | Demonstrate the complete buyer decision journey | PARTIAL | Local full fictional buyer journey and refined browser evidence verified; public demo mode not accepted |
+| P8.5 | Publish clear architecture, data dictionary and evidence lineage | PARTIAL | Recruiter walkthrough includes architecture and SQL source lineage; full release review remains |
+| P8.6 | Prepare technical recruiter walkthrough and failure demonstration | PARTIAL | Five-minute local walkthrough and abstention demonstration documented; owner recording/acceptance open |
+| P8.7 | Final project README, portfolio links and demo recording | PARTIAL | Local reproducible run and recruiter walkthrough documented; final portfolio links/recording and release remain |
 | P8.8 | Owner acceptance, integration and release handoff | BLOCKED | Approved P7 readiness, reviewed \`main\` merge, correct demo URL/artifacts and final handoff record |
 
 **P8 exit:** A recruiter can try or watch the completed **Investigate → Compare → Decide** application and independently inspect a truthful code/test/evidence story. No deployment or release has yet been authorised.
@@ -268,9 +284,9 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 4. **Review integrated P6 for owner acceptance before calling this a flagship product:** Two/three fictional enquiries, notes, side-by-side evidence and frozen-restart reopening are code-verified. Complete missing UX, access, retention, approved source display and release-like cases.
 5. **Treat P7 and P8 as independent release gates:** Security, rights, accessibility, performance, safe deployment and portfolio walkthrough. A green development build is not public release authorisation.
 
-**Suggested next milestone:** owner decision on release scope, then identity-provider/session and operational release readiness, with independent comparable validation and real-data rights/as-of kept separate. Consolidated source lifecycle is verified for fictional loopback only. No provider provisioning, deployment or real property publication without separate approval.
+**Suggested next milestone:** owner decision on clearly fictional recruiter release scope versus real-product readiness; visual acceptance, production identity/session HTTP integration and operational release readiness. Diagnose insufficient 2025 eligibility separately before new live extraction or policy changes. No deployment, provider provisioning, real property publication or external contact without separate approval.
 
-**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **76.1%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
+**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **79.2%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
 ## Full process and phase exit gates
 
@@ -304,7 +320,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Deterministic eligibility and no-future-sale rules, one-property-one-comparable accounting, complete explanation/provenance, independent evaluation, justified fallback rules and truthful insufficiency response. Do not promote experimental median to a validated price estimate.
 
-### P3: Product architecture and contracts — 10% weight; 92% estimated complete
+### P3: Product architecture and contracts — 10% weight; 94% estimated complete
 
 **Goal:** Translate the research engine into explicit, testable business objects and contracts for a real application.
 
@@ -322,7 +338,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** A client can submit a supported subject, retrieve ranked and explained earlier comparable sales, retrieve truthful insufficient-data results, and recover an investigation from persisted storage. Tests demonstrate these behaviours without handwritten fake totals.
 
-### P5: Property investigation frontend — 16% weight; 72% estimated complete
+### P5: Property investigation frontend — 16% weight; 80% estimated complete
 
 **Goal:** A usable browser experience rather than a notebook or audit dashboard.
 
@@ -330,7 +346,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** User completes add property -> inspect relevant historical comps -> understand why selected or why unavailable, in the browser, against the actual backend. No unsupported price claims.
 
-### P6: Saved buyer decision workflow — 12% weight; 90% estimated complete
+### P6: Saved buyer decision workflow — 12% weight; 92% estimated complete
 
 **Goal:** The distinctive complete micro-application experience.
 
@@ -338,7 +354,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** A returning buyer can open two saved properties, compare supported evidence and notes, and reopen identical source/rule-referenced results. An insufficient-data home is still savable.
 
-### P7: Integrated QA and readiness — 8% weight; 62% estimated complete
+### P7: Integrated QA and readiness — 8% weight; 68% estimated complete
 
 **Goal:** Prove the complete system is reliable, secure and honest.
 
@@ -346,7 +362,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Exit gate:** Accepted integration/demo journeys, reproducible clean build, documented limitations, suitable rate/resource controls and permission to expose chosen fields. Public exposure blocked if source reuse rights remain unresolved.
 
-### P8: Release and portfolio demonstration — 6% weight; 5% estimated complete
+### P8: Release and portfolio demonstration — 6% weight; 20% estimated complete
 
 **Goal:** Ship a coherent portfolio-quality application and explain technical decisions to recruiters.
 
