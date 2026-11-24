@@ -17,6 +17,7 @@ from backend.investigation_contract import ContractError
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
+from backend.buyer_evidence_preview import buyer_evidence_preview
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -54,6 +55,7 @@ ID_ROUTE = re.compile(r"^/v1/investigations/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}
 ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
 UUID_PART = r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
 MAP_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/map$")
+PREVIEW_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/evidence-preview$")
 SHORTLIST_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"$")
 SHORTLIST_MEMBERS_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries$")
 SHORTLIST_ENTRY_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries/" + UUID_PART + r"$")
@@ -268,6 +270,19 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
             if found is None:
                 return _response(start_response, 404, {"error": "address_not_found"})
             return _response(start_response, 200, found)
+
+        preview_match = PREVIEW_ROUTE.fullmatch(path)
+        if preview_match:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, buyer_evidence_preview(store, preview_match.group(1)))
+            except EvidenceStoreError as exc:
+                if str(exc) == "Investigation not found":
+                    return _response(start_response, 404, {"error": "investigation_not_found"})
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            except (sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
 
         map_match = MAP_ROUTE.fullmatch(path)
         if map_match:

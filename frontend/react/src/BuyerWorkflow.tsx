@@ -7,6 +7,7 @@ import SavedComparison from './SavedComparison';
 import GeoMapPanel from './GeoMapPanel';
 import HistoryPanel from './HistoryPanel';
 import Methodology from './Methodology';
+import BuyerEvidencePreview from './BuyerEvidencePreview';
 import './workspaceShell.css';
 import {fixtureFetch} from './fixtureFetch';
 
@@ -373,6 +374,7 @@ export default function BuyerWorkflow(){
           <div><small>Frozen snapshots</small><strong data-testid="buyer-snapshots">{record.sourceSnapshotIds.join(', ')}</strong></div>
           <div><small>Valuation</small><strong>Not produced</strong></div></div>
           <p data-testid="buyer-build-time">Fixture build timestamp: {record.sourceBuiltAtUtc} (not a source publication date).</p><p>Matching tier: {record.tier} · Building identity unverified · Historical source availability not established</p><p>All displayed sales are invented. No publisher property records or current market valuations are shown.</p></details>
+        <BuyerEvidencePreview key={record.investigationId} record={record}/>
         {record.warnings.map((w,i)=><p key={i} className="buyer-warning">{w}</p>)}
       </section>}
       </section>

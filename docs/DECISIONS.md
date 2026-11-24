@@ -219,3 +219,7 @@ Next highest-value work: production release contract and buyer evidence field pr
 
 ## 24 November 2026: Buyer Product Release Preparation V1
 Continue offline release preparation after verified private rehearsal. Correct client comparable cardinality without changing matcher or shortlist capacity; verify five source-shaped invented comparables through existing buyer runtime. Proposed field display contract, no actual release grant. See [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md).
+
+
+## Buyer evidence preview continuation
+Five-sale correction 55d6799 passed 11/11. Implement an explicit minimised read-only fixture projection from verified frozen evidence under existing owner boundary; reject historical source and approval flags. No real route, extra collection, release or matcher change. See [contract](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md).

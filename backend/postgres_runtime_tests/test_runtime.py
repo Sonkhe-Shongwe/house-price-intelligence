@@ -246,6 +246,20 @@ class RuntimeTests(unittest.TestCase):
                     for price in ("$487,500.01","$542,750.02","$519,900.03","$508,400.04","$534,200.05"):
                         expect(page.get_by_test_id("buyer-result")).to_contain_text(price)
                     iid=page.get_by_test_id("buyer-saved-id").inner_text()
+                    route="/v1/investigations/"+iid+"/evidence-preview"
+                    code,preview=self.call("bob","GET",route)
+                    self.assertEqual(code,200)
+                    self.assertEqual(preview["selected_count"],5)
+                    self.assertEqual(set(preview["sales"][0]),{"rank","sale_date","sale_price_usd","age_days","area_difference_pct","assessment_year","location_evidence"})
+                    for forbidden in ("pin","document","distance_km","latitude","longitude","label","address_id","relational_sha256"):
+                        self.assertNotIn('"'+forbidden+'"',json.dumps(preview))
+                    self.assertFalse(preview["provenance"]["public_display_approved"])
+                    self.assertEqual(self.call("alice","GET",route)[0],404)
+                    self.assertEqual(self.call("bob","POST",route,{})[0],405)
+                    page.get_by_test_id("buyer-preview-load").click()
+                    expect(page.get_by_test_id("buyer-preview-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("buyer-preview-sale")).to_have_count(5)
+                    expect(page.get_by_test_id("buyer-preview-result")).to_contain_text("$534,200.05")
                     page.get_by_test_id("geo-load").click()
                     expect(page.get_by_test_id("geo-unavailable")).to_be_visible(timeout=15000)
                     page.get_by_test_id("nav-saved").click()
