@@ -39,3 +39,5 @@
 @media(max-width:900px){.hpi-app-layout{display:block}.hpi-sidebar{padding:8px 12px;border-right:0;border-bottom:1px solid #d8e1d5}.hpi-sidebar nav{display:flex;flex-wrap:wrap;gap:4px}.hpi-sidebar nav button{padding:7px 10px;min-height:40px;font-size:12px}.hpi-nav-title,.hpi-sidebar-note{display:none}.hpi-sidebar nav button span{display:none}}
 @media(max-width:540px){.hpi-home-grid,.hpi-method-grid,.hpi-history-filters{grid-template-columns:minmax(0,1fr)}.hpi-history-list li{grid-template-columns:minmax(0,1fr);gap:6px}.hpi-history-list li button{justify-self:start}.hpi-metric,.hpi-method-grid article,.hpi-history-card{padding:14px}.hpi-main{padding:14px 10px 25px}.hpi-dossier-summary{gap:5px}.hpi-dossier-summary>div{padding:8px}.hpi-page-heading{gap:10px}.hpi-page-heading h1{font-size:32px}}
 @media(prefers-reduced-motion:reduce){.hpi-main *,.hpi-sidebar *{transition:none!important;animation:none!important}}
+
+.hpi-main:focus{outline:none}

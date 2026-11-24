@@ -324,6 +324,7 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.add_current(1)
         original=self.page.request.get(self.base+"/v1/investigations/"+iid).json()
         self.page.reload()
+        self.page.get_by_test_id("nav-compare").click()
         recent=self.page.get_by_test_id("workspace-open-recent").filter(has_text="Discoverable fictional shortlist")
         recent.click()
         expect(self.page.get_by_test_id("workspace-id")).to_have_text(sid)

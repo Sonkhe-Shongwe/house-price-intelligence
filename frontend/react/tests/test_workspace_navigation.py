@@ -22,6 +22,7 @@ class WorkspaceNavigationTests(unittest.TestCase):
                 expect(page.get_by_test_id("history-empty")).to_be_visible()
                 expect(page.get_by_test_id("nav-home")).to_have_attribute("aria-current","page")
                 page.get_by_test_id("workspace-new-investigation").click()
+                expect(page.locator("#hpi-content")).to_be_focused()
                 def save(pin):
                     page.get_by_test_id("buyer-manual-pin").fill(pin)
                     page.get_by_test_id("buyer-create").click()
@@ -67,6 +68,7 @@ class WorkspaceNavigationTests(unittest.TestCase):
                     page.get_by_test_id("nav-methodology").focus()
                     page.keyboard.press("Enter")
                     expect(page.get_by_test_id("methodology")).to_be_visible()
+                    expect(page.locator("#hpi-content")).to_be_focused()
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"))
                     page.get_by_test_id("nav-home").click()
                 if path_env:page.screenshot(path=str(dest/"02-workspace-mobile.png"),full_page=True)
@@ -76,7 +78,6 @@ class WorkspaceNavigationTests(unittest.TestCase):
                 page=browser.new_page()
                 page.goto(server.base+"/")
                 expect(page.get_by_test_id("history-open")).to_have_count(2)
-                page.get_by_test_id("history-open").filter(has_text="").first.wait_for()
                 page.get_by_test_id("nav-saved").click()
                 page.get_by_test_id("history-search").fill("00000000000001")
                 expect(page.get_by_test_id("history-open")).to_have_count(1)

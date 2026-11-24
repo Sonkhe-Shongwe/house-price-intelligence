@@ -249,7 +249,7 @@ export default function BuyerWorkflow(){
           ref={view===item.id?navFocus:undefined} onClick={()=>navigate(item.id)}>
           <span aria-hidden="true">{item.symbol}</span>{item.label}</button>)}</nav>
         <div className="hpi-sidebar-note"><b>Local fixture</b><p>Fictional data only. No valuation or real locations.</p></div></aside>
-      <main id="hpi-content" className="source-container hpi-main">
+      <main id="hpi-content" className="source-container hpi-main" ref={contentFocus} tabIndex={-1}>
         <div className="hpi-top-warning" role="note">Fictional data · Local-only workspace · No real property records or valuations</div>
         {(view==='home'||view==='saved')&&<HistoryPanel mode={view} revision={historyRevision} disabled={writing}
           onOpen={openHistory} onNew={newInvestigation} onCompare={()=>navigate('compare')} onHistory={()=>navigate('saved')}/>}
