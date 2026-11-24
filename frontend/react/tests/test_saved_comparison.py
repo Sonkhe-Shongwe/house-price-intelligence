@@ -328,6 +328,70 @@ class ReactSavedComparisonTests(unittest.TestCase):
         self.assertEqual(self.get_shortlist(sid)["entries"],[])
         self.assertEqual(self.page.request.get(self.base+"/v1/investigations/"+iid).json(),original)
 
+    def test_note_commit_lost_response_reconciles_without_retry_or_draft_loss(self):
+        first=self.create_investigation()
+        sid=self.create_workspace("Recover note after interruption")
+        self.add_current(1)
+        self.create_investigation("105 Fictional Court",option=1)
+        self.add_current(2)
+        before=self.get_shortlist(sid)
+        cards=self.page.get_by_test_id("workspace-entry")
+        cards.nth(0).get_by_test_id("workspace-note").fill("Committed note")
+        cards.nth(1).get_by_test_id("workspace-note").fill("Unsubmitted second draft")
+        url=self.base+"/v1/shortlists/"+sid+"/entries/"+first
+        writes=[]
+        def interrupted(route):
+            if route.request.method=="PATCH":
+                response=route.fetch()
+                writes.append(response.status)
+                route.abort()
+            else:route.continue_()
+        self.page.route(url,interrupted)
+        cards.nth(0).get_by_test_id("workspace-save-note").click()
+        expect(self.page.get_by_test_id("workspace-recovery")).to_be_visible()
+        expect(cards.nth(0).get_by_test_id("workspace-save-note")).to_be_disabled()
+        expect(cards.nth(1).get_by_test_id("workspace-save-note")).to_be_disabled()
+        expect(self.page.get_by_test_id("workspace-comparison")).to_have_count(0)
+        self.assertEqual(writes,[200])
+        self.assertEqual(self.get_shortlist(sid)["entries"][0]["note_text"],"Committed note")
+        self.page.unroute(url,interrupted)
+        self.page.get_by_test_id("workspace-recover").click()
+        expect(self.page.get_by_test_id("workspace-recovery")).to_have_count(0)
+        expect(cards.nth(0).get_by_test_id("workspace-note-state")).to_have_text("Saved note verified")
+        expect(cards.nth(1).get_by_test_id("workspace-note")).to_have_value("Unsubmitted second draft")
+        expect(cards.nth(1).get_by_test_id("workspace-note-state")).to_have_text("Unsaved changes")
+        expect(self.page.get_by_test_id("workspace-comparison")).to_be_visible()
+        after=self.get_shortlist(sid)
+        self.assertEqual(after["entries"][1]["note_text"],"")
+        for original,current in zip(before["entries"],after["entries"]):
+            self.assertEqual(original["investigation"],current["investigation"])
+            self.assertEqual(original["match_policy_version"],current["match_policy_version"])
+
+    def test_remove_commit_lost_response_reconciles_membership(self):
+        iid=self.create_investigation()
+        sid=self.create_workspace("Recover removal after interruption")
+        self.add_current(1)
+        original=self.page.request.get(self.base+"/v1/investigations/"+iid).json()
+        url=self.base+"/v1/shortlists/"+sid+"/entries/"+iid
+        writes=[]
+        def interrupted(route):
+            if route.request.method=="DELETE":
+                response=route.fetch()
+                writes.append(response.status)
+                route.abort()
+            else:route.continue_()
+        self.page.route(url,interrupted)
+        self.page.once("dialog",lambda dialog:dialog.accept())
+        self.page.get_by_test_id("workspace-remove").click()
+        expect(self.page.get_by_test_id("workspace-recovery")).to_be_visible()
+        self.assertEqual(writes,[200])
+        self.assertEqual(self.get_shortlist(sid)["entries"],[])
+        self.page.unroute(url,interrupted)
+        self.page.get_by_test_id("workspace-recover").click()
+        expect(self.page.get_by_test_id("workspace-recovery")).to_have_count(0)
+        expect(self.page.get_by_test_id("workspace-count")).to_have_text("0 / 3")
+        self.assertEqual(self.page.request.get(self.base+"/v1/investigations/"+iid).json(),original)
+
     def test_capture_shortlist_workflow_visuals(self):
         folder=os.environ.get("HPI_SHORTLIST_SCREENSHOTS")
         if not folder:self.skipTest("Screenshots only in hosted review CI")

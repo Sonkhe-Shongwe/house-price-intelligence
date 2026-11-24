@@ -27,11 +27,12 @@ async function api(path: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', bo
   }
   return json;
 }
-function evidenceWasPreserved(previous: ShortlistView | null, next: ShortlistView, removedId?:string) {
+function evidenceWasPreserved(previous: ShortlistView | null, next: ShortlistView, removedId?:string, allowMembershipChange=false) {
   if (!previous || previous.shortlistId !== next.shortlistId) return;
   for (const earlier of previous.entries) {
     if (earlier.investigationId===removedId) continue;
     const current = next.entries.find(entry => entry.investigationId === earlier.investigationId);
+    if(!current&&allowMembershipChange)continue;
     if (!current || JSON.stringify(current.investigation) !== JSON.stringify(earlier.investigation)) {
       throw Error('frozen_evidence_changed');
     }
@@ -54,6 +55,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [recoveryRequired,setRecoveryRequired]=useState(false);
   const locked = useRef(false);
   const live = useRef(true);
 
@@ -98,7 +100,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
     savedNoteId?: string,
     removedId?: string,
   ) {
-    if (locked.current) return;
+    if (locked.current||recoveryRequired) return;
     locked.current = true;setBusy(true);setError('');setStatus('');
     try {
       // A POST/PATCH may commit even if its response fails. Never auto-retry it.
@@ -114,6 +116,8 @@ export default function SavedComparison({active}: WorkspaceProps) {
       if (live.current) {setStatus(success);void loadRecent();}
     } catch (e) {
       if (live.current) {
+        if(workspace)setRecoveryRequired(true);
+        void loadRecent();
         setError(previewError(e) +
           '. Refresh the saved shortlist before repeating a write; a prior request may have committed.');
       }
@@ -138,17 +142,29 @@ export default function SavedComparison({active}: WorkspaceProps) {
   async function refresh(event?:React.FormEvent<HTMLFormElement>, chosenId?:string) {
     event?.preventDefault();
     const targetId=chosenId??reopenId.trim();
-    if(hasDrafts()){setError('Save pending notes before reopening a shortlist.');return;}
+    const sameWorkspace=workspace?.shortlistId===targetId;
+    if(!sameWorkspace&&(hasDrafts()||recoveryRequired)){
+      setError('Refresh the current shortlist and resolve pending notes before switching.');return;
+    }
     if (!UUID.test(targetId)) {setError('Enter a valid lowercase shortlist UUID.');return;}
     if (locked.current) return;
     locked.current=true;setBusy(true);setError('');setStatus('');
     try {
       const loaded=adaptShortlist(await api('/v1/shortlists/'+targetId,'GET'));
       if (loaded.shortlistId!==targetId)throw Error('shortlist_identity_conflict');
-      evidenceWasPreserved(workspace,loaded);
-      install(loaded);if(live.current)setStatus('Shortlist reopened from Python, including stored notes.');
+      evidenceWasPreserved(workspace,loaded,undefined,true);
+      if(sameWorkspace&&workspace?.entries.some(e=>notes[e.investigationId]!==e.noteText&&
+        !loaded.entries.some(next=>next.investigationId===e.investigationId))){
+        throw Error('A property with an unsaved note is no longer on the shortlist. Copy your draft before leaving this page.');
+      }
+      install(loaded,sameWorkspace);
+      if(live.current){setRecoveryRequired(false);setStatus('Shortlist reopened from Python, including stored notes.');void loadRecent();}
     } catch(e) {
-      if(live.current){setWorkspace(null);setNotes({});setError(previewError(e));}
+      if(live.current){
+        if(workspace&&sameWorkspace){setRecoveryRequired(true);}
+        else {setWorkspace(null);setNotes({});setRecoveryRequired(false);}
+        setError(previewError(e));
+      }
     } finally {locked.current=false;if(live.current)setBusy(false);}
   }
 
@@ -240,7 +256,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
       <div className="workspace-input-line"><input id="workspace-label" data-testid="workspace-label"
         maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}
         disabled={busy} required/>
-        <button type="submit" data-testid="workspace-create" disabled={busy}>Create shortlist</button></div>
+        <button type="submit" data-testid="workspace-create" disabled={busy||recoveryRequired}>Create shortlist</button></div>
     </form>}
     <section aria-label="Recent saved shortlists">
       <h3>Saved shortlists</h3>
@@ -261,12 +277,18 @@ export default function SavedComparison({active}: WorkspaceProps) {
         <button type="submit" data-testid="workspace-reopen" disabled={busy}>Open saved shortlist</button></div>
     </form>
     {workspace && <>
+      {recoveryRequired&&<p role="alert" data-testid="workspace-recovery" className="source-error">
+        Current server state is unconfirmed. The cards below are last-confirmed records and local drafts.
+        Refresh this shortlist before making another change.
+        <button type="button" disabled={busy} data-testid="workspace-recover"
+          onClick={()=>void refresh(undefined,workspace.shortlistId)}>Refresh current shortlist</button>
+      </p>}
       <div className="workspace-summary"><div><small>Saved shortlist / Python fixture</small>
         <h3>{workspace.label}</h3><span data-testid="workspace-id">{workspace.shortlistId}</span></div>
         <div><strong data-testid="workspace-count">{workspace.entries.length} / 3</strong>
           <small>Different properties</small></div></div>
       <div className="workspace-add">
-        <button type="button" data-testid="workspace-add-current" disabled={!hasActive||busy}
+        <button type="button" data-testid="workspace-add-current" disabled={!hasActive||busy||recoveryRequired}
           onClick={()=>active&&void addInvestigation(active.investigationId,active)}>
           Add current saved investigation
         </button>
@@ -275,9 +297,9 @@ export default function SavedComparison({active}: WorkspaceProps) {
           <div className="workspace-input-line"><input id="workspace-other-id"
             data-testid="workspace-other-id" value={otherId}
             onChange={e=>setOtherId(e.target.value)} maxLength={36}
-            disabled={busy||workspace.entries.length>=3}/>
+            disabled={busy||recoveryRequired||workspace.entries.length>=3}/>
             <button type="submit" data-testid="workspace-add-id"
-              disabled={busy||workspace.entries.length>=3}>Add saved ID</button></div>
+              disabled={busy||recoveryRequired||workspace.entries.length>=3}>Add saved ID</button></div>
         </form>
       </div>
       {workspace.entries.length===0 && <p className="workspace-empty" data-testid="workspace-empty">
@@ -300,18 +322,18 @@ export default function SavedComparison({active}: WorkspaceProps) {
               rows={3} maxLength={800} value={note} disabled={busy}
               onChange={e=>setNotes(prev=>({...prev,[entry.investigationId]:e.target.value}))}/>
             <div className="workspace-card-bottom"><span data-testid="workspace-note-state">
-              {dirty?'Unsaved changes':'Saved note verified'}</span>
+              {recoveryRequired?'Awaiting server confirmation':dirty?'Unsaved changes':'Saved note verified'}</span>
               <button type="button" data-testid="workspace-save-note"
-                disabled={!dirty||busy} onClick={()=>void saveNote(entry.investigationId)}>Save note</button>
+                disabled={!dirty||busy||recoveryRequired} onClick={()=>void saveNote(entry.investigationId)}>Save note</button>
             </div>
             <div className="workspace-provenance"><span>Frozen build · {entry.investigation.sourceBuildId}</span>
               <span>No verified map geometry</span></div>
-            <button type="button" data-testid="workspace-remove" disabled={busy||dirty}
+            <button type="button" data-testid="workspace-remove" disabled={busy||dirty||recoveryRequired}
               onClick={()=>void removeMember(entry.investigationId)}>Remove property</button>
           </article>;
         })}
       </div>
-      {workspace.entries.length>=2&&<div className="workspace-grid" data-testid="workspace-comparison">
+      {!recoveryRequired&&workspace.entries.length>=2&&<div className="workspace-grid" data-testid="workspace-comparison">
         {workspace.entries.map(entry=><article className="workspace-card" key={entry.investigationId}>
           <h3>{entry.investigation.subjectLabel}</h3>
           <dl><dt>Asking price (buyer-reported)</dt><dd>{entry.investigation.askingPriceText}</dd>
