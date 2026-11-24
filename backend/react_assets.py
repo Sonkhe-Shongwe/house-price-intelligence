@@ -3,8 +3,8 @@ from pathlib import Path
 import re
 
 DIST = Path(__file__).resolve().parents[1] / "frontend" / "react" / "dist"
-ASSET_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,100}-[A-Za-z0-9_-]{6,}\.(?:js|css)$")
-MIME_TYPES = {".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
+ASSET_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,100}-[A-Za-z0-9_-]{6,}\.(?:js|mjs|css)$")
+MIME_TYPES = {".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
 
 def load_react_assets(directory: Path = DIST) -> dict[str, tuple[bytes, str]]:
     directory = directory.resolve(strict=True)

@@ -1,0 +1,12 @@
+.geo-panel{min-width:0;background:#f4f8f5;border:1px solid #d2ddd5;border-radius:14px;padding:16px;display:grid;gap:12px;color:#203d32}
+.geo-panel h3{margin:4px 0;font-size:1.25rem}.geo-panel p{margin:4px 0;font-size:.85rem}
+.geo-panel small{overflow-wrap:anywhere}.geo-vector{position:relative;min-width:0}
+.geo-canvas{height:320px;width:100%;overflow:hidden;border-radius:10px;border:1px solid #b9cbc0;background:#e4eee7}
+.geo-marker{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:2px solid white;font:700 14px system-ui;box-shadow:0 2px 5px #203d3260}
+.geo-subject{background:white;color:#245648;border:3px solid #245648}.geo-sale{background:#245648;color:white;cursor:pointer}
+.geo-sale[aria-pressed=true]{background:#e9b85e;color:#243a30;border-color:#243a30}
+.geo-sale:focus-visible,.geo-controls button:focus-visible,.geo-load:focus-visible{outline:3px solid #8a5c00;outline-offset:2px}
+.geo-controls{display:flex;gap:6px;position:absolute;top:8px;right:8px}
+.geo-controls button,.geo-load{border:1px solid #245648;border-radius:7px;background:#fff;color:#245648;min-width:36px;min-height:36px;font-weight:600;cursor:pointer;padding:8px}
+.geo-provenance{font-size:.75rem}.geo-load{margin:8px 0;max-width:100%}
+@media(max-width:480px){.geo-canvas{height:250px}.geo-panel{padding:10px}}

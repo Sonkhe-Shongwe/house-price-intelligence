@@ -44,6 +44,7 @@ jobs:
           fi
       - name: Canonical launcher browser acceptance
         env:
+          HPI_GEO_SCREENSHOTS: ${{ runner.temp }}/hpi-react-geo
           HPI_BUYER_SCREENSHOTS: ${{ runner.temp }}/hpi-react-buyer
           HPI_SHORTLIST_SCREENSHOTS: ${{ runner.temp }}/hpi-react-shortlist
         run: python -m unittest discover -s frontend/react/tests -p 'test_*.py' -v
@@ -53,6 +54,7 @@ jobs:
         with:
           name: hpi-react-integration-screenshots
           path: |
+            ${{ runner.temp }}/hpi-react-geo/*.png
             ${{ runner.temp }}/hpi-react-buyer/*.png
             ${{ runner.temp }}/hpi-react-shortlist/*.png
           if-no-files-found: warn

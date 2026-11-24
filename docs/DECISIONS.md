@@ -102,3 +102,8 @@
 ### 24 November: React integration review authorisation
 
 Owner approved React Application Integration V1 implementation, commits on a short-lived branch based on development, canonical persistence reuse, feature parity, CI and a review PR. See [PR #8](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/8). This is bounded fictional integration approval only: no merge, deployment, legacy retirement, real property data, map adoption or phase acceptance authorised. Final UI/stack acceptance remains subject to review and applicable security/rights gates.
+
+
+## 24 November 2026 owner authorisation
+
+PR #8 synthetic React accepted and merged to development after exact-head CI success. Synthetic Geographic Evidence Integration V1 authorised on development, using versioned read-only virtual display positions, separate from the original matcher and frozen SQLite records. See [contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). No approval of real geography, external providers, main merge, deployment or publication. P3 10%, weighted MVP 22.8% unchanged.

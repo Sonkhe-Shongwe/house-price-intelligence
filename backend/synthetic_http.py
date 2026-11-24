@@ -16,6 +16,7 @@ from typing import Any
 from backend.investigation_contract import ContractError
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
+from backend.synthetic_map import map_evidence
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -52,6 +53,7 @@ def _static_response(start_response, asset):
 ID_ROUTE = re.compile(r"^/v1/investigations/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$")
 ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
 UUID_PART = r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+MAP_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/map$")
 SHORTLIST_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"$")
 SHORTLIST_MEMBERS_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries$")
 SHORTLIST_ENTRY_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries/" + UUID_PART + r"$")
@@ -92,7 +94,7 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
 
 
 def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
-               react_assets: dict[str, tuple[bytes, str]] | None = None):
+               react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -101,6 +103,10 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
     if not isinstance(store, SyntheticInvestigationStore):
         raise TypeError("Only the fixture-backed investigation store may be served")
     shortlists = SyntheticShortlistService(store)
+    if synthetic_map and react_assets is None:
+        raise ValueError("Synthetic map requires the React frontend")
+    react_headers = [(key, value + "; worker-src 'self'" if synthetic_map and key == "Content-Security-Policy" else value)
+                     for key, value in SECURITY_HEADERS]
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "")
@@ -126,7 +132,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             payload, content_type = react_assets[path]
             start_response("200 OK", [("Content-Type", content_type),
-                                      ("Content-Length", str(len(payload))), *SECURITY_HEADERS])
+                                      ("Content-Length", str(len(payload))), *react_headers])
             return [payload]
 
         if react_assets is None and path in STATIC_ASSETS:
@@ -254,6 +260,20 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
             if found is None:
                 return _response(start_response, 404, {"error": "address_not_found"})
             return _response(start_response, 200, found)
+
+        map_match = MAP_ROUTE.fullmatch(path)
+        if map_match:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, map_evidence(
+                    store, map_match.group(1), enabled=synthetic_map))
+            except EvidenceStoreError as exc:
+                if str(exc) == "Investigation not found":
+                    return _response(start_response, 404, {"error": "investigation_not_found"})
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            except (sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
 
         match = ID_ROUTE.fullmatch(path)
         if match:

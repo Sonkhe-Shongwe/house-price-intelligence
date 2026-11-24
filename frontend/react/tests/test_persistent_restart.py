@@ -41,12 +41,14 @@ def free_port():
 
 
 class LocalFixtureProcess:
-    def __init__(self, port: int, *, database: Path | None, flags: bool = True):
+    def __init__(self, port: int, *, database: Path | None, flags: bool = True, synthetic_map: bool = False):
         self.port=port
         self.base=f"http://127.0.0.1:{port}"
         args=[sys.executable, "-m", SERVER, "--port", str(port), "--frontend", "react"]
         if flags:
             args.append("--fixture-only")
+        if synthetic_map:
+            args.append("--synthetic-map")
         if database is not None:
             args.extend(["--fixture-db",str(database)])
         self.log=tempfile.TemporaryFile(mode="w+t",encoding="utf-8")

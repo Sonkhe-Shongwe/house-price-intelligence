@@ -26,7 +26,10 @@ def main():
                         help="Explicit opt-in: persist invented fixture evidence at this local SQLite file")
     parser.add_argument("--frontend", choices=("legacy", "react"), default="legacy",
                         help="Explicitly choose the integrated React candidate; legacy remains available")
+    parser.add_argument("--synthetic-map", action="store_true", help="Opt in to virtual display geography; no real locations")
     args = parser.parse_args()
+    if args.synthetic_map and args.frontend != "react":
+        parser.error("--synthetic-map requires --frontend react")
     if not args.fixture_only:
         parser.error("This demonstrator requires the explicit --fixture-only opt-in")
     if not 1024 <= args.port <= 65535:
@@ -39,7 +42,7 @@ def main():
         parser.error(f"Refusing fixture database: {exc}")
     try:
         # Deliberately no option to bind to 0.0.0.0 or a remote interface.
-        with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets)) as server:
+        with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets, synthetic_map=args.synthetic_map)) as server:
             print(f"Fixture-only API at http://127.0.0.1:{args.port}/health")
             print("WARNING: invented records, no auth, no CORS, NOT FOR DEPLOYMENT")
             if args.fixture_db is not None:

@@ -4,6 +4,7 @@ import {adaptInvestigation, type InvestigationView} from './evidenceBridge';
 import './sourceReview.css';
 import './buyerWorkflow.css';
 import SavedComparison from './SavedComparison';
+import GeoMapPanel from './GeoMapPanel';
 
 type Candidate = {
   addressId: string; label: string; hint: string | null; ambiguous: boolean;
@@ -220,7 +221,7 @@ export default function BuyerWorkflow(){
         <h1>Find a parcel.<br/><em>Examine the evidence.</em></h1>
         <p>A real browser-to-Python investigation flow using imaginary properties and historical-sale fixtures, with no predictions or claimed geographic accuracy.</p>
       </div><div className="source-meta"><span>API · p3-draft-v0.3</span><span>Writes · local synthetic SQLite</span></div></section>
-      <div className="source-warning" role="note">This is a fictional-only local application. Saved investigations use the selected local fixture database; do not enter personal information. A shared street address may represent two different parcels. No login, real property records, map positions or current value estimates.</div>
+      <div className="source-warning" role="note">This is a fictional-only local application. Saved investigations use the selected local fixture database; do not enter personal information. A shared street address may represent two different parcels. No login, real property records, real map positions or current value estimates.</div>
       <section className="buyer-columns">
         <div className="buyer-forms">
           <article className="buyer-pane"><div className="buyer-section-number">01 / SEARCH</div>
@@ -272,7 +273,7 @@ export default function BuyerWorkflow(){
                 disabled={(!chosen&&!PIN.test(manualPin)) || phase!=='idle'}>
                 {phase==='creating'?'Saving and verifying…':'Save fictional investigation'}</button>
             </form>
-            <div className="buyer-constraint">An address must be explicitly selected; a manually entered PIN is a separate lookup. All geographic map geometry remains unavailable.</div>
+            <div className="buyer-constraint">An address must be explicitly selected; a manually entered PIN is a separate lookup. Real geography remains unverified; a separate fictional display layer is optional.</div>
           </article>
         </div>
         <aside className="buyer-progress">
@@ -280,7 +281,7 @@ export default function BuyerWorkflow(){
           <h2>Trace every decision.</h2><p>Server-owned parcel identity, source-verified comparable sales and reproducible saved results.</p>
           <div className="buyer-progress-line"><span className={chosen?'buyer-done':''}>1</span><div><b>Identify parcel</b><small>{chosen?'Specific synthetic PIN resolved':'Select a candidate from the search results'}</small></div></div>
           <div className="buyer-progress-line"><span className={record?'buyer-done':''}>2</span><div><b>Save source evidence</b><small>{record?'Frozen investigation reopened':'Send buyer inputs to the Python matcher'}</small></div></div>
-          <div className="buyer-progress-line"><span>3</span><div><b>Do not infer location</b><small>Map pins unavailable until independently verified</small></div></div>
+          <div className="buyer-progress-line"><span>3</span><div><b>Do not infer location</b><small>Only opt-in virtual positions; no real-world location claims</small></div></div>
           <div className="buyer-reopen-card"><label htmlFor="buyer-reopen-id">Reopen saved investigation ID</label>
             <form onSubmit={reopen}><input id="buyer-reopen-id" data-testid="buyer-reopen-id" type="text"
               value={reopenInput} onChange={e=>setReopenInput(e.target.value)}
@@ -311,10 +312,7 @@ export default function BuyerWorkflow(){
             <p data-testid="buyer-explanation">{selected?selected.explanation:record.comparables.length
               ?'Choose a sale to inspect its exact original matching explanation.'
               :'No qualified comparable sales were returned by the Python matcher.'}</p></div></article>
-          <article className="buyer-map-disabled" data-testid="buyer-no-geometry"><div className="buyer-disabled-icon" aria-hidden="true">⌾</div>
-            <span>GEOLOCATION EVIDENCE / NOT AVAILABLE</span><h3>Map withheld.</h3>
-            <p>The API contains no approved geographic feature for this saved investigation. This UI will not invent map coordinates or distances.</p>
-            <strong>NO MAP MARKERS · NO VALUATION</strong></article></div>
+          <GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/></div>
         <div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
           <div><small>User-reported asking price</small><strong>{record.askingPriceText}</strong></div>
           <div><small>Fixture build</small><strong data-testid="buyer-build">{record.sourceBuildId}</strong></div>
@@ -324,7 +322,7 @@ export default function BuyerWorkflow(){
       </section>}
       <SavedComparison active={record}/>
       <footer className="source-footer"><b>HOUSE PRICE INTELLIGENCE / BUYER WORKSPACE</b>
-        <span>Fictional · Loopback only · Exact cents · No geographic map</span></footer>
+        <span>Fictional · Loopback only · Exact cents · No real geographic map</span></footer>
     </div>
   </div>;
 }
