@@ -20,7 +20,7 @@ npm run dev
 
 Navigate to the displayed `http://127.0.0.1:5173/` URL. The app requires Node 22.12+ (or a currently supported Vite runtime). **After installing development dependencies, all browser content and rendering are local:** no basemap CDN, API key or external fonts. Browser WebGL2 availability determines whether vector rendering works; the evidence list and SVG are available regardless.
 
-Run `npm run typecheck` to check typed TSX and `python -m unittest discover -s browser_tests -p 'test_react_map_spike.py' -v` from the repo root **after `npm run build`**, with pinned Playwright/Chromium available. The included GitHub workflow is a candidate until the spike is committed to the repository and its exact-HEAD CI is verified. This v0.5 source has passed an isolated TypeScript/Vite build and offline harness tests. The exact-source production ESM and WebGL result must be verified separately in GitHub Actions. Do not upload or deploy the distribution.
+Run `npm run typecheck` to check typed TSX and `python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_*.py' -v` from the repository root **after `npm run build`**, with Playwright and Chromium available. The isolated feature branch is committed as editable source; [full-source CI run 45298710007](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45298710007) passed a clean `npm ci`, production ESM build, actual MapLibre WebGL-ready and six real browser tests. Do not infer approval to replace the existing Python/SQLite frontend or deploy.
 
 ## Map accuracy and privacy boundary
 
