@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 71.4% owner-authorised planning estimate (24 Nov) |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 76.1% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -139,3 +139,7 @@ Owner-authorised PR1–PR8 verified all eight workflows at 240f5ce. Weighted est
 
 ## 24 November 2026: consolidation authorisation
 Owner approved PC1–PC8 fictional runtime integration and bounded public-source research. No real data, external contact, provider provisioning, main merge or deployment. See [consolidation](engineering/PRODUCTION_CONSOLIDATION_V1.md).
+
+
+## 24 November 2026: consolidation milestone progress review
+PC1–PC8 verified same-database reviewed fictional source lifecycle, cross-build reopen and rollback, revised PostgreSQL map and bounded recovery checks; weighted estimate 76.1% (71.4% prior, +4.7 points). Auth0 is recommended first OIDC candidate, not selected/provisioned; real property disclosure remains unapproved. All weights and exit gates unchanged. See [consolidation](engineering/PRODUCTION_CONSOLIDATION_V1.md) and [roadmap](P_PHASE_ROADMAP.md). No release scope change, provider account, deployment or contact authorised.
