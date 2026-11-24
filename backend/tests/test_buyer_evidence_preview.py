@@ -30,7 +30,7 @@ class BuyerEvidencePreviewTests(unittest.TestCase):
         item["subject"]["label"]="private marker"
         self.assertNotIn("private marker",str(project_buyer_evidence(item)))
     def test_invalid_chronology_or_money_refused(self):
-        for key,val in (("assessment_year",2024),("age_days",0),("sale_price_usd",525000.0)):
+        for key,val in (("characteristics_year",2024),("age_days",0),("sale_price_usd",525000.0)):
             item=copy.deepcopy(self.record);item["comparables"][0][key]=val
             with self.subTest(key=key),self.assertRaises(DisclosureDenied):project_buyer_evidence(item)
     def test_empty_evidence_has_no_fabricated_sales(self):
