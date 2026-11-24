@@ -12,3 +12,6 @@ New Python tests: distinct source-bound points and no writes, disabled/unknown a
 
 ## Rollback and handoff
 Remove --synthetic-map to use the existing React experience; legacy remains selectable. No new database or data conversion. Do not merge main, deploy, publish real records or select external tile/geocoding providers. Read [checkpoint](../CHECKPOINT.md) and [P3 contract](P3_APPLICATION_CONTRACT.md).
+
+## First hosted verification and follow-up
+Development commit de9204b6680cfd4d26b3cb75e4b4b6fbf160a50c: [React CI 45345244250](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45345244250) passed 31/31 including all three new geographic browser journeys; [regression CI 45345244396](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45345244396) passed 180 Python and 16 existing browser tests. Actual screenshot inspected. Follow-up pins the v1 source digest at both boundaries, renders the source GeoJSON in the local worker and isolates deferred module failure from the buyer workspace with an additional real browser test. Verify this follow-up's exact-head CI before acceptance.

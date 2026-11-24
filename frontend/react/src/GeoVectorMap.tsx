@@ -20,7 +20,12 @@ export default function GeoVectorMap({points,selected,onSelect}:{points:MapPoint
     const guard=window.setTimeout(fail,10000);
     try{
       map=new maplibregl.Map({container:node.current,
-        style:{version:8,sources:{},layers:[{id:'virtual-background',type:'background',paint:{'background-color':'#e4eee7'}}]},
+        style:{version:8,sources:{positions:{type:'geojson',data:{type:'FeatureCollection',
+          features:points.map(p=>({type:'Feature',id:p.rank,geometry:{type:'Point',coordinates:p.coordinates},
+            properties:{rank:p.rank}}))}}},
+          layers:[{id:'virtual-background',type:'background',paint:{'background-color':'#e4eee7'}},
+            {id:'virtual-position-halos',type:'circle',source:'positions',
+              paint:{'circle-radius':25,'circle-color':'#245648','circle-opacity':0.10}}]},
         center:[0,0],zoom:11.5,minZoom:9,maxZoom:16,renderWorldCopies:false,
         dragRotate:false,pitchWithRotate:false,scrollZoom:false,attributionControl:false});
       instance.current=map;

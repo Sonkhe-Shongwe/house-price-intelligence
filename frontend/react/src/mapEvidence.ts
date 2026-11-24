@@ -12,7 +12,7 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
      r.build_id!==record.sourceBuildId||r.source_kind!=='synthetic_fixture'||
      r.geometry_kind!=='virtual_display_point'||r.real_geography_verified!==false||
      r.distance_supported!==false||r.position_source_id!=='synthetic-display-geography-v1'||
-     typeof r.position_source_sha256!=='string'||! /^[0-9a-f]{64}$/.test(r.position_source_sha256))
+     r.position_source_sha256!=='c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9')
     throw Error('Map provenance rejected');
   const collection=object(r.feature_collection);
   if(collection.type!=='FeatureCollection'||!Array.isArray(collection.features))

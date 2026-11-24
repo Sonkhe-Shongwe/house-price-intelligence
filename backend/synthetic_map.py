@@ -25,6 +25,8 @@ POSITION_SHA256 = hashlib.sha256(json.dumps(
 
 
 def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
+    if POSITION_SHA256 != "c692c4933f7e967c9bd89a5278126ffcbbda3fcbc5c37f4c0f1c6f2824d5f7b9":
+        raise EvidenceStoreError("Display source changed without a new version")
     result = store.reopen(investigation_id)
     build = result["data_build"]
     response = {

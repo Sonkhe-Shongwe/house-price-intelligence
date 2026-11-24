@@ -64,6 +64,15 @@ class GeographicIntegrationTests(unittest.TestCase):
         expect(self.page.get_by_test_id("geo-error")).to_be_visible()
         expect(self.page.get_by_test_id("geo-vector")).to_have_count(0)
         expect(self.page.get_by_test_id("buyer-sale")).to_have_count(3)
+    def test_missing_optional_bundle_does_not_crash_buyer(self):
+        self.save()
+        self.page.route("**/assets/GeoVectorMap-*.js",lambda r:r.abort())
+        self.page.get_by_test_id("geo-load").click()
+        expect(self.page.get_by_test_id("geo-bundle-fallback")).to_be_visible(timeout=15000)
+        expect(self.page.get_by_test_id("buyer-sale")).to_have_count(3)
+        self.page.get_by_test_id("buyer-sale").nth(1).click()
+        expect(self.page.get_by_test_id("buyer-sale").nth(1)).to_have_attribute("aria-pressed","true")
+
     def test_renderer_failure_keeps_evidence_and_mobile_reflow(self):
         self.page.set_viewport_size({"width":320,"height":800})
         self.page.add_init_script("""const orig=HTMLCanvasElement.prototype.getContext;

@@ -1,8 +1,15 @@
-import {lazy,Suspense,useEffect,useRef,useState} from 'react';
+import {Component,lazy,Suspense,useEffect,useRef,useState,type ReactNode} from 'react';
 import {adaptMap,type MapEvidence} from './mapEvidence';
 import type {InvestigationView} from './evidenceBridge';
 import './geoMap.css';
 const VectorMap=lazy(()=>import('./GeoVectorMap'));
+class OptionalMapBoundary extends Component<{children:ReactNode},{failed:boolean}>{
+  state={failed:false};
+  static getDerivedStateFromError(){return {failed:true};}
+  render(){return this.state.failed
+    ? <p role="status" data-testid="geo-bundle-fallback">Optional map could not load. The verified sale list remains usable.</p>
+    :this.props.children;}
+}
 export default function GeoMapPanel({record,selected,onSelect}:{record:InvestigationView;selected:number|null;onSelect:(n:number)=>void}){
   const [data,setData]=useState<MapEvidence|null>(null);
   const [error,setError]=useState('');
@@ -25,9 +32,9 @@ export default function GeoMapPanel({record,selected,onSelect}:{record:Investiga
   if(data&&data.points.length>0)return <article className="geo-panel" data-testid="geo-panel">
     <header><small>FICTIONAL GEOGRAPHIC EVIDENCE</small><h3>Explore saved sale positions.</h3>
       <p>Virtual points only. No streets, real locations, distances or valuation.</p></header>
-    <Suspense fallback={<p role="status">Loading optional map renderer…</p>}>
+    <OptionalMapBoundary><Suspense fallback={<p role="status">Loading optional map renderer…</p>}>
       <VectorMap points={data.points} selected={selected} onSelect={onSelect}/>
-    </Suspense>
+    </Suspense></OptionalMapBoundary>
     <small className="geo-provenance">Display source: {data.source} · SHA-256 {data.digest.slice(0,12)} · Separate from original matching coordinates</small>
   </article>;
   return <article className="buyer-map-disabled" data-testid="buyer-no-geometry"><div className="buyer-disabled-icon" aria-hidden="true">⌾</div>
