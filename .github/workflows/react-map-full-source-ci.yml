@@ -35,6 +35,17 @@ jobs:
           npm ci --no-fund --no-audit
           npm run typecheck
           npm run build
+      - name: Verify React presentation adapter against REAL fixture-only WSGI P3/P6 JSON
+        run: |
+          mkdir -p "$RUNNER_TEMP/hpi-source-bridge"
+          PYTHONPATH=. python design-prototypes/react-map-spike/tests/export_real_api_contract.py > "$RUNNER_TEMP/hpi-source-bridge/actual-http.json"
+          design-prototypes/react-map-spike/node_modules/.bin/esbuild \
+            design-prototypes/react-map-spike/src/evidenceBridge.ts \
+            --bundle --platform=node --format=esm \
+            --outfile="$RUNNER_TEMP/hpi-source-bridge/evidenceBridge.mjs"
+          node design-prototypes/react-map-spike/tests/test_evidence_bridge.mjs \
+            "$RUNNER_TEMP/hpi-source-bridge/actual-http.json" \
+            "$RUNNER_TEMP/hpi-source-bridge/evidenceBridge.mjs"
       - name: Verify deferred map chunk and same-origin worker bundle
         run: |
           python - <<'PY'
