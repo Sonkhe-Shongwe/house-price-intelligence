@@ -243,7 +243,13 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual({c["sale_price_usd"] for c in result["comparables"]},{"487500.01","542750.02","519900.03"})
             self.assertIsNone(result["valuation"])
             self.assertEqual(self.call("alice","GET","/v1/investigations/"+original["investigation_id"])[1],original)
-            self.assertFalse(self.call("alice","GET","/v1/investigations/"+result["investigation_id"]+"/map")[1]["map_available"])
+            code,map_result=self.call("alice","GET","/v1/investigations/"+result["investigation_id"]+"/map")
+            self.assertEqual(code,200)
+            self.assertFalse(map_result["map_available"])
+            self.assertIsNone(map_result["position_source_id"])
+            self.assertIsNone(map_result["position_source_sha256"])
+            self.assertEqual(map_result["reason"],"geometry_unavailable")
+            self.assertEqual(map_result["feature_collection"]["features"],[])
             with sync_playwright() as pw:
                 browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
                 try:
@@ -258,6 +264,9 @@ class RuntimeTests(unittest.TestCase):
                     expect(page.get_by_test_id("buyer-result")).to_contain_text("$487,500.01")
                     expect(page.get_by_test_id("buyer-result")).to_contain_text("$542,750.02")
                     expect(page.get_by_test_id("buyer-result")).to_contain_text("$519,900.03")
+                    page.get_by_test_id("geo-load").click()
+                    expect(page.get_by_test_id("geo-unavailable")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("geo-error")).to_have_count(0)
                 finally:browser.close()
         finally:activate(ADMIN,old_build,generation)
 

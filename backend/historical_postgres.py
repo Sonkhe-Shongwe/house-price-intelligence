@@ -3,7 +3,7 @@ No network, HTTP endpoint, runtime activation, or real-property publication.
 Input is operator-side; caller authenticates source and completeness separately.
 """
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from collections import defaultdict
 from backend.real_source_intake import prepare_intake, digest
 from backend.curated_ingestion_candidate import ImportRefused, _verify_or_insert
@@ -110,6 +110,44 @@ def import_historical(conn, **intake):
         _verify(adapter,build,ids,rows)
     return build
 
+def _address_key(value):
+    return " ".join(value.casefold().split())
+
+def _address_options(conn, build, snapshot, year):
+    """Bounded snapshot-specific eligible addresses, not market-wide identity."""
+    groups=defaultdict(list)
+    for pin,label in conn.execute("""SELECT pin,display_address FROM historical_address_states
+                                      WHERE snapshot_id=? AND tax_year=? AND address_state='one_nonblank'
+                                      ORDER BY pin""",(snapshot,year)).fetchall():
+        token="h-"+digest([build,pin,year])[:38]
+        groups[_address_key(label)].append((pin,token))
+    return groups
+
+def search_historical_address(conn, query, analysis_date, **intake):
+    """Private exact lookup of eligible address records; no raw row returned.
+    A single eligible candidate is parcel-only, not proof of unique ownership
+    or a physical building. Missing/ambiguous source rows cannot be selected.
+    """
+    _check(conn)
+    if not isinstance(query,str) or not query.strip() or len(query)>240:
+        raise ImportRefused("Invalid historical address query")
+    try:
+        when=date.fromisoformat(analysis_date)
+        if when.isoformat()!=analysis_date or when.year not in (2024,2025):
+            raise ValueError
+    except (TypeError,ValueError):
+        raise ImportRefused("Historical analysis date outside intake window") from None
+    plan=prepare_intake(**intake)
+    build,ids,rows=_plan_rows(plan)
+    with conn.transaction():
+        conn.execute("SELECT pg_advisory_xact_lock(194323)")
+        adapter=FixtureConnection(conn)
+        _verify(adapter,build,ids,rows)
+        matches=_address_options(adapter,build,ids["address"],when.year-1).get(_address_key(query),[])
+        return {"status":"one_eligible_candidate" if len(matches)==1 else "ambiguous" if matches else "no_match",
+                "candidate_count":len(matches),"address_id":matches[0][1] if len(matches)==1 else None,
+                "identity_scope":"parcel_only","building_identity_verified":False}
+
 def review_historical(conn, request, **intake):
     """Private operator-side read of a verified inactive build, not a served API.
     Reuse canonical subject/candidate queries and redacted evidence contract.
@@ -125,8 +163,17 @@ def review_historical(conn, request, **intake):
         # Shared read queries have no create/reopen or disclosure capability.
         store=CuratedReadQueries(adapter,build)
         validated=validate_request(request)
-        if validated["subject"].get("address_id") is not None:
-            raise ImportRefused("Historical address resolution not yet enabled")
+        token=validated["subject"].get("address_id")
+        if token is not None:
+            year=int(validated["analysis_date"][:4])-1
+            groups=_address_options(adapter,build,ids["address"],year)
+            found=[pin for group in groups.values() if len(group)==1 for pin,aid in group if aid==token]
+            if len(found)!=1:
+                raise ImportRefused("Historical address candidate not resolved in build/year")
+            submitted=validated["subject"]["pin"]
+            if submitted is not None and submitted!=found[0]:
+                raise ImportRefused("Historical address identity conflict")
+            validated["subject"]["pin"]=found[0]
         subject=store._resolved_subject(validated)
         candidates,_=store._candidates(validated)
         provenance={"build_id":build,"built_at_utc":plan["source_manifests"]["sales"]["extracted_at_utc"],

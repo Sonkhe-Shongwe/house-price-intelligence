@@ -59,6 +59,18 @@ def map_evidence(store, investigation_id: str, *, enabled: bool) -> dict:
         "reason": "map_disabled",
         "feature_collection": {"type": "FeatureCollection", "features": []},
     }
+    # A reviewed source-shaped replay has no reviewed display positions.
+    # Do not attach another build's position-source identity or permit unknown builds.
+    from backend.curated_ingestion_candidate import _plan
+    replay = build["build_id"] == _plan("v4")[2]
+    if replay:
+        if build["source_kind"] != "synthetic_fixture":
+            raise EvidenceStoreError("Unexpected replay map evidence source")
+        if hasattr(store, "verify_map_fixture"):
+            store.verify_map_fixture()
+        response.update(position_source_id=None, position_source_sha256=None,
+                        reason="geometry_unavailable" if enabled else "map_disabled")
+        return response
     if not enabled:
         return response
     if (build["build_id"] != BUILD_ID and not revision and not rich) or build["source_kind"] != "synthetic_fixture":

@@ -13,10 +13,12 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
   const revisedSource=['candidate-e758c7da195b3ac129a70614','candidate-b693166e4803634e513f41d2'].includes(record.sourceBuildId)&&
     r.position_source_id==='synthetic-display-geography-v2'&&r.position_source_sha256==='411cd6d2403b0b520e52d67f8c1ea99daa1f7fbdf8f61a1bffdb17ecbc9735f8';
   const richSource=record.sourceBuildId==='candidate-12d7698f01e5de3078c4d754'&&r.position_source_id==='synthetic-display-geography-v3'&&r.position_source_sha256==='f3c44ac291dc4bdf008f9ec0685ea60f5392cb81fc9a071d766e442c7385c2b5';
+  const noSource=r.map_available===false&&r.position_source_id===null&&r.position_source_sha256===null&&
+    (r.reason==='geometry_unavailable'||r.reason==='map_disabled');
   if(r.contract_version!=='synthetic-map-v1'||r.investigation_id!==record.investigationId||
      r.build_id!==record.sourceBuildId||r.source_kind!=='synthetic_fixture'||
      r.geometry_kind!=='virtual_display_point'||r.real_geography_verified!==false||
-     r.distance_supported!==false||(!legacySource&&!revisedSource&&!richSource))
+     r.distance_supported!==false||(!legacySource&&!revisedSource&&!richSource&&!noSource))
     throw Error('Map provenance rejected');
   const collection=object(r.feature_collection);
   if(collection.type!=='FeatureCollection'||!Array.isArray(collection.features))
@@ -25,7 +27,7 @@ export function adaptMap(raw:unknown, record:InvestigationView):MapEvidence {
     if(collection.features.length!==0||typeof r.reason!=='string'||
        !['map_disabled','geometry_unavailable','insufficient_or_unsupported_evidence'].includes(r.reason))
       throw Error('Invalid unavailable map');
-    return {source:r.position_source_id as string,digest:r.position_source_sha256 as string,points:[],reason:r.reason};
+    return {source:noSource?'':r.position_source_id as string,digest:noSource?'':r.position_source_sha256 as string,points:[],reason:r.reason};
   }
   if(r.map_available!==true||r.reason!==null||record.selectedCount===0||
      !['supported_neighbourhood','exploratory_spatial'].includes(record.status)||
