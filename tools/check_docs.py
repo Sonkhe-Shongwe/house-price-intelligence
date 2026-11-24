@@ -79,6 +79,10 @@ def progress_errors(root: Path):
             errors.append(f"Roadmap summary does not show computed progress {expected_label}")
         if expected_label not in full.read_text(encoding="utf-8"):
             errors.append(f"Detailed roadmap does not show computed progress {expected_label}")
+        for rel in ("docs/CHECKPOINT.md", "docs/DOCUMENTATION_INDEX.md", "README.md",
+                    "docs/MASTER_CONTINUATION_PROMPT.md"):
+            if expected_label not in (root / rel).read_text(encoding="utf-8"):
+                errors.append(f"{rel}: current handoff lacks computed progress {expected_label}")
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
     return errors
@@ -94,7 +98,7 @@ def active_handoff_errors(root: Path):
     required = {
         "README.md": ("--fixture-db", "PRs #5 and #6"),
         "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.4", "two-to-three-property shortlist"),
-        "docs/ROADMAP.md": ("P6 two-to-three-property shortlist", "22.8%"),
+        "docs/ROADMAP.md": ("P6 two-to-three-property shortlist",),
         "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md",),
         "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),
         "frontend/README.md": ("POST /v1/addresses/search", "105 Fictional Court", "building_identity_verified"),

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |
 | Method | Product-first, verifiable foundations before advanced prediction | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) |
-| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 22.8% subjective baseline |
+| Delivery control | Retain House Price Intelligence P0-P8 stages, weights and gates | [P-stage roadmap](P_PHASE_ROADMAP.md); 62.9% owner-authorised planning estimate (24 Nov) |
 | Engineering process (approved 23 Nov) | Eight-step requirements/architecture/risk/implementation/tests/integration/review/handoff; safe migrations and explicit evidence levels | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md); process approval, not feature/stack approval |
 | Development station (approved 23 Nov; refined 23 Nov) | **One ongoing `development` working branch** for connected P3–P6 feature work, **stable `main`** for reviewed and owner-accepted milestones; GitHub Actions on development pushes and integration PRs; local Windows pulls only for indispensable owner/platform acceptance | [Cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Additional branches only for exceptional needs. Avoid squash/force rewrites of permanent branch; no blanket permission to merge or deploy |
 | Delivery evidence (23 Nov) | Original owner manual fixture journey, now followed by real hosted synthetic browser and API tests on `development` | [Current checkpoint](CHECKPOINT.md) identifies the latest verified run; earlier 125-test main and isolated 127-test Windows results are historical snapshots, not the active CI counts |
@@ -115,3 +115,7 @@ Owner explicitly approved P3.1–P3.7 as the provisional synthetic application c
 
 ## 24 November 2026: PostgreSQL and source-readiness authorisation
 Owner approved PostgreSQL as a production database candidate and authorised PA1–PA4 synthetic implementation/CI and PA5–PA7 bounded aggregate-only research/documentation. Existing SQLite runtime preserved; no provider, deployment, real market, production authentication or publication rights approved. See [readiness contract](engineering/PRODUCTION_READINESS_V1.md). Formal P3 exit open, P3 10% and weighted MVP 22.8% unchanged.
+
+
+## 24 November 2026: milestone progress reassessment
+Owner authorised formal review and updating the recorded estimate after meaningful verified milestones. Current weighted estimate 62.9%, previous 22.8%, +40.1 percentage points. Original weights, product scope and phase exit gates retained. Evidence and remaining blockers are recorded in [P0–P8 roadmap](P_PHASE_ROADMAP.md) and [checkpoint](CHECKPOINT.md). Partial credit recognises verified integrated deliverables; this is not production approval, whole-phase acceptance, permission to deploy or a new code implementation instruction. Earlier scores in dated decisions are historical.
