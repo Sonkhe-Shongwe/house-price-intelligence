@@ -1,5 +1,9 @@
 # House Price Intelligence: current checkpoint
 
+## 24 November 2026: Private Real-Data Beta V1 (authorised, activation blocked)
+
+Owner authorised Private Real-Data Beta V1 on 24 November 2026: durable private database preparation, real-property evidence projection, authentication integration, scoped commits and private end-to-end acceptance. One new bounded extraction only after protected storage and permitted data-use scope are verified. No public publication, paid infrastructure, public deployment, valuation or main merge. Historical recovery commit 1397a13 passed 10/10 triggered workflows, including runtime push 45383586713 and 216 Python regression tests. Prior single live extraction remains consumed; new conditional allowance is unused. Internal canonical historical field projection implemented for offline sealed rehearsal, hosted verification pending. Protected durable storage not verified; no new extraction. See [beta contract](engineering/PRIVATE_REAL_DATA_BETA_V1.md).
+
 ## 24 November 2026: Controlled Product Activation Preparation V1
 
 Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. Approved baseline 87.1%. Historical recovery and private seal configuration implemented for invented inputs; hosted verification pending. See [activation decision register](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Real data removed after prior rehearsal. No new extraction, durable real storage, real disclosure, provider provisioning, deployment, valuation or main merge.

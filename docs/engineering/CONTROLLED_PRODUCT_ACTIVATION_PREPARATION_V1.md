@@ -28,3 +28,7 @@ The next meaningful milestone is a controlled private beta, not another independ
 4. Rehearse actual buyer API/browser and recovery with authorised records. Public release and portfolio URL only after explicit separate sign-off.
 
 Current progress is 87.1%; no percentage credit for this contract alone.
+
+
+## Subsequent owner decision
+Owner authorised Private Real-Data Beta V1 on 24 November 2026: durable private database preparation, real-property evidence projection, authentication integration, scoped commits and private end-to-end acceptance. One new bounded extraction only after protected storage and permitted data-use scope are verified. No public publication, paid infrastructure, public deployment, valuation or main merge. Historical recovery commit 1397a13 passed 10/10 triggered workflows, including runtime push 45383586713 and 216 Python regression tests. Prior single live extraction remains consumed; new conditional allowance is unused. See [Private Real-Data Beta V1](PRIVATE_REAL_DATA_BETA_V1.md). Storage verification remains outstanding, so no new live collection.

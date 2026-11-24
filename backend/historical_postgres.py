@@ -9,7 +9,7 @@ from backend.real_source_intake import prepare_intake, digest
 from backend.curated_ingestion_candidate import ImportRefused, _verify_or_insert
 from backend.postgres_ingestion import _check
 from backend.postgres_fixture import FixtureConnection
-from backend.investigation_contract import build_investigation, validate_request
+from backend.investigation_contract import _evaluate_investigation, validate_request
 from backend.synthetic_investigation_store import CuratedReadQueries
 
 from backend.historical_migration import migrate_historical
@@ -148,7 +148,7 @@ def review_historical(conn, request, **intake):
         _verify(adapter,build,ids,rows)
         return _review_verified(adapter,build,ids,plan["source_manifests"]["sales"]["extracted_at_utc"],request)
 
-def _review_verified(adapter,build,ids,stamp,request):
+def _evaluate_verified(adapter,build,ids,stamp,request):
     # Shared read queries have no create/reopen or disclosure capability.
     store=CuratedReadQueries(adapter,build)
     validated=validate_request(request)
@@ -164,10 +164,14 @@ def _review_verified(adapter,build,ids,stamp,request):
             raise ImportRefused("Historical address identity conflict")
         validated["subject"]["pin"]=found[0]
     subject=store._resolved_subject(validated)
-    candidates,_=store._candidates(validated)
+    candidates,transaction_ids=store._candidates(validated)
     provenance={"build_id":build,"built_at_utc":stamp,
                 "source_kind":"historical_research","source_snapshot_ids":sorted(ids.values())}
-    result=build_investigation(validated,resolved_subject=subject,candidate_sales=candidates,data_build=provenance)
+    result,selected=_evaluate_investigation(validated,resolved_subject=subject,candidate_sales=candidates,data_build=provenance)
+    return result,selected,transaction_ids,candidates
+
+def _review_verified(adapter,build,ids,stamp,request):
+    result,_,_,_=_evaluate_verified(adapter,build,ids,stamp,request)
     return {"status":result["status"],"reason":result["reason"],"selected_count":result["selected_count"],
             "tier":result["tier"],"warnings":result["warnings"],"evidence_details_redacted":True,
             "valuation":None,"source_kind":"historical_research","historical_asof_verified":False,

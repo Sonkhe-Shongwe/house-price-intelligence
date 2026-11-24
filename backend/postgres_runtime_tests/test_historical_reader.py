@@ -7,7 +7,9 @@ import psycopg
 from backend.postgres_ingestion import initialise
 from backend.historical_postgres import import_historical
 from backend.historical_migration import migrate_historical
-from backend.historical_reader import ROLE, PrivateHistoricalReader, provision_reader, seal_historical
+from backend.historical_reader import ROLE, PrivateHistoricalReader, provision_reader, seal_historical, _verified
+from backend.historical_postgres import _evaluate_verified
+from backend.historical_beta_projection import project_rehearsal
 from backend.curated_ingestion_candidate import ImportRefused
 from test_historical_import import population
 
@@ -41,6 +43,37 @@ class HistoricalReaderTests(unittest.TestCase):
                         self.assertNotIn("comparables",result)
                         self.assertFalse(result["public_display_approved"])
                         self.assertIsNone(result["valuation"])
+                        # Test-only projection: exact code-generated input, same sealed
+                        # transaction and canonical matching result, no HTTP route.
+                        with rd.transaction():
+                            rd.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+                            adapter,bid,ids,stamp=_verified(rd,seal)
+                            evaluated=_evaluate_verified(adapter,bid,ids,stamp,req)
+                            preview=project_rehearsal(*evaluated,ids)
+                            self.assertEqual(preview["source_kind"],"historical_shape_rehearsal")
+                            self.assertEqual(preview["selected_count"],result["selected_count"])
+                            self.assertEqual(preview["status"],result["status"])
+                            self.assertEqual([s["sale_price_usd"] for s in preview["sales"]],["525000.01"]*3)
+                            self.assertEqual([s["assessment_year"] for s in preview["sales"]],[2024]*3)
+                            self.assertEqual([s["assessed_area_sqft"] for s in preview["sales"]],[1600]*3)
+                            self.assertFalse(preview["provenance"]["publisher_attributed"])
+                            for forbidden in ("pin","document","latitude","longitude","address_id","relational_sha256"):
+                                self.assertNotIn("'"+forbidden+"'",str(preview))
+                            self.assertNotIn("FICT-",str(preview))
+                            # Wrong source membership and duplicate transaction identities
+                            # must not accidentally disclose a price.
+                            with self.assertRaises(ImportRefused):
+                                project_rehearsal(*evaluated,dict(ids,sales="wrong"))
+                            broken=copy.deepcopy(evaluated)
+                            key=next(iter(broken[2]))
+                            broken[2][key].append(broken[2][key][0])
+                            # Corrupt a selected key, not an arbitrary subject key.
+                            first=broken[1][0]
+                            key=(first["pin"],first["document"],first["sale_date"])
+                            broken[2][key].append(broken[2][key][0])
+                            with self.assertRaises(ImportRefused):
+                                project_rehearsal(*broken,ids)
+                        self.assertEqual(reader.review(req),result)
                         for statement in ("SELECT * FROM hpi_candidate.investigations",
                             "UPDATE hpi_candidate.sale_transactions SET price_usd_cents=1",
                             "INSERT INTO hpi_candidate.parcels VALUES ('00000000000009','17')",
