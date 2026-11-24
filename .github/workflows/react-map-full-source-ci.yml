@@ -89,6 +89,10 @@ jobs:
         env:
           HPI_BUYER_SCREENSHOTS: ${{ runner.temp }}/hpi-buyer-workflow-screenshots
         run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_buyer_workflow.py' -v
+      - name: Opt-in source-backed shortlist and editable-notes Chrome acceptance
+        env:
+          HPI_SHORTLIST_SCREENSHOTS: ${{ runner.temp }}/hpi-shortlist-workflow-screenshots
+        run: python -m unittest discover -s design-prototypes/react-map-spike/tests -p 'test_saved_comparison.py' -v
       - name: Publish visual-review evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -98,6 +102,7 @@ jobs:
             ${{ runner.temp }}/hpi-react-full-spike-screenshots/*.png
             ${{ runner.temp }}/hpi-source-connected-screenshots/*.png
             ${{ runner.temp }}/hpi-buyer-workflow-screenshots/*.png
+            ${{ runner.temp }}/hpi-shortlist-workflow-screenshots/*.png
             design-prototypes/react-map-spike/dist/**
           if-no-files-found: warn
           retention-days: 7
