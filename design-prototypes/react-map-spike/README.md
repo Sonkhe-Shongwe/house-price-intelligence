@@ -7,7 +7,7 @@ This is a deliberate continuation of [`../map-evidence-studio.html`](../map-evid
 - **SVG baseline:** beautiful, stable, accessible diagram with explicit marker/card selection. No GPU requirement.
 - **MapLibre GL JS v6 experiment:** GPU WebGL2 canvas with **inline virtual-coordinate GeoJSON**, stylised park/road layers, click-to-select and a separately bundled worker. **Absolutely no real geographic coordinates, tiles, geocoder, property facts or valuation.**
 
-Both operate with React 19, TypeScript, Vite 8 and custom CSS tokens. All dependency and map choices are subject to later architecture and user review. There is no server API connection or account/private note storage. Text is synthetic study fixture only.
+Both operate with React 19, TypeScript, Vite 8 and custom CSS tokens. All dependency and map choices remain subject to owner review. **The original SVG/MapLibre concept at `/` remains standalone and invented.** A separate **`/source-review` route** reads the actual local Python/SQLite fixture API through an isolated read-only same-origin preview, without reusing invented map coordinates. No accounts, private notes, real property datasets or production permissions are supplied.
 
 ## Run locally
 
@@ -28,8 +28,25 @@ The separate **evidenceBridge.ts** module is a read-only candidate for presentin
 
 Run the isolated cross-layer check as part of [.github/workflows/react-map-full-source-ci.yml](../../.github/workflows/react-map-full-source-ci.yml), or reproduce after npm ci from the repository root by exporting fixture-only WSGI JSON with tests/export_real_api_contract.py, compiling evidenceBridge.ts with the pinned TypeScript compiler, and executing tests/test_evidence_bridge.mjs. This test is deliberately separate from the six browser UI tests.
 
-**Verified** by [GitHub Actions 45300580369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45300580369): the actual WSGI API JSON and 13 integrity/tamper guards passed, alongside six real Chrome journeys and the clean Vite build. See the [source/geometry integration contract](../../docs/design/READ_ONLY_REACT_EVIDENCE_ADAPTER_2026-11-24.md). **No browser-to-Python integration, real geometry, map API, live application change, framework acceptance or release** is implied.
+**Verified** by [GitHub Actions 45300580369](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45300580369): the actual WSGI API JSON and 13 integrity/tamper guards passed, alongside six real Chrome journeys and the clean Vite build. See the [source/geometry integration contract](../../docs/design/READ_ONLY_REACT_EVIDENCE_ADAPTER_2026-11-24.md). **That adapter-only test does not itself establish browser-to-Python connectivity.** The separate source-connected preview below does; real geometry, live application changes, framework acceptance and release remain unapproved.
 
+## Working read-only React -> local Python/SQLite preview (24 November)
+
+The new source-connected investigation screen is separate from the invented-map style lab. It performs **real same-origin GET requests** to HPI's existing WSGI `GET /v1/investigations/{uuid}` and `GET /v1/shortlists/{uuid}`, using fresh fictional records seeded by the isolated Python runner. It displays exact cents, source snapshots and matching explanations, with a deliberate **Location unavailable** panel and no fictitious property pins.
+
+Run from the **repository root**:
+
+```bash
+npm ci --prefix design-prototypes/react-map-spike
+npm run build --prefix design-prototypes/react-map-spike
+python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8797
+```
+
+Open http://127.0.0.1:8797/source-review in your browser. This local WSGI preview is **read-only**. It serves a finite built HTML/hashed asset allowlist and guarded GET paths, rejects writes, proxy headers and cross-site origins, and inherits the backend's exact source contracts. No other HPI application route is modified.
+
+[Detailed integration/security handoff](../../docs/design/SOURCE_CONNECTED_REACT_PREVIEW_GATE_2026-11-24.md) and [isolated feature branch](https://github.com/Sonkhe-Shongwe/house-price-intelligence/tree/feature/react-maplibre-full-spike-validation-20261123).
+
+**Verified browser end-to-end:** [GitHub Actions 45306167930](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45306167930) passed the original six WebGL/UI tests and seven new source-connected Chrome tests. This is a local fictional-data proof, not the public HPI app, approved geographic coordinates, final visual direction or phase acceptance.
 ## Map accuracy and privacy boundary
 
 `src/data.ts` uses **diagram x/y percentages**. The MapLibre adapter converts these percentages to entirely virtual positions near the origin to exercise GeoJSON and WebGL. Those numbers are **not** verified longitude/latitude for any subject, sale, neighbourhood or parcel. They must never be passed to the HPI matcher, used to calculate real distance, or published as geographic evidence.
