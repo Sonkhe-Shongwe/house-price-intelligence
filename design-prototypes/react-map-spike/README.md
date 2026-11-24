@@ -61,6 +61,21 @@ python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8
 Open **http://127.0.0.1:8797/buyer-workflow**, create a fictional investigation, scroll to **Saved comparison**, create the shortlist, add the investigation, and save a note. Create or reopen a second investigation to compare two distinct parcels. This **third** preview mode must be explicitly enabled: the existing read-only and investigation-only modes still reject shortlist writes. DELETE remains disabled even in the third mode, and all writes go through the existing Python shortlist contract.
 
 Browser acceptance: [test_saved_comparison.py](tests/test_saved_comparison.py) exercises source-backed create/add/note/save/reopen, duplicate PIN and ID, three-property limit, invalid notes, denied writes, responsive layouts and screenshot review. The [source-integrity and permission report](../../docs/design/REACT_P6_SHORTLIST_NOTE_WRITE_GATE_2026-11-24.md) records the remaining approval gates. The local in-memory database disappears when the server stops; there are no accounts, private notes, real property data or production authorisation.
+## Controlled SQLite restart proof, separate file opt-in (24 November)
+
+By default **every preview remains an in-memory fictional database that resets on process restart**. To verify durable recovery of exactly the same saved fictional investigations, shortlist membership and note text, opt into a local private file **outside the Git repository**:
+
+```bash
+npm ci --prefix design-prototypes/react-map-spike
+npm run build --prefix design-prototypes/react-map-spike
+mkdir -p "$HOME/.hpi-fictional-restart"
+chmod 700 "$HOME/.hpi-fictional-restart"
+python design-prototypes/react-map-spike/tests/source_preview_server.py --port 8797 --enable-buyer-workflow --enable-shortlist-workflow --fixture-db "$HOME/.hpi-fictional-restart/demo.sqlite3"
+```
+
+Create and save two fictional investigations and their shortlist in the React buyer workflow, copy the IDs, stop Python and **restart with the same command and .sqlite3 file**. Reopen the saved IDs to verify exact source evidence and note recovery. The runner refuses files it cannot identify as its own fictional fixture and never migrates or overwrites an existing unrelated database. The older GET-only and buyer-only modes do not gain file storage permission. The file is private local test data, **not an authenticated production database**. Never store real property or personal data in it.
+
+See the [controlled-restart and tamper-rejection report](../../docs/design/CONTROLLED_SQLITE_RESTART_PROOF_2026-11-24.md) and [real-process restart browser tests](tests/test_persistent_restart.py).
 ## Working read-only React -> local Python/SQLite preview (24 November)
 
 The new source-connected investigation screen is separate from the invented-map style lab. It performs **real same-origin GET requests** to HPI's existing WSGI `GET /v1/investigations/{uuid}` and `GET /v1/shortlists/{uuid}`, using fresh fictional records seeded by the isolated Python runner. It displays exact cents, source snapshots and matching explanations, with a deliberate **Location unavailable** panel and no fictitious property pins.
