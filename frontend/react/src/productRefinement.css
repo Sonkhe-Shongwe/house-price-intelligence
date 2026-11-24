@@ -62,3 +62,5 @@
 .source-shell .buyer-candidate-select{color:#265f48}
 .source-shell .source-empty>span{color:#735320}
 .source-shell .buyer-disabled-icon{color:#285d46}
+
+.source-shell .buyer-result-title>div:last-child small{color:#405b50}
