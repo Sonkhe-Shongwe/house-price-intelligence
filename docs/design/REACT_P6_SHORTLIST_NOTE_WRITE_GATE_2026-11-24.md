@@ -17,7 +17,7 @@ The source-backed component is `design-prototypes/react-map-spike/src/SavedCompa
 - The component reads each mutation response, adapts it through the original trusted P3/P6 TypeScript boundary, **reopens the saved shortlist with GET** and requires the two representations to agree. For all entries present before the write, it also checks that the P3 presentation and matching policy are unchanged. Unexpected data shows an error, not a successful save.
 - Users may reopen by shortlist UUID during the same server session; notes are not merely browser-local or claimed persistent across app restarts.
 
-An interrupted mutation may already have committed server-side. The UI instructs the user to refresh the saved shortlist before retrying and does not silently duplicate the request. A source contract mismatch invalidates confirmation and is never treated as a completed note save.
+An interrupted mutation may already have committed server-side. The UI instructs the user to refresh the saved shortlist before retrying and does not silently duplicate the request. When one note is saved successfully, other cards' unsaved local drafts stay available until their own explicit Save action; manual reopen reloads the authoritative notes from Python. A source contract mismatch invalidates confirmation and is never treated as a completed note save.
 
 ## Privilege boundary
 
@@ -50,7 +50,9 @@ This remains **single-user localhost and disposable in-memory SQLite only**. It 
 7. Reject oversized notes and malformed investigation identifiers without mutating source evidence.
 8. Block cross-origin/proxied writes, arbitrary mutations and DELETE.
 9. Admit an insufficient-evidence investigation without fabricating a value.
-10. Capture desktop/mobile screenshot artefacts in the hosted CI run.
+10. Retain an unsaved draft on another property while confirming one note with Python.
+11. Verify 320px/375px mobile reflow without horizontal overflow and reduced-motion treatment.
+12. Capture desktop/mobile screenshot artefacts in the hosted CI run.
 
 The existing independent six visual/WebGL tests, seven source-review browser tests and eight buyer-creation browser tests remain part of the isolated workflow. Actual pass status must be checked for the **exact branch SHA** before declaring this milestone accepted as a technical proof.
 
