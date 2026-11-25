@@ -99,16 +99,54 @@ class InventedAcceptanceTests(unittest.TestCase):
         def docker(*args,**kwargs):
             result=subprocess.run(["docker","exec",*args],stderr=subprocess.DEVNULL,timeout=60,**kwargs)
             self.assertEqual(result.returncode,0,"Disposable recovery command failed")
-        with tempfile.TemporaryFile(dir=root) as dump:
-            docker(container,"pg_dump","-U","postgres","-d","hpi_ingest_fixture",
-                "-Fc","--schema=hpi_candidate","--no-owner",stdout=dump)
-            self.assertGreater(dump.tell(),0)
-            # Only this test-owned loopback schema is removed. Existing role
-            # definitions and database-level permissions deliberately survive.
-            conn.execute("DROP SCHEMA hpi_candidate CASCADE")
-            self.assertIsNone(conn.execute("SELECT to_regnamespace('hpi_candidate')").fetchone()[0])
-            dump.seek(0)
-            docker("-i",container,"pg_restore","-U","postgres","-d","hpi_ingest_fixture",
-                "--exit-on-error","--single-transaction","--no-owner",stdin=dump,stdout=subprocess.DEVNULL)
+        # Exercise a standard encrypted backup format with ephemeral key
+        # material. Never upload a dump, seal, ciphertext or key from CI.
+        with tempfile.TemporaryDirectory(dir=root) as private:
+            folder=Path(private)
+            home=folder/"gnupg"
+            home.mkdir(mode=0o700)
+            key=secrets.token_urlsafe(32).encode("ascii")+b"\n"
+            def gpg(*args,secret=key,expected=True):
+                result=subprocess.run(["gpg","--homedir",str(home),"--batch","--no-tty",
+                    "--pinentry-mode","loopback","--no-symkey-cache","--passphrase-fd","0",
+                    *map(str,args)],input=secret,stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,timeout=60)
+                self.assertEqual(result.returncode==0,expected,"Encrypted recovery command outcome")
+            raw=folder/"database.dump"
+            encrypted=folder/"database.dump.gpg"
+            encrypted_seal=folder/"seal.json.gpg"
+            with raw.open("xb") as dump:
+                raw.chmod(0o600)
+                docker(container,"pg_dump","-U","postgres","-d","hpi_ingest_fixture",
+                    "-Fc","--schema=hpi_candidate","--no-owner",stdout=dump)
+                self.assertGreater(dump.tell(),0)
+            try:
+                for source,target in ((raw,encrypted),(seal_path,encrypted_seal)):
+                    gpg("--symmetric","--cipher-algo","AES256","--output",target,source)
+                    self.assertGreater(target.stat().st_size,0)
+                raw.unlink()
+                seal_path.unlink()
+                wrong=secrets.token_urlsafe(32).encode("ascii")+b"\n"
+                for source in (encrypted,encrypted_seal):
+                    gpg("--decrypt",source,secret=wrong,expected=False)
+                # Truncated ciphertext must fail authentication; output never
+                # reaches the database or a restored seal path.
+                damaged=folder/"damaged.gpg"
+                damaged.write_bytes(encrypted.read_bytes()[:-16])
+                gpg("--decrypt",damaged,expected=False)
+                gpg("--output",raw,"--decrypt",encrypted)
+                gpg("--output",seal_path,"--decrypt",encrypted_seal)
+                raw.chmod(0o600)
+                seal_path.chmod(0o600)
+                # Only this disposable schema is removed, after authenticated
+                # decryption succeeds. Roles and database ACLs survive.
+                conn.execute("DROP SCHEMA hpi_candidate CASCADE")
+                self.assertIsNone(conn.execute("SELECT to_regnamespace('hpi_candidate')").fetchone()[0])
+                with raw.open("rb") as dump:
+                    docker("-i",container,"pg_restore","-U","postgres","-d","hpi_ingest_fixture",
+                        "--exit-on-error","--single-transaction","--no-owner",stdin=dump,stdout=subprocess.DEVNULL)
+            finally:
+                subprocess.run(["gpgconf","--homedir",str(home),"--kill","gpg-agent"],
+                    stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=15)
         self.assertEqual(observe(),before)
         self.assertEqual(conn.execute("SELECT count(*) FROM pg_policies WHERE schemaname='hpi_candidate'").fetchone()[0],5)
