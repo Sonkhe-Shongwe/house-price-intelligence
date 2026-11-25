@@ -137,26 +137,30 @@ class NeonMigrationRehearsalTests(unittest.TestCase):
                             _verify_staged_buyer(conn)
                             self.assertEqual(conn.execute("SELECT current_setting('search_path')").fetchone()[0],before)
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.workspace_owners").fetchone()[0],0)
-                        # Exercise the actual NOLOGIN role using SET LOCAL ROLE
-                        # with disposable identities, never live cloud records.
-                        with self.assertRaisesRegex(RuntimeError,"rollback buyer exercise"):
-                            with conn.transaction():
-                                conn.execute("INSERT INTO hpi_candidate.workspace_owners VALUES ('fixture-owner-a'),('fixture-owner-b')")
-                                conn.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-a','A','2026-01-01','fixture-owner-a'),('fixture-b','B','2026-01-01','fixture-owner-b')")
-                                conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(BUYER)))
-                                self.assertEqual(conn.execute("SELECT current_user").fetchone()[0],BUYER)
-                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[])
-                                conn.execute("SELECT set_config('hpi.owner_id','fixture-owner-a',true)")
-                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-a",)])
-                                with self.assertRaises(psycopg.errors.InsufficientPrivilege):
-                                    with conn.transaction():
-                                        conn.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-cross','Cross','2026-01-01','fixture-owner-b')")
-                                with self.assertRaises(psycopg.errors.InsufficientPrivilege):
-                                    with conn.transaction():
-                                        conn.execute("SELECT * FROM hpi_candidate.sale_transactions")
-                                conn.execute("SELECT set_config('hpi.owner_id','fixture-owner-b',true)")
-                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-b",)])
-                                raise RuntimeError("rollback buyer exercise")
+                        # Only the disposable CI superuser may SET ROLE into
+                        # the staged NOLOGIN principal. Do not grant membership
+                        # to the non-superuser migration owner or change login.
+                        with psycopg.connect(ADMIN,dbname=DB,autocommit=True) as exercise:
+                            self.assertEqual((exercise.info.host,exercise.info.dbname,exercise.info.user),("127.0.0.1",DB,"postgres"))
+                            self.assertTrue(exercise.execute("SELECT rolsuper FROM pg_roles WHERE rolname=current_user").fetchone()[0])
+                            with self.assertRaisesRegex(RuntimeError,"rollback buyer exercise"):
+                                with exercise.transaction():
+                                    exercise.execute("INSERT INTO hpi_candidate.workspace_owners VALUES ('fixture-owner-a'),('fixture-owner-b')")
+                                    exercise.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-a','A','2026-01-01','fixture-owner-a'),('fixture-b','B','2026-01-01','fixture-owner-b')")
+                                    exercise.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(BUYER)))
+                                    self.assertEqual(exercise.execute("SELECT current_user").fetchone()[0],BUYER)
+                                    self.assertEqual(exercise.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[])
+                                    exercise.execute("SELECT set_config('hpi.owner_id','fixture-owner-a',true)")
+                                    self.assertEqual(exercise.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-a",)])
+                                    with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                                        with exercise.transaction():
+                                            exercise.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-cross','Cross','2026-01-01','fixture-owner-b')")
+                                    with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                                        with exercise.transaction():
+                                            exercise.execute("SELECT * FROM hpi_candidate.sale_transactions")
+                                    exercise.execute("SELECT set_config('hpi.owner_id','fixture-owner-b',true)")
+                                    self.assertEqual(exercise.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-b",)])
+                                    raise RuntimeError("rollback buyer exercise")
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.workspace_owners").fetchone()[0],0)
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlists").fetchone()[0],0)
                         with self.assertRaisesRegex(RuntimeError,"rollback policy drift"):
