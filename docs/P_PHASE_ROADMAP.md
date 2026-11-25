@@ -325,13 +325,13 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
 | P8.1 | Decide public demonstration mode and data | PARTIAL | Owner selects full real-property product; candidate market retained, licensed field display decision still open |
-| P8.2 | Provide reproducible clean setup and deployment config | PARTIAL | Reproducible local release runbook, dependency/accessibility CI gates; production hosting config and Python dependency review remain |
+| P8.2 | Provide reproducible clean setup and deployment config | PARTIAL | Reproducible local release runbook, dependency/accessibility CI gates; production hosting config and Python dependency review remain; optional one-click fictional fallback |
 | P8.3 | Configure authorised hosting and safe endpoints | OPEN | Deployment uses reviewed network/auth/configuration; no localhost-only fixture WSGI accidentally exposed publicly |
-| P8.4 | Demonstrate the complete buyer decision journey | PARTIAL | Richer V3 actual PostgreSQL screenshot and complete fictional buyer journey verified; public demo scope not accepted |
+| P8.4 | Demonstrate the complete buyer decision journey | PARTIAL | Richer V3 actual PostgreSQL screenshot and complete fictional buyer journey verified; public demo scope not accepted; browser-only end-to-end acceptance required |
 | P8.5 | Publish clear architecture, data dictionary and evidence lineage | PARTIAL | Recruiter walkthrough includes architecture and SQL source lineage; full release review remains |
-| P8.6 | Prepare technical recruiter walkthrough and failure demonstration | PARTIAL | Recruiter walkthrough and actual richer screenshot ready for owner review; recording and public scope remain |
+| P8.6 | Prepare technical recruiter walkthrough and failure demonstration | PARTIAL | Recruiter walkthrough and actual richer screenshot ready for owner review; recording, public scope and isolated recruiter access remain |
 | P8.7 | Final project README, portfolio links and demo recording | PARTIAL | Release runbook, actual CI screenshot, reproducible local setup; final recording/portfolio link/release open |
-| P8.8 | Owner acceptance, integration and release handoff | BLOCKED | Approved P7 readiness, reviewed \`main\` merge, correct demo URL/artifacts and final handoff record |
+| P8.8 | Owner acceptance, integration and release handoff | BLOCKED | Approved P7 readiness, reviewed \`main\` merge, correct demo URL/artifacts, browser-only acceptance and final handoff record |
 
 **P8 exit:** A recruiter can try or watch the completed **Investigate → Compare → Decide** application and independently inspect a truthful code/test/evidence story. No deployment or release has yet been authorised.
 
@@ -428,6 +428,10 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 **Planned:** Deploy only after P7; representative allowed data or unmistakably labelled synthetic/demo fixtures where public display rights are unresolved; README, architecture diagram, clean setup, demo walkthrough/video, source and QA evidence, explanation of matching/risk trade-offs; working app URL if deployment is authorized.
 
 **Exit gate:** Reproducible installation and deployed/demo functionality: add two properties -> inspect ranked comps -> demonstrate fallback warning/abstention -> save/reopen -> compare -> explain test-backed joins and provenance.
+
+**Owner-approved browser-only release acceptance (25 November 2026; required, not yet verified):** On an ordinary supported browser with no project-specific setup, open one authorised HTTPS application URL, sign in through the integrated identity flow, complete the buyer journey, refresh/reopen saved work and sign out. Neither presenter nor recruiter needs CMD, PowerShell, WSL, CLI commands, manual service startup, database connection, certificate installation or Auth0 dashboard configuration. Hosting manages service startup and TLS; secrets remain server-side. Provide a dedicated least-privilege recruiter demonstration account or equally isolated approved demo access, preconfigured safe data and repeatable scenarios, with no access to private buyer records or operator privileges. Use only expressly permitted real fields or clearly labelled synthetic fixtures for the demo; this does not replace the original real-property MVP. Verify from a fresh browser with no developer session and retain redacted evidence of the complete journey, including insufficient evidence, persistence and logout. Hosting, access mode, data rights, R0 sustainability, deployment and main integration retain separate approval gates.
+
+**Optional resilience enhancement:** If proportionate, offer a one-click local fallback using prepared dependencies and isolated fictional data. No external login or cloud database should be required for an explicitly offline fallback; label its limitations. It is not a substitute for the browser-only hosted acceptance gate, and must not become a mandatory installer project.
 
 ## Conditional post-MVP branch, excluded from 100%
 

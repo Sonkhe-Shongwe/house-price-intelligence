@@ -2,7 +2,11 @@
 
 **Working local fictional demo, not a live property valuation service.** Original real-data MVP remains in scope; no public release authorised.
 
-## Run the actual application
+## Target release demonstration (owner-approved, pending acceptance)
+
+The intended recruiter demonstration starts at a single authorised HTTPS URL in a normal browser. Sign in using preconfigured, isolated least-privilege demo access, investigate and compare properties, show insufficient evidence, reopen saved work and sign out. No terminal, manual server startup, database connection, certificate import or identity dashboard is needed. Use reviewed synthetic fixtures or explicitly permitted real display fields; never share operator credentials or private buyer records. Prepare demo scenarios and reset/repeat them safely without destructive operations on shared or real data. The optional one-click offline fictional fallback is secondary, not a substitute for the hosted experience. See [P8 acceptance](../P_PHASE_ROADMAP.md).
+
+## Run the actual application (current engineering-only local procedure)
 Use Python 3.12 and Node 22 from the repository root. Build with `npm ci --prefix frontend/react` and `npm run build --prefix frontend/react`. Start `python -m backend.run_synthetic_api --fixture-only --frontend react --synthetic-map --port 8765`. Visit http://127.0.0.1:8765. Optional reviewed private SQLite file via `--fixture-db`; never use personal records. PostgreSQL acceptance is verified through hosted ephemeral CI, not a public demo URL.
 
 ## Five-minute walkthrough
@@ -31,4 +35,4 @@ flowchart TD
 Prior-tax-year assessment membership uses a build-bound join on snapshot, parcel PIN and tax year; accept exactly one assessment row. Sale transactions and parcel links are separate: exclude multi-parcel transactions as one-home priced comparables. The frozen result links transaction ID, source snapshot, exact cents and match policy. See [runtime](../engineering/PRODUCTION_RUNTIME_V1.md) and [consolidation](../engineering/PRODUCTION_CONSOLIDATION_V1.md). No inference of historical publisher availability from tax year.
 
 ## Honest limitations
-No validated valuations, real field publication rights, real building identity, real map locations or deployed login provider. Offline OIDC tests do not prove a live identity integration. No production deployment or final owner UX acceptance. Show only actual fictional CI screenshots and aggregate research. Do not claim real user counts, production SLA or employer endorsement.
+No validated valuations, real field publication rights, real building identity, real map locations or deployed login provider. Isolated actual Auth0 login, persistence and logout are verified; integration with the hosted buyer runtime is not. See [checkpoint](../CHECKPOINT.md). No production deployment or final owner UX acceptance. Show only actual fictional CI screenshots and aggregate research. Do not claim real user counts, production SLA or employer endorsement.
