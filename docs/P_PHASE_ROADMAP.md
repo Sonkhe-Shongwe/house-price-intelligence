@@ -2,7 +2,7 @@
 
 **Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
-**25 November operational reconciliation:** P4/P7 Neon cloud integration active. Direct restricted connectivity and persistent invented-data browser journey accepted (v3, 45627319372, exact 09c04b6, 8/8 workflows); restricted logins disabled after success. Disposable encrypted recovery verified; managed recovery/protected storage remain open. Actual isolated Auth0 login, restart persistence and native browser logout verified; actual buyer integration remains open. Real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). No weights, estimates or full gate dispositions changed.
+**25 November operational reconciliation:** P4/P7 Neon cloud integration active. Direct restricted connectivity and persistent invented-data browser journey accepted (v3, 45627319372, exact 09c04b6, 8/8 workflows); restricted logins disabled after success. Independent encrypted Google Drive recovery of the invented development database verified; key non-exposure, managed recovery and full protected storage remain open. Actual isolated Auth0 login, restart persistence and native browser logout verified; actual buyer integration remains open. Real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). No weights, estimates or full gate dispositions changed.
 
 ## Origin and scope
 
@@ -192,7 +192,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Every item must eventually be accompanied by:** concrete output or code reference, the exact tested commit/CI or dated research evidence, owner review where necessary, and its resulting state: *proposed → implemented → verified → integrated → accepted → released*. For future progress reviews, record both **candidate implementation** and **accepted phase credit**. A long checklist is not itself evidence of completion. The historical Phase 0–2 audits remain distinct from delivery stages P0–P2.
 
-### P0 | Buyer, market and product feasibility | Weight 6% | Recorded completion 94%
+### P0 | Buyer, market and product feasibility | Weight 6% | Approved planning estimate 94%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -206,7 +206,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P0 exit:** Approved scope, first supported market/class, source register, field policy and a clear permitted release approach. Current evidence: Evanston township 17 and Class 203 are **research pilot candidates**, not permanent geography or public-display approval.
 
-### P1 | Source extraction, cleaning and historical data | Weight 12% | Recorded completion 93%
+### P1 | Source extraction, cleaning and historical data | Weight 12% | Approved planning estimate 98%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -221,7 +221,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P1 exit:** Reproducible ingestion, stable keys, explained exclusions, source lineage and legally safe curated storage. Research pilot counts include 3,539 sales, 39,401 building records and 1,285 accepted historical joins; those alone do not prove complete historical or legal validity.
 
-### P2 | Explainable comparable-sales intelligence | Weight 14% | Recorded completion 65%
+### P2 | Explainable comparable-sales intelligence | Weight 14% | Approved planning estimate 75%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -237,7 +237,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P2 exit:** Reliable, explainable comparable selection with a justified fallback and independent assessment. **Known limitation:** on the 17 fallback cases, exploratory 2 km retrospective MAE was about $209,471, worse than township comparison at about $192,153. Do **not** present the sample median as a validated house-price prediction.
 
-### P3 | Domain model, service contracts and architecture | Weight 10% | Recorded completion 96%
+### P3 | Domain model, service contracts and architecture | Weight 10% | Approved planning estimate 96%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -255,7 +255,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P3 exit:** A **signed-off**, test-backed domain, data, API, error, security and first-journey specification. A good synthetic CI run is important evidence, but does not mean real identity, usage rights or production migration has been accepted.
 
-### P4 | Database, curated ingestion and backend APIs | Weight 16% | Recorded completion 91%
+### P4 | Database, curated ingestion and backend APIs | Weight 16% | Approved planning estimate 95%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -263,16 +263,16 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | P4.2 | Implement versioned and validated investigation HTTP contract | VERIFIED | Synthetic same-origin API accepts permitted input and rejects malformed/conflicting/unauthorised requests |
 | P4.3 | Join the existing pure matcher to curated SQL records | VERIFIED | End-to-end fixture run returns actual stored synthetic transactions, not hand-entered output totals |
 | P4.4 | Store, check and reopen frozen comparable evidence | VERIFIED | Fixture JSON, transaction IDs, snapshot IDs and exact cents remain consistent in memory **and in opt-in trusted local SQLite files** after restart |
-| P4.5 | Implement production-appropriate durable database | PARTIAL | PostgreSQL runtime consolidated, pool exhaustion/backend termination and restart recovery verified; production infrastructure/recovery plan open |
+| P4.5 | Implement production-appropriate durable database | PARTIAL | PostgreSQL runtime consolidated; actual Neon invented persistence and independent encrypted Drive restore verified; full protected storage and production infrastructure open |
 | P4.6 | Implement idempotent source-to-curated import | PARTIAL | Actual bounded private import, exact cents, idempotence and seal passed; V4 fictional runtime remains; production migration and durable real import open |
 | P4.7 | Resolve real buyer properties without unsupported guesses | PARTIAL | 137/137 actual historical cohort keys had nonblank unique labels; 59/59 restricted-reader address-token reviews matched PIN reviews; private acceptance only, public buyer resolver not activated |
 | P4.8 | Implement time-valid evidence and source refresh handling | PARTIAL | Atomic reviewed build activation/rollback, cross-build saved evidence and revision-specific addresses verified; real refresh/as-of blocked |
 | P4.9 | Finalise API stability, error safety and operational boundaries | PARTIAL | Offline HTTPS session adapter and canonical runtime requests verified; production rate, provider, storage and network review open |
-| P4.10 | Run persistent database/API acceptance | PARTIAL | 13 hosted PostgreSQL runtime scenarios passed; actual private sealed reader reviewed 59/59 subjects with canonical parity; real HTTP/browser/durable production acceptance open |
+| P4.10 | Run persistent database/API acceptance | PARTIAL | Actual private sealed reader reviewed 59/59 subjects with canonical parity; persistent invented Neon browser journey and independent restore passed; actual identity-to-buyer and real HTTP/browser acceptance open |
 
 **P4 exit:** A durable, safe, source-aware backend supporting real permitted data or a clearly scoped synthetic-only publicly labelled mode. In-memory fixture storage alone does not satisfy the phase.
 
-### P5 | Browser investigation experience | Weight 16% | Recorded completion 88%
+### P5 | Browser investigation experience | Weight 16% | Approved planning estimate 89%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -288,7 +288,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P5 exit:** A buyer can independently select a property, investigate eligible historical sales, understand why results are available or unavailable and act on the limitations, on the actual backend.
 
-### P6 | Save, shortlist, compare and decide | Weight 12% | Recorded completion 95%
+### P6 | Save, shortlist, compare and decide | Weight 12% | Approved planning estimate 95%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -304,23 +304,23 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **P6 exit:** An owner-accepted, responsible **Investigate → Compare → Decide** buyer workflow with two or three reopenable properties, notes, defensible evidence and appropriate data/access/retention and UX gates. The **implemented fictional-only P6 workflow** is verified, but it is not a production or formal P6 acceptance.
 
-### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Recorded completion 80%
+### P7 | Cross-layer correctness, privacy and readiness | Weight 8% | Approved planning estimate 83%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
 | P7.1 | Automated regression across Python, SQL, HTTP and browser | VERIFIED | bfb640d offline regression 208 Python, 13 runtime scenarios and all 10 workflows passed; marker 1290a1d 8/8 including private live rehearsal passed, no new extraction authority |
 | P7.2 | Validate hostile/invalid/unsupported requests | PARTIAL | Offline HTTPS session/CSRF/owner denial retained; restricted historical reader denies writes, buyer tables, DDL/temp and table/column grant drift; public security remains open |
-| P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Inactive historical late-write conflict rollback, source tamper denial and old evidence reopen verified alongside fixture activation/rollback; real backup/operational drill open |
+| P7.3 | Prove evidence integrity and migration rollback | PARTIAL | Inactive historical late-write conflict rollback, source tamper denial and old evidence reopen verified alongside fixture activation/rollback; actual invented Neon backup restored independently with source seal and owner denial; real-data operational protection open |
 | P7.4 | Test historical leakage, duplicate sales and source revision | PARTIAL | 2025 fixed retrospective holdout evaluated 59 eligible subjects; source-shaped intake revision/duplicate checks verified; historical publication-time availability proof remains open |
 | P7.5 | Accessibility, responsiveness and buyer failure recovery | PARTIAL | Axe four views zero detected violations and keyboard/mobile checks; one incomplete per view and manual accessibility review open |
-| P7.6 | Authentication/privacy/retention and secrets review | PARTIAL | Offline OIDC HTTP, private persisted sessions and browser CSRF writes/logout verified; live provider, distributed store, revocation and retention open |
-| P7.7 | Load, rate, recovery and operational monitoring checks | PARTIAL | Prior bounded recovery/load smoke retained; offline session persistence verified; production rate/monitoring/restore remain |
-| P7.8 | Licence, attribution and source-time release audit | BLOCKED | Publisher use cases and metadata reviewed for four sources; licenseId null for each, no specific public display/caching grant or as-of proof |
+| P7.6 | Authentication/privacy/retention and secrets review | PARTIAL | Offline OIDC HTTP, private persisted sessions and browser CSRF writes/logout verified; actual isolated Auth0 login/restart/logout verified; provider-to-buyer integration, distributed store, revocation and retention open |
+| P7.7 | Load, rate, recovery and operational monitoring checks | PARTIAL | Independent Drive retrieval and isolated PostgreSQL restoration verified for invented data; production rate/monitoring/retention remain |
+| P7.8 | Licence, attribution and source-time release audit | BLOCKED | Publisher intended comparable-property use and metadata reviewed; four licence IDs unspecified; private durable retention/field scope, public redistribution and as-of proof open |
 | P7.9 | Full user journey and release-readiness sign-off | BLOCKED | Separate P7 acceptance suite passes against release-like storage, APIs and browser; owner approves readiness |
 
 **P7 exit:** A reproducible and verified **release candidate**, with privacy/security/rights gates satisfied. CI-verified synthetic fixtures are not the same thing as a release security review.
 
-### P8 | Deployment, credible demonstration and recruiter handoff | Weight 6% | Recorded completion 35%
+### P8 | Deployment, credible demonstration and recruiter handoff | Weight 6% | Approved planning estimate 35%
 
 | ID | Work package | State | Measurable acceptance |
 | --- | --- | --- | --- |
@@ -441,7 +441,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Near-term execution, complexity last
 
-1. Reconcile real-data readiness: exact cohort identity and bounded research, permitted fields, idempotent curated ingestion and disclosure guard, subject to separate authorisation.
+1. Follow checkpoint: confirm key non-exposure and proposed owner-only scope; complete storage/access and permitted-use review before the unused conditional extraction. Preserve exact cohort, canonical ingestion and disclosure guard.
 2. Extend existing P4/P5 integrated services only after verified data/rights decisions; preserve SQLite and canonical matcher until production runtime is reviewed.
 3. Complete integrated ownership/authentication, privacy, retention and final buyer UX for P6.
 4. Independently verify P7 release readiness, then seek P8 release approval. No main merge, hosting or public real-data display without permission.

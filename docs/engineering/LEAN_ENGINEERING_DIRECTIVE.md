@@ -35,7 +35,7 @@
 4. Before extracting abstractions, establish at least two real uses or a measured need. Avoid speculative plugin systems, provider adapters, event queues or service layers that do not simplify the current feature.
 5. Preserve a single current handoff and existing phase-gate records; do not grow a parallel family of authoritative progress files.
 
-**Integration is not permission-free:** "continue" alone is not blanket authorisation to commit, push, install dependencies, deploy or publish sensitive data. An explicit request to update GitHub permits the requested bounded change, subject to preserving concurrent work.
+**Standing authority (25 November):** "continue" or "next" delegates ordinary scoped engineering, routine dependencies, commits and synthetic CI on permanent `development`. It is not blanket authority for deployment, main integration, spending, destructive action, access changes, real-data collection or disclosure. Follow [master prompt](../MASTER_CONTINUATION_PROMPT.md) and checkpoint; preserve concurrent work.
 
 ## 3. Proposed architecture and technology selection
 
@@ -97,7 +97,7 @@ The matcher does not import HTTP, SQL, frontend code or source-download utilitie
 - Do not add trivial tests for getters, internal variable names or behaviour already protected at a lower level.
 - Test at the lowest reasonable layer; reserve graphical/end-to-end tests for real user journeys and cross-layer risks.
 - Diagnose a failed check before rerunning it. Do not suppress evidence, rewrite a failing test to match bad code, or equate the absence of errors with full acceptance.
-- The reported 83 passing local P3 v0.5 tests are fixture/HTTP evidence **only**. A prior Chromium graphical check was blocked by the environment; browser acceptance stays open.
+- Historical 83-test P3 v0.5 evidence covered fixtures/HTTP only; the early graphical check was blocked. Later synthetic Chromium and React evidence is in the current checkpoint; full real/hosted buyer acceptance remains open.
 
 **Feedback-time targets (aspirations, not verified SLAs):** coding checks in seconds, focused suite plus contract checks approximately under one minute on a normal runner, few browser tests only when pertinent. Measure actual times, and only optimise meaningful bottlenecks.
 
@@ -137,7 +137,9 @@ Track useful signals rather than code volume:
 
 No arbitrary 100% test coverage requirement, 100% lint cleanliness on untouched historical code, forced test-count reduction, or KPI used to justify weakening safety checks.
 
-## 8. Current priorities and boundaries (23 November 2026)
+## 8. Historical priorities and boundaries (23 November 2026)
+
+Historical planning baseline below, not current work instructions. For present priorities, scores, integrated evidence and remaining approval gates, use [checkpoint](../CHECKPOINT.md) and [roadmap](../P_PHASE_ROADMAP.md).
 
 1. **Accept P3 before expanding:** Review the already-integrated synthetic PIN-first API, 15-table draft ERD, error/abstention states and genuine graphical browser journey. CI is verified but P3 acceptance remains open.
 2. **Review-only evidence integrity guard:** A separate sale-price/sales-snapshot reopen-guard patch exists outside GitHub. Do not claim it is integrated or tested by the 125-test CI. Reconcile the Windows checkout and rerun the full suite before any authorised integration.
@@ -149,7 +151,7 @@ No arbitrary 100% test coverage requirement, 100% lint cleanliness on untouched 
 
 **Historical baseline:** The original 22 Nov adoption referred to `708239eb2451e379981767136186ab5010057fed`, 42 published research tests and 83 local isolated P3 tests. This was a dated baseline and remains preserved for continuity.
 
-**Planning estimate unchanged:** P3 **10%**; weighted MVP **22.8%**.
+**Historical estimate at adoption:** P3 **10%**; weighted MVP **22.8%**. Superseded by the current approved roadmap.
 
 ## 9. Safe large changes, migrations and CI controls
 

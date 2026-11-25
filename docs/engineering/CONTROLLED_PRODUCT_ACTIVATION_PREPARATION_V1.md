@@ -2,6 +2,8 @@
 
 24 November 2026. Approved progress 87.1%. Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction.
 
+**Historical preparation contract:** The original 24 November proposal and gate table below are retained as dated context. Subsequent private beta approval, actual isolated Auth0 and invented Neon independent recovery supersede the original pending steps; see [checkpoint](../CHECKPOINT.md). Full storage/access/rights acceptance still open.
+
 ## Recovery contract
 The actual historical rehearsal succeeded and its temporary database was removed. No real records remain for activation. Before acquiring durable records, verify recovery of the canonical historical schema with two invented source revisions and independently retained seals. Reuse PostgreSQL 17 pg_dump/pg_restore, restricted reader and migration checks. No alternative app or schema. Back up the historical schema only into temporary private storage; exclude owner and ACL restoration. Recreate the disposable database, rotate reader credentials, provision grants from reviewed code and check both external seals without original extracts. Verify exact cents, all eight source snapshots, zero saved investigations, both revision-specific address tokens and identical redacted matching results. Reject old credentials, cross-revision token and post-restore tampering. No real records or dump artifacts. This is a recovery drill, not a hosted backup policy, encrypted production backup or recovery-time SLA.
 
