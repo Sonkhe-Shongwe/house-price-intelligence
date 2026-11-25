@@ -33,7 +33,7 @@ def _reply(start,status,value=None,*,cookies=(),location=None,html=None,form_iss
         body=html.encode()
         content_type="text/html; charset=utf-8"
     headers=[("Content-Type",content_type),("Content-Length",str(len(body))),
-        ("Cache-Control","no-store"),("Referrer-Policy","no-referrer"),
+        ("Cache-Control","no-store"),("Referrer-Policy","same-origin" if html is not None else "no-referrer"),
         ("X-Content-Type-Options","nosniff"),
         ("Content-Security-Policy","default-src 'none'; form-action 'self'"+(" "+form_issuer.rstrip("/") if form_issuer else "")+"; frame-ancestors 'none'; base-uri 'none'")]
     if location:headers.append(("Location",location))

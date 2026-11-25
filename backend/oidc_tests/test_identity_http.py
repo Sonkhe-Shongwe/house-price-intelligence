@@ -89,3 +89,17 @@ class IdentityHttpTests(unittest.TestCase):
             self.assertEqual(self.request(**extra)[0],"403 Forbidden")
         self.assertEqual(self.request("/auth/start","POST")[0],"401 Unauthorized")
         self.opener.open.assert_not_called()
+
+    def test_landing_referrer_policy_preserves_origin_validation(self):
+        status,headers,_=self.request()
+        self.assertEqual(status,"200 OK")
+        self.assertEqual(dict(headers)["Referrer-Policy"],"same-origin")
+        for origin in ("null","https://other.invalid"):
+            status,headers,_=self.request("/auth/start","POST",HTTP_ORIGIN=origin)
+            self.assertEqual(status,"403 Forbidden")
+            self.assertEqual(dict(headers)["Referrer-Policy"],"no-referrer")
+        status,headers,_=self.request("/auth/start","POST",HTTP_ORIGIN=ORIGIN,
+            HTTP_SEC_FETCH_SITE="same-origin")
+        self.assertEqual(status,"303 See Other")
+        self.assertEqual(dict(headers)["Referrer-Policy"],"no-referrer")
+        self.opener.open.assert_not_called()
