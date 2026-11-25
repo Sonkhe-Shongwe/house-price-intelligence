@@ -1,6 +1,7 @@
 """Identity-only local qualification HTTP boundary. No property routes or launcher.
 
-External top-level GET callback is the sole cross-site exception; state, nonce,
+External top-level GET callback and non-sensitive landing page are the only
+cross-site navigation exceptions; state, nonce,
 browser binding and PKCE remain mandatory. No actual provider request in tests.
 """
 from urllib.parse import parse_qs
@@ -24,7 +25,7 @@ def _binding(cookie):
     return values[0]
 
 
-def _reply(start,status,value=None,*,cookies=(),location=None,html=None):
+def _reply(start,status,value=None,*,cookies=(),location=None,html=None,form_issuer=None):
     if html is None:
         body=json.dumps(value or {},separators=(",",":")).encode()
         content_type="application/json"
@@ -34,7 +35,7 @@ def _reply(start,status,value=None,*,cookies=(),location=None,html=None):
     headers=[("Content-Type",content_type),("Content-Length",str(len(body))),
         ("Cache-Control","no-store"),("Referrer-Policy","no-referrer"),
         ("X-Content-Type-Options","nosniff"),
-        ("Content-Security-Policy","default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'")]
+        ("Content-Security-Policy","default-src 'none'; form-action 'self'"+(" "+form_issuer.rstrip("/") if form_issuer else "")+"; frame-ancestors 'none'; base-uri 'none'")]
     if location:headers.append(("Location",location))
     headers.extend(("Set-Cookie",cookie) for cookie in cookies)
     start(status,headers)
@@ -56,11 +57,12 @@ def identity_only_application(boundary,exchange):
         query=env.get("QUERY_STRING","")
         cookie=env.get("HTTP_COOKIE","")
         callback=method=="GET" and path=="/auth/callback"
+        navigation=callback or (method=="GET" and path=="/" and not query)
         if (env.get("wsgi.url_scheme")!="https" or env.get("REMOTE_ADDR")!="127.0.0.1"
             or env.get("HTTP_HOST")!="127.0.0.1:8766"
             or (origin is not None and origin!=ORIGIN)
-            or (site in ("cross-site","same-site") and not callback)
-            or (callback and site in ("cross-site","same-site") and
+            or (site in ("cross-site","same-site") and not navigation)
+            or (navigation and site in ("cross-site","same-site") and
                 (env.get("HTTP_SEC_FETCH_MODE")!="navigate" or env.get("HTTP_SEC_FETCH_DEST")!="document"))
             or any(env.get(k) for k in ("HTTP_FORWARDED","HTTP_X_FORWARDED_FOR",
                 "HTTP_X_FORWARDED_HOST","HTTP_X_FORWARDED_PROTO","HTTP_X_REAL_IP"))):
@@ -72,7 +74,7 @@ def identity_only_application(boundary,exchange):
                     body="<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>"
                 except AuthDenied:
                     body='<h1>HPI identity qualification</h1><form method="post" action="/auth/start"><button>Sign in</button></form>'
-                return _reply(start,"200 OK",html="<!doctype html><html><meta charset=utf-8><title>HPI identity qualification</title>"+body+"</html>")
+                return _reply(start,"200 OK",html="<!doctype html><html><meta charset=utf-8><title>HPI identity qualification</title>"+body+"</html>",form_issuer=boundary.issuer)
             if method=="POST" and path=="/auth/start" and not query:
                 if origin!=ORIGIN:raise AuthDenied("Login rejected")
                 bind=random_token()

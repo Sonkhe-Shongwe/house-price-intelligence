@@ -2,10 +2,10 @@ name: Offline identity and session boundary
 on:
   push:
     branches: [development]
-    paths: ['backend/oidc_boundary.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
+    paths: ['backend/oidc*.py','backend/persistent_oidc.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
   pull_request:
     branches: [development,main]
-    paths: ['backend/oidc_boundary.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
+    paths: ['backend/oidc*.py','backend/persistent_oidc.py','backend/oidc_tests/**','.github/workflows/oidc-offline.yml']
 permissions:
   contents: read
 jobs:

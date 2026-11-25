@@ -63,7 +63,8 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertEqual(status,"303 See Other")
         cookies=[v for k,v in headers if k=="Set-Cookie"]
         cookie=cookies[0].split(";",1)[0]
-        self.assertIn("Identity verified",self.request(HTTP_COOKIE=cookie)[2].decode())
+        self.assertIn("Identity verified",self.request(HTTP_COOKIE=cookie,HTTP_SEC_FETCH_SITE="cross-site",
+            HTTP_SEC_FETCH_MODE="navigate",HTTP_SEC_FETCH_DEST="document")[2].decode())
         status,_,body=self.request("/auth/session",HTTP_COOKIE=cookie)
         self.assertEqual(status,"200 OK")
         csrf=json.loads(body)["csrf"]
