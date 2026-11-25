@@ -14,4 +14,6 @@ Public network connectivity is enabled for all branches, without IP allowlisting
 
 Offline qualification adds a disposable PostgreSQL 17 role with the observed non-superuser privilege shape; canonical migration is tested under that role, not the CI superuser. Historical and runtime disposable guards remain unchanged. This is not a live Neon compatibility claim.
 
+Second offline slice: shared internal canonical/historical migration and reader-grant code is exercised under the observed non-superuser privilege shape, including transactional rollback, repeatable migration, read allowlist, prohibited writes/DDL/temp/buyer-table access and grant drift. Original disposable entry points remain guarded; there is no live provisioning or reader activation entry point. Hosted verification pending.
+
 Next: independently verify development endpoint and protected admin access, then explicit manual secret-scoped read-only connectivity check. Prepare migration and restricted role integration with the canonical SQL and separate historical/buyer data boundary; retain existing disposable guards. Verify role denials, TLS, migrations, backup and restore with invented records first. No live publisher collection or real-data ingestion until protected storage and permitted use verified. Conditional extraction allowance unused. Existing 87.1% planning baseline unchanged.

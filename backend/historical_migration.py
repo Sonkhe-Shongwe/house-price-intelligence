@@ -19,6 +19,11 @@ def migration_history(conn):
 
 def migrate_historical(conn):
     _check(conn)
+    _migrate_historical_schema(conn)
+
+
+def _migrate_historical_schema(conn):
+    """Shared checksum-tracked DDL; caller must enforce target boundary."""
     with conn.transaction():
         conn.execute("SELECT pg_advisory_xact_lock(194323)")
         conn.execute("SET LOCAL search_path TO hpi_candidate,pg_catalog")

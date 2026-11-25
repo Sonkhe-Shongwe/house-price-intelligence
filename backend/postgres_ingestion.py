@@ -11,6 +11,11 @@ def _check(conn):
 
 def initialise(conn):
     _check(conn)
+    _initialise_schema(conn)
+
+
+def _initialise_schema(conn):
+    """Shared migration implementation; caller must enforce target boundary."""
     with conn.transaction():
         if conn.execute("SELECT to_regnamespace('hpi_candidate')").fetchone()[0] is not None:
             raise ImportRefused("Refusing existing schema")

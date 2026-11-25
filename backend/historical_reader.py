@@ -23,6 +23,11 @@ READ_TABLES=("schema_migrations","historical_migrations","curated_builds","curat
 
 def provision_reader(conn,password):
     _check(conn)
+    _provision_reader(conn,password)
+
+
+def _provision_reader(conn,password):
+    """Shared grants; caller must enforce the reviewed database target."""
     if not isinstance(password,str) or len(password)<24:
         raise ImportRefused("Random reader password required")
     with conn.transaction():
@@ -32,8 +37,10 @@ def provision_reader(conn,password):
             raise ImportRefused("Reader role already exists")
         conn.execute(sql.SQL("CREATE ROLE {} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD {}").format(sql.Identifier(ROLE),sql.Literal(password)))
         conn.execute("REVOKE ALL ON SCHEMA hpi_candidate FROM PUBLIC")
-        conn.execute("REVOKE CONNECT,TEMPORARY ON DATABASE hpi_ingest_fixture FROM PUBLIC")
-        conn.execute(sql.SQL("GRANT CONNECT ON DATABASE hpi_ingest_fixture TO {}").format(sql.Identifier(ROLE)))
+        conn.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+        db = sql.Identifier(conn.info.dbname)
+        conn.execute(sql.SQL("REVOKE CONNECT,TEMPORARY ON DATABASE {} FROM PUBLIC").format(db))
+        conn.execute(sql.SQL("GRANT CONNECT ON DATABASE {} TO {}").format(db,sql.Identifier(ROLE)))
         conn.execute(sql.SQL("GRANT USAGE ON SCHEMA hpi_candidate TO {}").format(sql.Identifier(ROLE)))
         conn.execute(sql.SQL("GRANT SELECT ON {} TO {}").format(
             sql.SQL(",").join(sql.Identifier(SCHEMA,t) for t in READ_TABLES),sql.Identifier(ROLE)))
@@ -41,11 +48,16 @@ def provision_reader(conn,password):
 def _reader(conn):
     if (conn.info.host,conn.info.dbname,conn.info.user)!=("127.0.0.1","hpi_ingest_fixture",ROLE) or not conn.autocommit:
         raise ImportRefused("Restricted loopback historical reader required")
+    _verify_reader_privileges(conn)
+
+
+def _verify_reader_privileges(conn):
+    """Shared effective privilege audit, not a connection authorisation."""
     role=conn.execute("SELECT current_user,session_user,rolsuper,rolbypassrls,rolcreaterole,rolcreatedb,rolinherit FROM pg_roles WHERE rolname=current_user").fetchone()
     if role!=(ROLE,ROLE,False,False,False,False,False):
         raise ImportRefused("Invalid historical reader role")
     # Reject privilege drift, including ownership, inherited grants and temp schema.
-    if conn.execute("SELECT has_schema_privilege(current_user,'hpi_candidate','CREATE'),has_database_privilege(current_user,current_database(),'TEMP')").fetchone()!=(False,False):
+    if conn.execute("SELECT has_schema_privilege(current_user,'hpi_candidate','CREATE'),has_database_privilege(current_user,current_database(),'TEMP'),has_schema_privilege(current_user,'public','CREATE'),has_database_privilege(current_user,current_database(),'CREATE')").fetchone()!=(False,False,False,False):
         raise ImportRefused("Historical reader privilege drift")
     rows=conn.execute("""SELECT c.relname,has_table_privilege(current_user,c.oid,'SELECT'),
         has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER'),
