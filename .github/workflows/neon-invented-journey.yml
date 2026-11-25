@@ -2,11 +2,11 @@ name: Persistent Neon invented buyer journey
 on:
   push:
     branches: [development]
-    paths: ['.github/authorisations/neon-invented-journey-v1.txt']
+    paths: ['.github/authorisations/neon-invented-journey-v2.txt']
 permissions:
   contents: read
 concurrency:
-  group: neon-invented-journey-v1
+  group: neon-invented-journey-v2
   cancel-in-progress: false
 jobs:
   journey:
@@ -34,11 +34,11 @@ jobs:
           BEFORE: ${{ github.event.before }}
         run: |
           set -eu
-          marker=.github/authorisations/neon-invented-journey-v1.txt
+          marker=.github/authorisations/neon-invented-journey-v2.txt
           test "$BEFORE" = "$(git rev-parse HEAD^)"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git diff --name-status "$BEFORE" "$GITHUB_SHA" -- "$marker")" = "$(printf 'A\t%s' "$marker")"
-          test "$(cat "$marker")" = "$(printf 'neon-invented-journey-v1\nsource=%s' "$BEFORE")"
+          test "$(cat "$marker")" = "$(printf 'neon-invented-journey-v2\nsource=%s' "$BEFORE")"
           test "$(git diff --name-only "$BEFORE" "$GITHUB_SHA")" = "$marker"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:

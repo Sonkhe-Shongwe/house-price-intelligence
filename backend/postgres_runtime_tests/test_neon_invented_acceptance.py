@@ -3,6 +3,7 @@ import os
 import secrets
 import tempfile
 import unittest
+from time import sleep
 from contextlib import contextmanager
 from pathlib import Path
 import psycopg
@@ -32,11 +33,17 @@ class InventedAcceptanceTests(unittest.TestCase):
                     path=_write_seal(root,seal_historical(conn,**fixture_intake()))
                     conn.execute("ALTER ROLE hpi_historical_reader LOGIN")
                     conn.execute(sql.SQL("ALTER ROLE {} LOGIN PASSWORD {}").format(sql.Identifier(BUYER),sql.Literal(bp)))
+                    class SlowSearch(PrivateBetaRehearsal):
+                        def search(self,*args,**kwargs):
+                            sleep(6)
+                            return super().search(*args,**kwargs)
+                    stages=[]
                     @contextmanager
                     def open_service(boundary):
                         with psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=READER,password=rp,autocommit=True) as reader, psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=BUYER,password=bp,autocommit=True) as writer:
-                            yield PrivateBetaRehearsal.from_seal_file(reader,writer,path,boundary)
-                    report=browser_journey(root,open_service)
+                            yield SlowSearch.from_seal_file(reader,writer,path,boundary)
+                    report=browser_journey(root,open_service,progress=stages.append)
+                    self.assertEqual(stages,['startup','startup_verified','first_search','first_save','second_search','second_save','comparison_save','reconstruct','reopen_investigation','reopen_comparison','cross_owner_denial'])
                     self.assertEqual(report["status"],"invented_browser_journey_verified")
                     self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],2)
                     self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],3)

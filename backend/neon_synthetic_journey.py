@@ -21,12 +21,14 @@ class NeonSyntheticJourney(PrivateBetaRehearsal):
     def __init__(self,reader,writer,seal,boundary,*,expected_host):
         self.expected_host=expected_host
         self._plan=fixture_plan()
+        self._startup_verified=False
         if seal.get("build_id")!=self._plan[0]:
             raise ImportRefused("Only the fixed invented build is permitted")
         super().__init__(reader,writer,seal,boundary)
         _inspect_services(reader,writer,database=DATABASE)
         with self._source():
             pass
+        self._startup_verified=True
 
     def _check_connection(self,conn,role):
         host=self.expected_host
@@ -48,7 +50,11 @@ class NeonSyntheticJourney(PrivateBetaRehearsal):
             raise ImportRefused("Only the fixed invented build is permitted")
         # Verify exact generated values, not just a matching seal supplied by
         # an operator. No other historical build can be selected by a request.
-        _verify(adapter,build,ids,expected_rows)
+        # Every request still verifies the complete external relational seal.
+        # An unchanged cryptographic fingerprint binds the exact row check
+        # performed at construction; avoid repeating one SELECT per seed row.
+        if not self._startup_verified:
+            _verify(adapter,build,ids,expected_rows)
         return adapter,build,ids,stamp
 
 

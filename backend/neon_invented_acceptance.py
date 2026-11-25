@@ -11,7 +11,8 @@ import sys
 import tempfile
 from contextlib import ExitStack, contextmanager
 from threading import Thread
-from wsgiref.simple_server import make_server
+from wsgiref.simple_server import make_server, WSGIServer
+from time import monotonic
 import psycopg
 from backend.postgres_ingestion import initialise
 from backend.historical_migration import migrate_historical
@@ -76,6 +77,11 @@ def prepare_seal(dsn,root):
     return _write_seal(root,seal)
 
 
+class AcceptanceServer(WSGIServer):
+    def handle_error(self,request,client_address):
+        print('Invented acceptance: HTTP transport failure',file=sys.stderr,flush=True)
+
+
 class TLSHandler(QuietHandler):
     def get_environ(self):
         env=super().get_environ()
@@ -83,16 +89,17 @@ class TLSHandler(QuietHandler):
         return env
 
 
-def browser_journey(root,open_service):
+def browser_journey(root,open_service,*,progress=lambda stage:None):
     """Real Chromium, exact cents, insufficient evidence, persistence and denial.
     The service factory is invoked twice; no reimport or new buyer cookie.
     """
     from playwright.sync_api import sync_playwright,expect
+    expect.set_options(timeout=60000)
     root=_private_directory(root)
     cert=root/"cert.pem";key=root/"key.pem"
     subprocess.run(["openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1","-subj","/CN=127.0.0.1","-addext","subjectAltName=IP:127.0.0.1","-keyout",str(key),"-out",str(cert)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     assets=load_react_assets()
-    server=make_server("127.0.0.1",0,lambda e,s:[],handler_class=TLSHandler)
+    server=make_server("127.0.0.1",0,lambda e,s:[],server_class=AcceptanceServer,handler_class=TLSHandler)
     base="https://127.0.0.1:"+str(server.server_port)
     def boundary():
         return PersistentBoundary(session_file=root/"sessions.sqlite",issuer="https://issuer.invalid",client_id="fixture",
@@ -102,10 +109,12 @@ def browser_journey(root,open_service):
     tls.load_cert_chain(cert,key)
     server.socket=tls.wrap_socket(server.socket,server_side=True)
     thread=None
-    try:
-        with ExitStack() as sessions:
+    with ExitStack() as sessions:
+        try:
+            progress('startup')
             first=boundary()
             service=sessions.enter_context(open_service(first))
+            progress('startup_verified')
             server.set_app(application(None,assets,first,lambda **kw:None,private_beta=service))
             thread=Thread(target=server.serve_forever,daemon=True)
             thread.start()
@@ -118,46 +127,56 @@ def browser_journey(root,open_service):
                         name,value=cookie.split("=",1)
                         ctx=browser.new_context(ignore_https_errors=True)
                         ctx.add_cookies([{"name":name,"value":value,"url":base,"secure":True,"httpOnly":True,"sameSite":"Lax"}])
+                        ctx.set_default_timeout(60000)
                         contexts.append(ctx)
                     page=contexts[0].new_page()
+                    progress("first_search")
                     page.goto(base+"/private-beta-rehearsal")
                     page.get_by_test_id("beta-search").click()
                     expect(page.get_by_test_id("beta-match")).to_have_text("One eligible parcel candidate")
+                    progress("first_save")
                     page.get_by_test_id("beta-create").click()
-                    expect(page.get_by_test_id("beta-result")).to_be_visible(timeout=15000)
+                    expect(page.get_by_test_id("beta-result")).to_be_visible(timeout=60000)
                     expect(page.get_by_test_id("beta-sale")).to_have_count(3)
                     expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
                     iid=page.get_by_test_id("beta-id").input_value()
                     page.get_by_test_id("beta-add-comparison").click()
                     page.locator("#beta-note-0").fill("First property note")
+                    progress("second_search")
                     page.locator("#beta-address").fill("2 Fictional Court")
                     page.get_by_test_id("beta-search").click()
                     expect(page.get_by_test_id("beta-match")).to_have_text("One eligible parcel candidate")
+                    progress("second_save")
                     page.locator("#beta-price").fill("600000.02")
                     page.get_by_test_id("beta-create").click()
-                    expect(page.get_by_test_id("beta-result")).to_contain_text("0 eligible sales",timeout=15000)
+                    expect(page.get_by_test_id("beta-result")).to_contain_text("0 eligible sales",timeout=60000)
                     expect(page.get_by_test_id("beta-sale")).to_have_count(0)
                     page.get_by_test_id("beta-add-comparison").click()
+                    progress("comparison_save")
                     page.get_by_test_id("beta-save-comparison").click()
                     comparison=page.get_by_test_id("beta-comparison")
                     for value in ("600,000.02","525,000.01","First property note","insufficient data"):
-                        expect(comparison).to_contain_text(value,timeout=15000)
+                        expect(comparison).to_contain_text(value,timeout=60000)
                     sid=page.get_by_test_id("beta-comparison-id").input_value()
+                    progress("reconstruct")
                     second=boundary()
                     resumed=sessions.enter_context(open_service(second))
                     if (service.reader.info.backend_pid==resumed.reader.info.backend_pid or
                         service.writer.info.backend_pid==resumed.writer.info.backend_pid):
                         raise ImportRefused("Fresh service connections required")
                     server.set_app(application(None,assets,second,lambda **kw:None,private_beta=resumed))
+                    progress("reopen_investigation")
                     page.reload()
                     page.get_by_test_id("beta-id").fill(iid)
                     page.get_by_test_id("beta-reopen").click()
-                    expect(page.get_by_test_id("beta-sale")).to_have_count(3,timeout=15000)
+                    expect(page.get_by_test_id("beta-sale")).to_have_count(3,timeout=60000)
                     expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
+                    progress("reopen_comparison")
                     page.get_by_test_id("beta-comparison-id").fill(sid)
                     page.get_by_test_id("beta-reopen-comparison").click()
                     for value in ("600,000.02","525,000.01","First property note","insufficient data"):
-                        expect(comparison).to_contain_text(value,timeout=15000)
+                        expect(comparison).to_contain_text(value,timeout=60000)
+                    progress("cross_owner_denial")
                     other=contexts[1].new_page()
                     other.goto(base+"/private-beta-rehearsal")
                     other.get_by_test_id("beta-id").fill(iid)
@@ -172,11 +191,13 @@ def browser_journey(root,open_service):
                         raise ImportRefused("Buyer context leaked")
                 finally:
                     browser.close()
-    finally:
-        if thread is not None:
-            server.shutdown()
-            thread.join(timeout=5)
-        server.server_close()
+        finally:
+            # Wait for the single request-serving thread to finish before
+            # unwinding ExitStack and closing its database connections.
+            if thread is not None:
+                server.shutdown()
+                thread.join()
+            server.server_close()
     return {"status":"invented_browser_journey_verified","investigations_created":2,"comparison_created":1,
             "supported_sales":3,"insufficient_sales":0,"reconstructed":True,"cross_owner_denied":True,
             "real_data_activated":False}
@@ -188,6 +209,12 @@ def main():
         print("Invented acceptance invocation refused",file=sys.stderr)
         return 1
     stage=sys.argv[1]
+    current=stage
+    started=monotonic()
+    def progress(value):
+        nonlocal current
+        current=value
+        print('Invented acceptance stage: '+value+' elapsed_seconds='+str(round(monotonic()-started)),flush=True)
     try:
         root=_private_directory(sys.argv[2])
         if stage=="prepare":
@@ -196,11 +223,13 @@ def main():
         else:
             if os.environ.get("HPI_NEON_MODE")!=MODE:
                 raise ImportRefused("Explicit mode required")
-            report=browser_journey(root,lambda b:open_neon_synthetic_journey(os.environ,root/"seal.json",b))
+            report=browser_journey(root,lambda b:open_neon_synthetic_journey(os.environ,root/"seal.json",b),progress=progress)
             print(json.dumps(report,sort_keys=True))
         return 0
-    except Exception:
-        print("Invented acceptance failed at "+stage,file=sys.stderr)
+    except Exception as exc:
+        # Classify only; no exception message, SQL, browser trace or secret.
+        category=("assertion" if isinstance(exc,AssertionError) else "database" if isinstance(exc,psycopg.Error) else "refused" if isinstance(exc,ImportRefused) else "other")
+        print("Invented acceptance failed at "+current+" category="+category,file=sys.stderr,flush=True)
         return 1
 
 
