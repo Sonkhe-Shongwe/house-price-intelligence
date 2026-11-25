@@ -82,3 +82,38 @@ class NeonPreflightTests(unittest.TestCase):
             self.assertEqual(main({}),1)
         self.assertEqual(out.getvalue(),"")
         self.assertEqual(err.getvalue(),"Neon preflight refused or failed\n")
+
+
+class RestrictedServicePreflightTests(unittest.TestCase):
+    def settings(self):
+        return {"HPI_NEON_MODE":"development-restricted-preflight","HPI_NEON_DEVELOPMENT_HOST":HOST,
+                "HPI_NEON_READER_DSN":DSN.replace("hpi_private_owner","hpi_historical_reader").replace("invented-test-password","invented-reader-password-only"),
+                "HPI_NEON_BUYER_DSN":DSN.replace("hpi_private_owner","hpi_buyer_runtime").replace("invented-test-password","invented-buyer-password-only")}
+
+    def test_separate_restricted_strict_tls_settings(self):
+        from backend.neon_service_preflight import service_parameters
+        with patch.dict("os.environ",{},clear=True):
+            reader,buyer=service_parameters(self.settings())
+            self.assertEqual((reader["user"],buyer["user"]),("hpi_historical_reader","hpi_buyer_runtime"))
+            for value in (reader,buyer):
+                self.assertEqual((value["host"],value["sslmode"],value["channel_binding"],value["sslrootcert"]),(HOST,"verify-full","require","system"))
+            for change in (
+                {"HPI_NEON_READER_DSN":DSN},
+                {"HPI_NEON_BUYER_DSN":self.settings()["HPI_NEON_READER_DSN"]},
+                {"HPI_NEON_BUYER_DSN":self.settings()["HPI_NEON_BUYER_DSN"].replace("invented-buyer-password-only","invented-reader-password-only")},
+                {"HPI_NEON_DEVELOPMENT_HOST":"ep-unapproved.c-10.eu-central-1.aws.neon.tech"},
+                {"HPI_NEON_MODE":"other"},
+            ):
+                with self.subTest(change=change),self.assertRaises(PreflightRefused):
+                    service_parameters(dict(self.settings(),**change))
+
+    @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_no_default_connection_and_sanitised_failure(self,connect):
+        from backend.neon_service_preflight import run_preflight
+        with self.assertRaises(PreflightRefused):
+            run_preflight({})
+        connect.assert_not_called()
+        with patch.dict("os.environ",{},clear=True):
+            connect.side_effect=RuntimeError("invented secret diagnostic")
+            with self.assertRaisesRegex(PreflightRefused,"^Restricted cloud service preflight refused or failed$"):
+                run_preflight(self.settings())

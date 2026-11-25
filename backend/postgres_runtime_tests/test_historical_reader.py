@@ -134,6 +134,10 @@ class HistoricalReaderTests(unittest.TestCase):
                     a=boundary._issue_session("fixture-owner-a")
                     b=boundary._issue_session("fixture-owner-b")
                     with psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=ROLE,password=rp,autocommit=True) as rd, psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=BUYER,password=bp,autocommit=True) as wr:
+                        from backend.neon_service_preflight import _inspect_services
+                        report=_inspect_services(rd,wr,database="hpi_ingest_fixture")
+                        self.assertEqual((report["reader_tables"],report["buyer_tables"]),(13,5))
+                        self.assertTrue(report["read_only"])
                         svc=PrivateBetaRehearsal(rd,wr,seal,boundary)
                         match=PrivateHistoricalReader(rd,seal).search("1 fictional court","2025-04-01")
                         req={"township_code":"17","class_code":"203","analysis_date":"2025-04-01","subject":{"address_id":match["address_id"],"building_area_sqft":1600}}
@@ -146,6 +150,8 @@ class HistoricalReaderTests(unittest.TestCase):
                         self.assertEqual([s["sale_price_usd"] for s in saved["sales"]],["525000.01"]*3)
                         self.assertEqual(svc.reopen(iid,cookie=a["cookie"]),saved)
                         self._check_private_http_browser(rd,wr,seal)
+                        # Existing records are invisible without owner context.
+                        self.assertEqual(_inspect_services(rd,wr,database="hpi_ingest_fixture")["status"],"restricted_services_verified")
 
                         self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
                         with self.assertRaises(ImportRefused):

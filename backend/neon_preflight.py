@@ -19,7 +19,7 @@ ALLOWED = {"host", "port", "dbname", "user", "password", "sslmode", "channel_bin
 class PreflightRefused(ValueError):
     pass
 
-def connection_parameters(dsn, expected_host):
+def _connection_parameters(dsn, expected_host, role):
     """Normalise console DSN into an explicit, stricter libpq configuration."""
     try:
         p = conninfo_to_dict(dsn)
@@ -29,16 +29,20 @@ def connection_parameters(dsn, expected_host):
     if (set(p) - ALLOWED or not isinstance(expected_host, str)
             or not HOST.fullmatch(host) or "-pooler" in host
             or host != expected_host or p.get("dbname") != DATABASE
-            or p.get("user") != OWNER or not p.get("password")
+            or p.get("user") != role or not p.get("password")
             or p.get("port", "5432") != "5432"
             or p.get("sslmode") not in ("require", "verify-full")
             or p.get("channel_binding") != "require"
             or p.get("sslrootcert", "system") != "system"):
         raise PreflightRefused("Unapproved development connection configuration")
-    return dict(host=host, port=5432, dbname=DATABASE, user=OWNER,
+    return dict(host=host, port=5432, dbname=DATABASE, user=role,
                 password=p["password"], sslmode="verify-full", sslrootcert="system",
                 channel_binding="require", gssencmode="disable", connect_timeout=15,
                 application_name="hpi_cloud_preflight")
+
+def connection_parameters(dsn, expected_host):
+    return _connection_parameters(dsn, expected_host, OWNER)
+
 
 def inspect_connection(conn):
     """Check database identity, privileges and emptiness in a read-only transaction."""
