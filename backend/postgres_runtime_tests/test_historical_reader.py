@@ -149,7 +149,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         iid=saved["investigation_id"]
                         self.assertEqual([s["sale_price_usd"] for s in saved["sales"]],["525000.01"]*3)
                         self.assertEqual(svc.reopen(iid,cookie=a["cookie"]),saved)
-                        self._check_private_http_browser(rd,wr,seal)
+                        self._check_private_http_browser(rd,wr,seal,rp,bp)
                         # Existing records are invisible without owner context.
                         self.assertEqual(_inspect_services(rd,wr,database="hpi_ingest_fixture")["status"],"restricted_services_verified")
 
@@ -172,8 +172,10 @@ class HistoricalReaderTests(unittest.TestCase):
                 for role in (BUYER,ROLE):
                     admin.execute(sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
 
-    def _check_private_http_browser(self,rd,wr,seal):
+    def _check_private_http_browser(self,rd,wr,seal,rp,bp):
         import ssl
+        import json
+        from contextlib import ExitStack
         import subprocess
         import tempfile
         from pathlib import Path
@@ -187,13 +189,24 @@ class HistoricalReaderTests(unittest.TestCase):
         class TLSHandler(QuietHandler):
             def get_environ(self):
                 env=super().get_environ();env["HTTPS"]="on";return env
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, ExitStack() as fresh:
             path=Path(tmp);cert=path/"cert.pem";key=path/"key.pem"
+            seal_path=path/"seal.json"
+            # Invented seal only; the operator-owned temporary directory is 0700.
+            fd=os.open(seal_path,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600)
+            with os.fdopen(fd,"w",encoding="utf-8") as stream:
+                json.dump(seal,stream)
             subprocess.run(["openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1","-subj","/CN=127.0.0.1","-addext","subjectAltName=IP:127.0.0.1","-keyout",str(key),"-out",str(cert)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
             server=make_server("127.0.0.1",0,lambda e,s:[],handler_class=TLSHandler)
             base="https://127.0.0.1:"+str(server.server_port)
-            boundary=PersistentBoundary(session_file=path/"sessions.sqlite",issuer="https://issuer.invalid",client_id="fixture",authorize_endpoint="https://issuer.invalid/authorize",redirect_uri=base+"/auth/callback",public_keys={"fixture":"not-used-in-session-rehearsal"},owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
-            service=PrivateBetaRehearsal(rd,wr,seal,boundary)
+            def make_boundary():
+                return PersistentBoundary(session_file=path/"sessions.sqlite",issuer="https://issuer.invalid",client_id="fixture",authorize_endpoint="https://issuer.invalid/authorize",redirect_uri=base+"/auth/callback",public_keys={"fixture":"not-used-in-session-rehearsal"},owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
+            boundary=make_boundary()
+            seal_path.chmod(0o644)
+            with self.assertRaises(ImportRefused):
+                PrivateBetaRehearsal.from_seal_file(rd,wr,seal_path,boundary)
+            seal_path.chmod(0o600)
+            service=PrivateBetaRehearsal.from_seal_file(rd,wr,seal_path,boundary)
             server.set_app(application(None,load_react_assets(),boundary,lambda **kw:None,private_beta=service))
             tls=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);tls.load_cert_chain(cert,key)
             server.socket=tls.wrap_socket(server.socket,server_side=True)
@@ -218,10 +231,27 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-sale")).to_have_count(3)
                         expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
                         iid=page.get_by_test_id("beta-id").input_value()
+                        # Reconstruct the service and identity boundary without
+                        # reimporting data, reissuing cookies or reusing DB sessions.
+                        new_reader=fresh.enter_context(psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=ROLE,password=rp,autocommit=True))
+                        new_writer=fresh.enter_context(psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=BUYER,password=bp,autocommit=True))
+                        self.assertNotEqual(rd.info.backend_pid,new_reader.info.backend_pid)
+                        self.assertNotEqual(wr.info.backend_pid,new_writer.info.backend_pid)
+                        resumed_boundary=make_boundary()
+                        # A syntactically valid but incorrect external seal must
+                        # fail startup instead of silently accepting stored evidence.
+                        seal_path.write_text(json.dumps(dict(seal,relational_sha256="0"*64)))
+                        with self.assertRaises(ImportRefused):
+                            PrivateBetaRehearsal.from_seal_file(new_reader,new_writer,seal_path,resumed_boundary)
+                        seal_path.write_text(json.dumps(seal))
+                        resumed=PrivateBetaRehearsal.from_seal_file(new_reader,new_writer,seal_path,resumed_boundary)
+                        server.set_app(application(None,load_react_assets(),resumed_boundary,lambda **kw:None,private_beta=resumed))
                         page.reload()
                         page.get_by_test_id("beta-id").fill(iid)
                         page.get_by_test_id("beta-reopen").click()
                         expect(page.get_by_test_id("beta-sale")).to_have_count(3)
+                        expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
+                        self.assertIsNone(new_writer.execute("SELECT nullif(current_setting(\'hpi.owner_id\',true),\'\')").fetchone()[0])
                         other=contexts[1].new_page()
                         other.goto(base+"/private-beta-rehearsal")
                         other.get_by_test_id("beta-id").fill(iid)

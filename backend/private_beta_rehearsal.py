@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 import json
 from backend.buyer_ownership import ROLE as BUYER, _verify_buyer_privileges
 from backend.historical_reader import ROLE as READER, _verified, PrivateHistoricalReader
+from backend.historical_seal_config import load_historical_seal
 from backend.historical_postgres import _evaluate_verified
 from backend.historical_beta_projection import project_rehearsal
 from backend.investigation_contract import validate_request
@@ -40,6 +41,17 @@ class PrivateBetaRehearsal:
             raise ImportRefused("Offline identity fixture required")
         self.reader,self.writer,self.seal,self.boundary=reader,writer,dict(seal),boundary
         self.request_lock=RLock()
+
+    @classmethod
+    def from_seal_file(cls, reader, writer, seal_path, boundary):
+        """Load operator-held private seal and verify source before serving.
+        
+        Still loopback invented fixtures only. No cloud or live-source switch.
+        """
+        service = cls(reader, writer, load_historical_seal(seal_path), boundary)
+        with service._source():
+            pass
+        return service
 
     def _owner(self,cookie,method,origin=None,csrf=None):
         owner=self.boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=csrf)
