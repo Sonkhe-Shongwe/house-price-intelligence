@@ -2,7 +2,7 @@
 
 A buyer-facing historical comparable-sales investigation and shortlist workspace: **Investigate / Compare / Decide**. Not a listings marketplace, appraisal or trained price-prediction model. Asking price is user-reported, distinct from recorded sales.
 
-**Status reviewed 25 November 2026:** `development` contains the integrated fictional React/SQLite buyer journey (PRs #5 and #6; React PR #8), verified split-role PostgreSQL persistence and authenticated historical-shape browser rehearsal. Neon development schema and restricted permissions installed (25 tables, five RLS policies, no application records); temporary service credentials configured, direct application-driver connectivity still pending. **87.1%** is the approved weighted MVP planning estimate, not measured completion. All full phase gates open. See [current checkpoint](docs/CHECKPOINT.md) for exact source/CI, current connection test and next task; [roadmap](docs/P_PHASE_ROADMAP.md) for gates. No public data display, valuation or deployment approved.
+**Status reviewed 25 November 2026:** `development` contains the integrated fictional React/SQLite buyer journey (PRs #5 and #6; React PR #8), verified split-role PostgreSQL persistence and authenticated historical-shape browser rehearsal. Neon development schema, direct restricted TLS and persistent invented buyer journey verified; saved fictional buyer records retained, service logins disabled. Disposable encrypted recovery verified; protected storage open. Actual Auth0 callback/token exchange reached, but time validation blocks acceptance. **87.1%** is the approved weighted MVP planning estimate, not measured completion. All full phase gates open. See [current checkpoint](docs/CHECKPOINT.md) for exact source/CI, current connection test and next task; [roadmap](docs/P_PHASE_ROADMAP.md) for gates. No public data display, valuation or deployment approved.
 
 ## Historical research evidence, not product claims
 
@@ -50,7 +50,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next:** Complete the simplified restricted direct-connection acceptance test, then verify cloud-connected application behaviour, persistent invented-data acceptance and storage/data-use protections. The prior private live rehearsal is historical; the new conditional extraction allowance is unused and cannot be exercised before the protected-storage and permitted-use gate. See [checkpoint](docs/CHECKPOINT.md).
+**Next:** Complete isolated actual identity qualification, then protected storage/recovery, operator/access and data-use scope. Direct connection and persistent invented acceptance are verified; do not replay. The prior private live rehearsal is historical; the new conditional extraction allowance is unused and cannot be exercised before the protected-storage and permitted-use gate. See [checkpoint](docs/CHECKPOINT.md).
 
 **Conditional only:** Price prediction requires independent chronological evaluation and defensible uncertainty. Live listings, real-time valuations, mortgages, alerts and multi-market expansion are outside this MVP.
 

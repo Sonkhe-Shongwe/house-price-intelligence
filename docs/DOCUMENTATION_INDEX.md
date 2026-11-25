@@ -8,9 +8,9 @@
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
-| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 25 November reconciliation; older [Post-P6 audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) remains historical |
-| Active database workstream | [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) | Schema, restricted permissions, direct connection and persistent invented buyer journey accepted; protected storage open |
-| Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional extraction unused; no deployment or real buyer route |
+| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 25 November status-ledger consolidation; older [Post-P6 audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) remains historical |
+| Active database workstream | [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) | Restricted TLS, persistent invented buyer journey and disposable encrypted recovery accepted; protected storage open |
+| Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional extraction unused; actual identity blocked on token timing; no deployment or real buyer route |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 87.1% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
@@ -67,4 +67,4 @@
 
 Use [CHECKPOINT.md](CHECKPOINT.md) as the only current state/next-task ledger; [DECISIONS.md](DECISIONS.md) for authority and [P_PHASE_ROADMAP.md](P_PHASE_ROADMAP.md) for phase gates. [Master prompt](MASTER_CONTINUATION_PROMPT.md) and [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) define standing autonomy, one permanent development branch and stable main. Earlier design and engineering contracts describe their dated scope, not the latest project status.
 
-Active: [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) within [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md). Verified schema, role separation, direct restricted connectivity and persistent invented-data cloud browser acceptance do not mean production hosting or protected real storage. Temporary service logins disabled after acceptance; follow checkpoint for bounded future integration. P4 95%, P7 83%, P8 35%; **87.1%** weighted, all gates open. For exact source, runs and scope, consult the checkpoint. Previous index preserved [at the pre-audit commit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/8e85c848c66f5c540e3730f8e93d87011d39ffcd/docs/DOCUMENTATION_INDEX.md).
+Active: [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) within [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md). See checkpoint for the actual identity timing diagnostic and next action. Disposable encrypted recovery verified; managed recovery and protected storage open. P4 95%, P7 83%, P8 35%; **87.1%** weighted, all gates open. [Pre-cleanup index](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/1dbcb6aba082af909ee3fe79d5b0a1cfec8cc867/docs/DOCUMENTATION_INDEX.md).
