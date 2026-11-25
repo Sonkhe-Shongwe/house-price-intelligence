@@ -37,6 +37,23 @@ function decode(x:unknown):Result{
   }
   return r as unknown as Result;
 }
+type Entry={investigation_id:string;note_text:string;investigation:Result};
+type Comparison={shortlist_id:string;label:string;entries:Entry[]};
+function decodeComparison(x:unknown):Comparison{
+  const r=record(x);
+  exact(r,'source_kind shortlist_id label created_at_utc entries');
+  if(r.source_kind!=='historical_shape_rehearsal'||typeof r.shortlist_id!=='string'||!UUID.test(r.shortlist_id)
+    ||typeof r.label!=='string'||typeof r.created_at_utc!=='string'||!Array.isArray(r.entries)
+    ||r.entries.length<2||r.entries.length>3)throw Error('Unavailable');
+  const entries=r.entries.map(x=>{
+    const e=record(x);exact(e,'investigation_id note_text investigation');
+    const investigation=decode(e.investigation);
+    if(e.investigation_id!==investigation.investigation_id||typeof e.note_text!=='string'||e.note_text.length>800)throw Error('Unavailable');
+    return {investigation_id:investigation.investigation_id,note_text:e.note_text,investigation};
+  });
+  if(new Set(entries.map(e=>e.investigation_id)).size!==entries.length)throw Error('Unavailable');
+  return {shortlist_id:r.shortlist_id,label:r.label,entries};
+}
 async function api(path:string,body?:unknown){
   const res=await fixtureFetch(ROOT+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok)throw Error('Unavailable');
@@ -48,6 +65,8 @@ export default function PrivateBetaRehearsal(){
   const [token,setToken]=useState<string|null>(null),[status,setStatus]=useState('');
   const [result,setResult]=useState<Result|null>(null),[iid,setIid]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(false);
+  const [entries,setEntries]=useState<Entry[]>([]),[label,setLabel]=useState('My fictional comparison');
+  const [sid,setSid]=useState(''),[comparison,setComparison]=useState<Comparison|null>(null);
   async function run(action:()=>Promise<void>){
     setBusy(true);setError(false);
     try{await action();}catch{setError(true);}finally{setBusy(false);}
@@ -82,5 +101,39 @@ export default function PrivateBetaRehearsal(){
         <p>Buyer-reported asking price: {result.asking_price_usd===null?'Not supplied':formatExactUsd(result.asking_price_usd)}</p>
         <ol>{result.sales.map(s=><li key={s.rank} data-testid="beta-sale"><strong>{formatExactUsd(s.sale_price_usd)}</strong> · {s.sale_date} · {s.assessed_area_sqft} sq ft (assessment {s.assessment_year}) · {s.age_days} days earlier · {s.area_difference_pct}% area difference · {s.location_evidence.replaceAll('_',' ')}</li>)}</ol>
       </section>}
+      <section className="hpi-provenance" aria-label="Saved property comparison">
+        <h2>Compare saved investigations</h2>
+        <fieldset disabled={busy}>
+          <legend>Choose two or three distinct fictional parcels</legend>
+          <button type="button" className="buyer-save" data-testid="beta-add-comparison" disabled={!result||entries.length>=3||entries.some(e=>e.investigation_id===result.investigation_id)} onClick={()=>{
+            if(result)setEntries(old=>[...old,{investigation_id:result.investigation_id,note_text:'',investigation:result}]);
+          }}>Add saved investigation</button>
+          {entries.map((entry,i)=><div key={entry.investigation_id}>
+            <p>Property {i+1}: {entry.investigation.analysis_date} · {entry.investigation.selected_count} eligible sales</p>
+            <label htmlFor={'beta-note-'+i}>Property {i+1} note</label>
+            <input id={'beta-note-'+i} maxLength={800} value={entry.note_text} onChange={e=>setEntries(old=>old.map((x,j)=>j===i?{...x,note_text:e.target.value}:x))}/>
+            <button type="button" onClick={()=>setEntries(old=>old.filter(x=>x.investigation_id!==entry.investigation_id))}>Remove property {i+1}</button>
+          </div>)}
+          <label htmlFor="beta-comparison-label">Comparison name</label><input id="beta-comparison-label" maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}/>
+          <button type="button" className="buyer-save" data-testid="beta-save-comparison" disabled={entries.length<2||!label.trim()} onClick={()=>void run(async()=>{
+            setComparison(null);const c=decodeComparison(await api('/shortlists',{label,entries:entries.map(({investigation_id,note_text})=>({investigation_id,note_text}))}));setComparison(c);setSid(c.shortlist_id);
+          })}>Save comparison</button>
+          <label htmlFor="beta-comparison-id">Saved comparison ID</label><input id="beta-comparison-id" data-testid="beta-comparison-id" value={sid} onChange={e=>setSid(e.target.value)}/>
+          <button type="button" className="buyer-save" data-testid="beta-reopen-comparison" disabled={!UUID.test(sid)} onClick={()=>void run(async()=>{
+            setComparison(null);setComparison(decodeComparison(await api('/shortlists/'+sid)));
+          })}>Reopen comparison</button>
+        </fieldset>
+        {comparison&&<div data-testid="beta-comparison">
+          <h3>{comparison.label}</h3>
+          <table><caption>Frozen historical evidence, not a valuation</caption><thead><tr><th scope="col">Evidence</th>{comparison.entries.map((e,i)=><th scope="col" key={e.investigation_id}>Property {i+1}</th>)}</tr></thead>
+          <tbody>
+            <tr><th scope="row">Analysis date</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.analysis_date}</td>)}</tr>
+            <tr><th scope="row">Evidence status</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.status.replaceAll('_',' ')}</td>)}</tr>
+            <tr><th scope="row">Buyer-reported asking price</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.asking_price_usd===null?'Not supplied':formatExactUsd(e.investigation.asking_price_usd)}</td>)}</tr>
+            <tr><th scope="row">Historical sales</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.sales.map(s=><div key={s.rank}>{formatExactUsd(s.sale_price_usd)} · {s.sale_date}</div>)}</td>)}</tr>
+            <tr><th scope="row">Buyer notes</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.note_text||'None'}</td>)}</tr>
+          </tbody></table>
+        </div>}
+      </section>
     </main></>;
 }

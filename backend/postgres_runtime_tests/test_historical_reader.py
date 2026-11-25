@@ -158,8 +158,10 @@ class HistoricalReaderTests(unittest.TestCase):
                             svc.reopen(iid,cookie=b["cookie"])
                         with self.assertRaises(AuthDenied):
                             svc.reopen(iid,cookie="")
-                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],2)
-                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],6)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],3)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],9)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlists").fetchone()[0],1)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlist_investigations").fetchone()[0],2)
                         for forbidden in ("FICT-","00000000000001","relational_sha256","address_id"):
                             self.assertNotIn(forbidden,str(saved))
                         with self.assertRaises(psycopg.errors.InsufficientPrivilege):
@@ -231,6 +233,21 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-sale")).to_have_count(3)
                         expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
                         iid=page.get_by_test_id("beta-id").input_value()
+                        page.get_by_test_id("beta-add-comparison").click()
+                        page.locator("#beta-note-0").fill("First property note")
+                        page.locator("#beta-address").fill("2 Fictional Court")
+                        page.get_by_test_id("beta-search").click()
+                        expect(page.get_by_test_id("beta-match")).to_have_text("One eligible parcel candidate")
+                        page.locator("#beta-price").fill("600000.02")
+                        page.get_by_test_id("beta-create").click()
+                        expect(page.get_by_test_id("beta-result")).to_be_visible(timeout=15000)
+                        second=page.get_by_test_id("beta-id").input_value()
+                        self.assertNotEqual(iid,second)
+                        page.get_by_test_id("beta-add-comparison").click()
+                        page.get_by_test_id("beta-save-comparison").click()
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("600,000.02")
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("First property note")
+                        sid=page.get_by_test_id("beta-comparison-id").input_value()
                         # Reconstruct the service and identity boundary without
                         # reimporting data, reissuing cookies or reusing DB sessions.
                         new_reader=fresh.enter_context(psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=ROLE,password=rp,autocommit=True))
@@ -252,12 +269,32 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-sale")).to_have_count(3)
                         expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
                         self.assertIsNone(new_writer.execute("SELECT nullif(current_setting(\'hpi.owner_id\',true),\'\')").fetchone()[0])
+                        page.get_by_test_id("beta-comparison-id").fill(sid)
+                        page.get_by_test_id("beta-reopen-comparison").click()
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("600,000.02")
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("525,000.01")
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("First property note")
+                        # Another investigation of the first parcel already exists.
+                        # Reject distinct investigation IDs that identify the same parcel.
+                        auth=resumed_boundary._issue_session("fixture-owner-a")
+                        from backend.synthetic_shortlists import ShortlistError
+                        with new_writer.transaction():
+                            new_writer.execute("SET LOCAL search_path TO hpi_candidate,pg_catalog")
+                            new_writer.execute("SELECT set_config('hpi.owner_id','fixture-owner-a',true)")
+                            duplicates=new_writer.execute("SELECT investigation_id FROM investigations WHERE investigation_id<>%s AND investigation_id<>%s",(iid,second)).fetchall()
+                        self.assertEqual(len(duplicates),1)
+                        with self.assertRaisesRegex(ShortlistError,"duplicate_property"):
+                            resumed.create_comparison({"label":"Duplicate","entries":[{"investigation_id":iid},{"investigation_id":duplicates[0][0]}]},cookie=auth["cookie"],origin=resumed_boundary.origin,csrf=auth["csrf"])
                         other=contexts[1].new_page()
                         other.goto(base+"/private-beta-rehearsal")
                         other.get_by_test_id("beta-id").fill(iid)
                         other.get_by_test_id("beta-reopen").click()
                         expect(other.get_by_test_id("beta-error")).to_be_visible()
                         self.assertEqual(other.get_by_test_id("beta-result").count(),0)
+                        other.get_by_test_id("beta-comparison-id").fill(sid)
+                        other.get_by_test_id("beta-reopen-comparison").click()
+                        expect(other.get_by_test_id("beta-error")).to_be_visible()
+                        self.assertEqual(other.get_by_test_id("beta-comparison").count(),0)
                         for ctx in contexts:ctx.close()
                     finally:browser.close()
             finally:server.shutdown();server.server_close();thread.join(timeout=5)

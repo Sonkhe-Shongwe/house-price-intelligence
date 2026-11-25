@@ -9,10 +9,12 @@ from backend.synthetic_http import (MAX_BODY_BYTES, SECURITY_HEADERS, _response,
     _strict_pairs, _reject_constant, UUID_PART)
 from backend.curated_ingestion_candidate import ImportRefused
 from backend.investigation_contract import ContractError
+from backend.synthetic_shortlists import ShortlistError
 
 PAGE="/private-beta-rehearsal"
 PREFIX="/v1/private-beta-rehearsal"
 REOPEN=re.compile("^"+PREFIX+"/investigations/"+UUID_PART+"$")
+REOPEN_COMPARISON=re.compile("^"+PREFIX+"/shortlists/"+UUID_PART+"$")
 
 
 def _body(env):
@@ -50,13 +52,14 @@ def route(service,assets,env,start):
         start("200 OK",[("Content-Type",content_type),("Content-Length",str(len(payload))),*SECURITY_HEADERS])
         return [payload]
     match=REOPEN.fullmatch(path)
-    if path not in (PREFIX+"/search",PREFIX+"/investigations") and not match:
+    comparison=REOPEN_COMPARISON.fullmatch(path)
+    if path not in (PREFIX+"/search",PREFIX+"/investigations",PREFIX+"/shortlists") and not (match or comparison):
         return _response(start,404,{"error":"not_found"})
-    expected="GET" if match else "POST"
+    expected="GET" if (match or comparison) else "POST"
     if method!=expected:
         return _response(start,405,{"error":"method_not_allowed"},allow=expected)
     try:
-        payload=None if match else _body(env)
+        payload=None if (match or comparison) else _body(env)
     except (ValueError,KeyError,UnicodeError):
         return _response(start,400,{"error":"invalid_request"})
     try:
@@ -65,15 +68,22 @@ def route(service,assets,env,start):
         with service.request_lock:
             if match:
                 return _response(start,200,service.reopen(match[1],cookie=cookie))
+            if comparison:
+                return _response(start,200,service.reopen_comparison(comparison[1],cookie=cookie))
+            if path==PREFIX+"/shortlists":
+                result=service.create_comparison(payload,**auth)
+                return _response(start,201,result,location=PREFIX+"/shortlists/"+result["shortlist_id"])
             if path==PREFIX+"/search":
                 if set(payload)!={"query","analysis_date"}:
                     return _response(start,400,{"error":"invalid_request"})
                 return _response(start,200,service.search(payload["query"],payload["analysis_date"],**auth))
             result=service.create(payload,**auth)
             return _response(start,201,result,location=PREFIX+"/investigations/"+result["investigation_id"])
+    except ShortlistError as exc:
+        return _response(start,exc.status,{"error":exc.code})
     except ContractError:
         return _response(start,422,{"error":"invalid_investigation"})
     except ImportRefused:
-        return _response(start,404 if match else 422,{"error":"investigation_unavailable"})
+        return _response(start,404 if (match or comparison) else 422,{"error":"investigation_unavailable"})
     except (psycopg.Error,RuntimeError,KeyError,TypeError):
         return _response(start,503,{"error":"evidence_unavailable"})
