@@ -37,6 +37,8 @@ Owner created a dedicated development Regular Web Application and verified one t
 
 ## Recovery, storage and access gates
 
+Owner-approved browser-only P8 release criteria recorded at e8b79cd; all seven workflows passed. Read-only Neon recheck confirms one listed project admin, unprotected development and production branches, six-hour history, both restricted roles NOLOGIN, no restricted sessions, and unchanged invented record counts (2 investigations, 2 results, 3 evidence, 1 shortlist, 2 memberships, 4 sales, 5 RLS policies). No real-data extraction or database write. Reusable operator encrypted dump-and-seal package prepared from existing disposable recovery test; exact-head CI pending. Trusted operator storage, separate key custody and actual independent retained backup are still open.
+
 Disposable encrypted recovery is verified, not independent off-provider backup or managed recovery. Observed Free-plan constraints: unprotected branches, public endpoint access, empty IP allowlist, six-hour history capped at 1 GiB, no scheduled snapshots. Prior bounded snapshot attempt refused; no root/production workaround, reset, finalization or deletion. Off-provider encrypted storage, key custody, trusted operator device, access inventory and permitted use remain open. Existing protected environment requires normal owner approval for separately authorised service windows; no bypass or repeat of consumed v8/v3 markers.
 
 ## Research and data-use boundary
