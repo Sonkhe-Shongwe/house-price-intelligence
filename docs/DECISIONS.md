@@ -283,3 +283,7 @@ Owner requested less restrictive development configuration; normal owner reviewe
 ## 25 November 2026: owner-only beta and proportionate security
 
 Owner approved sole-human-operator private beta (engineering assistance through existing authorised tools) and attested exclusive administrative account access. Individual MFA likely enabled, not verified. Existing invented-only backup confidentiality remediation deferred at owner request; independent technical recovery evidence remains valid. A fresh securely encrypted backup with a distinct undisclosed key and complete protection/use acceptance are prerequisites to real-data storage. No repeated security exercises for routine fictional development. No waiver of the conditional extraction, access, release, cost or main-integration gates; 87.1% unchanged.
+
+## 26 November 2026: combined invented journey and UX priority
+
+Owner authorised one bounded combined Auth0/Neon fictional integration window and application owner registration. Window consumed and both restricted roles disabled with zero sessions independently verified. Actual authenticated save, comparison and owner-observed reopen/sign-out demonstrated; actual restart, note persistence and cross-owner/old-cookie denial not independently demonstrated in this run. Owner rejected rehearsal UI as final product; prioritise professional integrated buyer UX redesign using invented data. Existing formal gates, 87.1% approved baseline, R0, extraction and release restrictions remain unchanged.
