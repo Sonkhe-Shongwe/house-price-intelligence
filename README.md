@@ -2,7 +2,7 @@
 
 A buyer-facing historical comparable-sales investigation and shortlist workspace: **Investigate / Compare / Decide**. Not a listings marketplace, appraisal or trained price-prediction model. Asking price is user-reported, distinct from recorded sales.
 
-**Status reviewed 25 November 2026:** `development` contains the integrated fictional React/SQLite buyer journey (PRs #5 and #6; React PR #8), tested PostgreSQL HTTP and historical-reader preparation. Latest verified source [8e85c84](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8e85c848c66f5c540e3730f8e93d87011d39ffcd) passed all ten workflows. Neon administrative access and an empty PostgreSQL development database are verified; direct application connectivity and real-data storage are not. **87.1%** is the approved weighted MVP planning estimate, not measured completion. All full phase gates remain open. See [current checkpoint](docs/CHECKPOINT.md) for live status and [roadmap](docs/P_PHASE_ROADMAP.md) for acceptance requirements. No public data display, valuation or deployment approved.
+**Status reviewed 25 November 2026:** `development` contains the integrated fictional React/SQLite buyer journey (PRs #5 and #6; React PR #8), tested PostgreSQL HTTP and historical-reader preparation. Latest verified source [8e85c84](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8e85c848c66f5c540e3730f8e93d87011d39ffcd) passed all ten workflows. Neon administrative access and installation of the 23-table canonical/historical development schema are verified; restricted application access, direct application connectivity and real-data storage are not. No application records are stored. **87.1%** is the approved weighted MVP planning estimate, not measured completion. All full phase gates remain open. See [current checkpoint](docs/CHECKPOINT.md) for live status and [roadmap](docs/P_PHASE_ROADMAP.md) for acceptance requirements. No public data display, valuation or deployment approved.
 
 ## Historical research evidence, not product claims
 
@@ -50,7 +50,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next:** Qualify the canonical schema and restricted roles on Neon development, then verify application connectivity, persistent invented-data acceptance and storage/data-use protections. The prior private live rehearsal is historical; the new conditional extraction allowance is unused and cannot be exercised before the protected-storage and permitted-use gate. See [checkpoint](docs/CHECKPOINT.md).
+**Next:** Qualify restricted roles on the installed Neon development schema, then verify application connectivity, persistent invented-data acceptance and storage/data-use protections. The prior private live rehearsal is historical; the new conditional extraction allowance is unused and cannot be exercised before the protected-storage and permitted-use gate. See [checkpoint](docs/CHECKPOINT.md).
 
 **Conditional only:** Price prediction requires independent chronological evaluation and defensible uncertainty. Live listings, real-time valuations, mortgages, alerts and multi-market expansion are outside this MVP.
 

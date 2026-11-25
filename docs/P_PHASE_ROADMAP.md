@@ -2,7 +2,7 @@
 
 **Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
-**25 November operational reconciliation:** P4/P7 Neon cloud integration is active. Administrative access and empty development DB verified; canonical/historical restricted-reader preparation passed disposable CI. Application-to-cloud connectivity, real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). The dated milestones below are historical evidence; no weights, estimates or gate dispositions changed.
+**25 November operational reconciliation:** P4/P7 Neon cloud integration is active. Administrative access and live 23-table canonical/historical development schema installation verified; restricted-reader preparation passed disposable CI, live restricted access remains open. Application-to-cloud connectivity, real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). The dated milestones below are historical evidence; no weights, estimates or gate dispositions changed.
 
 ## Origin and scope
 
