@@ -1,6 +1,7 @@
 """Execute the new browser acceptance harness against the disposable CI DB."""
 import os
 import secrets
+import subprocess
 import tempfile
 import unittest
 from time import sleep
@@ -13,6 +14,9 @@ from backend.neon_synthetic_seed import fixture_intake,seed_statements
 from backend.historical_reader import seal_historical,provision_reader,ROLE as READER
 from backend.buyer_ownership import ROLE as BUYER,_prepare_empty_buyer_schema
 from backend.private_beta_rehearsal import PrivateBetaRehearsal
+from backend.oidc_boundary import OidcBoundary
+from backend.curated_ingestion_candidate import ImportRefused
+from backend.neon_service_preflight import _inspect_services
 
 ADMIN=os.environ["HPI_PG_DSN"]
 
@@ -49,7 +53,62 @@ class InventedAcceptanceTests(unittest.TestCase):
                     self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],3)
                     self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlists").fetchone()[0],1)
                     self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlist_investigations").fetchone()[0],2)
+                    # Preserve the browser-created records, not a second hand-built
+                    # fixture. Restore schema, data, sequence, RLS and schema ACLs
+                    # with existing restricted roles in the disposable database.
+                    self._check_restore(conn,root,path,rp,bp)
             finally:
                 with psycopg.connect(ADMIN,autocommit=True) as admin:
                     for role in (READER,BUYER):
                         admin.execute(sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
+
+    def _check_restore(self,conn,root,seal_path,rp,bp):
+        self.assertEqual((conn.info.host,conn.info.dbname,conn.info.user),
+                         ("127.0.0.1","hpi_ingest_fixture","postgres"))
+        container=os.environ["HPI_PG_CONTAINER"]
+        self.assertRegex(container,r"^[a-f0-9]{64}$")
+        ids=[r[0] for r in conn.execute("SELECT investigation_id FROM hpi_candidate.investigations ORDER BY investigation_id").fetchall()]
+        sid=conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchone()[0]
+
+        def observe():
+            # Fresh offline identity sessions: the database recovery guarantee
+            # covers records, not restoration of external authentication tokens.
+            boundary=OidcBoundary(issuer="https://issuer.invalid",client_id="fixture",
+                authorize_endpoint="https://issuer.invalid/authorize",
+                redirect_uri="https://127.0.0.1:8766/auth/callback",
+                public_keys={"fixture":"not-used-in-session-rehearsal"},
+                owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
+            a=boundary._issue_session("fixture-owner-a")["cookie"]
+            b=boundary._issue_session("fixture-owner-b")["cookie"]
+            with psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=READER,password=rp,autocommit=True) as rd, psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=BUYER,password=bp,autocommit=True) as wr:
+                self.assertEqual(_inspect_services(rd,wr,database="hpi_ingest_fixture")["status"],"restricted_services_verified")
+                svc=PrivateBetaRehearsal.from_seal_file(rd,wr,seal_path,boundary)
+                saved=[svc.reopen(i,cookie=a) for i in ids]
+                comparison=svc.reopen_comparison(sid,cookie=a)
+                for i in ids:
+                    with self.assertRaises(ImportRefused):
+                        svc.reopen(i,cookie=b)
+                with self.assertRaises(ImportRefused):
+                    svc.reopen_comparison(sid,cookie=b)
+                self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
+                return saved,comparison
+
+        before=observe()
+        self.assertEqual(sorted(x["selected_count"] for x in before[0]),[0,3])
+        self.assertEqual([x["note_text"] for x in before[1]["entries"]],["First property note",""])
+        def docker(*args,**kwargs):
+            result=subprocess.run(["docker","exec",*args],stderr=subprocess.DEVNULL,timeout=60,**kwargs)
+            self.assertEqual(result.returncode,0,"Disposable recovery command failed")
+        with tempfile.TemporaryFile(dir=root) as dump:
+            docker(container,"pg_dump","-U","postgres","-d","hpi_ingest_fixture",
+                "-Fc","--schema=hpi_candidate","--no-owner",stdout=dump)
+            self.assertGreater(dump.tell(),0)
+            # Only this test-owned loopback schema is removed. Existing role
+            # definitions and database-level permissions deliberately survive.
+            conn.execute("DROP SCHEMA hpi_candidate CASCADE")
+            self.assertIsNone(conn.execute("SELECT to_regnamespace('hpi_candidate')").fetchone()[0])
+            dump.seek(0)
+            docker("-i",container,"pg_restore","-U","postgres","-d","hpi_ingest_fixture",
+                "--exit-on-error","--single-transaction","--no-owner",stdin=dump,stdout=subprocess.DEVNULL)
+        self.assertEqual(observe(),before)
+        self.assertEqual(conn.execute("SELECT count(*) FROM pg_policies WHERE schemaname='hpi_candidate'").fetchone()[0],5)
