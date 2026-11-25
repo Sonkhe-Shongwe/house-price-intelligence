@@ -345,7 +345,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 **Owner release direction:** full original real-property product selected. Canonical exact-year correction and fixed 2025 holdout verified; next source-specific rights, evidence-only/fallback disclosure and production gates. No further live extraction, contact, provisioning, real display or deployment without scoped approval.
 
-**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **85.7%**; change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
+**Scoring rule:** Existing P0–P8 stage weights and exit gates remain fixed. The latest owner-authorised 24 November reassessment is **87.1%** (85.7% was the preceding milestone); change estimates only at meaningful milestone reviews, not from this breakdown alone. Subitem statuses are *not numeric percentages*. At each milestone review, revisit the phase's exit gate, inspect exact commit/CI and dated research/owner evidence, then update both this roadmap and [CHECKPOINT.md](CHECKPOINT.md) with a defensible completion estimate and any remaining blocked items. Do not add a second spreadsheet or independent score ledger unless explicitly approved.
 
 ## Full process and phase exit gates
 
