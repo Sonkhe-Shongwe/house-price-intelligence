@@ -17,7 +17,7 @@ BINDING="__Host-hpi_login"
 
 def _binding(cookie):
     if not isinstance(cookie,str) or len(cookie)>4096:
-        raise AuthDenied("Login rejected")
+        raise AuthDenied("Login rejected",category="browser_binding")
     values=[part.strip().split("=",1)[1] for part in cookie.split(";")
             if part.strip().startswith(BINDING+"=")]
     if len(values)!=1 or not valid_token(values[0]):
@@ -42,7 +42,7 @@ def _reply(start,status,value=None,*,cookies=(),location=None,html=None,form_iss
     return [body]
 
 
-def identity_only_application(boundary,exchange):
+def identity_only_application(boundary,exchange,*,diagnostic=lambda category: None):
     if (not isinstance(boundary,PersistentBoundary) or not isinstance(exchange,ConfidentialCodeExchange)
         or not ISSUER.fullmatch(boundary.issuer) or boundary.redirect!=CALLBACK
         or boundary.origin!=ORIGIN or exchange.issuer!=boundary.issuer
@@ -82,10 +82,10 @@ def identity_only_application(boundary,exchange):
                 return _reply(start,"303 See Other",location=url,cookies=(
                     f"{BINDING}={bind}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=300",))
             if callback:
-                if len(query)>4096:raise AuthDenied("Callback rejected")
+                if len(query)>4096:raise AuthDenied("Callback rejected",category="callback_parameters")
                 args=parse_qs(query,keep_blank_values=True,strict_parsing=True,max_num_fields=2)
                 if set(args)!={"state","code"} or any(len(v)!=1 for v in args.values()):
-                    raise AuthDenied("Callback rejected")
+                    raise AuthDenied("Callback rejected",category="callback_parameters")
                 result=boundary.finish(state=args["state"][0],browser_binding=_binding(cookie),
                     code=args["code"][0],exchange=exchange)
                 return _reply(start,"303 See Other",location="/",cookies=(result["cookie"],
@@ -96,7 +96,14 @@ def identity_only_application(boundary,exchange):
                 cleared=boundary.logout(cookie=cookie,origin=origin,csrf=env.get("HTTP_X_HPI_CSRF"))
                 return _reply(start,"200 OK",{"logged_out":True},cookies=(cleared,))
             return _reply(start,"404 Not Found",{"error":"identity_route_only"})
-        except (AuthDenied,ValueError):
+        except (AuthDenied,ValueError) as exc:
+            if callback:
+                category=getattr(exc,"category",None)
+                allowed={"browser_binding","callback_parameters","callback_state_binding",
+                    "token_exchange","token_format","token_header","signing_key","token_lifetime",
+                    "token_nonce","token_audience","token_issuer","token_signature","token_claims",
+                    "subject_allowlist"}
+                diagnostic(category if category in allowed else "callback_other")
             return _reply(start,"401 Unauthorized",{"error":"identity_rejected"})
         except Exception:
             return _reply(start,"503 Service Unavailable",{"error":"identity_unavailable"})

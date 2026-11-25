@@ -77,7 +77,8 @@ def create_server(root,client_secret):
     context.minimum_version=ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(cert,key)
     boundary,exchange=prepare_auth0(**config,client_secret=client_secret)
-    server=make_server("127.0.0.1",8766,identity_only_application(boundary,exchange),
+    server=make_server("127.0.0.1",8766,identity_only_application(boundary,exchange,
+            diagnostic=lambda category: print("Identity callback rejected: "+category,flush=True)),
         server_class=QuietServer,handler_class=QuietTLSHandler)
     try:
         server.socket=context.wrap_socket(server.socket,server_side=True)

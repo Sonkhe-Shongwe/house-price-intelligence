@@ -15,7 +15,10 @@ import jwt
 
 TOKEN=re.compile(r"^[A-Za-z0-9_-]{43}$")
 COOKIE="__Host-hpi_session"
-class AuthDenied(ValueError):pass
+class AuthDenied(ValueError):
+    def __init__(self,message,*,category=None):
+        super().__init__(message)
+        self.category=category
 def random_token():return secrets.token_urlsafe(32)
 def digest(value):return sha256(value.encode("ascii")).hexdigest()
 def valid_token(value):return isinstance(value,str) and TOKEN.fullmatch(value) is not None
@@ -70,37 +73,53 @@ class OidcBoundary:
                 "state":state,"nonce":nonce,"code_challenge":challenge,"code_challenge_method":"S256"}
         return self.endpoint+"?"+urlencode(params)
     def _verify(self,token,nonce):
-        if not isinstance(token,str) or len(token)>16000:raise AuthDenied("Identity rejected")
+        def denied(category):
+            return AuthDenied("Identity rejected",category=category)
+        if not isinstance(token,str) or len(token)>16000:raise denied("token_format")
         try:
             header=jwt.get_unverified_header(token)
             if header.get("alg")!="RS256" or any(k in header for k in ("jku","x5u","jwk","crit")):
-                raise AuthDenied("Identity rejected")
+                raise denied("token_header")
             kid=header.get("kid")
-            if not isinstance(kid,str) or kid not in self.keys:raise AuthDenied("Identity rejected")
+            if not isinstance(kid,str) or kid not in self.keys:raise denied("signing_key")
             claims=jwt.decode(token,self.keys[kid],algorithms=["RS256"],audience=self.client_id,issuer=self.issuer,
                 options={"require":["iss","sub","aud","exp","iat","nonce"],"strict_aud":True})
             if (type(claims["iat"]) is not int or type(claims["exp"]) is not int
-                or claims["exp"]<=claims["iat"] or claims["exp"]-claims["iat"]>600
-                or not isinstance(claims["nonce"],str) or not compare_digest(claims["nonce"],nonce)
-                or ("azp" in claims and claims["azp"]!=self.client_id)):
-                raise AuthDenied("Identity rejected")
+                or claims["exp"]<=claims["iat"] or claims["exp"]-claims["iat"]>600):
+                raise denied("token_lifetime")
+            if not isinstance(claims["nonce"],str) or not compare_digest(claims["nonce"],nonce):
+                raise denied("token_nonce")
+            if "azp" in claims and claims["azp"]!=self.client_id:
+                raise denied("token_audience")
             owner=self.owners.get((claims["iss"],claims["sub"]))
-            if owner is None:raise AuthDenied("Identity rejected")
+            if owner is None:raise denied("subject_allowlist")
             return owner
-        except (jwt.PyJWTError,ValueError,TypeError,KeyError) as exc:
-            raise AuthDenied("Identity rejected") from None
+        except AuthDenied:
+            raise
+        except jwt.ExpiredSignatureError:
+            raise denied("token_lifetime") from None
+        except jwt.ImmatureSignatureError:
+            raise denied("token_lifetime") from None
+        except jwt.InvalidAudienceError:
+            raise denied("token_audience") from None
+        except jwt.InvalidIssuerError:
+            raise denied("token_issuer") from None
+        except jwt.InvalidSignatureError:
+            raise denied("token_signature") from None
+        except (jwt.PyJWTError,ValueError,TypeError,KeyError):
+            raise denied("token_claims") from None
     def finish(self,*,state,browser_binding,code,exchange):
         """Exchange is injected by trusted server code; offline tests never call a provider."""
         if not valid_token(state) or not valid_token(browser_binding) or not isinstance(code,str) or not 1<=len(code)<=2048:
-            raise AuthDenied("Login callback rejected")
+            raise AuthDenied("Login callback rejected",category="callback_state_binding")
         with self.lock:
             self._prune()
             pending=self.pending.get(digest(state))
             if pending is None or not compare_digest(pending.binding,digest(browser_binding)):
-                raise AuthDenied("Login callback rejected")
+                raise AuthDenied("Login callback rejected",category="callback_state_binding")
             del self.pending[digest(state)] # single use even on failed exchange
         try:token=exchange(code=code,verifier=pending.verifier,redirect_uri=self.redirect)
-        except Exception:raise AuthDenied("Identity exchange unavailable") from None
+        except Exception:raise AuthDenied("Identity exchange unavailable",category="token_exchange") from None
         owner=self._verify(token,pending.nonce)
         return self._issue_session(owner)
 
