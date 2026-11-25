@@ -4,9 +4,9 @@
 
 ## Repository and verification
 
-- Permanent `development` source at audit: [1dbcb6a](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/1dbcb6aba082af909ee3fe79d5b0a1cfec8cc867); 10/11 ordinary workflows passed, runtime push [45677756077](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45677756077) still running at observation. Both identity workflows passed ([45677756133](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45677756133), [45677764471](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45677764471)). Documentation audit CI is separate; reverify exact head.
+- Latest verified functional source: [7d4e831](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/7d4e831aed74c7e2eccadcf3cb8874bb5e438eb6); 11/11 ordinary workflows passed, including [identity push 45683747551](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45683747551) and [identity PR 45683763307](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45683763307). Identity push job 139450753845: 26/26 tests in 1.473s, including native logout, CSRF/origin refusal, old-cookie denial and unchanged CSP. Earlier documentation audit 4f666004 passed 7/7. Reverify current head separately.
 - Stable `main`: [103c854](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/103c854eae36a0a0fa81bb007b71ebadc52179d6). Retain [integration PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4); verify state before integration. No main merge or deployment authorised.
-- Owner-observed WSL2 Ubuntu, Python 3.14.4, PyJWT 2.15.1, cryptography 50.0.2. Prior Windows checkout switched safely to development, preserving three untracked ZIPs. Last owner test 6539ac6: 24/24 identity tests in 1.333s. Current local HEAD/working tree not directly inspectable.
+- Owner-observed WSL2 Ubuntu, Python 3.14.4, PyJWT 2.15.1, cryptography 50.0.2. Prior Windows checkout switched safely to development, preserving three untracked ZIPs. Owner-observed local suite: 25/25 in 1.868s before the native logout change. The subsequent browser showed the new logout control; local 26-test output was not supplied. Current local HEAD/working tree not directly inspectable.
 
 ## Current verified implementation on development
 
@@ -18,22 +18,22 @@
 | Persistent invented buyer journey | [v3 run 45627319372](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45627319372), activation 09c04b6, 8/8 workflows. Search/save twice, supported and insufficient evidence, comparison, fresh sessions/reopen and cross-owner denial. One-time window consumed. |
 | Disposable recovery | [45628678686](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45628678686) 43 tests: saved buyer records, external seal, ACLs, five RLS policies restored. [45630291466](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45630291466) 43 tests including AES-256 encrypted disposable restore and wrong-key/truncation refusal. No retained backup or key. |
 | Managed recovery | Non-root snapshot refused by provider. No snapshot/restore branch created. Isolated point-in-time restore requires explicit approval and supported procedure; no current clone substitution or production action. |
-| External identity | Actual Auth0 authorization, exact issuer callback and token exchange reached; time validation rejected. No accepted actual session. |
+| External identity | Owner-observed actual Auth0 login, authenticated landing, session persistence after launcher restart and native sign-out returning to unauthenticated landing. CI verifies old-cookie denial; no actual provider-wide SSO logout or buyer/database integration claim. |
 
 **Neon read-only observation, 25 November 18:42:26 UTC:** explicit nondefault development database: two investigations, two results, three evidence rows, one shortlist, two memberships; both restricted roles NOLOGIN, zero restricted sessions. Prior verified seed: four invented sales, five RLS policies; 25 tables, 90 constraints, 40 indexes, one sequence, five migration history records. Preserve records, passwords and grants. Reader SELECT on 13 approved tables only; buyer access limited to five owner-isolated tables, membership DELETE/note UPDATE and sequence USAGE. No real source activation. See [Neon contract](engineering/NEON_CLOUD_INTEGRATION_V1.md).
 
-## Active blocker: actual Auth0 identity qualification (logout only pending)
+## Actual Auth0 identity qualification: local milestone verified
 
 Owner created a dedicated development Regular Web Application and verified one test user's email. Required setup: RS256, client_secret_post, Authorization Code with S256 PKCE, no public signup, exact HTTPS callback. Screenshots confirm app type, signing/authentication method, callback configuration and 600-second ID token lifetime; reverify other settings if necessary. Browser reached Auth0 and local callback after leaf certificate import into Windows LocalMachine TrustedPeople.
 
 - 4293a6e local HTTPS launcher: 20/20 local and 11/11 CI. 8cb0be4 corrected form referrer policy; 21/21 local passed.
 - 2dfa465 diagnostic-label regression failed; 8bdcc13 corrected it, 23/23 local and 11/11 CI passed. Owner confirmed callback fields code, state, iss; former parser allowed two.
 - 6539ac6 exact callback issuer validation: 24/24 local and 11/11 CI. Actual exchange succeeded, time validation rejected; replay rejected state.
-- Windows and WSL UTC clocks agree within one second; actual provider duration and offset unknown. 1dbcb6a distinguishes expired, future, invalid temporal claims and excessive duration. Strict 600-second cap retained. No new live retry observed.
+- Windows and WSL UTC clocks agree within one second; actual provider duration and offset unknown. 1dbcb6a distinguishes expired, future, invalid temporal claims and excessive duration. Strict 600-second cap retained. Later owner evidence below supersedes the earlier failure.
 
-**Owner evidence, 25 November:** 25/25 local identity tests passed in 1.868s. Two fresh callbacks returned `token_not_yet_valid`; Ubuntu clock readings bracketed an external HTTP Date approximately five seconds ahead. After Windows time resynchronisation and WSL shutdown/restart, local/external readings aligned within one second. Fresh browser authentication displayed Identity verified, and the same landing persisted after launcher restart (owner screenshots). No clock leeway or token policy change. The console logout attempt was blocked by existing CSP before a request; not a logout failure. Native same-origin CSRF-protected form correction prepared in this continuation; CI and actual browser logout pending.
+**Owner evidence, 25 November:** 25/25 local identity tests passed in 1.868s. Two fresh callbacks returned `token_not_yet_valid`; Ubuntu clock readings bracketed an external HTTP Date approximately five seconds ahead. After Windows time resynchronisation and WSL shutdown/restart, local/external readings aligned within one second. Fresh browser authentication displayed Identity verified, and the same landing persisted after launcher restart (owner screenshots). No clock leeway or token policy change. The console logout attempt was blocked by existing CSP before a request; not a logout failure. Native same-origin CSRF-protected form correction 7d4e831 passed all 11 workflows. Owner screenshots show actual Auth0 consent, authenticated landing with Sign out, then unauthenticated landing with Sign in after the requested logout procedure. Browser outcome observed; server-side old-cookie denial verified in CI, not independently probed with an actual token. No provider-wide logout claimed.
 
-**Next owner action:** after exact-head identity CI passes, stop the launcher, pull development fast-forward only, activate the existing `~/.hpi-identity/venv/bin/activate` and run the identity suite (expected 26). Restart with `python -m backend.oidc_local_qualification --qualify-auth0 ~/.hpi-identity`, enter secret only at hidden prompt, open `https://127.0.0.1:8766/`, click Sign out and confirm Sign in returns and remains after refresh. If session expired, sign in fresh first. Do not share credentials, tokens or callback URLs. Stop after qualification; remove only exact temporary leaf certificate imports from both Windows TrustedPeople stores after owner verification. No Neon connection in launcher.
+**Operator cleanup:** stop the qualification launcher with Ctrl+C. Remove only the exact temporary local leaf certificate imports from Windows CurrentUser/LocalMachine TrustedPeople after verifying the certificate fingerprint. Cleanup not yet owner-confirmed. No further provider login or setup needed for this isolated milestone. No Neon connection in launcher.
 
 ## Recovery, storage and access gates
 
@@ -47,9 +47,9 @@ Prior one-time collection is consumed. On 24 November the owner authorised **one
 
 ## Next acceptance task
 
-1. Complete actual isolated identity qualification with native browser logout and denial; session establishment and reconstruction owner-observed. No live data or buyer integration claim from local test.
-2. Establish protected storage, independent encrypted backup/recovery and operator/access list. Evaluate isolated point-in-time recovery only with explicit approval and supported non-destructive operation. Preserve R0.
-3. Verify permitted-use scope before unused conditional bounded extraction. Production, public display, valuation, paid resources and main integration retain separate gates.
+1. Establish protected storage, independent encrypted backup/recovery and operator/access list. Evaluate isolated point-in-time recovery only with explicit approval and supported non-destructive operation. Preserve R0.
+2. Verify permitted-use scope before unused conditional bounded extraction.
+3. Integrate actual identity with the controlled buyer runtime and qualify its end-to-end ownership boundary under separately authorised service windows. Production, public display, valuation, paid resources and main integration retain separate gates.
 
 Routine scoped work follows [AGENTS](../AGENTS.md), [master prompt](MASTER_CONTINUATION_PROMPT.md) and [lean directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md). No unattended execution claims.
 
