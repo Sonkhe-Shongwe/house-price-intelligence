@@ -8,21 +8,12 @@ from backend.historical_postgres import import_historical, review_historical, se
 from backend.curated_ingestion_candidate import ImportRefused
 from backend.synthetic_investigation_store import SyntheticInvestigationStore, EvidenceStoreError
 from backend.postgres_fixture import FixtureConnection
-from backend.tests.test_real_source_intake import sample
+from backend.neon_synthetic_seed import fixture_intake
 
 ADMIN=os.environ["HPI_PG_DSN"]
 
 def population():
-    args=sample()
-    rows=args["rows"]
-    for i in range(2,5):
-        p=f"{i:014d}"
-        rows["sales"].append(dict(rows["sales"][0],pin=p,doc_no=f"FICT-{i}",
-                                 sale_date=f"2025-01-0{i}T00:00:00"))
-        for role in ("assessment","geography","address"):
-            rows[role].append(dict(rows[role][0],pin=p))
-        rows["address"][-1]["prop_address_full"]=f"{i} Fictional Court"
-    return args
+    return fixture_intake()
 
 class HistoricalImportTests(unittest.TestCase):
     def test_transactional_inactive_import_review_revision_and_tamper(self):

@@ -122,13 +122,26 @@ class HistoricalReaderTests(unittest.TestCase):
                     initialise(conn)
                     migrate_historical(conn)
                     args=population()
-                    import_historical(conn,**args)
-                    seal=seal_historical(conn,**args)
                     rp,bp=secrets.token_urlsafe(32),secrets.token_urlsafe(32)
                     provision_reader(conn,rp)
+                    conn.execute("ALTER ROLE hpi_historical_reader NOLOGIN")
                     _prepare_empty_buyer_schema(conn)
-                    conn.execute("INSERT INTO hpi_candidate.workspace_owners VALUES ('fixture-owner-a'),('fixture-owner-b')")
-                    # A real restricted login is used only in the disposable DB.
+                    from backend.neon_synthetic_seed import seed_statements
+                    # Exercise the identical fixed seed plan against a disposable
+                    # target, with the cloud target guard independently refused.
+                    with self.assertRaises(psycopg.Error), conn.transaction():
+                        for statement in seed_statements():
+                            conn.execute(statement)
+                    with conn.transaction():
+                        for statement in seed_statements(disposable=True):
+                            conn.execute(statement)
+                    seal=seal_historical(conn,**args)
+                    with self.assertRaises(psycopg.Error), conn.transaction():
+                        for statement in seed_statements(disposable=True):
+                            conn.execute(statement)
+                    self.assertEqual(seal_historical(conn,**args),seal)
+                    # Real restricted logins exist only in this disposable DB.
+                    conn.execute("ALTER ROLE hpi_historical_reader LOGIN")
                     conn.execute(sql.SQL("ALTER ROLE {} LOGIN PASSWORD {}").format(sql.Identifier(BUYER),sql.Literal(bp)))
                     boundary=OidcBoundary(issuer="https://issuer.invalid",client_id="fixture",authorize_endpoint="https://issuer.invalid/authorize",redirect_uri="https://127.0.0.1:8766/auth/callback",public_keys={"fixture":"not-used-in-session-rehearsal"},owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
                     a=boundary._issue_session("fixture-owner-a")

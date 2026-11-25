@@ -117,6 +117,11 @@ def seal_historical(conn,**intake):
 
 def _verified(conn,seal):
     _reader(conn)
+    return _verified_seal(conn,seal)
+
+
+def _verified_seal(conn,seal):
+    """Internal sealed-row verifier. Caller must enforce target and role."""
     if not isinstance(seal,dict) or set(seal)!={"build_id","relational_sha256"}:
         raise ImportRefused("Trusted historical seal required")
     build=seal["build_id"]; ids=_ids(build)
@@ -145,24 +150,29 @@ class PrivateHistoricalReader:
     def from_seal_file(cls,conn,path):
         return cls(conn,load_historical_seal(path))
     def search(self,query,analysis_date):
-        if not isinstance(query,str) or not query.strip() or len(query)>240:
-            raise ImportRefused("Invalid historical address query")
-        try:
-            when=date.fromisoformat(analysis_date)
-            if when.isoformat()!=analysis_date or when.year not in (2024,2025):raise ValueError
-        except (TypeError,ValueError):
-            raise ImportRefused("Historical analysis date outside intake window") from None
         with self.conn.transaction():
             self.conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             self.conn.execute("SET LOCAL statement_timeout='5000ms'")
             adapter,build,ids,_=_verified(self.conn,self.seal)
-            matches=_address_options(adapter,build,ids["address"],when.year-1).get(_address_key(query),[])
-            return {"status":"one_eligible_candidate" if len(matches)==1 else "ambiguous" if matches else "no_match",
-                    "candidate_count":len(matches),"address_id":matches[0][1] if len(matches)==1 else None,
-                    "identity_scope":"parcel_only","building_identity_verified":False}
+            return _search_verified(adapter,build,ids,query,analysis_date)
     def review(self,request):
         with self.conn.transaction():
             self.conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             self.conn.execute("SET LOCAL statement_timeout='5000ms'")
             adapter,build,ids,stamp=_verified(self.conn,self.seal)
             return _review_verified(adapter,build,ids,stamp,request)
+
+
+def _search_verified(adapter,build,ids,query,analysis_date):
+    """Shared address search; only after the caller verifies the sealed build."""
+    if not isinstance(query,str) or not query.strip() or len(query)>240:
+        raise ImportRefused("Invalid historical address query")
+    try:
+        when=date.fromisoformat(analysis_date)
+        if when.isoformat()!=analysis_date or when.year not in (2024,2025):raise ValueError
+    except (TypeError,ValueError):
+        raise ImportRefused("Historical analysis date outside intake window") from None
+    matches=_address_options(adapter,build,ids["address"],when.year-1).get(_address_key(query),[])
+    return {"status":"one_eligible_candidate" if len(matches)==1 else "ambiguous" if matches else "no_match",
+            "candidate_count":len(matches),"address_id":matches[0][1] if len(matches)==1 else None,
+            "identity_scope":"parcel_only","building_identity_verified":False}

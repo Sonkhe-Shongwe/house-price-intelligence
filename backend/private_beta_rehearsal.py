@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 import json
 import re
 from backend.buyer_ownership import ROLE as BUYER, _verify_buyer_privileges
-from backend.historical_reader import ROLE as READER, _verified, PrivateHistoricalReader
+from backend.historical_reader import ROLE as READER, _verified, _search_verified
 from backend.historical_seal_config import load_historical_seal
 from backend.historical_postgres import _evaluate_verified
 from backend.historical_beta_projection import project_rehearsal
@@ -31,9 +31,12 @@ def _connection(conn, role):
 
 
 class PrivateBetaRehearsal:
+    _check_connection=staticmethod(_connection)
+    _verify_source=staticmethod(_verified)
+
     def __init__(self, reader, writer, seal, boundary):
-        _connection(reader,READER)
-        _connection(writer,BUYER)
+        self._check_connection(reader,READER)
+        self._check_connection(writer,BUYER)
         if reader is writer or reader.info.port!=writer.info.port:
             raise ImportRefused("Separate roles on the same fixture required")
         if (not isinstance(boundary,OidcBoundary)
@@ -63,17 +66,17 @@ class PrivateBetaRehearsal:
 
     @contextmanager
     def _source(self):
-        _connection(self.reader,READER)
+        self._check_connection(self.reader,READER)
         with self.reader.transaction():
             self.reader.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             self.reader.execute("SET LOCAL statement_timeout='5000ms'")
             self.reader.execute("SET LOCAL lock_timeout='3000ms'")
             self.reader.execute("SELECT pg_advisory_xact_lock_shared(194323)")
-            yield _verified(self.reader,self.seal)
+            yield self._verify_source(self.reader,self.seal)
 
     @contextmanager
     def _buyer(self,owner):
-        _connection(self.writer,BUYER)
+        self._check_connection(self.writer,BUYER)
         with self.writer.transaction():
             self.writer.execute("SET LOCAL statement_timeout='5000ms'")
             self.writer.execute("SET LOCAL lock_timeout='3000ms'")
@@ -86,8 +89,8 @@ class PrivateBetaRehearsal:
 
     def search(self,query,analysis_date,*,cookie,origin,csrf):
         self._owner(cookie,"POST",origin,csrf)
-        _connection(self.reader,READER)
-        return PrivateHistoricalReader(self.reader,self.seal).search(query,analysis_date)
+        with self._source() as (adapter,build,ids,_):
+            return _search_verified(adapter,build,ids,query,analysis_date)
 
     def create(self,request,*,cookie,origin,csrf):
         owner=self._owner(cookie,"POST",origin,csrf)
