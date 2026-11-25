@@ -70,8 +70,12 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
         try:
             if method=="GET" and path=="/" and not query:
                 try:
-                    boundary.authorize(cookie=cookie,method="GET")
-                    body="<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>"
+                    csrf=boundary.csrf_for_session(cookie)
+                    if not valid_token(csrf):raise AuthDenied("Session rejected")
+                    body=('<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>'
+                          '<form method="post" action="/auth/logout">'
+                          f'<input type="hidden" name="csrf" value="{csrf}">'
+                          '<button>Sign out</button></form>')
                 except AuthDenied:
                     body='<h1>HPI identity qualification</h1><form method="post" action="/auth/start"><button>Sign in</button></form>'
                 return _reply(start,"200 OK",html="<!doctype html><html><meta charset=utf-8><title>HPI identity qualification</title>"+body+"</html>",form_issuer=boundary.issuer)
@@ -101,7 +105,23 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
             if method=="GET" and path=="/auth/session" and not query:
                 return _reply(start,"200 OK",{"authenticated":True,"csrf":boundary.csrf_for_session(cookie)})
             if method=="POST" and path=="/auth/logout" and not query:
-                cleared=boundary.logout(cookie=cookie,origin=origin,csrf=env.get("HTTP_X_HPI_CSRF"))
+                csrf=env.get("HTTP_X_HPI_CSRF")
+                if env.get("CONTENT_TYPE")=="application/x-www-form-urlencoded":
+                    # Native form navigation works under the existing no-script/no-connect CSP.
+                    # Accept only a bounded single CSRF field, never competing credentials.
+                    if origin!=ORIGIN or csrf is not None:
+                        raise AuthDenied("Logout rejected")
+                    length=env.get("CONTENT_LENGTH","")
+                    if length!="48":raise AuthDenied("Logout rejected")
+                    raw=env["wsgi.input"].read(48)
+                    if len(raw)!=48 or not raw.startswith(b"csrf="):
+                        raise AuthDenied("Logout rejected")
+                    try:csrf=raw[5:].decode("ascii")
+                    except UnicodeError:raise AuthDenied("Logout rejected") from None
+                    if not valid_token(csrf):raise AuthDenied("Logout rejected")
+                    cleared=boundary.logout(cookie=cookie,origin=origin,csrf=csrf)
+                    return _reply(start,"303 See Other",location="/",cookies=(cleared,))
+                cleared=boundary.logout(cookie=cookie,origin=origin,csrf=csrf)
                 return _reply(start,"200 OK",{"logged_out":True},cookies=(cleared,))
             return _reply(start,"404 Not Found",{"error":"identity_route_only"})
         except (AuthDenied,ValueError) as exc:

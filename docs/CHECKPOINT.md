@@ -22,7 +22,7 @@
 
 **Neon read-only observation, 25 November 18:42:26 UTC:** explicit nondefault development database: two investigations, two results, three evidence rows, one shortlist, two memberships; both restricted roles NOLOGIN, zero restricted sessions. Prior verified seed: four invented sales, five RLS policies; 25 tables, 90 constraints, 40 indexes, one sequence, five migration history records. Preserve records, passwords and grants. Reader SELECT on 13 approved tables only; buyer access limited to five owner-isolated tables, membership DELETE/note UPDATE and sequence USAGE. No real source activation. See [Neon contract](engineering/NEON_CLOUD_INTEGRATION_V1.md).
 
-## Active blocker: actual Auth0 identity qualification
+## Active blocker: actual Auth0 identity qualification (logout only pending)
 
 Owner created a dedicated development Regular Web Application and verified one test user's email. Required setup: RS256, client_secret_post, Authorization Code with S256 PKCE, no public signup, exact HTTPS callback. Screenshots confirm app type, signing/authentication method, callback configuration and 600-second ID token lifetime; reverify other settings if necessary. Browser reached Auth0 and local callback after leaf certificate import into Windows LocalMachine TrustedPeople.
 
@@ -31,7 +31,9 @@ Owner created a dedicated development Regular Web Application and verified one t
 - 6539ac6 exact callback issuer validation: 24/24 local and 11/11 CI. Actual exchange succeeded, time validation rejected; replay rejected state.
 - Windows and WSL UTC clocks agree within one second; actual provider duration and offset unknown. 1dbcb6a distinguishes expired, future, invalid temporal claims and excessive duration. Strict 600-second cap retained. No new live retry observed.
 
-**Next owner action:** in existing Ubuntu venv/repository, run `git pull --ff-only origin development`, then `python -m unittest discover -s backend/oidc_tests -v` (expected 25). After relevant exact-head CI and local tests pass, launch `python -m backend.oidc_local_qualification --qualify-auth0 ~/.hpi-identity`, enter client secret only at hidden prompt, manually navigate to `https://127.0.0.1:8766/` and start a fresh login. Report only terminal diagnostic or redacted verified landing. Never replay callback, bypass TLS or share secrets/tokens/identifiers. Stop after qualification; remove only exact temporary leaf certificate imports from both Windows TrustedPeople stores after owner verification. No Neon connection in launcher. See [beta identity procedure](engineering/PRIVATE_REAL_DATA_BETA_V1.md).
+**Owner evidence, 25 November:** 25/25 local identity tests passed in 1.868s. Two fresh callbacks returned `token_not_yet_valid`; Ubuntu clock readings bracketed an external HTTP Date approximately five seconds ahead. After Windows time resynchronisation and WSL shutdown/restart, local/external readings aligned within one second. Fresh browser authentication displayed Identity verified, and the same landing persisted after launcher restart (owner screenshots). No clock leeway or token policy change. The console logout attempt was blocked by existing CSP before a request; not a logout failure. Native same-origin CSRF-protected form correction prepared in this continuation; CI and actual browser logout pending.
+
+**Next owner action:** after exact-head identity CI passes, stop the launcher, pull development fast-forward only, activate the existing `~/.hpi-identity/venv/bin/activate` and run the identity suite (expected 26). Restart with `python -m backend.oidc_local_qualification --qualify-auth0 ~/.hpi-identity`, enter secret only at hidden prompt, open `https://127.0.0.1:8766/`, click Sign out and confirm Sign in returns and remains after refresh. If session expired, sign in fresh first. Do not share credentials, tokens or callback URLs. Stop after qualification; remove only exact temporary leaf certificate imports from both Windows TrustedPeople stores after owner verification. No Neon connection in launcher.
 
 ## Recovery, storage and access gates
 
@@ -45,7 +47,7 @@ Prior one-time collection is consumed. On 24 November the owner authorised **one
 
 ## Next acceptance task
 
-1. Complete actual isolated identity qualification using timing diagnostics; verify session establishment, reconstruction/logout and denial as applicable. No live data or buyer integration claim from local test.
+1. Complete actual isolated identity qualification with native browser logout and denial; session establishment and reconstruction owner-observed. No live data or buyer integration claim from local test.
 2. Establish protected storage, independent encrypted backup/recovery and operator/access list. Evaluate isolated point-in-time recovery only with explicit approval and supported non-destructive operation. Preserve R0.
 3. Verify permitted-use scope before unused conditional bounded extraction. Production, public display, valuation, paid resources and main integration retain separate gates.
 

@@ -1,5 +1,7 @@
 """WSGI qualification of provider callback without network, DB or deployment."""
 import json
+from io import BytesIO
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -74,6 +76,47 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertEqual(self.request("/auth/session",HTTP_COOKIE=cookie)[0],"401 Unauthorized")
         self.assertEqual(self.request("/auth/callback",**params)[0],"401 Unauthorized")
         self.opener.open.assert_called_once()
+
+    def test_native_logout_preserves_csp_and_revokes_session(self):
+        status,headers,_=self.request("/auth/callback",**self.begin())
+        self.assertEqual(status,"303 See Other")
+        cookie=next(v for k,v in headers if k=="Set-Cookie").split(";",1)[0]
+        status,headers,body=self.request(HTTP_COOKIE=cookie)
+        self.assertEqual(status,"200 OK")
+        csp=dict(headers)["Content-Security-Policy"]
+        self.assertIn("default-src 'none'",csp)
+        self.assertNotIn("connect-src",csp)
+        self.assertIn("form-action 'self'",csp)
+        self.assertEqual(dict(headers)["Cache-Control"],"no-store")
+        self.assertIn(b'<form method="post" action="/auth/logout">',body)
+        csrf=re.search(rb'name="csrf" value="([A-Za-z0-9_-]{43})"',body).group(1)
+        raw=b"csrf="+csrf
+        def submit(payload=raw,**overrides):
+            env=dict(HTTP_COOKIE=cookie,HTTP_ORIGIN=ORIGIN,
+                CONTENT_TYPE="application/x-www-form-urlencoded",CONTENT_LENGTH=str(len(payload)))
+            env["wsgi.input"]=BytesIO(payload)
+            env.update(overrides)
+            return self.request("/auth/logout","POST",**env)
+        for payload,overrides,expected in (
+            (raw,{"HTTP_ORIGIN":"https://other.invalid"},"403 Forbidden"),
+            (raw,{"HTTP_ORIGIN":None},"401 Unauthorized"),
+            (raw,{"HTTP_SEC_FETCH_SITE":"cross-site"},"403 Forbidden"),
+            (raw,{"HTTP_X_HPI_CSRF":csrf.decode()},"401 Unauthorized"),
+            (b"csrf="+b"x"*43,{},"401 Unauthorized"),
+            (raw+b"&csrf="+csrf,{},"401 Unauthorized"),
+            (raw[:-1],{"CONTENT_LENGTH":"48"},"401 Unauthorized"),
+            (raw,{"CONTENT_LENGTH":"99999999"},"401 Unauthorized"),
+        ):
+            with self.subTest(expected=expected,overrides=overrides):
+                self.assertEqual(submit(payload,**overrides)[0],expected)
+                self.assertEqual(self.request("/auth/session",HTTP_COOKIE=cookie)[0],"200 OK")
+        status,headers,_=submit()
+        self.assertEqual(status,"303 See Other")
+        self.assertEqual(dict(headers)["Location"],"/")
+        self.assertIn("Max-Age=0",dict(headers)["Set-Cookie"])
+        self.assertEqual(self.request("/auth/session",HTTP_COOKIE=cookie)[0],"401 Unauthorized")
+        self.assertIn(b"Sign in",self.request(HTTP_COOKIE=cookie)[2])
+        self.assertEqual(submit()[0],"401 Unauthorized")
 
     def test_callback_binding_and_navigation_required(self):
         params=self.begin()
