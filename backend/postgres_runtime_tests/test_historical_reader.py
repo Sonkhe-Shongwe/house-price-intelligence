@@ -159,7 +159,16 @@ class HistoricalReaderTests(unittest.TestCase):
                         with self.assertRaises(AuthDenied):
                             svc.reopen(iid,cookie="")
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],3)
-                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],9)
+                        # At April 1 the first parcel's same-day sale is ineligible
+                        # for the second parcel, whose own sale is also excluded.
+                        # Two remaining earlier sales are below the minimum of three.
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],6)
+                        self.assertEqual(conn.execute("""SELECT i.evidence_status,count(e.rank)
+                            FROM hpi_candidate.investigations i
+                            LEFT JOIN hpi_candidate.comparable_evidence e USING(investigation_id)
+                            GROUP BY i.investigation_id,i.evidence_status
+                            ORDER BY i.evidence_status,count(e.rank)""").fetchall(),
+                            [("insufficient_data",0),("supported_neighbourhood",3),("supported_neighbourhood",3)])
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlists").fetchone()[0],1)
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlist_investigations").fetchone()[0],2)
                         for forbidden in ("FICT-","00000000000001","relational_sha256","address_id"):
@@ -241,12 +250,16 @@ class HistoricalReaderTests(unittest.TestCase):
                         page.locator("#beta-price").fill("600000.02")
                         page.get_by_test_id("beta-create").click()
                         expect(page.get_by_test_id("beta-result")).to_be_visible(timeout=15000)
+                        expect(page.get_by_test_id("beta-result")).to_contain_text("0 eligible sales")
+                        expect(page.get_by_test_id("beta-result")).to_contain_text("insufficient data")
+                        expect(page.get_by_test_id("beta-sale")).to_have_count(0)
                         second=page.get_by_test_id("beta-id").input_value()
                         self.assertNotEqual(iid,second)
                         page.get_by_test_id("beta-add-comparison").click()
                         page.get_by_test_id("beta-save-comparison").click()
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("600,000.02")
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("First property note")
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("insufficient data")
                         sid=page.get_by_test_id("beta-comparison-id").input_value()
                         # Reconstruct the service and identity boundary without
                         # reimporting data, reissuing cookies or reusing DB sessions.
@@ -274,6 +287,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("600,000.02")
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("525,000.01")
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("First property note")
+                        expect(page.get_by_test_id("beta-comparison")).to_contain_text("insufficient data")
                         # Another investigation of the first parcel already exists.
                         # Reject distinct investigation IDs that identify the same parcel.
                         auth=resumed_boundary._issue_session("fixture-owner-a")
