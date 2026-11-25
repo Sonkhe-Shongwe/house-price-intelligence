@@ -5,7 +5,7 @@
 
 ## Authoritative working arrangement
 
-- **Connected Neon administration:** Use the authenticated integration for non-destructive development-only inspection and scoped database preparation. Never substitute a public repository for a secret store, retrieve elevated credentials unnecessarily, or confuse administrative access with direct application runtime connectivity. See [Neon contract](NEON_CLOUD_INTEGRATION_V1.md).
+- **Connected Neon administration:** Use the authenticated integration for non-destructive development-only inspection and scoped database preparation. Never substitute a public repository for a secret store, retrieve elevated credentials unnecessarily, or confuse administrative access with direct application runtime connectivity. See [Neon contract](NEON_CLOUD_INTEGRATION_V1.md). Use the existing protected environment and v4 exact-parent marker for temporary direct-connection acceptance; avoid repeated manual SHA updates. Do not confuse a runner with permanent hosting.
 
 - **One GitHub repository:** [house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). No competing source checkouts, numbered review ZIPs or parallel status ledgers.
 - **`development` is our single continuing working branch.** Build approved application features, fixes, tests and documentation on it. Do **not** create another feature branch for each task. Additional branches require a demonstrated reason, such as an urgent release hotfix, incompatible experiment or concurrent risky migration, and explicit approval.

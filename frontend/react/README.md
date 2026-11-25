@@ -19,3 +19,7 @@ Use the same build and launcher with `--synthetic-map`: `python -m backend.run_s
 
 
 Open `/` for the workspace landing page or `/buyer-workflow` for direct investigation. Use Saved properties to search the latest 30 verified investigations and Compare to reopen existing shortlists. See [workspace contract](../../docs/engineering/BUYER_WORKSPACE_UX_V1.md).
+
+### Authenticated private historical-shape rehearsal
+
+The same React bundle now includes `/private-beta-rehearsal` only when explicitly injected through the existing offline HTTPS/OIDC test adapter. Actual disposable PostgreSQL browser tests verify fictional address search, save, refresh/reopen and cross-owner refusal. This is not a public or live real-data route; ordinary launcher instructions above remain unchanged. See [private beta contract](../../docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md) and [checkpoint](../../docs/CHECKPOINT.md).

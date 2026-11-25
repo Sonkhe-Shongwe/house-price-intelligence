@@ -24,7 +24,7 @@ See the [P3 candidate contract and proposed ERD](../docs/engineering/P3_APPLICAT
 
 ## PostgreSQL development preparation
 
-The disposable PostgreSQL 17 runtime and historical reader are CI-verified; Neon administrative read-only access is verified, but direct application connectivity and real-data activation are not. See [current checkpoint](../docs/CHECKPOINT.md) and [Neon integration](../docs/engineering/NEON_CLOUD_INTEGRATION_V1.md). Do not change the loopback-only fixture guards to connect a real database; use the reviewed cloud integration path.
+The disposable PostgreSQL 17 runtime, split-role historical reader/buyer persistence and authenticated browser rehearsal are CI-verified. Neon development schema and restricted grants are installed; temporary credentials configured, but direct application connectivity and real-data activation are not. The protected connection workflow invokes `python -m backend.neon_service_preflight`; see the checkpoint for the current approval and secret procedure. See [current checkpoint](../docs/CHECKPOINT.md) and [Neon integration](../docs/engineering/NEON_CLOUD_INTEGRATION_V1.md). Do not change the loopback-only fixture guards to connect a real database; use the reviewed cloud integration path.
 
 ## Optional durable fictional investigations (development only)
 
