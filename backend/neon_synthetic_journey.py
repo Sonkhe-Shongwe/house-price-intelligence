@@ -4,7 +4,7 @@ The existing loopback HTTPS and fictional issuer boundary remains mandatory.
 from contextlib import contextmanager
 import psycopg
 from backend.neon_preflight import DATABASE, HOST
-from backend.neon_service_preflight import service_parameters, _identity, _inspect_services
+from backend.neon_service_preflight import service_parameters, _identity, _inspect_services, _connection_outcome
 from backend.private_beta_rehearsal import PrivateBetaRehearsal
 from backend.historical_reader import ROLE as READER, _verified_seal, _verify_reader_privileges
 from backend.buyer_ownership import ROLE as BUYER
@@ -59,18 +59,34 @@ class NeonSyntheticJourney(PrivateBetaRehearsal):
 
 
 @contextmanager
-def open_neon_synthetic_journey(environ,seal_path,boundary):
+def _connect_service(config,kind,progress):
+    """Report only a fixed role and classified driver outcome, never a DSN."""
+    progress(kind+"_connection")
+    try:
+        conn=psycopg.connect(**config,autocommit=True)
+    except psycopg.Error as exc:
+        progress(kind+"_connection_"+_connection_outcome(exc))
+        raise
+    with conn:
+        yield conn
+
+
+@contextmanager
+def open_neon_synthetic_journey(environ,seal_path,boundary,*,progress=lambda stage:None):
     """Restricted connections only; caller provides a private external seal.
     No owner DSN, mode fallback, fixture guard override or persistent hosting.
     """
     if environ.get("HPI_NEON_MODE")!=MODE:
         raise ImportRefused("Explicit invented cloud journey required")
+    progress("seal_configuration")
     seal=load_historical_seal(seal_path)
     if seal["build_id"]!=fixture_plan()[0]:
         raise ImportRefused("Only the fixed invented build is permitted")
     settings=dict(environ,HPI_NEON_MODE="development-restricted-preflight")
+    progress("service_configuration")
     reader,writer=service_parameters(settings)
     for p in (reader,writer):
         p["application_name"]="hpi_invented_journey"
-    with psycopg.connect(**reader,autocommit=True) as rd, psycopg.connect(**writer,autocommit=True) as wr:
+    with _connect_service(reader,"reader",progress) as rd, _connect_service(writer,"buyer",progress) as wr:
+        progress("service_identity_permissions_and_seal")
         yield NeonSyntheticJourney(rd,wr,seal,boundary,expected_host=environ.get("HPI_NEON_DEVELOPMENT_HOST"))

@@ -223,7 +223,7 @@ def main():
         else:
             if os.environ.get("HPI_NEON_MODE")!=MODE:
                 raise ImportRefused("Explicit mode required")
-            report=browser_journey(root,lambda b:open_neon_synthetic_journey(os.environ,root/"seal.json",b),progress=progress)
+            report=browser_journey(root,lambda b:open_neon_synthetic_journey(os.environ,root/"seal.json",b,progress=progress),progress=progress)
             print(json.dumps(report,sort_keys=True))
         return 0
     except Exception as exc:

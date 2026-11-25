@@ -1,8 +1,9 @@
 """Offline cloud target/fixture guard tests; never connect to Neon."""
 import unittest
+import psycopg
 from unittest.mock import MagicMock,patch
 from backend.neon_synthetic_seed import fixture_plan,seed_statements
-from backend.neon_synthetic_journey import NeonSyntheticJourney,open_neon_synthetic_journey,MODE
+from backend.neon_synthetic_journey import NeonSyntheticJourney,open_neon_synthetic_journey,_connect_service,MODE
 from backend.curated_ingestion_candidate import ImportRefused
 from backend.private_beta_rehearsal import PrivateBetaRehearsal
 from backend.historical_reader import ROLE
@@ -56,3 +57,19 @@ class NeonSyntheticJourneyTests(unittest.TestCase):
         identity.assert_not_called()
         # The original loopback class still refuses cloud connections.
         with self.assertRaises(ImportRefused):PrivateBetaRehearsal._check_connection(conn,ROLE)
+
+    @patch("backend.neon_synthetic_journey.psycopg.connect")
+    def test_reader_authentication_stage_never_discloses_driver_message(self,connect):
+        connect.side_effect=psycopg.OperationalError("password authentication failed: private-marker")
+        stages=[]
+        with self.assertRaises(psycopg.OperationalError),_connect_service({},"reader",stages.append):
+            self.fail("No connection should be yielded")
+        self.assertEqual(stages,["reader_connection","reader_connection_authentication"])
+
+    @patch("backend.neon_synthetic_journey.psycopg.connect")
+    def test_buyer_connection_stage_does_not_misclassify_later_errors(self,connect):
+        stages=[]
+        with self.assertRaises(psycopg.OperationalError),_connect_service({},"buyer",stages.append):
+            raise psycopg.OperationalError("password authentication failed: private-marker")
+        self.assertEqual(stages,["buyer_connection"])
+        connect.return_value.__exit__.assert_called_once()
