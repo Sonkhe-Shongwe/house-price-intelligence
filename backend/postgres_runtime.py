@@ -95,6 +95,7 @@ def bootstrap(admin_dsn, password):
             conn.execute("SET LOCAL search_path TO hpi_candidate, pg_catalog")
             prepare(conn)
             conn.execute((ROOT.parent/"postgres_ownership_candidate.sql").read_text(),prepare=False)
+            conn.execute("INSERT INTO workspace_owners VALUES (%s),(%s)",tuple(OWNERS.values()))
             conn.execute(sql.SQL("CREATE ROLE {} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD {}").format(sql.Identifier(ROLE),sql.Literal(password)))
             conn.execute(sql.SQL("GRANT USAGE ON SCHEMA hpi_candidate TO {}").format(sql.Identifier(ROLE)))
             conn.execute("REVOKE CREATE ON SCHEMA hpi_candidate FROM PUBLIC")

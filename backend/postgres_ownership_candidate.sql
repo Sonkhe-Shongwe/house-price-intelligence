@@ -1,4 +1,5 @@
--- Separate synthetic ownership experiment, not a production migration.
+-- Shared empty-buyer ownership candidate; no accounts are seeded by DDL.
+-- Fixture callers seed their own invented identities explicitly.
 -- Empty buyer tables only; no silent assignment of an existing buyer's records.
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM investigations) OR EXISTS (SELECT 1 FROM shortlists) THEN
@@ -6,7 +7,6 @@ DO $$ BEGIN
   END IF;
 END $$;
 CREATE TABLE workspace_owners (owner_id TEXT PRIMARY KEY);
-INSERT INTO workspace_owners VALUES ('fictional-alice'),('fictional-bob');
 ALTER TABLE investigations ADD COLUMN owner_id TEXT NOT NULL DEFAULT nullif(current_setting('hpi.owner_id',true),'') REFERENCES workspace_owners;
 ALTER TABLE shortlists ADD COLUMN owner_id TEXT NOT NULL DEFAULT nullif(current_setting('hpi.owner_id',true),'') REFERENCES workspace_owners;
 ALTER TABLE investigations ADD UNIQUE (investigation_id,owner_id);

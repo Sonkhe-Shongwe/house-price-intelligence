@@ -10,6 +10,7 @@ from backend.historical_migration import _migrate_historical_schema, migration_h
 from backend.historical_reader import ROLE as READER, READ_TABLES, _provision_reader, _verify_reader_privileges, provision_reader
 from backend.curated_ingestion_candidate import ImportRefused
 from hashlib import sha256
+from backend.buyer_ownership import ROLE as BUYER, _prepare_empty_buyer_schema, _verify_staged_buyer
 
 ADMIN = os.environ["HPI_PG_DSN"]
 DB = "hpi_neon_migration_fixture"
@@ -105,3 +106,43 @@ class NeonMigrationRehearsalTests(unittest.TestCase):
                 if admin.execute("SELECT 1 FROM pg_roles WHERE rolname=%s", (READER,)).fetchone():
                     admin.execute(sql.SQL("DROP ROLE {}").format(sql.Identifier(READER)))
                 admin.execute(sql.SQL("DROP ROLE {}").format(sql.Identifier(ROLE)))
+
+    def test_empty_buyer_ownership_and_staged_role(self):
+        password, reader_password = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
+        with psycopg.connect(ADMIN, autocommit=True) as admin:
+            self.assertEqual((admin.info.host,admin.info.dbname,admin.info.user),("127.0.0.1","hpi_fixture","postgres"))
+            self.assertIsNone(admin.execute("SELECT 1 FROM pg_database WHERE datname=%s",(DB,)).fetchone())
+            for role in (ROLE,READER,BUYER):
+                self.assertIsNone(admin.execute("SELECT 1 FROM pg_roles WHERE rolname=%s",(role,)).fetchone())
+            admin.execute(sql.SQL("CREATE ROLE {} LOGIN NOSUPERUSER CREATEROLE CREATEDB BYPASSRLS PASSWORD {}").format(sql.Identifier(ROLE),sql.Literal(password)))
+            try:
+                admin.execute(sql.SQL("CREATE DATABASE {} OWNER {}").format(sql.Identifier(DB),sql.Identifier(ROLE)))
+                try:
+                    with psycopg.connect(ADMIN,dbname=DB,user=ROLE,password=password,autocommit=True) as conn:
+                        _initialise_schema(conn)
+                        _migrate_historical_schema(conn)
+                        _provision_reader(conn,reader_password)
+                        with self.assertRaisesRegex(RuntimeError,"rollback buyer"):
+                            with conn.transaction():
+                                _prepare_empty_buyer_schema(conn)
+                                raise RuntimeError("rollback buyer")
+                        self.assertIsNone(conn.execute("SELECT to_regclass('hpi_candidate.workspace_owners')").fetchone()[0])
+                        self.assertIsNone(conn.execute("SELECT 1 FROM pg_roles WHERE rolname=%s",(BUYER,)).fetchone())
+                        _prepare_empty_buyer_schema(conn)
+                        _verify_staged_buyer(conn)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.workspace_owners").fetchone()[0],0)
+                        with self.assertRaises(ImportRefused):
+                            _prepare_empty_buyer_schema(conn)
+                        with psycopg.connect(ADMIN,dbname=DB,user=READER,password=reader_password,autocommit=True) as rd:
+                            _verify_reader_privileges(rd)
+                            with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                                rd.execute("SELECT * FROM hpi_candidate.workspace_owners")
+                        conn.execute(sql.SQL("GRANT SELECT ON hpi_candidate.sale_transactions TO {}").format(sql.Identifier(BUYER)))
+                        with self.assertRaises(ImportRefused):
+                            _verify_staged_buyer(conn)
+                finally:
+                    admin.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(DB)))
+            finally:
+                for role in (BUYER,READER,ROLE):
+                    if admin.execute("SELECT 1 FROM pg_roles WHERE rolname=%s",(role,)).fetchone():
+                        admin.execute(sql.SQL("DROP ROLE {}").format(sql.Identifier(role)))

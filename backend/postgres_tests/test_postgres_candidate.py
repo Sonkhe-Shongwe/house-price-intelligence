@@ -104,6 +104,7 @@ class PostgresCandidateTests(unittest.TestCase):
     def test_ownership_isolation_default_deny_and_cross_owner_fk(self):
         store=self.setup_seed()
         self.conn.execute((ROOT.parent/"postgres_ownership_candidate.sql").read_text(),prepare=False)
+        self.conn.execute("INSERT INTO workspace_owners VALUES ('fictional-alice'),('fictional-bob')")
         self.conn.execute("CREATE ROLE hpi_app_test NOLOGIN NOSUPERUSER NOBYPASSRLS")
         try:
             self.conn.execute("GRANT USAGE ON SCHEMA hpi_candidate TO hpi_app_test")
