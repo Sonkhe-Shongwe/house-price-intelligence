@@ -1,0 +1,15 @@
+# Neon Cloud Integration V1
+
+25 November 2026. Owner selected free Neon instead of local persistent storage. Existing private beta authority remains conditional; no paid infrastructure, public deployment, public data release, valuation or main merge.
+
+## Observations and boundaries
+
+Owner screenshots confirm Frankfurt AWS project, Free plan, 1 GB quota, production and development branches (no expiry), database hpi_private, PostgreSQL 17.12, owner hpi_private_owner (not superuser; CREATEROLE, CREATEDB and BYPASSRLS true). SQL Editor returned no application tables on development. No application credentials were shared. These are observed console results, not an independent network connection or complete security attestation.
+
+Public network connectivity is enabled for all branches, without IP allowlisting, VPC or branch protection on this plan. TLS with hostname verification and SCRAM channel binding, least privilege, trusted administrative access and protected external backups are necessary. See https://neon.com/blog/postgres-needs-better-connection-security-defaults . A public endpoint is not public read access. The free plan's limitations still require an explicit real-data risk review. Owner's Windows security remains unresolved following detected malware; do not use that machine to enter, copy or rotate sensitive credentials. Use a separate trusted device to secure Neon and GitHub sessions and rotate both branch owner passwords before secret configuration. Do not copy owner credentials into source, SQL history, chat, browser client, logs or artifacts.
+
+## First implementation
+
+[Read-only preflight](../../backend/neon_preflight.py) validates an independently pinned direct Frankfurt development endpoint, hpi_private database, owner, strict TLS verify-full with system roots and required channel binding. It refuses pooled endpoints, unapproved connection options, ambient PG environment settings, unexpected role privileges, server major version or nonempty application target. It uses a read-only transaction, emits only aggregate status and sanitises connection failures. No automatic connection or live workflow. The expected endpoint is an operator-controlled configuration, not inferred from a branch name or request; no actual host or secret is committed. Tests are offline mocks in the existing PostgreSQL runtime suite. This is only a bootstrap preflight, not a cloud importer or production adapter.
+
+Next: independently verify development endpoint and protected admin access, then explicit manual secret-scoped read-only connectivity check. Prepare migration and restricted role integration with the canonical SQL and separate historical/buyer data boundary; retain existing disposable guards. Verify role denials, TLS, migrations, backup and restore with invented records first. No live publisher collection or real-data ingestion until protected storage and permitted use verified. Conditional extraction allowance unused. Existing 87.1% planning baseline unchanged.

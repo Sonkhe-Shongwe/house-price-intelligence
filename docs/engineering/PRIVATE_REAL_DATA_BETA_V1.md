@@ -14,3 +14,8 @@ Extract a private internal evaluator from the existing investigation contract, s
 
 ## Acceptance and next action
 Verify exact-head tests for canonical contract regression, sealed restricted historical projection, exact cents, assessment area/year, snapshot membership, duplicate selected transaction refusal and unchanged redacted reader output. Retain existing auth and UI tests. Private real beta not yet active. Next action is the concrete operator storage preflight and identity environment decision, then connect the actual protected DB and integrate real private buyer persistence and UI. Only once storage and permitted use are verified may the one newly authorised bounded extraction occur. No new approval needed for individual scoped engineering steps.
+
+
+## 25 November 2026 infrastructure update
+
+Owner provisioned a free Neon project instead of local storage. See [cloud integration contract](NEON_CLOUD_INTEGRATION_V1.md). No real storage activation or extraction yet.

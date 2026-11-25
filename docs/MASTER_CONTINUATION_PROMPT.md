@@ -8,6 +8,8 @@
 
 ## Current verified working handoff (24 November 2026)
 
+25 November 2026: Neon Cloud Integration V1. Owner console preflight confirms empty PostgreSQL 17.12 development database, free Frankfurt project, production/development branches and elevated owner. Latest private beta commit 6bc91ae passed all ten exact-head workflows. Local storage approach superseded by managed cloud candidate; trusted administrative access and network/backup/role controls not verified. Read-only cloud preflight prepared, offline verification pending. No cloud connection from CI, real extraction, public deployment, paid resources or main merge. [Cloud integration contract](engineering/NEON_CLOUD_INTEGRATION_V1.md).
+
 **Read first:** [current checkpoint](CHECKPOINT.md), [80-package P0–P8 roadmap](P_PHASE_ROADMAP.md), [decisions](DECISIONS.md), [production readiness](engineering/PRODUCTION_READINESS_V1.md), [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md), [P3 contract](engineering/P3_APPLICATION_CONTRACT.md), [P6 contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [geographic contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) and [two-branch workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Verify live branch SHAs and exact-head CI each session.
 
 **Latest application baseline:** 1cedf378e806f5fafc18639ba72207a70f2b4195 on development, six workflows passed (182 Python, 16 legacy browser, 33 React, 5 PostgreSQL); four separate address audit safeguards and aggregate query passed on c6a16aa. Earlier PRs #5/#6 and #8 are integrated. Main 103c854; PR #4 draft, unmerged. Verify current head separately from this dated baseline.
