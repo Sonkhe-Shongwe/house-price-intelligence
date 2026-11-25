@@ -70,6 +70,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Current continuation:** preceding documentation commit 695ff5b passed seven of seven exact-head workflows ([push 45703433708](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45703433708)). Private fictional buyer UI now offers explicit sign-out via the existing CSRF-protected session endpoint, clears displayed buyer state only after server-confirmed logout, and extends the disposable browser test to verify old-cookie rejection and durable comparison retention. Exact new commit CI pending. No live provider integration, new service window or real-data approval.
 
+**Provider-to-buyer integration preparation:** added an explicit single-owner Auth0-shaped adapter for the exact fixed invented disposable PostgreSQL build, reusing the qualified callback and existing private buyer routes. Existing identity-only and fictional issuer modes remain distinct; no cloud connection or provider-owner provisioning outside disposable CI. Extended restricted PostgreSQL test to exercise signed callback, authenticated buyer page, search/save/reopen, cross-owner refusal, CSRF and logout with mocked token endpoint. Exact-head CI pending; actual provider-to-buyer acceptance still open. No new service window, real data or deployment.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.

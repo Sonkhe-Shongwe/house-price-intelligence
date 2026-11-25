@@ -43,6 +43,20 @@ def _reply(start,status,value=None,*,cookies=(),location=None,html=None,form_iss
 
 
 def identity_only_application(boundary,exchange,*,diagnostic=lambda category: None):
+    return _application(boundary,exchange,diagnostic=diagnostic)
+
+
+def buyer_identity_application(boundary,exchange,service,assets,*,diagnostic=lambda category: None):
+    # Import only for the disposable buyer integration, not the identity-only launcher.
+    from backend.auth0_invented_buyer import Auth0InventedBuyer
+    if type(service) is not Auth0InventedBuyer or service.boundary is not boundary:
+        raise ValueError("Explicit invented provider buyer service required")
+    from backend.private_beta_http import PAGE,PREFIX,route
+    return _application(boundary,exchange,diagnostic=diagnostic,
+        buyer=(service,assets,PAGE,PREFIX,route))
+
+
+def _application(boundary,exchange,*,diagnostic,buyer=None):
     if (not isinstance(boundary,PersistentBoundary) or not isinstance(exchange,ConfidentialCodeExchange)
         or not ISSUER.fullmatch(boundary.issuer) or boundary.redirect!=CALLBACK
         or boundary.origin!=ORIGIN or exchange.issuer!=boundary.issuer
@@ -72,7 +86,10 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
                 try:
                     csrf=boundary.csrf_for_session(cookie)
                     if not valid_token(csrf):raise AuthDenied("Session rejected")
-                    body=('<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>'
+                    heading=('<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>'
+                        if buyer is None else '<h1>Identity verified</h1><p>Private invented-data buyer workspace.</p>'
+                        '<p><a href="/private-beta-rehearsal">Open buyer workspace</a></p>')
+                    body=(heading+
                           '<form method="post" action="/auth/logout">'
                           f'<input type="hidden" name="csrf" value="{csrf}">'
                           '<button>Sign out</button></form>')
@@ -123,6 +140,11 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
                     return _reply(start,"303 See Other",location="/",cookies=(cleared,))
                 cleared=boundary.logout(cookie=cookie,origin=origin,csrf=csrf)
                 return _reply(start,"200 OK",{"logged_out":True},cookies=(cleared,))
+            if buyer is not None:
+                service,assets,page,prefix,route=buyer
+                if path==page or path.startswith(prefix+"/") or (path.startswith("/assets/") and path in assets):
+                    boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=env.get("HTTP_X_HPI_CSRF"))
+                    return route(service,assets,env,start)
             return _reply(start,"404 Not Found",{"error":"identity_route_only"})
         except (AuthDenied,ValueError) as exc:
             if callback:

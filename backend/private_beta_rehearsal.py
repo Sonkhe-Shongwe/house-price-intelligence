@@ -39,13 +39,18 @@ class PrivateBetaRehearsal:
         self._check_connection(writer,BUYER)
         if reader is writer or reader.info.port!=writer.info.port:
             raise ImportRefused("Separate roles on the same fixture required")
+        self.allowed_owners=self._identity_owners(boundary)
+        self.reader,self.writer,self.seal,self.boundary=reader,writer,dict(seal),boundary
+        self.request_lock=RLock()
+
+    @staticmethod
+    def _identity_owners(boundary):
         if (not isinstance(boundary,OidcBoundary)
             or not (urlsplit(boundary.issuer).hostname or "").endswith(".invalid")
             or urlsplit(boundary.origin).hostname not in ("127.0.0.1","localhost")
             or set(boundary.owners.values())!=OWNERS):
             raise ImportRefused("Offline identity fixture required")
-        self.reader,self.writer,self.seal,self.boundary=reader,writer,dict(seal),boundary
-        self.request_lock=RLock()
+        return OWNERS
 
     @classmethod
     def from_seal_file(cls, reader, writer, seal_path, boundary):
@@ -60,7 +65,7 @@ class PrivateBetaRehearsal:
 
     def _owner(self,cookie,method,origin=None,csrf=None):
         owner=self.boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=csrf)
-        if owner not in OWNERS:
+        if owner not in self.allowed_owners:
             raise AuthDenied("Identity rejected")
         return owner
 

@@ -188,6 +188,7 @@ class HistoricalReaderTests(unittest.TestCase):
                             self.assertNotIn(forbidden,str(saved))
                         with self.assertRaises(psycopg.errors.InsufficientPrivilege):
                             wr.execute("SELECT * FROM hpi_candidate.sale_transactions")
+                        self._check_provider_buyer(conn,rd,wr,seal,iid)
                         conn.execute("UPDATE hpi_candidate.comparable_evidence SET sale_price_usd_cents=sale_price_usd_cents+1 WHERE investigation_id=%s AND rank=1",(iid,))
                         with self.assertRaisesRegex(ImportRefused,"Saved evidence mismatch"):
                             svc.reopen(iid,cookie=a["cookie"])
@@ -195,6 +196,93 @@ class HistoricalReaderTests(unittest.TestCase):
                 admin.execute("DROP DATABASE hpi_ingest_fixture")
                 for role in (BUYER,ROLE):
                     admin.execute(sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
+
+    def _check_provider_buyer(self,admin,rd,wr,seal,other_id):
+        # Exercise real signed-token validation, callback, CSRF and restricted SQL.
+        # Only the confidential token endpoint response is mocked; never contact Auth0.
+        import json
+        import tempfile
+        from io import BytesIO
+        from email.message import Message
+        from pathlib import Path
+        from time import time
+        from urllib.parse import parse_qs,urlsplit,urlencode
+        from unittest.mock import MagicMock
+        import jwt
+        from jwt.algorithms import RSAAlgorithm
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from backend.oidc_provider_config import prepare_auth0,CALLBACK
+        from backend.oidc_identity_http import buyer_identity_application,identity_only_application,ORIGIN
+        from backend.auth0_invented_buyer import Auth0InventedBuyer
+        from backend.react_assets import load_react_assets
+        issuer="https://example-fixture.us.auth0.com/"
+        key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+        jwks={"keys":[dict(json.loads(RSAAlgorithm.to_jwk(key.public_key())),kid="pinned",use="sig",alg="RS256")]}
+        with tempfile.TemporaryDirectory() as tmp:
+            boundary,exchange=prepare_auth0(issuer=issuer,client_id="fixture",client_secret="x"*48,
+                redirect_uri=CALLBACK,jwks=jwks,owner_by_subject={"auth0|alice":"provider-owner"},
+                session_file=Path(tmp)/"provider.sqlite")
+            admin.execute("INSERT INTO hpi_candidate.workspace_owners(owner_id) VALUES('provider-owner')")
+            with self.assertRaises(ImportRefused):
+                PrivateBetaRehearsal(rd,wr,seal,boundary)
+            with self.assertRaises(ImportRefused):
+                Auth0InventedBuyer(rd,wr,dict(seal,build_id="wrong"),boundary)
+            service=Auth0InventedBuyer(rd,wr,seal,boundary)
+            assets=load_react_assets()
+            app=buyer_identity_application(boundary,exchange,service,assets)
+            exchange._opener=MagicMock()
+            def call(path,method="GET",**overrides):
+                env={"REQUEST_METHOD":method,"PATH_INFO":path,"QUERY_STRING":"",
+                     "REMOTE_ADDR":"127.0.0.1","HTTP_HOST":"127.0.0.1:8766","wsgi.url_scheme":"https"}
+                env.update(overrides)
+                reply=[]
+                payload=b"".join(app(env,lambda status,headers:reply.extend((status,headers))))
+                return int(reply[0].split()[0]),reply[1],payload
+            page="/private-beta-rehearsal"
+            prefix="/v1/private-beta-rehearsal"
+            self.assertEqual(call(page)[0],401)
+            self.assertEqual(call(page,REMOTE_ADDR="192.0.2.1")[0],403)
+            status,headers,_=call("/auth/start","POST",HTTP_ORIGIN=ORIGIN)
+            self.assertEqual(status,303)
+            q=parse_qs(urlsplit(dict(headers)["Location"]).query)
+            binding=dict(headers)["Set-Cookie"].split(";",1)[0]
+            now=int(time())
+            token=jwt.encode(dict(iss=issuer,sub="auth0|alice",aud="fixture",nonce=q["nonce"][0],
+                iat=now,exp=now+300),key,algorithm="RS256",headers={"kid":"pinned"})
+            response=exchange._opener.open.return_value.__enter__.return_value
+            response.status=200;response.geturl.return_value=issuer+"oauth/token"
+            response.headers=Message();response.headers["Content-Type"]="application/json"
+            response.read.return_value=json.dumps({"id_token":token}).encode()
+            status,headers,_=call("/auth/callback",QUERY_STRING=urlencode(
+                {"code":"fictional-code","state":q["state"][0],"iss":issuer}),HTTP_COOKIE=binding,
+                HTTP_SEC_FETCH_SITE="cross-site",HTTP_SEC_FETCH_MODE="navigate",HTTP_SEC_FETCH_DEST="document")
+            self.assertEqual(status,303)
+            cookie=next(v for k,v in headers if k=="Set-Cookie").split(";",1)[0]
+            self.assertIn(b"Open buyer workspace",call("/",HTTP_COOKIE=cookie)[2])
+            self.assertEqual(call(page,HTTP_COOKIE=cookie)[0],200)
+            self.assertEqual(call(page,HTTP_COOKIE=cookie,HTTP_SEC_FETCH_SITE="cross-site")[0],403)
+            self.assertEqual(call(prefix+"/investigations/"+other_id,HTTP_COOKIE=cookie)[0],404)
+            csrf=json.loads(call("/auth/session",HTTP_COOKIE=cookie)[2])["csrf"]
+            def post(path,value,csrf_value=csrf):
+                raw=json.dumps(value).encode()
+                return call(prefix+path,"POST",HTTP_COOKIE=cookie,HTTP_ORIGIN=ORIGIN,HTTP_X_HPI_CSRF=csrf_value,
+                    CONTENT_TYPE="application/json",CONTENT_LENGTH=str(len(raw)),**{"wsgi.input":BytesIO(raw)})
+            query={"query":"1 Fictional Court","analysis_date":"2025-04-01"}
+            self.assertEqual(post("/search",query,"wrong")[0],401)
+            status,_,body=post("/search",query)
+            self.assertEqual(status,200)
+            match=json.loads(body)
+            status,_,body=post("/investigations",{"township_code":"17","class_code":"203",
+                "analysis_date":"2025-04-01","subject":{"address_id":match["address_id"],"building_area_sqft":1600}})
+            self.assertEqual(status,201)
+            saved=json.loads(body);own_path=prefix+"/investigations/"+saved["investigation_id"]
+            self.assertEqual(saved["selected_count"],3)
+            self.assertEqual(json.loads(call(own_path,HTTP_COOKIE=cookie)[2]),saved)
+            self.assertEqual(call("/auth/logout","POST",HTTP_COOKIE=cookie,HTTP_ORIGIN=ORIGIN,HTTP_X_HPI_CSRF=csrf)[0],200)
+            self.assertEqual(call(own_path,HTTP_COOKIE=cookie)[0],401)
+            self.assertEqual(admin.execute("SELECT owner_id FROM hpi_candidate.investigations WHERE investigation_id=%s",
+                (saved["investigation_id"],)).fetchone()[0],"provider-owner")
+            exchange._opener.open.assert_called_once()
 
     def _check_private_http_browser(self,rd,wr,seal,rp,bp):
         import ssl
