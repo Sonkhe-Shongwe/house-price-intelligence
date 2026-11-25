@@ -117,3 +117,32 @@ class RestrictedServicePreflightTests(unittest.TestCase):
             connect.side_effect=RuntimeError("invented secret diagnostic")
             with self.assertRaisesRegex(PreflightRefused,"^Restricted cloud service preflight refused or failed$"):
                 run_preflight(self.settings())
+
+    def test_provider_credential_and_masked_placeholder(self):
+        from backend.neon_service_preflight import service_parameters, ServicePreflightRefused
+        with patch.dict("os.environ",{},clear=True):
+            cfg=self.settings()
+            cfg["HPI_NEON_READER_DSN"]=cfg["HPI_NEON_READER_DSN"].replace("invented-reader-password-only","fictional-R4nd0m")
+            self.assertEqual(service_parameters(cfg)[0]["user"],"hpi_historical_reader")
+            cfg["HPI_NEON_READER_DSN"]=cfg["HPI_NEON_READER_DSN"].replace("fictional-R4nd0m","****************")
+            with self.assertRaises(ServicePreflightRefused) as caught:
+                service_parameters(cfg)
+            self.assertEqual(caught.exception.code,"reader_credential_shape")
+
+    def test_cli_diagnostic_never_echoes_exception(self):
+        from backend.neon_service_preflight import main, ServicePreflightRefused
+        for code,expected in (("reader_configuration","reader_configuration"),
+                              ("buyer_connection","buyer_connection"),
+                              ("invented-secret-should-not-appear","unexpected_failure")):
+            err=io.StringIO()
+            with patch("backend.neon_service_preflight.run_preflight",side_effect=ServicePreflightRefused(code)),redirect_stderr(err):
+                self.assertEqual(main({}),1)
+            self.assertEqual(err.getvalue(),"Restricted cloud service preflight refused or failed: "+expected+"\n")
+
+    @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_connection_failure_classified_without_details(self,connect):
+        from backend.neon_service_preflight import run_preflight, ServicePreflightRefused
+        connect.side_effect=RuntimeError("secret-bearing connection error")
+        with patch.dict("os.environ",{},clear=True),self.assertRaises(ServicePreflightRefused) as caught:
+            run_preflight(self.settings())
+        self.assertEqual(caught.exception.code,"reader_connection")

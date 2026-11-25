@@ -13,17 +13,38 @@ from backend.buyer_ownership import ROLE as BUYER, _verify_buyer_privileges
 from backend.postgres_runtime import BUYER_TABLES
 
 
+class ServicePreflightRefused(PreflightRefused):
+    """Only allowlisted diagnostic codes may leave the CLI."""
+    def __init__(self, code):
+        super().__init__("Restricted cloud service preflight refused or failed")
+        self.code=code
+
+
+DIAGNOSTICS=frozenset(("mode_or_environment","reader_configuration","buyer_configuration",
+    "duplicate_credentials","reader_credential_shape","buyer_credential_shape",
+    "reader_connection","buyer_connection","service_permission_checks","unexpected_failure"))
+
+
 def service_parameters(environ):
     if environ.get("HPI_NEON_MODE")!="development-restricted-preflight" or any(k.startswith("PG") for k in os.environ):
-        raise PreflightRefused("Explicit restricted mode and clean libpq environment required")
+        raise ServicePreflightRefused("mode_or_environment")
     host=environ.get("HPI_NEON_DEVELOPMENT_HOST")
-    reader=_connection_parameters(environ.get("HPI_NEON_READER_DSN",""),host,READER)
-    buyer=_connection_parameters(environ.get("HPI_NEON_BUYER_DSN",""),host,BUYER)
+    configs=[]
+    for key,role,kind in (("HPI_NEON_READER_DSN",READER,"reader"),("HPI_NEON_BUYER_DSN",BUYER,"buyer")):
+        try:
+            configs.append(_connection_parameters(environ.get(key,""),host,role))
+        except PreflightRefused:
+            raise ServicePreflightRefused(kind+"_configuration") from None
+    reader,buyer=configs
     if reader["password"]==buyer["password"]:
-        raise PreflightRefused("Distinct service credentials required")
-    for config in (reader,buyer):
-        if len(config["password"])<24:
-            raise PreflightRefused("Restricted random credential required")
+        raise ServicePreflightRefused("duplicate_credentials")
+    for config,kind in ((reader,"reader"),(buyer,"buyer")):
+        password=config["password"]
+        # Provider-generated random credentials are accepted for this short-lived
+        # qualification. Length alone is not proof of randomness. Reject masked
+        # console placeholders and obviously undersized values.
+        if len(password)<12 or set(password)=={"*"}:
+            raise ServicePreflightRefused(kind+"_credential_shape")
         config["application_name"]="hpi_service_preflight"
     return reader,buyer
 
@@ -81,20 +102,32 @@ def run_preflight(environ):
     try:
         configs=service_parameters(environ)
         with ExitStack() as stack:
-            reader,buyer=[stack.enter_context(psycopg.connect(**config,autocommit=True)) for config in configs]
-            report=_inspect_services(reader,buyer,database=DATABASE)
-            # libpq accepted mandatory verify-full and required channel binding.
-            # Do not print endpoint, user configuration, certificates or passwords.
+            connections=[]
+            for config,kind in zip(configs,("reader","buyer")):
+                try:
+                    connections.append(stack.enter_context(psycopg.connect(**config,autocommit=True)))
+                except Exception:
+                    raise ServicePreflightRefused(kind+"_connection") from None
+            try:
+                report=_inspect_services(*connections,database=DATABASE)
+            except Exception:
+                raise ServicePreflightRefused("service_permission_checks") from None
             return dict(report,direct_tls=True)
+    except ServicePreflightRefused:
+        raise
     except Exception:
-        raise PreflightRefused("Restricted cloud service preflight refused or failed") from None
+        raise ServicePreflightRefused("unexpected_failure") from None
 
 
 def main(environ=None):
     try:
         result=run_preflight(os.environ if environ is None else environ)
+    except ServicePreflightRefused as exc:
+        code=exc.code if exc.code in DIAGNOSTICS else "unexpected_failure"
+        print("Restricted cloud service preflight refused or failed: "+code,file=sys.stderr)
+        return 1
     except Exception:
-        print("Restricted cloud service preflight refused or failed",file=sys.stderr)
+        print("Restricted cloud service preflight refused or failed: unexpected_failure",file=sys.stderr)
         return 1
     print(json.dumps(result,sort_keys=True))
     return 0
