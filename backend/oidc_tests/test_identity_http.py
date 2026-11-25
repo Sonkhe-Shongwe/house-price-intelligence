@@ -107,15 +107,17 @@ class IdentityHttpTests(unittest.TestCase):
 
     def test_callback_diagnostics_are_fixed_and_browser_error_generic(self):
         params=self.begin()
-        status,_,body=self.request("/auth/callback",**dict(params,HTTP_COOKIE=""))
-        self.assertEqual(status,"401 Unauthorized")
-        self.assertEqual(json.loads(body),{"error":"identity_rejected"})
-        self.assertEqual(self.diagnostics,["browser_binding"])
+        for cookie in ("","__Host-hpi_login=invalid",params["HTTP_COOKIE"]+"; "+params["HTTP_COOKIE"],"x"*4097):
+            status,_,body=self.request("/auth/callback",**dict(params,HTTP_COOKIE=cookie))
+            self.assertEqual(status,"401 Unauthorized")
+            self.assertEqual(json.loads(body),{"error":"identity_rejected"})
+        self.assertEqual(self.diagnostics,["browser_binding"]*4)
+        self.opener.open.assert_not_called()
         self.opener.open.side_effect=OSError("private-fixture-secret")
         status,_,body=self.request("/auth/callback",**params)
         self.assertEqual(status,"401 Unauthorized")
         self.assertEqual(json.loads(body),{"error":"identity_rejected"})
-        self.assertEqual(self.diagnostics,["browser_binding","token_exchange"])
+        self.assertEqual(self.diagnostics,["browser_binding"]*4+["token_exchange"])
         self.assertEqual(self.request("/auth/callback",**params)[0],"401 Unauthorized")
         self.assertEqual(self.diagnostics[-1],"callback_state_binding")
 

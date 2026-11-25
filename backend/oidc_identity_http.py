@@ -21,7 +21,7 @@ def _binding(cookie):
     values=[part.strip().split("=",1)[1] for part in cookie.split(";")
             if part.strip().startswith(BINDING+"=")]
     if len(values)!=1 or not valid_token(values[0]):
-        raise AuthDenied("Login rejected")
+        raise AuthDenied("Login rejected",category="browser_binding")
     return values[0]
 
 
