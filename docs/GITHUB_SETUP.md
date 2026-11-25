@@ -4,7 +4,7 @@
 
 ## Branch responsibilities
 
-Standing authority delegates ordinary scoped source changes and verification; use connected GitHub tools and Neon administrative access before asking for manual Windows operations. Direct application credentials and protected storage remain separate from the administrative integration. The temporary protected Neon preflight environment already exists; its v4 marker validates the exact source parent without requiring a manual SHA variable edit. See [Neon contract](engineering/NEON_CLOUD_INTEGRATION_V1.md); normal owner approval still required.
+Standing authority delegates ordinary scoped source changes and verification; use connected GitHub tools and Neon administrative access before asking for manual Windows operations. Direct application credentials and protected storage remain separate from the administrative integration. The temporary protected Neon preflight environment already exists; its one-time markers validate exact source parents; accepted v8/v3 markers are consumed, not repeatable. See [Neon contract](engineering/NEON_CLOUD_INTEGRATION_V1.md); normal owner approval still required.
 
 - **`development`:** Permanent working branch. Approved source, tests and documentation updates go here and trigger the offline GitHub Actions application/Chromium suite.
 - **`main`:** Stable owner-reviewed integration branch. Changes arrive from `development` through a milestone pull request, after explicit approval and passing checks. Do not commit routine changes directly to `main`.

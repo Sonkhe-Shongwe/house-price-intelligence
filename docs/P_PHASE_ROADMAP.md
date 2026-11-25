@@ -2,7 +2,7 @@
 
 **Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
-**25 November operational reconciliation:** P4/P7 Neon cloud integration active. Direct restricted connectivity and persistent invented-data browser journey accepted (v3, 45627319372, exact 09c04b6, 8/8 workflows); restricted logins disabled after success. Protected recovery, actual identity, real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). No weights, estimates or full gate dispositions changed.
+**25 November operational reconciliation:** P4/P7 Neon cloud integration active. Direct restricted connectivity and persistent invented-data browser journey accepted (v3, 45627319372, exact 09c04b6, 8/8 workflows); restricted logins disabled after success. Disposable encrypted recovery verified; managed recovery/protected storage remain open. Actual Auth0 callback and token exchange reached; time validation blocks acceptance. Real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). No weights, estimates or full gate dispositions changed.
 
 ## Origin and scope
 
