@@ -16,7 +16,7 @@
 | P7 | Integrated QA, privacy, rights, readiness | 8% | 83% |
 | P8 | Release, demo and portfolio handoff | 6% | 35% |
 
-**Current delivery distinction:** Provisional P3.1-P3.7 synthetic scope, integrated P4 backend, P5 React workspace and P6 two-to-three-property shortlist/notes/comparison; all full phase gates remain open. PostgreSQL fictional runtime, split-role historical persistence and authenticated browser rehearsal are verified in CI. Neon schema and restricted permissions are installed (25 tables, five RLS policies); temporary credentials configured. Direct application-to-Neon connectivity remains unverified.
+**Current delivery distinction:** Provisional P3.1-P3.7 synthetic scope, integrated P4 backend, P5 React workspace and P6 two-to-three-property shortlist/notes/comparison; all full phase gates remain open. PostgreSQL fictional runtime, split-role historical persistence and authenticated browser rehearsal are verified in CI. Neon schema and restricted permissions are installed (25 tables, five RLS policies); direct restricted application connectivity and persistent invented buyer journey accepted (v3, 45627319372). Temporary service logins disabled after acceptance; protected recovery and real-data gates remain open.
 
 **Active priority:** P4 database preparation and P7 security/operational readiness. P8 release remains downstream. See [checkpoint](CHECKPOINT.md), [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md), [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) and the [detailed phase acceptance matrix](P_PHASE_ROADMAP.md).
 
