@@ -156,3 +156,29 @@ class IdentityHttpTests(unittest.TestCase):
                 self.opener.open.assert_not_called()
         self.assertEqual(self.request("/auth/callback",**params)[0],"303 See Other")
         self.opener.open.assert_called_once()
+
+    def test_token_timing_diagnostics_keep_strict_limit(self):
+        cases=(
+            (-10,591,"token_duration_excessive duration_seconds=601"),
+            (-700,-100,"token_expired"),
+            (120,720,"token_not_yet_valid"),
+            (0,31536001,"token_duration_excessive"),
+            (-10,590,None),
+        )
+        for issued,expires,category in cases:
+            with self.subTest(category=category):
+                params=self.begin()
+                response=self.opener.open.return_value.__enter__.return_value
+                original=json.loads(response.read.return_value)["id_token"]
+                claims=jwt.decode(original,self.key.public_key(),algorithms=["RS256"],audience="fixture")
+                now=int(time())
+                claims.update(iat=now+issued,exp=now+expires)
+                response.read.return_value=json.dumps({"id_token":jwt.encode(
+                    claims,self.key,algorithm="RS256",headers={"kid":"pinned"})}).encode()
+                status,_,body=self.request("/auth/callback",**params)
+                if category is None:
+                    self.assertEqual(status,"303 See Other")
+                else:
+                    self.assertEqual(status,"401 Unauthorized")
+                    self.assertEqual(json.loads(body),{"error":"identity_rejected"})
+                    self.assertEqual(self.diagnostics[-1],category)

@@ -85,8 +85,15 @@ class OidcBoundary:
             claims=jwt.decode(token,self.keys[kid],algorithms=["RS256"],audience=self.client_id,issuer=self.issuer,
                 options={"require":["iss","sub","aud","exp","iat","nonce"],"strict_aud":True})
             if (type(claims["iat"]) is not int or type(claims["exp"]) is not int
-                or claims["exp"]<=claims["iat"] or claims["exp"]-claims["iat"]>600):
-                raise denied("token_lifetime")
+                or claims["exp"]<=claims["iat"]):
+                raise denied("token_time_invalid")
+            duration=claims["exp"]-claims["iat"]
+            if duration>600:
+                failure=denied("token_duration_excessive")
+                # Only a bounded integer duration, from a verified signed token.
+                # Never expose the token, timestamp, or identity.
+                failure.duration_seconds=duration if duration<=31536000 else None
+                raise failure
             if not isinstance(claims["nonce"],str) or not compare_digest(claims["nonce"],nonce):
                 raise denied("token_nonce")
             if "azp" in claims and claims["azp"]!=self.client_id:
@@ -97,9 +104,9 @@ class OidcBoundary:
         except AuthDenied:
             raise
         except jwt.ExpiredSignatureError:
-            raise denied("token_lifetime") from None
+            raise denied("token_expired") from None
         except jwt.ImmatureSignatureError:
-            raise denied("token_lifetime") from None
+            raise denied("token_not_yet_valid") from None
         except jwt.InvalidAudienceError:
             raise denied("token_audience") from None
         except jwt.InvalidIssuerError:

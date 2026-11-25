@@ -108,10 +108,16 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
             if callback:
                 category=getattr(exc,"category",None)
                 allowed={"browser_binding","callback_parameters","callback_issuer","callback_state_binding",
-                    "token_exchange","token_format","token_header","signing_key","token_lifetime",
+                    "token_exchange","token_format","token_header","signing_key","token_time_invalid","token_duration_excessive",
+                    "token_expired","token_not_yet_valid",
                     "token_nonce","token_audience","token_issuer","token_signature","token_claims",
                     "subject_allowlist"}
-                diagnostic(category if category in allowed else "callback_other")
+                if category not in allowed:category="callback_other"
+                duration=getattr(exc,"duration_seconds",None)
+                if category=="token_duration_excessive" and type(duration) is int and 600<duration<=31536000:
+                    diagnostic(category+" duration_seconds="+str(duration))
+                else:
+                    diagnostic(category)
             return _reply(start,"401 Unauthorized",{"error":"identity_rejected"})
         except Exception:
             return _reply(start,"503 Service Unavailable",{"error":"identity_unavailable"})
