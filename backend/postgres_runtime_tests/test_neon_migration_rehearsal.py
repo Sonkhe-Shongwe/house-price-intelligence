@@ -129,8 +129,43 @@ class NeonMigrationRehearsalTests(unittest.TestCase):
                         self.assertIsNone(conn.execute("SELECT to_regclass('hpi_candidate.workspace_owners')").fetchone()[0])
                         self.assertIsNone(conn.execute("SELECT 1 FROM pg_roles WHERE rolname=%s",(BUYER,)).fetchone())
                         _prepare_empty_buyer_schema(conn)
-                        _verify_staged_buyer(conn)
+                        # Policy expression deparsing must not depend on the
+                        # caller's search path, and verification must preserve it.
+                        for path in ('"$user", public', 'pg_catalog'):
+                            conn.execute("SELECT set_config('search_path',%s,false)",(path,))
+                            before=conn.execute("SELECT current_setting('search_path')").fetchone()[0]
+                            _verify_staged_buyer(conn)
+                            self.assertEqual(conn.execute("SELECT current_setting('search_path')").fetchone()[0],before)
                         self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.workspace_owners").fetchone()[0],0)
+                        # Exercise the actual NOLOGIN role using SET LOCAL ROLE
+                        # with disposable identities, never live cloud records.
+                        with self.assertRaisesRegex(RuntimeError,"rollback buyer exercise"):
+                            with conn.transaction():
+                                conn.execute("INSERT INTO hpi_candidate.workspace_owners VALUES ('fixture-owner-a'),('fixture-owner-b')")
+                                conn.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-a','A','2026-01-01','fixture-owner-a'),('fixture-b','B','2026-01-01','fixture-owner-b')")
+                                conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(BUYER)))
+                                self.assertEqual(conn.execute("SELECT current_user").fetchone()[0],BUYER)
+                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[])
+                                conn.execute("SELECT set_config('hpi.owner_id','fixture-owner-a',true)")
+                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-a",)])
+                                with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                                    with conn.transaction():
+                                        conn.execute("INSERT INTO hpi_candidate.shortlists(shortlist_id,label,created_at_utc,owner_id) VALUES ('fixture-cross','Cross','2026-01-01','fixture-owner-b')")
+                                with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                                    with conn.transaction():
+                                        conn.execute("SELECT * FROM hpi_candidate.sale_transactions")
+                                conn.execute("SELECT set_config('hpi.owner_id','fixture-owner-b',true)")
+                                self.assertEqual(conn.execute("SELECT shortlist_id FROM hpi_candidate.shortlists").fetchall(),[("fixture-b",)])
+                                raise RuntimeError("rollback buyer exercise")
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.workspace_owners").fetchone()[0],0)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.shortlists").fetchone()[0],0)
+                        with self.assertRaisesRegex(RuntimeError,"rollback policy drift"):
+                            with conn.transaction():
+                                conn.execute("ALTER POLICY own_shortlists ON hpi_candidate.shortlists USING (true)")
+                                with self.assertRaisesRegex(ImportRefused,"Buyer policy definition drift"):
+                                    _verify_staged_buyer(conn)
+                                raise RuntimeError("rollback policy drift")
+                        _verify_staged_buyer(conn)
                         with self.assertRaises(ImportRefused):
                             _prepare_empty_buyer_schema(conn)
                         with psycopg.connect(ADMIN,dbname=DB,user=READER,password=reader_password,autocommit=True) as rd:

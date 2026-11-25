@@ -76,7 +76,14 @@ def _verify_staged_buyer(conn):
       has_sequence_privilege(%s,oid,'SELECT,UPDATE') FROM seq""",(ROLE,ROLE)).fetchall()
     if len(seq)!=1 or seq[0][0]!=SEQUENCE or seq[0][1]==ROLE or seq[0][2:]!=(True,False):
         raise ImportRefused("Buyer sequence drift")
-    policies=conn.execute("SELECT tablename,policyname,permissive,roles::text,cmd,qual,with_check FROM pg_policies WHERE schemaname='hpi_candidate'").fetchall()
+    # pg_policies deparses relation names according to search_path. Review the
+    # exact same expression under the canonical path, not a qualified variant
+    # caused by the caller's ambient namespace. Restore that namespace afterward.
+    with conn.transaction():
+        previous=conn.execute("SELECT current_setting('search_path')").fetchone()[0]
+        conn.execute("SET LOCAL search_path TO hpi_candidate,pg_catalog")
+        policies=conn.execute("SELECT tablename,policyname,permissive,roles::text,cmd,qual,with_check FROM pg_policies WHERE schemaname='hpi_candidate'").fetchall()
+        conn.execute("SELECT set_config('search_path',%s,true)",(previous,))
     if len(policies)!=len(POLICIES) or {p[0] for p in policies}!=set(POLICIES):
         raise ImportRefused("Buyer policy inventory drift")
     for table,name,permissive,roles,cmd,qual,check in policies:
