@@ -175,4 +175,70 @@ class RestrictedServicePreflightTests(unittest.TestCase):
         connect.side_effect=RuntimeError("secret-bearing connection error")
         with patch.dict("os.environ",{},clear=True),self.assertRaises(ServicePreflightRefused) as caught:
             run_preflight(self.settings())
-        self.assertEqual(caught.exception.code,"reader_connection")
+        self.assertEqual(caught.exception.code,"service_checks_failed")
+        self.assertEqual(caught.exception.outcomes,{"reader":"unknown_connection","buyer":"unknown_connection"})
+        self.assertEqual(connect.call_count,2)
+
+
+    def test_connection_categories_do_not_echo_driver_text(self):
+        import psycopg
+        from backend.neon_service_preflight import _connection_outcome
+        for message,expected in (
+            ("password authentication failed for user invented-secret","authentication"),
+            ("channel binding required but server did not offer it","channel_binding"),
+            ("SSL error: certificate verify failed","certificate"),
+            ("could not translate host name invented-host","dns"),
+            ("connection timeout expired","timeout"),
+            ("connection refused","network"),
+            ("SSL handshake failed","tls"),
+            ("database invented-db does not exist","database"),
+            ("no pg_hba.conf entry","server_rejected"),
+            ("invalid connection option invented","client_configuration"),
+            ("invented arbitrary secret","unknown_connection"),
+        ):
+            with self.subTest(expected=expected):
+                self.assertEqual(_connection_outcome(psycopg.OperationalError(message)),expected)
+        self.assertEqual(_connection_outcome(psycopg.errors.InvalidPassword("secret")),"authentication")
+
+    @patch("backend.neon_service_preflight._inspect_service")
+    @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_reader_failure_still_checks_buyer_and_closes_connection(self,connect,inspect):
+        import psycopg
+        from backend.neon_service_preflight import main
+        buyer=MagicMock()
+        connect.side_effect=[psycopg.OperationalError("password authentication failed invented-secret"),buyer]
+        err=io.StringIO()
+        with patch.dict("os.environ",{},clear=True),redirect_stderr(err):
+            self.assertEqual(main(self.settings()),1)
+        self.assertEqual(connect.call_count,2)
+        inspect.assert_called_once_with(buyer.__enter__.return_value,"hpi_buyer_runtime",database="hpi_private")
+        buyer.__exit__.assert_called_once()
+        lines=err.getvalue().splitlines()
+        self.assertEqual(lines[0],"Restricted cloud service preflight refused or failed: service_checks_failed")
+        self.assertEqual(json.loads(lines[1]),{"reader":"authentication","buyer":"verified"})
+        self.assertNotIn("invented-secret",err.getvalue())
+
+    @patch("backend.neon_service_preflight._inspect_service")
+    @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_permission_failure_does_not_skip_other_role(self,connect,inspect):
+        from backend.neon_service_preflight import main
+        inspect.side_effect=[RuntimeError("secret-bearing permission diagnostic"),None]
+        err=io.StringIO()
+        with patch.dict("os.environ",{},clear=True),redirect_stderr(err):
+            self.assertEqual(main(self.settings()),1)
+        self.assertEqual(connect.call_count,2)
+        self.assertEqual(inspect.call_count,2)
+        self.assertEqual(json.loads(err.getvalue().splitlines()[1]),{"reader":"permission_checks","buyer":"verified"})
+        self.assertNotIn("secret-bearing",err.getvalue())
+
+    @patch("backend.neon_service_preflight._inspect_service")
+    @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_both_roles_must_pass_for_success(self,connect,inspect):
+        from backend.neon_service_preflight import run_preflight
+        with patch.dict("os.environ",{},clear=True):
+            result=run_preflight(self.settings())
+        self.assertEqual(connect.call_count,2)
+        self.assertEqual(inspect.call_count,2)
+        self.assertTrue(result["direct_tls"])
+        self.assertEqual(result["status"],"restricted_services_verified")
+        self.assertFalse(result["real_data_activated"])
