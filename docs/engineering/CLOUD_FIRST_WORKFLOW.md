@@ -11,6 +11,10 @@
 - **GitHub-connected source tools author code; GitHub Actions runs verification.** Actions is not an independent coding agent. Only the exact commit that passed its relevant checks is verified.
 - **Windows is the manual acceptance station only when necessary:** Windows-only compatibility, actual UX/visual judgment or owner sign-off. Never treat Windows's unknown uncommitted changes as automatically represented by GitHub.
 
+## Standing engineering autonomy (25 November 2026)
+
+Routine engineering within the approved scope is delegated: independently select and implement the next integrated task, commit to development, run and diagnose CI, correct regressions and continue toward a meaningful milestone in the available execution session. No separate owner approval for ordinary scoped edits or synthetic verification. Ask only for indispensable owner action or a genuine cost, credential/access, data-rights, live-data, destructive-operation, release or main-integration boundary. Preserve the eight-step directive, exact-head evidence and phase gates. Do not claim unattended execution after the session ends. Prefer working software to new process documents.
+
 ## Continuous development and integration loop
 
 1. Restore the canonical [checkpoint](../CHECKPOINT.md), actual repository heads, [decisions](../DECISIONS.md), approval scope and current acceptance gate. Inspect relevant implementation and tests before changing it.

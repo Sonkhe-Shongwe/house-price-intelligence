@@ -2,7 +2,9 @@
 No connection at import time. Never accept credentials from browser requests.
 Run only with reviewed secrets from a trusted operator environment.
 """
+import json
 import os
+import sys
 import re
 import psycopg
 from psycopg.conninfo import conninfo_to_dict
@@ -79,3 +81,18 @@ def run_preflight(environ):
     except Exception:
         # Connection diagnostics can contain secret-bearing connection details.
         raise PreflightRefused("Cloud connection or read-only inspection failed") from None
+
+
+def main(environ=None):
+    """Explicit operator invocation; no arguments, credentials or tracebacks printed."""
+    try:
+        report = run_preflight(os.environ if environ is None else environ)
+    except Exception:
+        print("Neon preflight refused or failed", file=sys.stderr)
+        return 1
+    print(json.dumps(report, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -17,6 +17,10 @@ Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEA
 
 Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) alongside the unchanged eight-step directive. Use **one GitHub repository, the permanent `development` working branch, stable `main`, and GitHub Actions for routine verifiable tests**. Source changes are authored on `development` through authorised GitHub/cloud tools; Actions executes builds and checks rather than automatically writing code. Create a PR from `development` to `main` at an accepted milestone, not one new branch/PR per small fix. Never squash-merge or force-rewrite the permanent development history by default. Pull to Windows only for essential platform testing or owner UX acceptance. Never create another active app workspace or serial review ZIP as a substitute for integration. Separate observed manual tests, unmerged patches and committed CI evidence. Do not commit, merge, deploy, change repository rules or dispatch live-data jobs without the relevant owner authorisation.
 
+## Standing engineering autonomy (25 November 2026)
+
+Routine engineering within the approved scope is delegated: independently select and implement the next integrated task, commit to development, run and diagnose CI, correct regressions and continue toward a meaningful milestone in the available execution session. No separate owner approval for ordinary scoped edits or synthetic verification. Ask only for indispensable owner action or a genuine cost, credential/access, data-rights, live-data, destructive-operation, release or main-integration boundary. Preserve the eight-step directive, exact-head evidence and phase gates. Do not claim unattended execution after the session ends. Prefer working software to new process documents.
+
 ## Engineering boundaries
 
 - Prioritise traceable data, correct joins, source/time limitations, reproducible tests, clear comparable evidence and a complete buyer workflow.
@@ -24,7 +28,7 @@ Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORK
 - Keep publisher data, user data, property-level raw extracts and credentials out of public commits or artifacts. Publication/display rights have not been approved.
 - The integrated local **fictional-only** backend/browser/SQLite/shortlist is verified on `development`, but it is **not an approved production** database, real-property API, final buyer UI, deployment or price-prediction model. Consult the [current checkpoint](docs/CHECKPOINT.md).
 - Preserve dated audit reports; update current handoffs and decisions only with new evidence. Use `python tools/check_docs.py` for internal Markdown links and P-stage arithmetic. For map work, consult [mapping research](docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md): existing synthetic parcel coordinates all overlap, there is no approved map contract, and renderer, tile provider, geocoder and property source must be independently decided.
-- Do not automatically publish Git changes, manually dispatch live data audits, change scheduled cloud jobs or deploy without the owner's relevant approval. A specific user instruction to update GitHub permits the bounded changes requested.
+- Standing authority permits routine commits to development within approved scope; manually dispatched live data audits, scheduled cloud jobs and deployment still require the relevant approval.
 - Never force-push or delete/rewrite uncommitted work or retained evidence.
 
 For current work, follow the latest acceptance gate and its tests. If no local checkout is visible, report that limitation rather than claiming a clean working tree.

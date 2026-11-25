@@ -1,7 +1,10 @@
 """Offline tests only. No external DB connection or secrets."""
 import unittest
+import io
+import json
+from contextlib import redirect_stdout, redirect_stderr
 from unittest.mock import MagicMock, patch
-from backend.neon_preflight import connection_parameters, inspect_connection, run_preflight, PreflightRefused
+from backend.neon_preflight import connection_parameters, inspect_connection, run_preflight, PreflightRefused, main
 
 HOST = "ep-example-fictional.c-10.eu-central-1.aws.neon.tech"
 DSN = f"postgresql://hpi_private_owner:invented-test-password@{HOST}/hpi_private?sslmode=require&channel_binding=require"
@@ -64,3 +67,18 @@ class NeonPreflightTests(unittest.TestCase):
             with self.assertRaisesRegex(PreflightRefused,"^Cloud connection or read-only inspection failed$"):
                 run_preflight({"HPI_NEON_MODE":"development-empty-preflight","HPI_NEON_OWNER_DSN":DSN,
                                "HPI_NEON_DEVELOPMENT_HOST":HOST})
+
+    @patch("backend.neon_preflight.run_preflight")
+    def test_operator_cli_reports_only_aggregate_or_generic_error(self, run):
+        run.return_value={"status":"empty_development_preflight","read_only":True}
+        out,err=io.StringIO(),io.StringIO()
+        with redirect_stdout(out),redirect_stderr(err):
+            self.assertEqual(main({}),0)
+        self.assertEqual(json.loads(out.getvalue()),run.return_value)
+        self.assertEqual(err.getvalue(),"")
+        run.side_effect=RuntimeError("invented-secret-bearing-diagnostic")
+        out,err=io.StringIO(),io.StringIO()
+        with redirect_stdout(out),redirect_stderr(err):
+            self.assertEqual(main({}),1)
+        self.assertEqual(out.getvalue(),"")
+        self.assertEqual(err.getvalue(),"Neon preflight refused or failed\n")

@@ -1,4 +1,4 @@
-# House Price Intelligence | Master Continuation Prompt v1.4
+# House Price Intelligence | Master Continuation Prompt v1.5
 
 **Purpose:** General-purpose continuation across sessions, phases, tools and workstreams. This prompt is not limited to P3, research or any particular technology stack. Its first duty is to restore the **current verified state** before deciding what to do.
 
@@ -6,9 +6,13 @@
 **Workflow:** Default source changes target the permanent `development` branch; `main` is stable. Discover and verify both current heads. Do not assume GitHub reflects the user's local Windows branch.  
 **Previously used Windows checkout (unverified now):** `C:\Users\Lenovo\Downloads\Github Projects\house-price-intelligence`
 
-## Current verified working handoff (24 November 2026)
+## Standing engineering autonomy (25 November 2026)
 
-25 November 2026: Neon Cloud Integration V1. Owner console preflight confirms empty PostgreSQL 17.12 development database, free Frankfurt project, production/development branches and elevated owner. Latest private beta commit 6bc91ae passed all ten exact-head workflows. Local storage approach superseded by managed cloud candidate; trusted administrative access and network/backup/role controls not verified. Read-only cloud preflight prepared, offline verification pending. No cloud connection from CI, real extraction, public deployment, paid resources or main merge. [Cloud integration contract](engineering/NEON_CLOUD_INTEGRATION_V1.md).
+Routine engineering within the approved scope is delegated: independently select and implement the next integrated task, commit to development, run and diagnose CI, correct regressions and continue toward a meaningful milestone in the available execution session. No separate owner approval for ordinary scoped edits or synthetic verification. Ask only for indispensable owner action or a genuine cost, credential/access, data-rights, live-data, destructive-operation, release or main-integration boundary. Preserve the eight-step directive, exact-head evidence and phase gates. Do not claim unattended execution after the session ends. Prefer working software to new process documents.
+
+## Current verified working handoff (25 November 2026)
+
+25 November 2026: Neon Cloud Integration V1. Owner console preflight confirms empty PostgreSQL 17.12 development database, free Frankfurt project, production/development branches and elevated owner. Latest private beta commit 6bc91ae passed all ten exact-head workflows. Local storage approach superseded by managed cloud candidate; trusted administrative access and network/backup/role controls not verified. Read-only cloud preflight at 8c0540e passed all ten exact-head workflows. Added an aggregate-only executable preflight and disposable non-superuser canonical migration rehearsal; new head CI pending. No cloud connection from CI, real extraction, public deployment, paid resources or main merge. [Cloud integration contract](engineering/NEON_CLOUD_INTEGRATION_V1.md).
 
 **Read first:** [current checkpoint](CHECKPOINT.md), [80-package P0–P8 roadmap](P_PHASE_ROADMAP.md), [decisions](DECISIONS.md), [production readiness](engineering/PRODUCTION_READINESS_V1.md), [workspace contract](engineering/BUYER_WORKSPACE_UX_V1.md), [P3 contract](engineering/P3_APPLICATION_CONTRACT.md), [P6 contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [geographic contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) and [two-branch workflow](engineering/CLOUD_FIRST_WORKFLOW.md). Verify live branch SHAs and exact-head CI each session.
 
