@@ -53,19 +53,22 @@ def route(service,assets,env,start):
         return [payload]
     match=REOPEN.fullmatch(path)
     comparison=REOPEN_COMPARISON.fullmatch(path)
-    if path not in (PREFIX+"/search",PREFIX+"/investigations",PREFIX+"/shortlists") and not (match or comparison):
+    workspace=path==PREFIX+"/workspace"
+    if not workspace and path not in (PREFIX+"/search",PREFIX+"/investigations",PREFIX+"/shortlists") and not (match or comparison):
         return _response(start,404,{"error":"not_found"})
-    expected="GET" if (match or comparison) else "POST"
+    expected="GET" if (match or comparison or workspace) else "POST"
     if method!=expected:
         return _response(start,405,{"error":"method_not_allowed"},allow=expected)
     try:
-        payload=None if (match or comparison) else _body(env)
+        payload=None if (match or comparison or workspace) else _body(env)
     except (ValueError,KeyError,UnicodeError):
         return _response(start,400,{"error":"invalid_request"})
     try:
         # Both restricted fixture connections are shared by the test harness.
         # Serialize complete calls so transaction-local identity cannot interleave.
         with service.request_lock:
+            if workspace:
+                return _response(start,200,service.saved_workspace(cookie=cookie))
             if match:
                 return _response(start,200,service.reopen(match[1],cookie=cookie))
             if comparison:
