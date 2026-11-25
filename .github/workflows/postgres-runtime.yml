@@ -41,6 +41,9 @@ jobs:
           HPI_PG_DSN: postgresql://postgres:fictional-ci-only@127.0.0.1:${{ job.services.postgres.ports[5432] }}/hpi_fixture
         run: python -m unittest discover -s backend/postgres_runtime_tests -v
 
+      - name: Export fixed invented seed for reviewed operator transaction
+        run: python -m backend.neon_synthetic_seed
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
