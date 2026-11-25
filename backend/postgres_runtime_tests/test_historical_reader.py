@@ -145,13 +145,15 @@ class HistoricalReaderTests(unittest.TestCase):
                         iid=saved["investigation_id"]
                         self.assertEqual([s["sale_price_usd"] for s in saved["sales"]],["525000.01"]*3)
                         self.assertEqual(svc.reopen(iid,cookie=a["cookie"]),saved)
+                        self._check_private_http_browser(rd,wr,seal)
+
                         self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
                         with self.assertRaises(ImportRefused):
                             svc.reopen(iid,cookie=b["cookie"])
                         with self.assertRaises(AuthDenied):
                             svc.reopen(iid,cookie="")
-                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],1)
-                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],3)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],2)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],6)
                         for forbidden in ("FICT-","00000000000001","relational_sha256","address_id"):
                             self.assertNotIn(forbidden,str(saved))
                         with self.assertRaises(psycopg.errors.InsufficientPrivilege):
@@ -163,3 +165,63 @@ class HistoricalReaderTests(unittest.TestCase):
                 admin.execute("DROP DATABASE hpi_ingest_fixture")
                 for role in (BUYER,ROLE):
                     admin.execute(sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
+
+    def _check_private_http_browser(self,rd,wr,seal):
+        import ssl
+        import subprocess
+        import tempfile
+        from pathlib import Path
+        from threading import Thread
+        from wsgiref.simple_server import make_server
+        from backend.postgres_runtime import QuietHandler
+        from backend.persistent_oidc import PersistentBoundary
+        from backend.offline_oidc_http import application
+        from backend.react_assets import load_react_assets
+        from playwright.sync_api import sync_playwright,expect
+        class TLSHandler(QuietHandler):
+            def get_environ(self):
+                env=super().get_environ();env["HTTPS"]="on";return env
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp);cert=path/"cert.pem";key=path/"key.pem"
+            subprocess.run(["openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1","-subj","/CN=127.0.0.1","-addext","subjectAltName=IP:127.0.0.1","-keyout",str(key),"-out",str(cert)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            server=make_server("127.0.0.1",0,lambda e,s:[],handler_class=TLSHandler)
+            base="https://127.0.0.1:"+str(server.server_port)
+            boundary=PersistentBoundary(session_file=path/"sessions.sqlite",issuer="https://issuer.invalid",client_id="fixture",authorize_endpoint="https://issuer.invalid/authorize",redirect_uri=base+"/auth/callback",public_keys={"fixture":"not-used-in-session-rehearsal"},owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
+            service=PrivateBetaRehearsal(rd,wr,seal,boundary)
+            server.set_app(application(None,load_react_assets(),boundary,lambda **kw:None,private_beta=service))
+            tls=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER);tls.load_cert_chain(cert,key)
+            server.socket=tls.wrap_socket(server.socket,server_side=True)
+            thread=Thread(target=server.serve_forever,daemon=True);thread.start()
+            try:
+                with sync_playwright() as pw:
+                    browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                    try:
+                        contexts=[]
+                        for owner in ("fixture-owner-a","fixture-owner-b"):
+                            cookie=boundary._issue_session(owner)["cookie"].split(";",1)[0]
+                            name,value=cookie.split("=",1)
+                            ctx=browser.new_context(ignore_https_errors=True)
+                            ctx.add_cookies([{"name":name,"value":value,"url":base,"secure":True,"httpOnly":True,"sameSite":"Lax"}])
+                            contexts.append(ctx)
+                        page=contexts[0].new_page()
+                        page.goto(base+"/private-beta-rehearsal")
+                        page.get_by_test_id("beta-search").click()
+                        expect(page.get_by_test_id("beta-match")).to_have_text("One eligible parcel candidate")
+                        page.get_by_test_id("beta-create").click()
+                        expect(page.get_by_test_id("beta-result")).to_be_visible(timeout=15000)
+                        expect(page.get_by_test_id("beta-sale")).to_have_count(3)
+                        expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
+                        iid=page.get_by_test_id("beta-id").input_value()
+                        page.reload()
+                        page.get_by_test_id("beta-id").fill(iid)
+                        page.get_by_test_id("beta-reopen").click()
+                        expect(page.get_by_test_id("beta-sale")).to_have_count(3)
+                        other=contexts[1].new_page()
+                        other.goto(base+"/private-beta-rehearsal")
+                        other.get_by_test_id("beta-id").fill(iid)
+                        other.get_by_test_id("beta-reopen").click()
+                        expect(other.get_by_test_id("beta-error")).to_be_visible()
+                        self.assertEqual(other.get_by_test_id("beta-result").count(),0)
+                        for ctx in contexts:ctx.close()
+                    finally:browser.close()
+            finally:server.shutdown();server.server_close();thread.join(timeout=5)

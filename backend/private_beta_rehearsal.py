@@ -1,13 +1,14 @@
 """Internal split-role persistence rehearsal; loopback invented fixtures only.
-No live cloud connector, HTTP route, real-data activation or identity provider.
+No live cloud connector, real-data activation or identity provider.
 """
 from contextlib import contextmanager
+from threading import RLock
 from hashlib import sha256
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 import json
 from backend.buyer_ownership import ROLE as BUYER, _verify_buyer_privileges
-from backend.historical_reader import ROLE as READER, _verified
+from backend.historical_reader import ROLE as READER, _verified, PrivateHistoricalReader
 from backend.historical_postgres import _evaluate_verified
 from backend.historical_beta_projection import project_rehearsal
 from backend.investigation_contract import validate_request
@@ -38,6 +39,7 @@ class PrivateBetaRehearsal:
             or set(boundary.owners.values())!=OWNERS):
             raise ImportRefused("Offline identity fixture required")
         self.reader,self.writer,self.seal,self.boundary=reader,writer,dict(seal),boundary
+        self.request_lock=RLock()
 
     def _owner(self,cookie,method,origin=None,csrf=None):
         owner=self.boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=csrf)
@@ -67,6 +69,11 @@ class PrivateBetaRehearsal:
                 raise ImportRefused("Unexpected buyer owner context")
             self.writer.execute("SELECT set_config('hpi.owner_id',%s,true)",(owner,))
             yield self.writer
+
+    def search(self,query,analysis_date,*,cookie,origin,csrf):
+        self._owner(cookie,"POST",origin,csrf)
+        _connection(self.reader,READER)
+        return PrivateHistoricalReader(self.reader,self.seal).search(query,analysis_date)
 
     def create(self,request,*,cookie,origin,csrf):
         owner=self._owner(cookie,"POST",origin,csrf)

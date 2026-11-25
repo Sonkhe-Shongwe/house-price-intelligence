@@ -24,7 +24,12 @@ def reply(start,code,value,cookies=(),location=None):
     if location:headers.append(("Location",location))
     start(code,headers)
     return [data]
-def application(pool,assets,boundary,exchange):
+def application(pool,assets,boundary,exchange,*,private_beta=None):
+    if private_beta is not None:
+        from backend.private_beta_http import route as beta_route
+        from backend.private_beta_rehearsal import PrivateBetaRehearsal
+        if not isinstance(private_beta,PrivateBetaRehearsal) or private_beta.boundary is not boundary or pool is not None:
+            raise ValueError("Explicit isolated private rehearsal required")
     if not urlsplit(boundary.issuer).hostname.endswith(".invalid") or not ALLOWED_HOST.fullmatch(urlsplit(boundary.origin).netloc):
         raise ValueError("Offline fictional issuer and loopback HTTPS only")
     def app(env,start):
@@ -50,7 +55,7 @@ def application(pool,assets,boundary,exchange):
                 args=parse_qs(raw,keep_blank_values=True,strict_parsing=True,max_num_fields=2)
                 if set(args)!={"state","code"} or any(len(v)!=1 for v in args.values()):raise AuthDenied("Callback rejected")
                 result=boundary.finish(state=args["state"][0],browser_binding=browser_binding(cookie),code=args["code"][0],exchange=exchange)
-                return reply(start,"303 See Other",{},(result["cookie"],binding_cookie("",0)),location="/")
+                return reply(start,"303 See Other",{},(result["cookie"],binding_cookie("",0)),location="/private-beta-rehearsal" if private_beta is not None else "/")
             if path=="/auth/session" and method=="GET":
                 if env.get("QUERY_STRING"):raise AuthDenied("Session rejected")
                 return reply(start,"200 OK",{"csrf":boundary.csrf_for_session(cookie)})
@@ -59,6 +64,8 @@ def application(pool,assets,boundary,exchange):
                 return reply(start,"200 OK",{"logged_out":True},(boundary.logout(cookie=cookie,origin=origin,csrf=csrf),))
             if path.startswith("/auth/"):return _response(start,405,{"error":"method_not_allowed"})
             owner=boundary.authorize(cookie=cookie,method=method,origin=origin,csrf=csrf)
+            if private_beta is not None:
+                return beta_route(private_beta,assets,env,start)
             return serve_owner(pool,assets,env,start,owner)
         except (AuthDenied,ValueError):return reply(start,"401 Unauthorized",{"error":"fictional_authentication_required"})
         except (sqlite3.Error,OSError):return _response(start,503,{"error":"session_unavailable"})
