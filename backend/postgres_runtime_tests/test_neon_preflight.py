@@ -140,6 +140,36 @@ class RestrictedServicePreflightTests(unittest.TestCase):
             self.assertEqual(err.getvalue(),"Restricted cloud service preflight refused or failed: "+expected+"\n")
 
     @patch("backend.neon_service_preflight.psycopg.connect")
+    def test_buyer_configuration_reasons_are_fixed_and_connect_never_runs(self, connect):
+        from backend.neon_service_preflight import main
+        buyer = self.settings()["HPI_NEON_BUYER_DSN"]
+        cases = (
+            ("", "missing"),
+            ("psql 'invented secret input'", "parse"),
+            (buyer+"&hostaddr=127.0.0.1", "options"),
+            (buyer.replace(HOST, "ep-other.c-10.eu-central-1.aws.neon.tech"), "endpoint"),
+            (buyer.replace("fictional.c-", "fictional-pooler.c-"), "endpoint"),
+            (buyer.replace("/hpi_private?", "/other?"), "database"),
+            (buyer.replace("hpi_buyer_runtime", "hpi_historical_reader"), "role"),
+            (buyer.replace(":invented-buyer-password-only@", ":@"), "password"),
+            (buyer.replace(HOST, HOST+":5433"), "port"),
+            (buyer.replace("channel_binding=require", "channel_binding=prefer"), "tls"),
+            (buyer.replace("sslmode=require", "sslmode=disable"), "tls"),
+            (buyer+"&sslrootcert=/tmp/invented-secret", "tls"),
+        )
+        with patch.dict("os.environ", {}, clear=True):
+            for dsn, reason in cases:
+                with self.subTest(reason=reason):
+                    config = dict(self.settings(), HPI_NEON_BUYER_DSN=dsn)
+                    out, err = io.StringIO(), io.StringIO()
+                    with redirect_stdout(out), redirect_stderr(err):
+                        self.assertEqual(main(config), 1)
+                    self.assertEqual(out.getvalue(), "")
+                    self.assertEqual(err.getvalue(),
+                        "Restricted cloud service preflight refused or failed: buyer_configuration_"+reason+"\n")
+        connect.assert_not_called()
+
+    @patch("backend.neon_service_preflight.psycopg.connect")
     def test_connection_failure_classified_without_details(self,connect):
         from backend.neon_service_preflight import run_preflight, ServicePreflightRefused
         connect.side_effect=RuntimeError("secret-bearing connection error")

@@ -7,7 +7,8 @@ import json
 import os
 import sys
 import psycopg
-from backend.neon_preflight import DATABASE, PreflightRefused, _connection_parameters
+from backend.neon_preflight import (DATABASE, CONFIG_REASONS, ConfigurationRefused,
+                                    PreflightRefused, _connection_parameters)
 from backend.historical_reader import ROLE as READER, READ_TABLES, _verify_reader_privileges
 from backend.buyer_ownership import ROLE as BUYER, _verify_buyer_privileges
 from backend.postgres_runtime import BUYER_TABLES
@@ -22,7 +23,8 @@ class ServicePreflightRefused(PreflightRefused):
 
 DIAGNOSTICS=frozenset(("mode_or_environment","reader_configuration","buyer_configuration",
     "duplicate_credentials","reader_credential_shape","buyer_credential_shape",
-    "reader_connection","buyer_connection","service_permission_checks","unexpected_failure"))
+    "reader_connection","buyer_connection","service_permission_checks","unexpected_failure")) | frozenset(
+        f"{kind}_configuration_{reason}" for kind in ("reader", "buyer") for reason in CONFIG_REASONS)
 
 
 def service_parameters(environ):
@@ -33,6 +35,8 @@ def service_parameters(environ):
     for key,role,kind in (("HPI_NEON_READER_DSN",READER,"reader"),("HPI_NEON_BUYER_DSN",BUYER,"buyer")):
         try:
             configs.append(_connection_parameters(environ.get(key,""),host,role))
+        except ConfigurationRefused as exc:
+            raise ServicePreflightRefused(f"{kind}_configuration_{exc.reason}") from None
         except PreflightRefused:
             raise ServicePreflightRefused(kind+"_configuration") from None
     reader,buyer=configs

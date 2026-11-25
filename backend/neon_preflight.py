@@ -19,22 +19,43 @@ ALLOWED = {"host", "port", "dbname", "user", "password", "sslmode", "channel_bin
 class PreflightRefused(ValueError):
     pass
 
+CONFIG_REASONS = frozenset(("missing", "parse", "options", "endpoint", "database",
+                            "role", "password", "port", "tls"))
+
+
+class ConfigurationRefused(PreflightRefused):
+    """A fixed reason only; never retain submitted DSN or parameter values."""
+    def __init__(self, reason):
+        super().__init__("Unapproved development connection configuration")
+        self.reason = reason if reason in CONFIG_REASONS else "parse"
+
+
 def _connection_parameters(dsn, expected_host, role):
     """Normalise console DSN into an explicit, stricter libpq configuration."""
+    if not isinstance(dsn, str) or not dsn.strip():
+        raise ConfigurationRefused("missing")
     try:
         p = conninfo_to_dict(dsn)
     except Exception:
-        raise PreflightRefused("Invalid cloud connection configuration") from None
+        raise ConfigurationRefused("parse") from None
     host = p.get("host", "")
-    if (set(p) - ALLOWED or not isinstance(expected_host, str)
-            or not HOST.fullmatch(host) or "-pooler" in host
-            or host != expected_host or p.get("dbname") != DATABASE
-            or p.get("user") != role or not p.get("password")
-            or p.get("port", "5432") != "5432"
-            or p.get("sslmode") not in ("require", "verify-full")
+    if set(p) - ALLOWED:
+        raise ConfigurationRefused("options")
+    if (not isinstance(expected_host, str) or not HOST.fullmatch(host)
+            or "-pooler" in host or host != expected_host):
+        raise ConfigurationRefused("endpoint")
+    if p.get("dbname") != DATABASE:
+        raise ConfigurationRefused("database")
+    if p.get("user") != role:
+        raise ConfigurationRefused("role")
+    if not p.get("password"):
+        raise ConfigurationRefused("password")
+    if p.get("port", "5432") != "5432":
+        raise ConfigurationRefused("port")
+    if (p.get("sslmode") not in ("require", "verify-full")
             or p.get("channel_binding") != "require"
             or p.get("sslrootcert", "system") != "system"):
-        raise PreflightRefused("Unapproved development connection configuration")
+        raise ConfigurationRefused("tls")
     return dict(host=host, port=5432, dbname=DATABASE, user=role,
                 password=p["password"], sslmode="verify-full", sslrootcert="system",
                 channel_binding="require", gssencmode="disable", connect_timeout=15,

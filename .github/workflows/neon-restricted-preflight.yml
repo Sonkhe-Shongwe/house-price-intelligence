@@ -2,11 +2,11 @@ name: Restricted Neon development connection acceptance
 on:
   push:
     branches: [development]
-    paths: ['.github/authorisations/neon-restricted-preflight-v4.txt']
+    paths: ['.github/authorisations/neon-restricted-preflight-v5.txt']
 permissions:
   contents: read
 concurrency:
-  group: neon-restricted-preflight-v4
+  group: neon-restricted-preflight-v5
   cancel-in-progress: false
 jobs:
   preflight:
@@ -24,11 +24,11 @@ jobs:
           BEFORE: ${{ github.event.before }}
         run: |
           set -eu
-          marker=.github/authorisations/neon-restricted-preflight-v4.txt
+          marker=.github/authorisations/neon-restricted-preflight-v5.txt
           test "$BEFORE" = "$(git rev-parse HEAD^)"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git diff --name-status "$BEFORE" "$GITHUB_SHA" -- "$marker")" = "$(printf 'A\t%s' "$marker")"
-          test "$(cat "$marker")" = "$(printf 'neon-restricted-preflight-v4\nsource=%s' "$BEFORE")"
+          test "$(cat "$marker")" = "$(printf 'neon-restricted-preflight-v5\nsource=%s' "$BEFORE")"
           test "$(git diff --name-only "$BEFORE" "$GITHUB_SHA")" = "$marker"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
