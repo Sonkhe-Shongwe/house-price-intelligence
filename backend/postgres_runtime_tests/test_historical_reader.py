@@ -278,8 +278,29 @@ class HistoricalReaderTests(unittest.TestCase):
             saved=json.loads(body);own_path=prefix+"/investigations/"+saved["investigation_id"]
             self.assertEqual(saved["selected_count"],3)
             self.assertEqual(json.loads(call(own_path,HTTP_COOKIE=cookie)[2]),saved)
+            status,_,body=post("/search",dict(query,query="2 Fictional Court"))
+            self.assertEqual(status,200)
+            status,_,body=post("/investigations",{"township_code":"17","class_code":"203",
+                "analysis_date":"2025-04-01","subject":{"address_id":json.loads(body)["address_id"],"building_area_sqft":1600}})
+            self.assertEqual(status,201)
+            second=json.loads(body)
+            self.assertEqual(second["selected_count"],0)
+            status,_,body=post("/shortlists",{"label":"Provider comparison","entries":[
+                {"investigation_id":saved["investigation_id"],"note_text":"First property"},
+                {"investigation_id":second["investigation_id"],"note_text":"Second property"}]})
+            self.assertEqual(status,201)
+            comparison=json.loads(body)
+            comparison_path=prefix+"/shortlists/"+comparison["shortlist_id"]
+            # Reconstruct persistent identity and service without a new token exchange.
+            resumed,exchange2=prepare_auth0(issuer=issuer,client_id="fixture",client_secret="x"*48,
+                redirect_uri=CALLBACK,jwks=jwks,owner_by_subject={"auth0|alice":"provider-owner"},
+                session_file=Path(tmp)/"provider.sqlite")
+            app=buyer_identity_application(resumed,exchange2,Auth0InventedBuyer(rd,wr,seal,resumed),assets)
+            self.assertEqual(json.loads(call(own_path,HTTP_COOKIE=cookie)[2]),saved)
+            self.assertEqual(json.loads(call(comparison_path,HTTP_COOKIE=cookie)[2]),comparison)
             self.assertEqual(call("/auth/logout","POST",HTTP_COOKIE=cookie,HTTP_ORIGIN=ORIGIN,HTTP_X_HPI_CSRF=csrf)[0],200)
             self.assertEqual(call(own_path,HTTP_COOKIE=cookie)[0],401)
+            self.assertEqual(call(comparison_path,HTTP_COOKIE=cookie)[0],401)
             self.assertEqual(admin.execute("SELECT owner_id FROM hpi_candidate.investigations WHERE investigation_id=%s",
                 (saved["investigation_id"],)).fetchone()[0],"provider-owner")
             exchange._opener.open.assert_called_once()

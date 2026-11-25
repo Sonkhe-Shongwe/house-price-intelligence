@@ -51,6 +51,18 @@ def buyer_identity_application(boundary,exchange,service,assets,*,diagnostic=lam
     from backend.auth0_invented_buyer import Auth0InventedBuyer
     if type(service) is not Auth0InventedBuyer or service.boundary is not boundary:
         raise ValueError("Explicit invented provider buyer service required")
+    return _buyer_application(boundary,exchange,service,assets,diagnostic)
+
+
+def neon_buyer_identity_application(boundary,exchange,service,assets,*,diagnostic=lambda category: None):
+    # Separate explicit entry point; the disposable factory remains cloud-refusing.
+    from backend.neon_provider_buyer import NeonProviderBuyer
+    if type(service) is not NeonProviderBuyer or service.boundary is not boundary or not service._startup_verified:
+        raise ValueError("Verified invented cloud provider buyer service required")
+    return _buyer_application(boundary,exchange,service,assets,diagnostic)
+
+
+def _buyer_application(boundary,exchange,service,assets,diagnostic):
     from backend.private_beta_http import PAGE,PREFIX,route
     return _application(boundary,exchange,diagnostic=diagnostic,
         buyer=(service,assets,PAGE,PREFIX,route))
