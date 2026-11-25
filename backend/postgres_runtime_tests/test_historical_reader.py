@@ -322,6 +322,16 @@ class HistoricalReaderTests(unittest.TestCase):
                         other.get_by_test_id("beta-reopen-comparison").click()
                         expect(other.get_by_test_id("beta-error")).to_be_visible()
                         self.assertEqual(other.get_by_test_id("beta-comparison").count(),0)
+                        # Browser sign-out must clear the displayed evidence and revoke the old session.
+                        old_cookie=next(c for c in contexts[0].cookies() if c['name']=='__Host-hpi_session')
+                        page.get_by_test_id("beta-sign-out").click()
+                        expect(page.get_by_role("heading",name="Signed out")).to_be_visible()
+                        self.assertEqual(page.get_by_test_id("beta-result").count(),0)
+                        self.assertEqual(page.get_by_test_id("beta-comparison").count(),0)
+                        with self.assertRaises(AuthDenied):
+                            resumed_boundary.authorize(cookie=old_cookie['name']+'='+old_cookie['value'],method='GET')
+                        # Revocation is session-specific, and does not delete durable buyer records.
+                        self.assertEqual(resumed.reopen_comparison(sid,cookie=auth['cookie'])['shortlist_id'],sid)
                         for ctx in contexts:ctx.close()
                     finally:browser.close()
             finally:server.shutdown();server.server_close();thread.join(timeout=5)

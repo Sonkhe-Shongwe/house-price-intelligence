@@ -65,6 +65,7 @@ export default function PrivateBetaRehearsal(){
   const [token,setToken]=useState<string|null>(null),[status,setStatus]=useState('');
   const [result,setResult]=useState<Result|null>(null),[iid,setIid]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(false);
+  const [signedOut,setSignedOut]=useState(false),[logoutError,setLogoutError]=useState(false);
   const [entries,setEntries]=useState<Entry[]>([]),[label,setLabel]=useState('My fictional comparison');
   const [sid,setSid]=useState(''),[comparison,setComparison]=useState<Comparison|null>(null);
   async function run(action:()=>Promise<void>){
@@ -72,7 +73,18 @@ export default function PrivateBetaRehearsal(){
     try{await action();}catch{setError(true);}finally{setBusy(false);}
   }
   function clear(){setToken(null);setStatus('');setResult(null);}
-  return <><header className="app-topbar"><strong>House Price Intelligence</strong><span>Private investigation rehearsal</span></header>
+  async function signOut(){
+    setBusy(true);setLogoutError(false);
+    try{
+      const response=await fixtureFetch('/auth/logout',{method:'POST'});
+      if(!response.ok||record(await response.json()).logged_out!==true)throw Error('Sign out unavailable');
+      // No buyer data or draft notes remain in the signed-out view. Saved records stay on the server.
+      clear();setAddress('');setDate('');setArea('');setPrice('');setIid('');setEntries([]);
+      setLabel('');setSid('');setComparison(null);setError(false);setSignedOut(true);
+    }catch{setLogoutError(true);}finally{setBusy(false);}
+  }
+  if(signedOut)return <main className="buyer-pane"><h1>Signed out</h1><p role="status">Your session has ended. Saved investigations and comparisons remain available after signing in again.</p></main>;
+  return <><header className="app-topbar"><strong>House Price Intelligence</strong><span>Private investigation rehearsal</span><button type="button" disabled={busy} data-testid="beta-sign-out" onClick={()=>void signOut()}>Sign out</button></header>
     <main className="buyer-pane">
       <h1>Investigate historical evidence</h1>
       <p>Invented source-shaped records only. No real property records, valuation, building identity or geographic position.</p>
@@ -95,6 +107,7 @@ export default function PrivateBetaRehearsal(){
         <label htmlFor="beta-iid">Saved investigation ID</label><input id="beta-iid" data-testid="beta-id" value={iid} onChange={e=>setIid(e.target.value)}/>
         <button className="buyer-save" type="button" disabled={!UUID.test(iid)} data-testid="beta-reopen" onClick={()=>void run(async()=>{setResult(null);setResult(decode(await api('/investigations/'+iid)));})}>Reopen saved investigation</button>
       </fieldset>
+      {logoutError&&<p role="alert">Sign out could not be confirmed. Retry before leaving this session unattended.</p>}
       {error&&<p role="alert" data-testid="beta-error">Investigation unavailable. Check your session and input.</p>}
       {result&&<section className="hpi-provenance" data-testid="beta-result" aria-label="Saved evidence">
         <h2>Saved evidence</h2><p>{result.selected_count} eligible sales · {result.status.replaceAll('_',' ')} · {result.analysis_date}</p>
