@@ -2,11 +2,11 @@ name: Restricted Neon development connection acceptance
 on:
   push:
     branches: [development]
-    paths: ['.github/authorisations/neon-restricted-preflight-v3.txt']
+    paths: ['.github/authorisations/neon-restricted-preflight-v4.txt']
 permissions:
   contents: read
 concurrency:
-  group: neon-restricted-preflight-v3
+  group: neon-restricted-preflight-v4
   cancel-in-progress: false
 jobs:
   preflight:
@@ -19,18 +19,16 @@ jobs:
         with:
           fetch-depth: 2
           persist-credentials: false
-      - name: Verify separately reviewed source and one-time marker
+      - name: Verify exact source parent and one-time marker
         env:
           BEFORE: ${{ github.event.before }}
-          APPROVED_SHA: ${{ vars.HPI_NEON_PREFLIGHT_APPROVED_SHA }}
         run: |
           set -eu
-          marker=.github/authorisations/neon-restricted-preflight-v3.txt
-          test -n "$APPROVED_SHA"
-          test "$BEFORE" = "$APPROVED_SHA"
-          test "$(git rev-parse HEAD^)" = "$APPROVED_SHA"
+          marker=.github/authorisations/neon-restricted-preflight-v4.txt
+          test "$BEFORE" = "$(git rev-parse HEAD^)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git diff --name-status "$BEFORE" "$GITHUB_SHA" -- "$marker")" = "$(printf 'A\t%s' "$marker")"
-          test "$(cat "$marker")" = "owner-approved-neon-restricted-preflight-v3"
+          test "$(cat "$marker")" = "$(printf 'neon-restricted-preflight-v4\nsource=%s' "$BEFORE")"
           test "$(git diff --name-only "$BEFORE" "$GITHUB_SHA")" = "$marker"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
