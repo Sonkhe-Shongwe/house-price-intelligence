@@ -1,10 +1,10 @@
 # House Price Intelligence
 
-**Status reviewed 24 November 2026:** Owner-authorised PRs #5 and #6 integrated the fictional buyer workflow and PR #8 integrated React. The latest verified application baseline [1cedf37](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/1cedf378e806f5fafc18639ba72207a70f2b4195) passed six push/PR workflows: 182 Python, 16 legacy browser, 33 React and 5 PostgreSQL tests; the separate bounded address audit passed four safeguards. React workspace, fictional map, SQLite persistence and shortlist comparison are integrated; PostgreSQL is a verified candidate, not the deployed runtime. Latest RD candidate a24ce43 passed 189 Python, 33 React and 5 PostgreSQL tests; bounded cohort audit verified 262/262 nonblank single-row parcel-year keys. Runtime commit 240f5ce passed all eight workflows (fictional PostgreSQL HTTP, owner isolation, concurrency/restart, React and separate PostgreSQL revision import). Consolidation f7e0d96 verified same-runtime fictional build activation/rollback, mixed-build shortlist, revised PostgreSQL map and connection recovery. PI fac1c3d verified 34 React, seven PostgreSQL runtime and seven offline identity scenarios; 2025 holdout blocked by insufficient subjects. See [recruiter walkthrough](docs/product/RECRUITER_WALKTHROUGH_V1.md). FA 4d5e7d4 verified rich V3, offline HTTPS persisted sessions and browser writes, four-view automated accessibility and npm production dependency checks. Count-only source diagnostic did not resolve holdout eligibility. FR qualification 0381780 passed all eight workflows, identified exact-year parser defect and recovered 59 later eligible subjects in a diagnostic-only experiment. Subsequently [3bd6232](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3bd623262da29b56b74a2af1272a4870e7c25767) corrected canonical parsing and the [fixed chronological holdout](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45368763925) completed on 59 later subjects; current matcher beats township paired MAE, 1 km not better. No matching policy, valuation or real-data publication approved. Real-data integration [91d8872](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/91d8872342b10ba673c067a83d6fe6f1b0177871) verified inactive source-shaped PostgreSQL importer, private redacted address/matcher review and authenticated V4 fictional intake-to-React replay, with unavailable map abstention. **87.1%** is the current owner-authorised weighted planning estimate, not measured code completion or production readiness. All full phase exit gates remain open. See [current checkpoint](docs/CHECKPOINT.md) and [roadmap](docs/P_PHASE_ROADMAP.md). No release or real data display approved.
+A buyer-facing historical comparable-sales investigation and shortlist workspace: **Investigate / Compare / Decide**. Not a listings marketplace, appraisal or trained price-prediction model. Asking price is user-reported, distinct from recorded sales.
 
-House Price Intelligence aims to help a prospective homebuyer examine historical completed sales, understand why properties are comparable, and save and compare a shortlist. It is an original Investigate / Compare / Decide workspace, not a copied property listings marketplace; the supported geography should be selected by verified data quality and rights, not nationality. Any asking price will be user-reported, not presented as a verified listing. **No current-market appraisal, trained price model, production API/database, approved public-data frontend or deployed service exists.** A local, invented-data HTTP/SQLite/browser investigation slice is included for engineering review.
+**Status reviewed 25 November 2026:** `development` contains the integrated fictional React/SQLite buyer journey (PRs #5 and #6; React PR #8), tested PostgreSQL HTTP and historical-reader preparation. Latest verified source [8e85c84](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8e85c848c66f5c540e3730f8e93d87011d39ffcd) passed all ten workflows. Neon administrative access and an empty PostgreSQL development database are verified; direct application connectivity and real-data storage are not. **87.1%** is the approved weighted MVP planning estimate, not measured completion. All full phase gates remain open. See [current checkpoint](docs/CHECKPOINT.md) for live status and [roadmap](docs/P_PHASE_ROADMAP.md) for acceptance requirements. No public data display, valuation or deployment approved.
 
-## Verified evidence, not product claims
+## Historical research evidence, not product claims
 
 The historical research pilot uses Cook County township 17 (Evanston, Illinois), 2022–2024 recorded sales and a Class 203 one-story residence segment.
 
@@ -26,32 +26,19 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 
 | Document | Role |
 | --- | --- |
-| [Documentation index](docs/DOCUMENTATION_INDEX.md) | Which document to trust; current versus historical material |
-| [Current checkpoint](docs/CHECKPOINT.md) | Verified status, blockers and next engineering task |
-| [Master continuation prompt](docs/MASTER_CONTINUATION_PROMPT.md) | Reusable instructions for resuming this project in a new session |
-| [P0–P8 roadmap](docs/P_PHASE_ROADMAP.md) | Phase acceptance gates, weights and progress rules |
-| [Roadmap summary](docs/ROADMAP.md) | Concise percentage table |
-| [Decisions and open questions](docs/DECISIONS.md) | Agreed direction versus pending approval |
-| [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer journey and functional acceptance |
-| [UX research and product direction](docs/design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | Exploratory screen hierarchy and visual concepts; **not approved UI** |
-| [Visual Foundation V1 proposal](docs/design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | Proposed professional visual foundation and open frontend stack choices; no redesign authorised |
-| [Professional UI and mapping research](docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) | Map renderer, geometry integrity, tile rights/CSP/cost, premium interface risks and test gates |
-| [P6 shortlist contract](docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | Integrated fictional-only shortlist, notes and side-by-side comparison; phase acceptance pending |
-| [Engineering contract](docs/engineering/ENGINEERING_CONTRACT.md) | Data and application correctness |
-| [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step feature lifecycle, risk-based tests, safe large changes and phase-governed integration |
-| [Cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) | Permanent `development`, stable `main`, automated versus manual acceptance and controlled milestone merges |
-| [Cloud-first documentation audit](docs/reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md) | Dated audit of the new operating model; not a second checkpoint |
-| [P3 application contract](docs/engineering/P3_APPLICATION_CONTRACT.md) | Current synthetic-only investigation and API boundary; acceptance still pending |
-| [Source register](docs/research/SOURCE_REGISTER.md) | Publisher IDs, provenance and reuse checks |
-| [Earlier continuity/directive audit](docs/reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | Historical risk review, partially superseded by later integration and mapping research |
-| [Earlier process audit](docs/reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Dated engineering directive adoption and prior status review |
-| [Previous documentation audit](docs/reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | Retained historical cleanup findings |
-
-The repository also retains the original [pinnacle vision](docs/product/PINNACLE_VISION.md), [data-feasibility research](docs/research/DATA_FEASIBILITY.md) and [migration history](docs/MIGRATION_MANIFEST.md). The older Phase 0–2 **audit experiment names are distinct from the overall P0–P8 delivery stages**.
+| [Current checkpoint](docs/CHECKPOINT.md) | Single current engineering handoff, CI and next task |
+| [Master continuation prompt](docs/MASTER_CONTINUATION_PROMPT.md) | Standing engineering autonomy and cross-session workflow |
+| [Documentation index](docs/DOCUMENTATION_INDEX.md) | Canonical navigation, historical evidence and contracts |
+| [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md) | Acceptance gates and weights |
+| [Decisions](docs/DECISIONS.md) | Approved scope and open boundaries |
+| [Neon integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md) | Active cloud database workstream |
+| [Private beta](docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional real-data scope |
+| [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer workflow |
+| [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step lifecycle and Definition of Done |
 
 ## Run and development workflows
 
-**Owner-approved two-branch cloud-first execution (23 November 2026):** Implement approved work on permanent `development`; reserve `main` for owner-reviewed integration milestones. GitHub Actions verifies each exact commit; it does not write source independently. Keep one draft integration PR rather than a new feature branch per minor change, and use Windows only when necessary for real UX/platform acceptance. See [cloud-first operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) and [current test evidence](docs/CHECKPOINT.md); do not copy fixed CI counts into a second live handoff. `main` branch protection remains unconfigured.
+**Cloud-first execution and standing autonomy (25 November 2026):** Implement approved work on permanent `development`; reserve `main` for owner-reviewed integration milestones. GitHub Actions verifies each exact commit; it does not write source independently. Keep one draft integration PR rather than a new feature branch per minor change, and use Windows only when necessary for real UX/platform acceptance. See [cloud-first operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) and [current test evidence](docs/CHECKPOINT.md); do not copy fixed CI counts into a second live handoff. See the checkpoint for observed branch configuration. Neon administration uses the connected integration, not passwords in source or chat.
 
 **Routine audits are cloud-first.** The [GitHub Actions data-audit workflow](.github/workflows/data-audit.yml) runs the three research phases and uploads aggregate, privacy-conscious summaries; [operating instructions](docs/AUTOMATED_DATA_AUDIT.md). The [offline application CI workflow](.github/workflows/audit-tests.yml) checks research and synthetic application tests, JavaScript, docs and genuine Chromium against the fixture-only local API on `development` and `main` pushes and PRs targeting `main`. Costly real-data audits remain separately restricted.
 
@@ -61,13 +48,10 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 ## Scope and next milestone
 
-**Bounded flagship:** One supported geography and property class, user-entered property enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
+**Bounded flagship:** One supported geography and property class, user-entered enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Latest:** [Production Data Activation Preparation V1](docs/engineering/PRODUCTION_DATA_ACTIVATION_V1.md) verified migration, sealed private reader and offline bounded collection at [2310a2e](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2310a2e519b3a55d5ba167b1ab7ea58fcce0ee59); actual real extraction, public display and deployment remain separate. **Latest verified:** [Private Real-Data Integration Rehearsal V1](docs/engineering/PRIVATE_REAL_REHEARSAL_V1.md), [live run 45375702613](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45375702613): 142 actual eligible sales stored, 137 parcel-year keys, 59/59 2025 restricted-reader and address-token reviews, canonical matcher parity, disposable DB removed. Single extraction consumed. **Next:** buyer evidence release contract and controlled activation preparation; no new extraction or real display without separate approval. Stable `main` requires owner merge approval.
+**Next:** Qualify the canonical schema and restricted roles on Neon development, then verify application connectivity, persistent invented-data acceptance and storage/data-use protections. The prior private live rehearsal is historical; the new conditional extraction allowance is unused and cannot be exercised before the protected-storage and permitted-use gate. See [checkpoint](docs/CHECKPOINT.md).
 
-**Conditional only:** Price prediction requires independent, chronology-respecting evaluation with defensible uncertainty; do not add a model merely to advertise AI. Live listing search, real-time valuations, mortgages, alerts and multi-market expansion are outside the first MVP.
+**Conditional only:** Price prediction requires independent chronological evaluation and defensible uncertainty. Live listings, real-time valuations, mortgages, alerts and multi-market expansion are outside this MVP.
 
-The [SA Tech Graduate Playbook](https://github.com/Sonkhe-Shongwe/sa-tech-grad-playbook.) is a separate, preserved source of graduate recruitment research. This repository is the standalone software project.
-
-
-**Latest runtime preparation:** Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction. [Controlled activation decision register](docs/engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). No actual deployment or public real-data release.
+Earlier project status and run details remain in the [25 November pre-audit README snapshot](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/8e85c848c66f5c540e3730f8e93d87011d39ffcd/README.md) and the dated evidence linked in the [documentation index](docs/DOCUMENTATION_INDEX.md).

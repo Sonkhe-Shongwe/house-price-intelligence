@@ -1,6 +1,6 @@
 # Documentation index and source-of-truth rules
 
-**Reviewed:** 23 November 2026. **Purpose:** Reduce documentation drift across research experiments, P0–P8 delivery planning and application implementation.
+**Reviewed:** 25 November 2026. **Purpose:** Reduce documentation drift across research experiments, P0–P8 delivery planning and application implementation.
 
 ## What to read first
 
@@ -8,7 +8,9 @@
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
-| Inspect latest documentation cleanup | [Post-P6 documentation reconciliation audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) | **Dated audit**, current-source corrections, unchanged phase scores, unresolved mapping and release gates; not another current checkpoint |
+| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 25 November reconciliation; older [Post-P6 audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) remains historical |
+| Active database workstream | [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) | Admin access verified; application connectivity and protected storage open |
+| Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional extraction unused; no deployment or real buyer route |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 87.1% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
@@ -35,9 +37,9 @@
 | See earlier cleanup | [22 Nov documentation audit](reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | **Retained historical audit** |
 | Review old scope/origins | [Pinnacle vision](product/PINNACLE_VISION.md), [Migration manifest](MIGRATION_MANIFEST.md), [archived roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) | **Historical/reference**, not current status |
 
-**Current RD1–RD7 contract:** [Real Data Integration Readiness V1](engineering/REAL_DATA_READINESS_V1.md), bounded cohort audit and synthetic-only ingestion/guard.
+**Earlier RD1–RD7 contract:** [Real Data Integration Readiness V1](engineering/REAL_DATA_READINESS_V1.md), bounded cohort audit and synthetic-only ingestion/guard.
 
-**Current runtime contract:** [Production Runtime Integration V1](engineering/PRODUCTION_RUNTIME_V1.md), fictional accounts, PostgreSQL HTTP and revision candidate.
+**Earlier runtime contract:** [Production Runtime Integration V1](engineering/PRODUCTION_RUNTIME_V1.md), fictional accounts, PostgreSQL HTTP and revision candidate.
 
 **Consolidation contract:** [Production Consolidation V1](engineering/PRODUCTION_CONSOLIDATION_V1.md).
 
@@ -63,18 +65,6 @@
 
 ## Active engineering handoff
 
-**Canonical snapshot:** [CHECKPOINT.md](CHECKPOINT.md), with exact `development` SHA and verified CI. Use [DECISIONS.md](DECISIONS.md) for owner-approved versus blocked choices and the [80-package P0–P8 roadmap](P_PHASE_ROADMAP.md) for individual acceptance tests. Do not use dated review reports as the current action list.
+Use [CHECKPOINT.md](CHECKPOINT.md) as the only current state/next-task ledger; [DECISIONS.md](DECISIONS.md) for authority and [P_PHASE_ROADMAP.md](P_PHASE_ROADMAP.md) for phase gates. [Master prompt](MASTER_CONTINUATION_PROMPT.md) and [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) define standing autonomy, one permanent development branch and stable main. Earlier design and engineering contracts describe their dated scope, not the latest project status.
 
-**Working method:** The single permanent `development` branch receives authorised code/docs and hosted checks. Stable `main` receives milestone changes only through explicitly approved integration PRs. [Workflow](engineering/CLOUD_FIRST_WORKFLOW.md). No routine direct-to-main commits.
-
-**Current capability boundary:** Synthetic local React workspace, history, address choice, frozen evidence, virtual MapLibre display and restart-safe SQLite shortlist are integrated. PostgreSQL candidate service parity, dump/restore and RLS tests passed. No approved real address resolver, real display, integrated production access or deployment; all full phase gates remain open. See [checkpoint](CHECKPOINT.md), [workspace](engineering/BUYER_WORKSPACE_UX_V1.md) and [production readiness](engineering/PRODUCTION_READINESS_V1.md).
-
-**Phase scores:** P3 **96%**, weighted MVP **87.1%**, owner-authorised partial-deliverable reassessment; future evidence-backed milestone reviews update the same roadmap. Earlier 23 November test counts and staged commits are retained in Git history, [dated audits](reviews/) and [checkpoint references](CHECKPOINT.md), not duplicated as multiple competing current handoffs.
-
-Current active workstream: [Real-Data Integration V1](engineering/REAL_DATA_INTEGRATION_V1.md).
-
-Current verified workstream: [Production Data Activation Preparation V1](engineering/PRODUCTION_DATA_ACTIVATION_V1.md). Private bounded real rehearsal requires separate execution approval; no actual data acquired in this milestone.
-
-Latest verified workstream: [Private Real-Data Integration Rehearsal V1](engineering/PRIVATE_REAL_REHEARSAL_V1.md). Live run 45375702613 passed; one-time extraction consumed, aggregate-only evidence. Next: release contract and controlled activation preparation.
-
-Latest activation handoff: [Controlled Product Activation Preparation V1](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md). Real-source collection approval consumed; separate private beta and public release decisions.
+Active: [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) within [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md). Verified administrative access and empty development database do not mean application connectivity or protected real storage. P4 95%, P7 83%, P8 35%; **87.1%** weighted, all gates open. For exact source, runs and scope, consult the checkpoint. Previous index preserved [at the pre-audit commit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/8e85c848c66f5c540e3730f8e93d87011d39ffcd/docs/DOCUMENTATION_INDEX.md).

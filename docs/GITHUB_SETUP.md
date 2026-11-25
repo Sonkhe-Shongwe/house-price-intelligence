@@ -1,8 +1,10 @@
 # GitHub repository setup and two-branch workflow
 
-**Current operating method:** 23 November 2026. The [repository](https://github.com/Sonkhe-Shongwe/house-price-intelligence) exists. Do not create a second repository or re-upload historical ZIPs. The [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) is authoritative for approvals and milestone merges.
+**Current operating method:** 25 November 2026 (two-branch adoption 23 November). The [repository](https://github.com/Sonkhe-Shongwe/house-price-intelligence) exists. Do not create a second repository or re-upload historical ZIPs. The [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) is authoritative for approvals and milestone merges.
 
 ## Branch responsibilities
+
+Standing authority delegates ordinary scoped source changes and verification; use connected GitHub tools and Neon administrative access before asking for manual Windows operations. Direct application credentials and protected storage remain separate from the administrative integration.
 
 - **`development`:** Permanent working branch. Approved source, tests and documentation updates go here and trigger the offline GitHub Actions application/Chromium suite.
 - **`main`:** Stable owner-reviewed integration branch. Changes arrive from `development` through a milestone pull request, after explicit approval and passing checks. Do not commit routine changes directly to `main`.

@@ -2,6 +2,8 @@
 
 **Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
+**25 November operational reconciliation:** P4/P7 Neon cloud integration is active. Administrative access and empty development DB verified; canonical/historical restricted-reader preparation passed disposable CI. Application-to-cloud connectivity, real-data protection and release acceptance remain open. See [checkpoint](CHECKPOINT.md). The dated milestones below are historical evidence; no weights, estimates or gate dispositions changed.
+
 ## Origin and scope
 
 This is an **adaptation of the PilotODIN complexity-last P0–P8 process**, not a claim that PilotODIN's original feature-specific P0–P8 acceptance cases apply unchanged. Source reference: `PilotODIN_1.0_Master_Status_Roadmap_and_Continuity_2026-10-24.docx`, section "5. Complexity-last implementation roadmap". The original PilotODIN framework required verifiable local acceptance at each stage, robust deterministic foundations before advanced intelligence, and complex release packaging last.

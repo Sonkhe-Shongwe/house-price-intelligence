@@ -1,6 +1,6 @@
 # Backend: synthetic-only investigation service
 
-**Current candidate: 23 November 2026.** Python standard library, SQLite, WSGI, HTML/CSS/JS. This is a local fictional-data investigation prototype, **not** a production API, an authorised public property database or an appraisal.
+**Local fixture runtime:** Python, SQLite and WSGI, with legacy and React frontends. The separately tested PostgreSQL runtime and historical reader remain development-only. This is a local fictional-data investigation prototype, **not** a production API, an authorised public property database or an appraisal.
 
 - `investigation_contract.py`: validates buyer-entered enquiry fields and four evidence statuses; buyer asking price is user reported.
 - `synthetic_investigation_store.py`: server-bound fictional address selection, curated source joins, exact sale-price strings from integer cents, saved results and tamper-checked reopening.
@@ -21,6 +21,10 @@ python tools/dev_check.py --focus app
 Open http://127.0.0.1:8765/ locally. By default nothing is persisted after process shutdown; explicit `--fixture-db` mode persists fictional investigations, shortlists and notes across restarts. The service must not be deployed or given real publisher records. Automated tests run in GitHub Actions on the permanent `development` branch. Fixture migrations are an engineering candidate, not the accepted production backup/restore, source-ingestion or user-identity plan.
 
 See the [P3 candidate contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md), [P6 shortlist contract](../docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [current checkpoint](../docs/CHECKPOINT.md), and [engineering guardrails](../docs/engineering/ENGINEERING_CONTRACT.md).
+
+## PostgreSQL development preparation
+
+The disposable PostgreSQL 17 runtime and historical reader are CI-verified; Neon administrative read-only access is verified, but direct application connectivity and real-data activation are not. See [current checkpoint](../docs/CHECKPOINT.md) and [Neon integration](../docs/engineering/NEON_CLOUD_INTEGRATION_V1.md). Do not change the loopback-only fixture guards to connect a real database; use the reviewed cloud integration path.
 
 ## Optional durable fictional investigations (development only)
 

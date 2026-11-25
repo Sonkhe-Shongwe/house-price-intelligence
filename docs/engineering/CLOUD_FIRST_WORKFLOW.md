@@ -5,6 +5,8 @@
 
 ## Authoritative working arrangement
 
+- **Connected Neon administration:** Use the authenticated integration for non-destructive development-only inspection and scoped database preparation. Never substitute a public repository for a secret store, retrieve elevated credentials unnecessarily, or confuse administrative access with direct application runtime connectivity. See [Neon contract](NEON_CLOUD_INTEGRATION_V1.md).
+
 - **One GitHub repository:** [house-price-intelligence](https://github.com/Sonkhe-Shongwe/house-price-intelligence). No competing source checkouts, numbered review ZIPs or parallel status ledgers.
 - **`development` is our single continuing working branch.** Build approved application features, fixes, tests and documentation on it. Do **not** create another feature branch for each task. Additional branches require a demonstrated reason, such as an urgent release hotfix, incompatible experiment or concurrent risky migration, and explicit approval.
 - **`main` is the stable integrated branch.** Keep the last tested and owner-accepted milestone here. Never use `main` for routine incremental development.
@@ -26,7 +28,7 @@ Routine engineering within the approved scope is delegated: independently select
 
 The development branch is not a staging copy of real property datasets or a public deployment. No real property-level source records, owner/seller names, credentials or secrets may enter commits or CI logs.
 
-## Test responsibility and current verified baseline
+## Test responsibility and historical two-branch adoption baseline
 
 | Evidence or test | Default location | Verified status at two-branch adoption |
 | --- | --- | --- |
@@ -47,6 +49,6 @@ The [offline CI workflow](../../.github/workflows/audit-tests.yml) runs on `main
 - **Evidence:** Mark changes as proposed, implemented, verified, integrated, accepted or released. A green CI run does not automatically accept a product feature.
 - **Earlier Windows patches:** The original isolated 127-test safety patch and address-search candidates are historical inputs. Some safeguards were independently implemented on GitHub; do not assume every original local change is merged. Obtain their exact source diff before incorporating any unmerged element; preserve all local files.
 - **Release control:** The repository's `main` protection was not enabled at adoption. Required branch rules remain a separately reviewed configuration decision. Until then, use the documented PR + explicit approval discipline.
-- **Progress baseline:** P3 **10%**, weighted MVP **22.8%**, exit gate open. This is a subjective milestone estimate and stays unchanged for workflow-only work.
+- **Progress baseline:** 22.8% was historical at adoption. The current owner-approved estimate is 87.1%; consult [roadmap](../P_PHASE_ROADMAP.md) and [checkpoint](../CHECKPOINT.md), not historical workflow test counts. Workflow-only changes do not award phase credit.
 
 **Operating principle:** One working branch, automated cloud verification, one stable integration branch, milestone approvals rather than a PR for each small step.
