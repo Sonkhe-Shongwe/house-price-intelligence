@@ -54,7 +54,7 @@ class IdentityHttpTests(unittest.TestCase):
         response.headers=Message()
         response.headers["Content-Type"]="application/json"
         response.read.return_value=json.dumps({"id_token":token}).encode()
-        return dict(QUERY_STRING=urlencode({"state":q["state"][0],"code":"fictional-code"}),
+        return dict(QUERY_STRING=urlencode({"code":"fictional-code","state":q["state"][0],"iss":ISS}),
             HTTP_COOKIE=cookie,HTTP_SEC_FETCH_SITE="cross-site",
             HTTP_SEC_FETCH_MODE="navigate",HTTP_SEC_FETCH_DEST="document")
 
@@ -133,3 +133,26 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertEqual(status,"401 Unauthorized")
         self.assertEqual(json.loads(body),{"error":"identity_rejected"})
         self.assertEqual(self.diagnostics,["subject_allowlist"])
+
+    def test_callback_issuer_and_parameter_validation_before_exchange(self):
+        params=self.begin()
+        query=params["QUERY_STRING"]
+        values={k:v[0] for k,v in parse_qs(query).items()}
+        for bad,category in (
+            (urlencode(dict(values,iss="https://other.invalid/")),"callback_issuer"),
+            (urlencode(dict(values,iss=ISS.rstrip("/"))),"callback_issuer"),
+            (urlencode({k:v for k,v in values.items() if k!="iss"}),"callback_parameters"),
+            (urlencode(dict(values,iss="")),"callback_parameters"),
+            (urlencode(dict(values,code="")),"callback_parameters"),
+            (query+"&iss="+ISS,"callback_parameters"),
+            (query+"&unexpected=x","callback_parameters"),
+            ("malformed&"+query,"callback_parameters"),
+        ):
+            with self.subTest(category=category):
+                status,_,body=self.request("/auth/callback",**dict(params,QUERY_STRING=bad))
+                self.assertEqual(status,"401 Unauthorized")
+                self.assertEqual(json.loads(body),{"error":"identity_rejected"})
+                self.assertEqual(self.diagnostics[-1],category)
+                self.opener.open.assert_not_called()
+        self.assertEqual(self.request("/auth/callback",**params)[0],"303 See Other")
+        self.opener.open.assert_called_once()

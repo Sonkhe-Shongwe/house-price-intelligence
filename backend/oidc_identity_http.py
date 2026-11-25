@@ -83,9 +83,17 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
                     f"{BINDING}={bind}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=300",))
             if callback:
                 if len(query)>4096:raise AuthDenied("Callback rejected",category="callback_parameters")
-                args=parse_qs(query,keep_blank_values=True,strict_parsing=True,max_num_fields=2)
-                if set(args)!={"state","code"} or any(len(v)!=1 for v in args.values()):
+                try:
+                    args=parse_qs(query,keep_blank_values=True,strict_parsing=True,max_num_fields=3,
+                        errors="strict")
+                except ValueError:
+                    raise AuthDenied("Callback rejected",category="callback_parameters") from None
+                if set(args)!={"state","code","iss"} or any(len(v)!=1 or not v[0] for v in args.values()):
                     raise AuthDenied("Callback rejected",category="callback_parameters")
+                # RFC 9207: exact issuer comparison before any token exchange.
+                # The callback cannot select an endpoint or change the pinned issuer.
+                if args["iss"][0]!=boundary.issuer:
+                    raise AuthDenied("Callback rejected",category="callback_issuer")
                 result=boundary.finish(state=args["state"][0],browser_binding=_binding(cookie),
                     code=args["code"][0],exchange=exchange)
                 return _reply(start,"303 See Other",location="/",cookies=(result["cookie"],
@@ -99,7 +107,7 @@ def identity_only_application(boundary,exchange,*,diagnostic=lambda category: No
         except (AuthDenied,ValueError) as exc:
             if callback:
                 category=getattr(exc,"category",None)
-                allowed={"browser_binding","callback_parameters","callback_state_binding",
+                allowed={"browser_binding","callback_parameters","callback_issuer","callback_state_binding",
                     "token_exchange","token_format","token_header","signing_key","token_lifetime",
                     "token_nonce","token_audience","token_issuer","token_signature","token_claims",
                     "subject_allowlist"}
