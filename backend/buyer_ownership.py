@@ -37,10 +37,10 @@ def _prepare_empty_buyer_schema(conn):
         _verify_staged_buyer(conn)
 
 
-def _verify_staged_buyer(conn):
-    """Effective permissions on the dedicated buyer writer; no historical-source reads."""
+def _verify_buyer_privileges(conn, *, login):
+    """Effective permissions shared by staged verification and restricted fixture login."""
     flags=conn.execute("SELECT rolcanlogin,rolsuper,rolcreatedb,rolcreaterole,rolinherit,rolbypassrls,rolreplication FROM pg_roles WHERE rolname=%s",(ROLE,)).fetchone()
-    if flags!=(False,False,False,False,False,False,False):
+    if flags!=(login,False,False,False,False,False,False):
         raise ImportRefused("Buyer role flags drift")
     if conn.execute("SELECT EXISTS(SELECT 1 FROM pg_auth_members WHERE member=(SELECT oid FROM pg_roles WHERE rolname=%s))",(ROLE,)).fetchone()[0]:
         raise ImportRefused("Buyer role membership drift")
@@ -90,5 +90,10 @@ def _verify_staged_buyer(conn):
         if (name!=POLICIES[table] or permissive!="PERMISSIVE" or roles!="{public}" or cmd!="ALL"
             or check is not None or compact_sql(qual)!=compact_sql(expected_qual(table))):
             raise ImportRefused("Buyer policy definition drift")
+
+
+
+def _verify_staged_buyer(conn):
+    _verify_buyer_privileges(conn, login=False)
     if conn.execute("SELECT version,script_sha256 FROM hpi_candidate.buyer_ownership_migrations ORDER BY version").fetchall()!=[(1,sha256(SCRIPT.read_bytes()).hexdigest())]:
         raise ImportRefused("Buyer ownership checksum drift")

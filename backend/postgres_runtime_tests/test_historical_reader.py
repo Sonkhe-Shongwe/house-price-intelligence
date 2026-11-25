@@ -12,6 +12,10 @@ from backend.historical_postgres import _evaluate_verified
 from backend.historical_beta_projection import project_rehearsal
 from backend.curated_ingestion_candidate import ImportRefused
 from test_historical_import import population
+from backend.buyer_ownership import ROLE as BUYER, _prepare_empty_buyer_schema
+from backend.private_beta_rehearsal import PrivateBetaRehearsal
+from backend.oidc_boundary import OidcBoundary, AuthDenied
+from psycopg import sql
 
 ADMIN=os.environ["HPI_PG_DSN"]
 
@@ -108,3 +112,54 @@ class HistoricalReaderTests(unittest.TestCase):
             finally:
                 admin.execute("DROP DATABASE hpi_ingest_fixture")
                 admin.execute("DROP ROLE IF EXISTS "+ROLE)
+
+    def test_split_role_authenticated_save_and_reopen(self):
+        with psycopg.connect(ADMIN,autocommit=True) as admin:
+            self.assertEqual((admin.info.host,admin.info.dbname,admin.info.user),("127.0.0.1","hpi_fixture","postgres"))
+            admin.execute("CREATE DATABASE hpi_ingest_fixture")
+            try:
+                with psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",autocommit=True) as conn:
+                    initialise(conn)
+                    migrate_historical(conn)
+                    args=population()
+                    import_historical(conn,**args)
+                    seal=seal_historical(conn,**args)
+                    rp,bp=secrets.token_urlsafe(32),secrets.token_urlsafe(32)
+                    provision_reader(conn,rp)
+                    _prepare_empty_buyer_schema(conn)
+                    conn.execute("INSERT INTO hpi_candidate.workspace_owners VALUES ('fixture-owner-a'),('fixture-owner-b')")
+                    # A real restricted login is used only in the disposable DB.
+                    conn.execute(sql.SQL("ALTER ROLE {} LOGIN PASSWORD {}").format(sql.Identifier(BUYER),sql.Literal(bp)))
+                    boundary=OidcBoundary(issuer="https://issuer.invalid",client_id="fixture",authorize_endpoint="https://issuer.invalid/authorize",redirect_uri="https://127.0.0.1:8766/auth/callback",public_keys={"fixture":"not-used-in-session-rehearsal"},owner_map={"a":"fixture-owner-a","b":"fixture-owner-b"})
+                    a=boundary._issue_session("fixture-owner-a")
+                    b=boundary._issue_session("fixture-owner-b")
+                    with psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=ROLE,password=rp,autocommit=True) as rd, psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=BUYER,password=bp,autocommit=True) as wr:
+                        svc=PrivateBetaRehearsal(rd,wr,seal,boundary)
+                        match=PrivateHistoricalReader(rd,seal).search("1 fictional court","2025-04-01")
+                        req={"township_code":"17","class_code":"203","analysis_date":"2025-04-01","subject":{"address_id":match["address_id"],"building_area_sqft":1600}}
+                        with self.assertRaises(AuthDenied):
+                            svc.create(req,cookie=a["cookie"],origin=boundary.origin,csrf=b["csrf"])
+                        with self.assertRaises(ImportRefused):
+                            svc.create(dict(req,subject=dict(req["subject"],pin="00000000000001")),cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"])
+                        saved=svc.create(req,cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"])
+                        iid=saved["investigation_id"]
+                        self.assertEqual([s["sale_price_usd"] for s in saved["sales"]],["525000.01"]*3)
+                        self.assertEqual(svc.reopen(iid,cookie=a["cookie"]),saved)
+                        self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
+                        with self.assertRaises(ImportRefused):
+                            svc.reopen(iid,cookie=b["cookie"])
+                        with self.assertRaises(AuthDenied):
+                            svc.reopen(iid,cookie="")
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],1)
+                        self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.comparable_evidence").fetchone()[0],3)
+                        for forbidden in ("FICT-","00000000000001","relational_sha256","address_id"):
+                            self.assertNotIn(forbidden,str(saved))
+                        with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                            wr.execute("SELECT * FROM hpi_candidate.sale_transactions")
+                        conn.execute("UPDATE hpi_candidate.comparable_evidence SET sale_price_usd_cents=sale_price_usd_cents+1 WHERE investigation_id=%s AND rank=1",(iid,))
+                        with self.assertRaisesRegex(ImportRefused,"Saved evidence mismatch"):
+                            svc.reopen(iid,cookie=a["cookie"])
+            finally:
+                admin.execute("DROP DATABASE hpi_ingest_fixture")
+                for role in (BUYER,ROLE):
+                    admin.execute(sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(role)))
