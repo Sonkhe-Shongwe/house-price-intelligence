@@ -40,6 +40,18 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Run P3 fixture-only application tests
         run: python -m unittest discover -s backend/tests -v
+      - name: Qualify disposable basemap filesystem and process limits (invented files only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d "${RUNNER_TEMP}/hpi-basemap-limits.XXXXXX")"
+          cleanup() {
+            if mountpoint -q "$work"; then sudo umount "$work"; fi
+            rmdir "$work"
+          }
+          trap cleanup EXIT
+          sudo mount -t tmpfs -o "size=128m,nr_inodes=4096,uid=$(id -u),gid=$(id -g),mode=0700,nosuid,nodev" tmpfs "$work"
+          timeout --signal=TERM --kill-after=5s 60s python -m tools.qualify_basemap_limits "$work"
       - name: Verify actual browser JavaScript syntax
         run: node --check frontend/app.js
       - name: Validate documentation links and phase percentages
