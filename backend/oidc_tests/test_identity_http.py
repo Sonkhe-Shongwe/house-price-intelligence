@@ -118,6 +118,26 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertIn(b"Sign in",self.request(HTTP_COOKIE=cookie)[2])
         self.assertEqual(submit()[0],"401 Unauthorized")
 
+    def test_landing_styles_are_hash_pinned_and_identity_only(self):
+        from base64 import b64encode
+        from hashlib import sha256
+        status,headers,body=self.request()
+        self.assertEqual(status,"200 OK")
+        css=re.search(rb"<style>(.*?)</style>",body,re.S).group(1)
+        csp=dict(headers)["Content-Security-Policy"]
+        expected="'sha256-"+b64encode(sha256(css).digest()).decode()+"'"
+        self.assertIn("style-src "+expected,csp)
+        self.assertNotIn("unsafe-inline",csp)
+        self.assertNotIn("script-src",csp)
+        self.assertNotIn("connect-src",csp)
+        self.assertNotIn(b"<script",body)
+        self.assertNotIn(b"Open buyer workspace",body)
+        self.assertIn(b'<form method="post" action="/auth/start">',body)
+        self.assertIn(b'HPI identity qualification',body)
+        _,headers,_=self.request("/auth/session")
+        self.assertNotIn("style-src",dict(headers)["Content-Security-Policy"])
+        self.opener.open.assert_not_called()
+
     def test_callback_binding_and_navigation_required(self):
         params=self.begin()
         self.assertEqual(self.request("/auth/callback",**dict(params,HTTP_SEC_FETCH_DEST="iframe"))[0],"403 Forbidden")

@@ -10,6 +10,7 @@ from backend.oidc_boundary import AuthDenied,random_token,valid_token
 from backend.oidc_provider_config import CALLBACK,ISSUER
 from backend.oidc_exchange import ConfidentialCodeExchange
 from backend.persistent_oidc import PersistentBoundary
+from backend.oidc_landing import render_landing,STYLE_SOURCE
 
 ORIGIN="https://127.0.0.1:8766"
 BINDING="__Host-hpi_login"
@@ -35,7 +36,7 @@ def _reply(start,status,value=None,*,cookies=(),location=None,html=None,form_iss
     headers=[("Content-Type",content_type),("Content-Length",str(len(body))),
         ("Cache-Control","no-store"),("Referrer-Policy","same-origin" if html is not None else "no-referrer"),
         ("X-Content-Type-Options","nosniff"),
-        ("Content-Security-Policy","default-src 'none'; form-action 'self'"+(" "+form_issuer.rstrip("/") if form_issuer else "")+"; frame-ancestors 'none'; base-uri 'none'")]
+        ("Content-Security-Policy","default-src 'none'; form-action 'self'"+(" "+form_issuer.rstrip("/") if form_issuer else "")+"; frame-ancestors 'none'; base-uri 'none'"+("; style-src "+STYLE_SOURCE if html is not None else ""))]
     if location:headers.append(("Location",location))
     headers.extend(("Set-Cookie",cookie) for cookie in cookies)
     start(status,headers)
@@ -98,16 +99,10 @@ def _application(boundary,exchange,*,diagnostic,buyer=None):
                 try:
                     csrf=boundary.csrf_for_session(cookie)
                     if not valid_token(csrf):raise AuthDenied("Session rejected")
-                    heading=('<h1>Identity verified</h1><p>Local identity qualification only. No property data.</p>'
-                        if buyer is None else '<h1>Identity verified</h1><p>Private invented-data buyer workspace.</p>'
-                        '<p><a href="/private-beta-rehearsal">Open buyer workspace</a></p>')
-                    body=(heading+
-                          '<form method="post" action="/auth/logout">'
-                          f'<input type="hidden" name="csrf" value="{csrf}">'
-                          '<button>Sign out</button></form>')
+                    body=render_landing(buyer=buyer is not None,csrf=csrf)
                 except AuthDenied:
-                    body='<h1>HPI identity qualification</h1><form method="post" action="/auth/start"><button>Sign in</button></form>'
-                return _reply(start,"200 OK",html="<!doctype html><html><meta charset=utf-8><title>HPI identity qualification</title>"+body+"</html>",form_issuer=boundary.issuer)
+                    body=render_landing(buyer=buyer is not None)
+                return _reply(start,"200 OK",html=body,form_issuer=boundary.issuer)
             if method=="POST" and path=="/auth/start" and not query:
                 if origin!=ORIGIN:raise AuthDenied("Login rejected")
                 bind=random_token()

@@ -259,6 +259,43 @@ class HistoricalReaderTests(unittest.TestCase):
             self.assertEqual(status,303)
             cookie=next(v for k,v in headers if k=="Set-Cookie").split(";",1)[0]
             self.assertIn(b"Open buyer workspace",call("/",HTTP_COOKIE=cookie)[2])
+            # Render actual WSGI response and its CSP in Chromium, with no network/provider request.
+            from playwright.sync_api import sync_playwright,expect
+            with sync_playwright() as pw:
+                browser=pw.chromium.launch(headless=True,args=["--no-sandbox"])
+                try:
+                    visual=browser.new_page(viewport={"width":1440,"height":900})
+                    errors=[]
+                    visual.on("pageerror",lambda exc:errors.append(str(exc)))
+                    def render(response):
+                        code,headers,body=response
+                        visual.unroute_all()
+                        visual.route("**/*",lambda route:route.fulfill(status=code,headers=dict(headers),body=body) if route.request.url==ORIGIN+"/" else route.abort())
+                        visual.goto(ORIGIN+"/")
+                        self.assertEqual(visual.locator("body").evaluate("el=>getComputedStyle(el).backgroundColor"),"rgb(245, 242, 233)")
+                    def shot(name):
+                        folder=os.environ.get("HPI_RELEASE_SCREENSHOTS")
+                        if folder:
+                            Path(folder).mkdir(parents=True,exist_ok=True)
+                            visual.screenshot(path=str(Path(folder)/("private-auth-"+name+".png")),full_page=True,animations="disabled")
+                    render(call("/"))
+                    expect(visual.get_by_role("heading",name="Look beyond the asking price.")).to_be_visible()
+                    expect(visual.get_by_role("button",name="Sign in",exact=True)).to_be_visible()
+                    visual.keyboard.press("Tab")
+                    expect(visual.get_by_role("button",name="Sign in",exact=True)).to_be_focused()
+                    shot("signin")
+                    for width in (375,320):
+                        visual.set_viewport_size({"width":width,"height":850})
+                        self.assertTrue(visual.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
+                        shot("signin-"+str(width))
+                    visual.set_viewport_size({"width":1440,"height":900})
+                    render(call("/",HTTP_COOKIE=cookie))
+                    expect(visual.get_by_role("heading",name="Identity verified")).to_be_visible()
+                    expect(visual.get_by_role("link",name="Open buyer workspace")).to_have_attribute("href",page)
+                    expect(visual.get_by_role("button",name="Sign out")).to_be_visible()
+                    shot("verified")
+                    self.assertEqual(errors,[])
+                finally:browser.close()
             self.assertEqual(call(page,HTTP_COOKIE=cookie)[0],200)
             self.assertEqual(call(page,HTTP_COOKIE=cookie,HTTP_SEC_FETCH_SITE="cross-site")[0],403)
             self.assertEqual(call(prefix+"/investigations/"+other_id,HTTP_COOKIE=cookie)[0],404)
