@@ -93,6 +93,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Prototype visual verification:** 87b873a browser run 45726994190 passed 17/17 (including full two-concept journey); actual screenshot artifact downloaded and visually reviewed. 7/7 registered workflows successful; 0 pending. [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) records second-pass refinements and local Chromium focused test of identical HTML blob. New hosted tests pending. Atlas leading recommendation, Terminal retained; owner visual acceptance outstanding. Next review comparison/mobile and design direction, then bounded technology/adapter qualification. No application runtime change, dependencies, cloud access, data or score credit.
 
+**V3 signature screen refinement:** V2 b069987 passed all 7 CI workflows. V3 original recency/area graphics, conditional evidence, map sizing and compact mobile comparison reviewed in local Chromium; identical HTML blob verified. Exact amounts and notes preserved at 320/375px in both themes; no page errors or external requests. [Design study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) records evidence and limits. Hosted checks pending. Next visual review then shared UI/adapter qualification; no final owner theme approval, new dependencies, production changes, real-data work or progress credit.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
