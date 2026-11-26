@@ -111,13 +111,11 @@ def active_handoff_errors(root: Path):
     }
     forbidden = {
         "README.md": ("not a public service or durable shortlist", "Actual provider-to-buyer integration, full protected storage"),
-        "frontend/README.md": ("**The in-memory data disappear on shutdown**", "7 actual Chromium browser journeys"),
-        "docs/ROADMAP.md": ("durable persistence and P6 shortlist/compare remain ahead", "FE1 iconography next"),
+        "frontend/README.md": ("**The in-memory data disappear on shutdown**", "7 actual Chromium browser journeys", "**Not implemented:** trusted address search"),
+        "docs/ROADMAP.md": ("durable persistence and P6 shortlist/compare remain ahead", "FE1 iconography next", "127 patched tests, not committed"),
         "docs/P_PHASE_ROADMAP.md": ("no production database, real-data property API, accepted buyer UI, durable multi-property shortlist or deployment exists",),
         "docs/engineering/P3_APPLICATION_CONTRACT.md": ("The server uses in-memory SQLite: **no restart persistence** and no completed P6 shortlist",),
         "docs/GITHUB_SETUP.md": ("Code changes are committed to `main`", "git pull --ff-only origin main"),
-        "frontend/README.md": ("**Not implemented:** trusted address search",),
-        "docs/ROADMAP.md": ("127 patched tests, not committed",),
         "docs/CHECKPOINT.md": ("the stricter sale-price/sales-snapshot guard remains in a review-only patch",),
         "docs/DOCUMENTATION_INDEX.md": ("start FE1, not earlier prototypes", "Atlas candidate, not owner-approved"),
     }
