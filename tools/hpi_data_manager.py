@@ -1,4 +1,4 @@
-"""Offline HPI data workspace manager. No network, deletion or cloud operations."""
+"""HPI data workspace manager. Offline by default; explicit bounded Treasury intake only. No deletion or cloud operations."""
 import argparse
 import csv
 from datetime import date, timedelta
@@ -1058,8 +1058,11 @@ def audit_registered(root, spec, today=None):
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION}[sid]
-    if sid == "HPI-DATA-006":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION}[sid]
+    if sid == "HPI-DATA-007":
+        if m.get("retention_policy")!=TREASURY_POLICY or m["retention"]!=TREASURY_RETENTION:
+            raise ValueError("Unexpected Treasury retention policy.")
+    elif sid == "HPI-DATA-006":
         if (m.get("retention_policy") != MARKET_POLICY or m["retention"] != MARKET_RETENTION or
                 m.get("visual_page_reviewed_by_owner") is not True):
             raise ValueError("Unexpected market reference policy or visual review.")
@@ -1110,6 +1113,7 @@ def audit_workspace(root):
         ("HPI-DATA-004",BUILD_MANIFEST,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MAX_BYTES,None),
         ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None),
         ("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None),
+        treasury_spec(),
     ]
     results = []
     for spec in specs:
@@ -1661,12 +1665,339 @@ def market_self_test():
 
 
 
+
+# HPI-DATA-007: one approved three-request experiment, never a live application feed.
+TREASURY_HOST = "municipaldata.treasury.gov.za"
+TREASURY_BASE = "/api/cubes/audit_opinions"
+TREASURY_TERMS = "https://municipalmoney.gov.za/terms"
+TREASURY_CAP = 256*1024
+TREASURY_RAW = "02_Raw_Data/HPI-DATA-007_responses.zip"
+TREASURY_MANIFEST = "01_Source_Catalogue/HPI-DATA-007.json"
+TREASURY_OUTPUT = "03_Processed_Data/HPI-DATA-007/audit_opinions.json"
+TREASURY_REPORT = "07_Reports/HPI-DATA-007_quality.json"
+TREASURY_ATTEMPT = "07_Reports/HPI-DATA-007_attempt.json"
+TREASURY_POLICY = "treasury-private-audit-opinions-v1"
+TREASURY_RETENTION = "Private bounded qualification only; source terms and law prevail; no automatic deletion."
+TREASURY_NAMES = {"CPT":"City of Cape Town","JHB":"City of Johannesburg"}
+TREASURY_FIELDS = {"financial_year_end.year","demarcation.code","demarcation.label",
+                   "opinion.code","opinion.label","opinion.report_url"}
+TREASURY_PATHS = {"model":TREASURY_BASE+"/model",
+                  **{code:TREASURY_BASE+"/facts?cut=financial_year_end.year%3A2024%7Cdemarcation.code%3A%22"+code+"%22&pagesize=5"
+                     for code in TREASURY_NAMES}}
+
+def treasury_get(path, connection_factory=None):
+    import http.client
+    import ssl
+    if path not in TREASURY_PATHS.values():
+        raise ValueError("Request outside approved Treasury scope.")
+    factory=connection_factory or http.client.HTTPSConnection
+    conn=factory(TREASURY_HOST,timeout=20,context=ssl.create_default_context())
+    try:
+        # http.client does not follow redirects or retry requests. No proxy, auth,
+        # cookies, report links, compression, or arbitrary host/path accepted.
+        conn.request("GET",path,headers={"Accept":"application/json","Accept-Encoding":"identity","User-Agent":"HPI-bounded-research/1.0","Connection":"close"})
+        response=conn.getresponse()
+        if response.status!=200:
+            raise ValueError("Treasury HTTP status "+str(response.status)+"; no retry.")
+        if (response.getheader("Content-Type","").split(";")[0].strip().lower()!="application/json" or
+                response.getheader("Content-Encoding","identity").lower()!="identity"):
+            raise ValueError("Unexpected Treasury response media type or encoding.")
+        length=response.getheader("Content-Length")
+        if length is not None:
+            n=int(length)
+            if not 0<n<=TREASURY_CAP:
+                raise ValueError("Treasury response outside approved byte cap.")
+            body=response.read(n)
+            if len(body)!=n:
+                raise ValueError("Incomplete Treasury response.")
+        else:
+            body=response.read(TREASURY_CAP)
+            if len(body)>=TREASURY_CAP:
+                raise ValueError("Unbounded response reached cap; completeness unverified.")
+        if not body:
+            raise ValueError("Empty Treasury response.")
+        return body
+    finally:
+        conn.close()
+
+def treasury_json(raw):
+    import re
+    if not isinstance(raw,bytes) or not 0<len(raw)<=TREASURY_CAP:
+        raise ValueError("Treasury response outside approved cap.")
+    def unique(pairs):
+        result={}
+        for k,v in pairs:
+            if k in result:
+                raise ValueError("Duplicate JSON key in Treasury response.")
+            result[k]=v
+        return result
+    def bad_constant(_):
+        raise ValueError("Non-finite JSON value.")
+    obj=json.loads(raw.decode("utf-8"),object_pairs_hook=unique,parse_constant=bad_constant)
+    def screen(value):
+        if isinstance(value,dict):
+            for k,v in value.items():
+                if re.search(r"(?:^|[._])(?:email|phone|mobile|contact|person|officials|id_number|address|first_name|last_name)(?:$|[._])",k,re.I):
+                    raise ValueError("Unexpected personal-information field; response not retained.")
+                screen(v)
+        elif isinstance(value,list):
+            for v in value:
+                screen(v)
+        elif isinstance(value,str) and re.search(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}",value):
+            raise ValueError("Possible personal information in response; response not retained.")
+    screen(obj)
+    if not isinstance(obj,dict) or obj.get("status")!="ok":
+        raise ValueError("Treasury response is not a successful JSON object.")
+    return obj
+
+def treasury_model(raw):
+    import re
+    obj=treasury_json(raw)
+    model=obj["model"]
+    if not isinstance(model,dict) or model.get("name","audit_opinions")!="audit_opinions":
+        raise ValueError("Unexpected cube identity.")
+    dimensions=model["dimensions"]
+    if set(dimensions)!={"financial_year_end","demarcation","opinion"}:
+        raise ValueError("Unexpected audit-opinion dimensions.")
+    attrs={a["ref"] for d in dimensions.values() for a in d["attributes"].values()}
+    if attrs!=TREASURY_FIELDS:
+        raise ValueError("Unexpected audit-opinion model fields.")
+    updated=model.get("last_updated")
+    if not isinstance(updated,str) or not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])(?:-\d{2})?",updated):
+        raise ValueError("Required source update metadata missing.")
+    date.fromisoformat(updated+"-01" if len(updated)==7 else updated)
+    if updated[:4]<"2024":
+        raise ValueError("Model update predates selected year.")
+    # last_updated is the source update/reference period, not publication date.
+    published=model.get("publication_date")
+    if published is not None:
+        if not isinstance(published,str) or len(published)!=10:
+            raise ValueError("Unexpected explicit publication date.")
+        date.fromisoformat(published)
+    return {"source_last_updated":updated,"publication_date":published}
+
+def treasury_facts(raw,code):
+    import re
+    from urllib.parse import urlsplit
+    obj=treasury_json(raw)
+    fields=obj["fields"]
+    rows=obj["data"]
+    total=obj["total_fact_count"]
+    if (not isinstance(fields,list) or len(fields)!=len(TREASURY_FIELDS) or set(fields)!=TREASURY_FIELDS or
+            type(obj["page"]) is not int or obj["page"]!=1 or type(obj["page_size"]) is not int or
+            not 1<=obj["page_size"]<=5 or type(total) is not int or total not in (0,1) or
+            not isinstance(rows,list) or len(rows)!=total):
+        raise ValueError("Unexpected facts schema, duplicate outcome or incomplete page; no pagination.")
+    if not rows:
+        return {"municipality_code":code,"financial_year_end":2024,"status":"unavailable"}
+    row=rows[0]
+    if (not isinstance(row,dict) or set(row)!=TREASURY_FIELDS or row["demarcation.code"]!=code or
+            type(row["financial_year_end.year"]) is not int or row["financial_year_end.year"]!=2024 or
+            row["demarcation.label"]!=TREASURY_NAMES[code]):
+        raise ValueError("Treasury fact outside exact approved municipality/year scope.")
+    opinion=row["opinion.code"]
+    label=row["opinion.label"]
+    url=row["opinion.report_url"]
+    if not isinstance(opinion,str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,32}",opinion):
+        raise ValueError("Unexpected opinion code.")
+    known={"unqualified - no findings","unqualified - emphasis of matter items",
+           "qualified","qualified opinion","adverse","adverse opinion",
+           "disclaimer","disclaimer of opinion","unqualified - findings",
+           "unqualified - with findings","unqualified - with no findings",
+           "outstanding","audit outstanding","no report available","not available"}
+    if not isinstance(label,str) or label.casefold().strip() not in known:
+        raise ValueError("Unrecognised audit opinion label; review source.")
+    if url not in (None,""):
+        if not isinstance(url,str) or len(url)>2048:
+            raise ValueError("Unexpected report reference.")
+        u=urlsplit(url)
+        if u.scheme not in ("http","https") or not u.hostname or u.username or u.password or u.query or u.fragment:
+            raise ValueError("Unexpected report reference; not followed.")
+    return {"municipality_code":code,"municipality_name_source":row["demarcation.label"],
+            "financial_year_end":2024,"status":"reported","opinion_code":opinion,
+            "opinion_label":label,"report_url":url}
+
+def treasury_spec():
+    # ZIP storage overhead is local, not part of the API transfer budget.
+    return ("HPI-DATA-007",TREASURY_MANIFEST,TREASURY_RAW,TREASURY_OUTPUT,TREASURY_REPORT,
+            3*TREASURY_CAP+4096,None)
+
+def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
+    root=workspace(root)
+    today=today or date.today()
+    if not reviewed:
+        raise ValueError("Review and accept the Treasury source terms before any request.")
+    if not all((root/f).is_dir() for f in FOLDERS):
+        raise ValueError("Use the existing initialised private workspace.")
+    for relative in (TREASURY_ATTEMPT,TREASURY_RAW,TREASURY_MANIFEST,TREASURY_OUTPUT,TREASURY_REPORT):
+        p=root/relative
+        workspace(p.parent)
+        check_path(p)
+        if p.exists():
+            raise ValueError("007 attempt or output already exists; no repeat requests. Review existing status.")
+    # Exclusive creation is the one-time budget guard; failures consume this
+    # attempt. Never delete or reset it automatically, even on network failure.
+    with (root/TREASURY_ATTEMPT).open("xb") as f:
+        f.write(json_bytes({"dataset_id":"HPI-DATA-007","attempt_date":today.isoformat(),
+                            "approved_max_requests":3,"approved_body_bytes":3*TREASURY_CAP,
+                            "retry_authorised":False}))
+    payloads={}
+    facts=[]
+    for key,path in TREASURY_PATHS.items():
+        raw=fetch(path)
+        if key=="model":
+            provenance=treasury_model(raw)
+        else:
+            facts.append(treasury_facts(raw,key))
+        payloads[key]=raw
+    body_count=sum(map(len,payloads.values()))
+    if body_count>3*TREASURY_CAP:
+        raise ValueError("Aggregate transfer budget exceeded.")
+    if provenance["source_last_updated"][:7]>today.isoformat()[:7] or (provenance["publication_date"] and date.fromisoformat(provenance["publication_date"])>today):
+        raise ValueError("Source metadata date is in the future.")
+    q={"requested_metros":2,"reported_outcomes":sum(x["status"]=="reported" for x in facts),
+       "unavailable_outcomes":sum(x["status"]=="unavailable" for x in facts),
+       "financial_year_end":2024,"api_requests":3,"response_body_bytes":body_count,
+       "source_last_updated":provenance["source_last_updated"],"publication_date":provenance["publication_date"],
+       "publication_date_verified":provenance["publication_date"] is not None,
+       "display_authorised":False,"material_join":False,"report_links_followed":False}
+    bundle=io.BytesIO()
+    with zipfile.ZipFile(bundle,"w",compression=zipfile.ZIP_STORED) as z:
+        for key,raw in payloads.items():
+            z.writestr(zipfile.ZipInfo(key+".json"),raw)
+    raw_bundle=bundle.getvalue()
+    data=json_bytes({"source":"National Treasury, Municipal Money","terms_url":TREASURY_TERMS,
+                     "retrieval_date":today.isoformat(),**provenance,"observations":facts,
+                     "limitations":"Private qualification only. Update period is not publication date. No property, service quality, desirability or ranking inference."})
+    manifest={"dataset_id":"HPI-DATA-007","manager_version":"0.6.0",
+              "source":"National Treasury, Municipal Money audit_opinions",
+              "source_url":"https://"+TREASURY_HOST+TREASURY_BASE+"/model",
+              "source_licence":"Municipal Money terms: source/date attribution, no misleading use, no personal information or endorsement; private project scope",
+              "attribution":"National Treasury, Municipal Money, audit_opinions; publication date separately recorded if supplied; independent HPI processing.",
+              **provenance,"request_urls":{key:"https://"+TREASURY_HOST+path for key,path in TREASURY_PATHS.items()},
+              "response_sha256":{key:sha(raw) for key,raw in payloads.items()},
+              "source_bytes":len(raw_bundle),"source_sha256":sha(raw_bundle),"raw_path":TREASURY_RAW,
+              "first_intake_date":today.isoformat(),"terms_reviewed_by_owner":True,
+              "retention_policy":TREASURY_POLICY,"retention":TREASURY_RETENTION,"do_not_retain_on_or_after":None,
+              "processed_path":TREASURY_OUTPUT,"processed_sha256":sha(data),"quality_report":TREASURY_REPORT,"quality":q}
+    planned=[(root/TREASURY_RAW,raw_bundle),(root/TREASURY_OUTPUT,data),
+             (root/TREASURY_REPORT,json_bytes(q)),(root/TREASURY_MANIFEST,json_bytes(manifest))]
+    for p,b in planned:
+        check_target(p,b)
+    for p,b in planned:
+        publish(p,b)
+    return manifest
+
+def treasury_status(root):
+    path=root/TREASURY_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-007","registered":False,"attempt_started":(root/TREASURY_ATTEMPT).exists()}
+    m=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-007","registered":True,**retention_status(m),
+            "known_local_paths":[x for x in (TREASURY_RAW,TREASURY_OUTPUT,TREASURY_REPORT,TREASURY_MANIFEST,TREASURY_ATTEMPT) if (root/x).exists()]}
+
+def treasury_self_test():
+    # Synthetic JSON and fake transport: no live requests.
+    dims={d:{"attributes":{f.split(".")[1]:{"ref":f} for f in TREASURY_FIELDS if f.startswith(d+".")}}
+          for d in ("financial_year_end","demarcation","opinion")}
+    model={"status":"ok","model":{"dimensions":dims,"last_updated":"2026-06"}}
+    def fact(code):
+        row={"financial_year_end.year":2024,"demarcation.code":code,"demarcation.label":TREASURY_NAMES[code],
+             "opinion.code":"FIXTURE","opinion.label":"Qualified Opinion","opinion.report_url":None}
+        return {"status":"ok","fields":sorted(TREASURY_FIELDS),"page":1,"page_size":5,"total_fact_count":1,"data":[row]}
+    payloads={TREASURY_PATHS["model"]:json_bytes(model),
+              **{TREASURY_PATHS[c]:json_bytes(fact(c)) for c in TREASURY_NAMES}}
+    calls=[]
+    def fetch(path):
+        calls.append(path)
+        return payloads[path]
+    day=date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/RAW,b"prior untouched")
+        try:
+            treasury_acquire(root,False,fetch,day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Missing terms accepted")
+        assert not calls and not (root/TREASURY_ATTEMPT).exists()
+        m=treasury_acquire(root,True,fetch,day)
+        assert len(calls)==3 and m["quality"]["reported_outcomes"]==2
+        assert m["quality"]["publication_date_verified"] is False and m["quality"]["display_authorised"] is False
+        assert (root/RAW).read_bytes()==b"prior untouched"
+        assert audit_registered(root,treasury_spec(),day)["status"]=="integrity checks passed"
+        try:
+            treasury_acquire(root,True,fetch,day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Repeat acquisition allowed")
+        assert len(calls)==3
+    empty=fact("CPT")
+    empty["data"]=[];empty["total_fact_count"]=0
+    assert treasury_facts(json_bytes(empty),"CPT")["status"]=="unavailable"
+    for mode in ("wrong_year","wrong_code","duplicate","personal","extra","oversize"):
+        obj=fact("CPT")
+        if mode=="wrong_year": obj["data"][0]["financial_year_end.year"]=2025
+        if mode=="wrong_code": obj["data"][0]["demarcation.code"]="TSH"
+        if mode=="duplicate": obj["data"]*=2;obj["total_fact_count"]=2
+        if mode=="personal": obj["data"][0]["email"]="fixture@example.invalid"
+        if mode=="extra": obj["data"][0]["unexpected"]="fixture"
+        try:
+            treasury_facts(b"x"*(TREASURY_CAP+1) if mode=="oversize" else json_bytes(obj),"CPT")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid Treasury scope accepted")
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        attempted=[]
+        def fail(path):
+            attempted.append(path)
+            raise ValueError("Invented transport failure")
+        for _ in range(2):
+            try:
+                treasury_acquire(root,True,fail,day)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Failure not propagated")
+        assert len(attempted)==1 and (root/TREASURY_ATTEMPT).exists() and not (root/TREASURY_RAW).exists()
+    class Response:
+        status=302
+        def getheader(self,k,default=None):
+            return default
+        def read(self,n):
+            raise AssertionError("Redirect body read")
+    class Connection:
+        def __init__(self,*a,**k):
+            pass
+        def request(self,*a,**k):
+            pass
+        def getresponse(self):
+            return Response()
+        def close(self):
+            pass
+    try:
+        treasury_get(TREASURY_PATHS["model"],Connection)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Redirect accepted")
+    print("PASS: bounded Treasury scope, three requests, no retry, missing result, provenance, rejection, isolation and integrity.")
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
+    p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
     p.add_argument("--status",action="store_true")
     p.add_argument("--audit-workspace",action="store_true")
     p.add_argument("--geo-crosswalk",action="store_true",help="Private read-only candidate report for HPI-DATA-003/005")
@@ -1677,6 +2008,16 @@ def main():
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
+        if args.acquire_treasury:
+            if (args.dataset!="HPI-DATA-007" or args.self_test or args.status or args.audit_workspace or
+                    args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or args.init_only or
+                    args.intake_date is not None or args.retain_until is not None):
+                raise ValueError("Treasury acquisition must be a standalone explicit 007 action.")
+            root=workspace(args.root)
+            reviewed=args.terms_reviewed or input("Read and accept Municipal Money terms (source/date attribution, no personal data; private scope) (yes/no): ").strip().lower()=="yes"
+            manifest=treasury_acquire(root,reviewed)
+            print(json.dumps({"import":"complete","quality":manifest["quality"],"status":treasury_status(root)},indent=2))
+            return 0
         if args.geo_crosswalk or args.geo_alias:
             if (args.geo_crosswalk and args.geo_alias) or (args.self_test or args.status or args.audit_workspace or args.remove_internal_deadlines or args.init_only or
                     args.intake_date is not None or args.retain_until is not None or args.terms_reviewed or args.dataset != "HPI-DATA-002"):
@@ -1695,6 +2036,7 @@ def main():
             crosswalk_self_test()
             alias_self_test()
             market_self_test()
+            treasury_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -1705,8 +2047,10 @@ def main():
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0
         if args.status:
-            print(json.dumps(market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(treasury_status(root) if args.dataset == "HPI-DATA-007" else market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
+        if args.dataset == "HPI-DATA-007":
+            raise ValueError("007 requires explicit --acquire-treasury; use --status for an existing attempt.")
         initialise(root)
         if args.init_only:
             print("Workspace initialised; existing files preserved.")

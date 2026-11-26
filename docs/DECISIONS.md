@@ -128,3 +128,7 @@ Owner approves contextual feasibility slice research for Stats SA RPPI and Natio
 ## HPI-DATA-006 intake authority (26 November 2026)
 
 Owner explicitly approves bounded acquisition of one official Stats SA June 2026 P0160 PDF max 5 MiB, private processing and registration, strict R0. Preserve HPI-DATA-002; no merge. [Exact scope and adapter](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-hpi-data-006-offline-registration). No Treasury intake, full time-series archive, material integration, commercial/public display, release or phase acceptance.
+
+## HPI-DATA-007 intake authority (26 November 2026)
+
+Owner approves bounded National Treasury Municipal Money audit_opinions acquisition for CPT/JHB, financial year 2023/24, maximum three API requests and 768 KiB combined response bodies, private processing and registration only, strict R0, no material joins or source modifications. [Exact approved endpoints and implementation](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-hpi-data-007-bounded-acquisition-adapter). No retries, pagination, report fetching, further intake, release or scope change.
