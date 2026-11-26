@@ -96,7 +96,7 @@ def active_handoff_errors(root: Path):
     Passing this check does NOT establish full factual accuracy.
     """
     required = {
-        "README.md": ("--fixture-db", "PRs #5 and #6", "--frontend react", "protected-storage"),
+        "README.md": ("--fixture-db", "PRs #5 and #6", "--frontend react", "protected-storage", "South African data foundation", "DATA_MANAGER_V1.md"),
         "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.9", "Standing engineering autonomy", "two-to-three-property shortlist", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/ROADMAP.md": ("P6 two-to-three-property shortlist",),
         "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md", "archive/CHECKPOINT_EVIDENCE_2026-11-26.md", "archive/DECISION_HISTORY_2026-11-26.md", "archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md"),
@@ -106,7 +106,7 @@ def active_handoff_errors(root: Path):
             "## Current synthetic API and data contract on `development`",
             "`p3-draft-v0.3`", "`synthetic_address_candidates`",
         ),
-        "docs/CHECKPOINT.md": ("## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
+        "docs/CHECKPOINT.md": ("## Current South African data repertoire", "## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": (
             "P0-A Product foundation", "P0-B Market and competitive intelligence",
@@ -116,7 +116,7 @@ def active_handoff_errors(root: Path):
         ),
     }
     forbidden = {
-        "README.md": ("not a public service or durable shortlist", "Actual provider-to-buyer integration, full protected storage"),
+        "README.md": ("not a public service or durable shortlist", "Actual provider-to-buyer integration, full protected storage", "active P0-B market and competitive intelligence"),
         "frontend/README.md": ("**The in-memory data disappear on shutdown**", "7 actual Chromium browser journeys", "**Not implemented:** trusted address search"),
         "docs/ROADMAP.md": ("durable persistence and P6 shortlist/compare remain ahead", "FE1 iconography next", "127 patched tests, not committed"),
         "docs/P_PHASE_ROADMAP.md": ("no production database, real-data property API, accepted buyer UI, durable multi-property shortlist or deployment exists",),

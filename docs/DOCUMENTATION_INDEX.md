@@ -11,7 +11,7 @@
 | Execute P0 discovery | [P0 Discovery and Feasibility Directive](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) | Original P0 gates retained; P0-C conditional desk review complete, P0-D/E conditional desk reviews complete; P0-F and P0-G delivered; formal exit blocked while HPI-SA clarification pending |
 | Execute HPI-SA mission | [South African mission directive](engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md) | **Preferred, externally blocked**, SA0 and SA1 complete; SA2 complete as desk research; SA3 bounded desk complete; City confirmed portal route; private drafts prepared, clarification pending; SA4 empirical blocked; IR1/IR3 complete; no local data qualification or migration |
 | HPI-SA SA1 ecosystem and buyer research | [Local buyer and competitive research](product/SOUTH_AFRICAN_ECOSYSTEM_AND_BUYER_RESEARCH_2026-11-26.md) | Bounded desk research complete; local lifecycle, price/type distinctions, nine alternatives and four hypotheses; no demand or final scope acceptance |
-| HPI-SA SA2 acquisition research | [South African acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) | SA2.1-2.4 complete as desk research; Cape Town priority permission route, Ekurhuleni/Joburg fallback; no real access or licence established |
+| HPI-SA SA2 acquisition research | [South African acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) | SA2.1-2.4 complete as desk research; Historic Cape Town permission route; direct-access-first repertoire now has three retained contextual datasets; D01/D02 unresolved |
 | HPI-SA SA3 legal and rights research | [South African legal and data rights](research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) | SA3.1-3 desk deliverables complete; no compliance or permission approval |
 | HPI-SA SA3.3 permission packet | [Cape Town enquiry and research outline](research/SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) | Initial response received, owner reports clarification sent; lean crosswalk prepared, formal application unsent; SA4 blocked |
 | HPI-SA independent readiness | [Independent readiness and contract compatibility](engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md) | IR0/audit/IR1/IR3 complete; IR2 not required now; finite planning lane closed; no migration or scope change |
@@ -65,7 +65,7 @@
 | Data-first repertoire | [SA data availability inventory](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--data-first-repertoire-and-availability) | D01-D15 initial source/derived-data catalogue; contextual public routes, D01 unqualified; next bounded licence/schema qualification, no intake or scope change |
 | HPI-DATA-001 contextual pilot | [Final result](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-001-final-result-and-interpretation) | Closed: 49 usable ways, aggregate-only, 3/3 requests consumed; no retained raw data or coverage claim |
 | Reusable data repository / HPI-DATA-002 | [Empirical CSV profile and transformation](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-002-empirical-csv-profile-and-transformation) | Actual aggregate index data, 19 series/2,983 observations; private derivative, retention and terms review; D01/D02 unresolved |
-| HPI Data Manager | [Offline workspace utility](engineering/DATA_MANAGER_V1.md) | v0.1 RPPI adapter, CI and Windows import/repeat passed; pull-first preference, no new acquisition |
+| HPI Data Manager | [Offline workspace utility](engineering/DATA_MANAGER_V1.md) | Three adapters (RPPI, district geography, building footprints) imported on Windows; open retention migration complete; read-only workspace audit added, no new acquisition |
 | Open data retention | [Policy and metadata migration](engineering/DATA_MANAGER_V1.md#open-data-retention-policy-26-november-2026) | Owner removes internal deadline; source-specific limits and restricted-data controls remain; Windows migration complete |
 | D02/D01 source qualification | [Cadastral schema and access review](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--d02-cadastral-schema-and-d01-access-qualification) | National identity schema documented, current rights and sales access unresolved; metadata-only CSG enquiry sent; reply and rights pending |
 | Direct access campaign | [Concrete file candidates](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--direct-access-campaign-first-concrete-files) | UNISA library, district geometry download and portal inspection; [HPI-DATA-003 supplied file profile](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-003-supplied-snapshot-initial-profile); retention approved, v0.2 Windows import passed, path correction 7/7 CI; UNISA access denied |
@@ -91,6 +91,8 @@
 **Full product qualification:** [FR1–FR3](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
 
 ## Detailed archives and current qualification
+
+- [Data-first repository audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md): continuity, catalogue, integrity and workspace guard corrections; historical information retained.
 
 | Document | Role |
 | --- | --- |

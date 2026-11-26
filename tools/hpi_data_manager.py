@@ -57,6 +57,7 @@ def workspace(root):
     return root
 
 def read_bounded(path, limit=10*MIB):
+    workspace(path.parent)
     check_path(path)
     if not path.is_file() or path.stat().st_size > limit:
         raise ValueError("Missing or oversized file: " + path.name)
@@ -67,6 +68,7 @@ def read_bounded(path, limit=10*MIB):
     return data
 
 def check_target(path, data):
+    workspace(path.parent)
     check_path(path)
     if path.exists() and read_bounded(path, 50*MIB) != data:
         raise ValueError("Existing file differs; no overwrite: " + str(path))
@@ -83,6 +85,7 @@ def publish(path, data):
 def initialise(root):
     for folder in FOLDERS:
         p = root / folder
+        workspace(p)
         check_path(p)
         p.mkdir(parents=True, exist_ok=True)
     path = root / "01_Source_Catalogue/source_catalogue.csv"
@@ -221,10 +224,21 @@ def self_test():
         rejects(lambda: import_rppi(root,day,True,"bad",day))
         first = import_rppi(root,day,True,sha(archive),day)
         assert first["quality"]["observations"] == 2983
+        spec = ("HPI-DATA-002",MANIFEST,RAW,OUTPUT,REPORT,10*MIB,sha(archive))
+        before_audit = [(root/p).read_bytes() for p in (MANIFEST,RAW,OUTPUT,REPORT)]
+        assert audit_registered(root,spec,day)["status"] == "integrity checks passed"
+        assert before_audit == [(root/p).read_bytes() for p in (MANIFEST,RAW,OUTPUT,REPORT)]
         assert import_rppi(root,day,True,sha(archive),day+timedelta(days=365)) == first
         rejects(lambda: import_rppi(root,day+timedelta(days=1),True,sha(archive),day+timedelta(days=1)))
         assert (root/ARCHIVE).read_bytes() == archive
         (root/OUTPUT).write_text("existing different file")
+        rejects(lambda: audit_registered(root,spec,day))
+        nested = root/"02_Raw_Data"/"nested"
+        nested.mkdir()
+        (nested/".git").mkdir()
+        rejects(lambda: publish(nested/"private.csv",b"fixture"))
+        (nested/"fixture.txt").write_text("fixture")
+        rejects(lambda: read_bounded(nested/"fixture.txt"))
         rejects(lambda: import_rppi(root,day,True,sha(archive),day))
         assert (root/OUTPUT).read_text() == "existing different file"
         checkout = Path(tmp)/"checkout"
@@ -452,6 +466,9 @@ def district_self_test():
         rejects(lambda: import_districts(root,day,True,day,expected,day))
         rejects(lambda: import_districts(root,day,True,day+timedelta(days=10),expected,day+timedelta(days=10)))
         first = import_districts(root,day,True,day+timedelta(days=10),expected,day)
+        spec = ("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,10*MIB,expected)
+        assert audit_registered(root,spec,day)["status"] == "integrity checks passed"
+        rejects(lambda: audit_registered(root,spec,day+timedelta(days=10)))
         paths = [root/p for p in (GEO_RAW,GEO_OUTPUT,GEO_REPORT,GEO_MANIFEST)]
         before = [(p.read_bytes(),p.stat().st_mtime_ns) for p in paths]
         assert import_districts(root,day,True,day+timedelta(days=10),expected,day) == first
@@ -698,9 +715,12 @@ def building_self_test():
         rejects(lambda: import_buildings(root,day,True,day,day))
         rejects(lambda: import_buildings(root,day,True,day+timedelta(days=30),day+timedelta(days=30)))
         m=import_buildings(root,day,True,today=day)
+        spec = ("HPI-DATA-004",BUILD_MANIFEST,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MAX_BYTES,None)
+        assert audit_registered(root,spec,day)["status"] == "integrity checks passed"
         assert m==import_buildings(root,day,True,today=day+timedelta(days=365))
         rejects(lambda: import_buildings(root,day,True,day+timedelta(days=29),day))
         (root/BUILD_OUTPUT).write_text("conflict")
+        rejects(lambda: audit_registered(root,spec,day))
         rejects(lambda: import_buildings(root,day,True,today=day))
         assert (root/BUILD_OUTPUT).read_text()=="conflict"
     print("PASS: building streaming caps, geometry, optional attributes, retention and repeat checks.")
@@ -834,6 +854,79 @@ def retention_self_test():
     print("PASS: open retention migration, preservation, repeat and source-specific deadline.")
 
 
+
+# Live inventory is derived from manifests, not the historical starter CSV.
+def audit_registered(root, spec, today=None):
+    sid, manifest_path, raw_path, output_path, report_path, raw_limit, pinned = spec
+    today = today or date.today()
+    path = root/manifest_path
+    workspace(path.parent)
+    check_path(path)
+    if not path.exists():
+        return {"dataset_id":sid,"status":"not registered"}
+    m = json.loads(read_bounded(path))
+    if (m["dataset_id"] != sid or m["raw_path"] != raw_path or
+            m["processed_path"] != output_path or m["quality_report"] != report_path or
+            m["terms_reviewed_by_owner"] is not True):
+        raise ValueError("Manifest identity, path or terms attestation differs.")
+    intake = date.fromisoformat(m["first_intake_date"])
+    deadline = stored_deadline(m)
+    if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
+        raise ValueError("Invalid intake or expired applicable deadline.")
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD}[sid]
+    if m.get("retention_policy") == OPEN_POLICY:
+        if m["retention"] != OPEN_RETENTION:
+            raise ValueError("Unexpected open retention policy wording.")
+    elif m["retention"] != legacy or deadline is None:
+        raise ValueError("Unexpected legacy retention policy.")
+    def measured(relative, cap):
+        p = root/relative
+        workspace(p.parent)
+        check_path(p)
+        if not p.is_file():
+            raise ValueError("Registered file missing: "+relative)
+        digest = hashlib.sha256()
+        count = 0
+        with p.open("rb") as f:
+            while True:
+                chunk = f.read(min(MIB,cap-count+1))
+                if not chunk:
+                    break
+                count += len(chunk)
+                if count > cap:
+                    raise ValueError("Registered file over cap: "+relative)
+                digest.update(chunk)
+        return count,digest.hexdigest()
+    raw_bytes, raw_hash = measured(raw_path,raw_limit)
+    output_bytes, output_hash = measured(output_path,50*MIB)
+    if (raw_bytes != m["source_bytes"] or raw_hash != m["source_sha256"] or
+            (pinned is not None and raw_hash != pinned)):
+        raise ValueError("Raw size or checksum mismatch.")
+    if output_hash != m["processed_sha256"]:
+        raise ValueError("Processed checksum mismatch.")
+    if json.loads(read_bounded(root/report_path)) != m["quality"]:
+        raise ValueError("Quality report differs from registered metadata.")
+    return {"dataset_id":sid,"status":"integrity checks passed",
+            "source_bytes":raw_bytes,"processed_bytes":output_bytes,
+            "deadline":m["do_not_retain_on_or_after"],"quality":m["quality"]}
+
+def audit_workspace(root):
+    specs = [
+        ("HPI-DATA-002",MANIFEST,RAW,OUTPUT,REPORT,10*MIB,APPROVED_SHA),
+        ("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,10*MIB,GEO_SHA),
+        ("HPI-DATA-004",BUILD_MANIFEST,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MAX_BYTES,None),
+    ]
+    results = []
+    for spec in specs:
+        try:
+            results.append(audit_registered(root,spec))
+        except (ValueError,KeyError,TypeError,OSError,AttributeError) as exc:
+            results.append({"dataset_id":spec[0],"status":"review required","reason":str(exc)})
+    print(json.dumps({"audit":"read-only","datasets":results,
+        "limitations":"Checks known registered files only; not ground truth, source authentication, rights, backups, sync or full copy inventory. No files changed."},indent=2))
+    return 0 if all(x["status"]=="integrity checks passed" for x in results) else 1
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
@@ -841,6 +934,7 @@ def main():
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
+    p.add_argument("--audit-workspace",action="store_true")
     p.add_argument("--remove-internal-deadlines",action="store_true")
     p.add_argument("--init-only",action="store_true")
     p.add_argument("--intake-date",type=date.fromisoformat)
@@ -854,6 +948,10 @@ def main():
             retention_self_test()
             return 0
         root = workspace(args.root)
+        if args.audit_workspace:
+            if args.remove_internal_deadlines or args.init_only or args.status:
+                raise ValueError("Workspace audit must be a standalone read-only action.")
+            return audit_workspace(root)
         if args.remove_internal_deadlines:
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0

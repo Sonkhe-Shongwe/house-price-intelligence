@@ -42,3 +42,7 @@ Routine engineering within the approved scope is delegated: independently select
 - Never force-push or delete/rewrite uncommitted work or retained evidence.
 
 For current work, follow the latest acceptance gate and its tests. If no local checkout is visible, report that limitation rather than claiming a clean working tree.
+
+## Data-first repertoire operations (26 November 2026)
+
+Use the [current checkpoint](docs/CHECKPOINT.md), [Data Manager](docs/engineering/DATA_MANAGER_V1.md) and [acquisition register](docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md). Direct legitimate downloads and owner-assisted portals first; correspondence last resort with exact approval. Keep the permanent Windows Downloads/HPI-Project sibling folders separate: house-price-intelligence for Git, HPI-Data-Workspace for private data. No raw/processed data, secrets or private reports in public Git/CI. Open datasets have no blanket internal expiry; actual source conditions/law prevail; restricted real-property beta retention/protection remains unchanged. New acquisition, material joins, source rights, release and main integration retain separate gates. No national scale or product readiness inferred from partial repertoire.
