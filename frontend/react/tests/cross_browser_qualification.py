@@ -23,13 +23,19 @@ def bundle():
         size=len(gzip.compress(raw,mtime=0))
         report[kind]={"bytes":len(raw),"gzip_bytes":size,"ceiling_gzip_bytes":ceiling}
         if size>ceiling:raise AssertionError(f"{kind} exceeds initial bundle ceiling: {size}")
+    # Deferred archive sizes are reported independently, not initial-route transfer.
+    for kind,glob in (("optional_map_js","GeoVectorMap-*.js"),("optional_map_css","GeoVectorMap-*.css"),("map_worker","maplibre-gl-worker-*.js")):
+        files=sorted(assets.glob(glob))
+        if len(files)!=1:raise AssertionError(f"Unexpected {kind} asset inventory")
+        raw=files[0].read_bytes()
+        report[kind]={"bytes":len(raw),"gzip_bytes":len(gzip.compress(raw,mtime=0))}
     return report
 
 def main():
     output=Path(os.environ["HPI_CROSS_BROWSER_REPORT"])
-    report={"scope":"loopback fictional core buyer journey; no private cross-engine or GPU certification",
+    report={"scope":"loopback fictional core buyer journey and lightweight virtual schematic; no private cross-engine or GPU certification",
             "measurement":"single hosted lab run per engine, not field Web Vitals","status":"blocked","engines":[]}
-    server=LocalFixtureProcess(free_port(),database=None)
+    server=LocalFixtureProcess(free_port(),database=None,synthetic_map=True)
     try:
         report["bundle"]=bundle()
         with sync_playwright() as pw:
@@ -71,6 +77,21 @@ def main():
                     page.get_by_test_id("evidence-next").focus();page.keyboard.press("Enter")
                     expect(page.get_by_test_id("evidence-position")).to_have_text("Sale 1 of 3")
                     expect(page.get_by_test_id("evidence-next")).to_be_focused()
+                    start=time.perf_counter()
+                    page.get_by_test_id("geo-load-schematic").click()
+                    expect(page.get_by_test_id("geo-static-fallback")).to_be_visible(timeout=15000)
+                    engine["schematic_ready_ms"]=round((time.perf_counter()-start)*1000)
+                    expect(page.get_by_test_id("geo-static-rank-1")).to_have_attribute("aria-pressed","true")
+                    rank=page.get_by_test_id("geo-static-rank-2")
+                    rank.focus();page.keyboard.press("Enter")
+                    expect(rank).to_be_focused()
+                    expect(page.get_by_test_id("buyer-sale").nth(1)).to_have_attribute("aria-pressed","true")
+                    expect(page.get_by_test_id("geo-selected-sale")).to_contain_text("$525,000.00")
+                    page.set_viewport_size({"width":320,"height":800})
+                    assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"),f"{name}: schematic overflow"
+                    expect(rank).to_be_visible()
+                    page.set_viewport_size({"width":1366,"height":850})
+                    assert sum(u.endswith("/"+iid+"/map") for u in requests)==1
                     page.get_by_test_id("dossier-compare").click()
                     page.get_by_test_id("workspace-create").click()
                     expect(page.get_by_test_id("workspace-count")).to_have_text("0 / 3")
@@ -103,7 +124,7 @@ def main():
                 finally:browser.close()
                 # Each engine must begin with an empty workspace.
                 server.close()
-                if name!="webkit":server=LocalFixtureProcess(free_port(),database=None)
+                if name!="webkit":server=LocalFixtureProcess(free_port(),database=None,synthetic_map=True)
         report["status"]="passed"
     finally:
         server.close()

@@ -47,3 +47,8 @@
 .geo-selected-sale strong{font:650 22px/1.25 system-ui;font-variant-numeric:tabular-nums}
 .geo-selected-sale span,.geo-selected-sale small{font-size:12px;line-height:1.5}
 @media(max-width:540px){.geo-display-choice button{flex:1 1 100%}}
+
+/* Geographic controls remain readable and operable under coarse input. */
+.geo-gesture-help{color:#405b50;font-size:12px;line-height:1.5}
+.geo-vector [data-testid=geo-fallback]:focus-visible{outline:3px solid #a74429;outline-offset:3px}
+@media(pointer:coarse){.geo-themed .geo-sale{width:44px;height:44px}.geo-controls button{min-height:44px;min-width:44px}}

@@ -105,6 +105,39 @@ class GeographicIntegrationTests(unittest.TestCase):
             Path(path).mkdir(parents=True,exist_ok=True)
             self.page.get_by_test_id("geo-panel").screenshot(path=str(Path(path)/"04-selected-lightweight-320.png"))
 
+    def test_context_loss_releases_renderer_and_preserves_keyboard_selection(self):
+        iid=self.save()
+        before=self.server.get("/v1/investigations/"+iid)
+        self.page.get_by_test_id("geo-load").click()
+        expect(self.page.get_by_test_id("geo-ready")).to_be_visible(timeout=20000)
+        marker=self.page.get_by_test_id("geo-pin-2")
+        marker.focus();self.page.keyboard.press("Enter")
+        expect(marker).to_have_attribute("aria-pressed","true")
+        # Dispatch a synthetic context-lost event through the real renderer listener.
+        self.page.locator(".geo-canvas canvas").evaluate("e=>e.dispatchEvent(new Event('webglcontextlost',{cancelable:true}))")
+        expect(self.page.get_by_test_id("geo-fallback")).to_be_visible(timeout=20000)
+        expect(self.page.locator(".geo-canvas canvas")).to_have_count(0)
+        expect(self.page.get_by_test_id("geo-fallback")).to_be_focused()
+        expect(self.page.get_by_test_id("geo-static-rank-2")).to_have_attribute("aria-pressed","true")
+        self.assertEqual(before,self.server.get("/v1/investigations/"+iid))
+
+    def test_touch_context_supports_lightweight_selection(self):
+        with self.browser.new_context(viewport={"width":375,"height":850},has_touch=True,is_mobile=True,reduced_motion="reduce") as ctx:
+            page=ctx.new_page()
+            page.on("request",lambda r:self.external.append(r.url) if not r.url.startswith(self.server.base+"/") else None)
+            page.goto(self.server.base+"/buyer-workflow")
+            page.get_by_test_id("buyer-manual-pin").fill("00000000000001")
+            page.get_by_test_id("buyer-create").tap()
+            expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
+            page.get_by_test_id("geo-load-schematic").tap()
+            expect(page.get_by_test_id("geo-static-fallback")).to_be_visible()
+            rank=page.get_by_test_id("geo-static-rank-3")
+            rank.tap()
+            expect(rank).to_have_attribute("aria-pressed","true")
+            expect(page.get_by_test_id("buyer-sale").nth(2)).to_have_attribute("aria-pressed","true")
+            self.assertGreaterEqual(rank.evaluate("e=>e.getBoundingClientRect().height"),44)
+            self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+
     def test_tampered_map_identity_is_rejected(self):
         iid=self.save()
         route=self.server.base+"/v1/investigations/"+iid+"/map"

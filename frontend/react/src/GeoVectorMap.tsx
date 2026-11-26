@@ -33,6 +33,8 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
   const node=useRef<HTMLDivElement>(null);
   const instance=useRef<maplibregl.Map|null>(null);
   const buttons=useRef(new Map<number,HTMLButtonElement>());
+  const releaseRenderer=useRef<(()=>void)|null>(null);
+  const failureFocus=useRef(false),failureStatus=useRef<HTMLParagraphElement>(null);
   const choose=useRef(onSelect);choose.current=onSelect;
   const [status,setStatus]=useState<'loading'|'ready'|'fallback'>('loading');
   useEffect(()=>{
@@ -40,14 +42,27 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
     let map:maplibregl.Map|undefined;
     let disposed=false, failed=false;
     const markers:maplibregl.Marker[]=[];
-    const fail=()=>{if(!disposed){failed=true;setStatus('fallback');}};
+    const fail=()=>{
+      if(disposed||failed)return;
+      failed=true;
+      failureFocus.current=!!node.current?.contains(document.activeElement);
+      setStatus('fallback');
+    };
     const guard=window.setTimeout(fail,10000);
+    const release=()=>{
+      if(disposed)return;
+      disposed=true;window.clearTimeout(guard);buttons.current.clear();
+      markers.forEach(m=>m.remove());map?.remove();instance.current=null;
+      if(releaseRenderer.current===release)releaseRenderer.current=null;
+    };
+    releaseRenderer.current=release;
     try{
       map=new maplibregl.Map({container:node.current,
         style:evidenceStyle(points,theme),
         center:[0,0],zoom:11.5,minZoom:9,maxZoom:16,renderWorldCopies:false,
-        dragRotate:false,pitchWithRotate:false,scrollZoom:false,attributionControl:false});
+        dragRotate:false,pitchWithRotate:false,scrollZoom:false,cooperativeGestures:true,attributionControl:false});
       instance.current=map;
+      map.touchZoomRotate.disableRotation();
       const active=map;
       active.on('error',fail);
       active.on('webglcontextlost',fail);
@@ -75,9 +90,13 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
         }catch{fail();}
       });
     }catch{fail();}
-    return ()=>{disposed=true;window.clearTimeout(guard);buttons.current.clear();
-      markers.forEach(m=>m.remove());map?.remove();instance.current=null;};
+    return release;
   },[points]);
+  useEffect(()=>{
+    if(status!=='fallback')return;
+    releaseRenderer.current?.();
+    if(failureFocus.current)failureStatus.current?.focus();
+  },[status]);
   useEffect(()=>{
     buttons.current.forEach((b,rank)=>b.setAttribute('aria-pressed',String(rank===selected)));
     if(status==='ready'){
@@ -95,8 +114,8 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
   return <div className="geo-vector" data-testid="geo-vector">
     <div className="geo-canvas" ref={node} hidden={status==='fallback'} aria-label="Virtual display coordinates"/>
     {status==='loading'&&<p role="status">Preparing local vector renderer…</p>}
-    {status==='fallback'&&<><p data-testid="geo-fallback" role="status">Interactive map unavailable. The verified sale list remains usable.</p><VirtualMapFallback points={points} selected={selected} onSelect={onSelect}/></>}
-    {status==='ready'&&<><p data-testid="geo-ready" role="status">Virtual map · No basemap · Not to scale</p>
+    {status==='fallback'&&<><p ref={failureStatus} tabIndex={-1} data-testid="geo-fallback" role="status">Interactive map unavailable. The verified sale list remains usable.</p><VirtualMapFallback points={points} selected={selected} onSelect={onSelect}/></>}
+    {status==='ready'&&<><p data-testid="geo-ready" role="status">Virtual map · No basemap · Not to scale</p><p className="geo-gesture-help">On touch screens, use two fingers to move the map. Sale buttons and the lightweight view remain available.</p>
       <div className="geo-controls"><button type="button" aria-label="Zoom in fictional map" onClick={()=>instance.current?.zoomIn({duration:0})}><Icon name="plus" size={20}/></button>
       <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}><Icon name="minus" size={20}/></button><button type="button" aria-label="Reset fictional map view" onClick={resetView}><Icon name="refresh"/> Reset view</button></div></>}
   </div>;
