@@ -72,5 +72,6 @@ jobs:
           path: |
             ${{ runner.temp }}/hpi-visual-preview/*.png
             design-prototypes/map-evidence-studio.html
+            design-prototypes/hpi-atlas-terminal-study.html
           if-no-files-found: warn
           retention-days: 7
