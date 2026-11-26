@@ -89,6 +89,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Frontend convergence audit:** [26 November source audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) inventories reusable components, distinct wire contracts, private metadata/labels, atomic versus mutable comparisons, no private map capability and proposed typed adapters. Next: two high-fidelity full-flow fictional concepts, including honest geometry-unavailable state; no third production frontend. Prior audit eff72f2 documentation check failed on hard-coded v1.5 and missing shortlist wording; synthetic browser acceptance passed. This revision updates validator to v1.6 and restores shortlist guidance without weakening checks. Exact-head CI pending. No application/runtime changes or progress credit.
 
+**Original high-fidelity review candidate:** [Atlas / Terminal study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) added as standalone interactive fictional HTML, two visual directions, end-to-end review flow and geometry unavailable by default. No production source changes, dependencies or new cloud access. Browser verification and owner review pending; no final art direction approval. Next: review actual renders and fix prototype issues before shared component integration.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
