@@ -108,3 +108,7 @@ Owner authorised one concise metadata-only enquiry; Gmail returned SENT, no reco
 ## Critical audit handoff (26 November 2026)
 
 Owner-requested [critical audit](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#5-owner-requested-independent-critical-audit-26-november-2026) completed at a871214. Conditional GO for IR1 delta design only; event completeness vs latest snapshot, dated area vs current export, valuation-selected vs all sales and joint cap requirements explicit. SA4 remains blocked, not overall mission no-go. No scope/implementation change; no duplicate desk work, further contact or new data. Historical contact proposal superseded. Original P0 estimates unchanged and not SA readiness.
+
+## IR1 handoff (26 November 2026)
+
+[IR1 design](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#6-ir1-minimum-local-data-contract-delta-and-offline-acceptance-design-26-november-2026) completes bounded logical semantic delta and negative acceptance design. History vs snapshot, attribute effective/observation/availability, event identity and group restrictions, ZAR/m² and code mismatch/caps explicit. Existing scoped tests cover transferable patterns; IR2 not required now, no rehearsal executed. IR3 consolidated readiness/option decision next, close finite independent lane; no speculative code or source access. SA4 remains empirically blocked, not overall no-go. No email/response check, source grant, scope change or phase credit.
