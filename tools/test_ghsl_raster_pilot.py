@@ -102,12 +102,70 @@ class GhslTests(unittest.TestCase):
             self.assertLess(size,p.EXPANDED)
 
     def test_archive_rejections(self):
-        for rights,extra,reason in ((None,None,"MEMBERS"),(b"All rights reserved",None,"RIGHTS"),
+        for rights,extra,reason in ((None,None,"RIGHTS_MISSING"),(b"All rights reserved",None,"RIGHTS"),
              (RIGHTS,"../escape.txt","MEMBERS"),(RIGHTS,"evil.exe","MEMBERS")):
             with tempfile.TemporaryDirectory() as tmp:
                 root=Path(tmp)
                 with self.assertRaisesRegex(p.PilotRefused,reason):
                     p.unpack(archive(root,rights,extra),root,time.monotonic()+30)
+
+    def test_documented_overview_is_never_extracted(self):
+        for suffix in (".tif.ovr", ".ovr"):
+            with tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)
+                source=archive(root,extra=p.STEM+suffix)
+                tif,rights,total=p.unpack(source,root,time.monotonic()+30)
+                self.assertEqual(p.analyse(tif)["difference_percentage_points"],"30")
+                self.assertFalse((root/(p.STEM+suffix)).exists())
+                self.assertFalse((root/"tile.tif.ovr").exists())
+                self.assertIn(b"CC BY 4.0",rights.encode())
+
+    def test_specific_safe_inventory_reasons(self):
+        def item(name, size=1, mode=stat.S_IFREG|0o600, flags=0, compression=zipfile.ZIP_STORED):
+            info=zipfile.ZipInfo(name)
+            info.file_size=size
+            info.external_attr=mode<<16
+            info.flag_bits=flags
+            info.compress_type=compression
+            return info
+        raster=item(p.STEM+".tif")
+        rights=item("copyright.txt")
+        for info,reason in (
+            (item("../unknown"),"MEMBERS_PATH"),
+            (item("secret.exe"),"MEMBERS_UNKNOWN"),
+            (item(p.STEM+".ovr",mode=stat.S_IFLNK|0o600),"MEMBERS_TYPE"),
+            (item(p.STEM+".ovr",mode=stat.S_IFREG|0o700),"MEMBERS_MODE"),
+            (item(p.STEM+".ovr",flags=1),"MEMBERS_ENCRYPTED"),
+            (item(p.STEM+".ovr",compression=zipfile.ZIP_BZIP2),"MEMBERS_COMPRESSION"),
+            (item(p.STEM+".ovr",size=0),"MEMBERS_SIZE"),
+            (item(p.STEM+".ovr",size=p.EXPANDED),"CAP"),
+            (item(p.STEM+"/"+p.STEM+".tif"),"MEMBERS_DUPLICATE"),
+        ):
+            with self.subTest(reason=reason), self.assertRaisesRegex(p.PilotRefused,"^"+reason+"$"):
+                p.inspect_members([raster,rights,info],time.monotonic()+5)
+        with self.assertRaisesRegex(p.PilotRefused,"^MEMBERS_COUNT$"):
+            p.inspect_members([raster]*5,time.monotonic()+5)
+        with self.assertRaisesRegex(p.PilotRefused,"^MEMBERS_RASTER$"):
+            p.inspect_members([rights],time.monotonic()+5)
+        members,total=p.inspect_members([raster],time.monotonic()+5)
+        self.assertEqual(set(members),{"raster"})
+        self.assertEqual(total,1)
+
+    def test_unknown_member_reason_survives_worker_and_attempt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            for d in ("01_Source_Catalogue","02_Raw_Data","07_Reports"): (root/d).mkdir()
+            def runner(worker,directory,report,seconds):
+                if worker is p.download_worker:
+                    raw=archive(directory,extra="private_unknown.exe").read_bytes()
+                    return {"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()}
+                return p.supervise(worker,directory,report,seconds)
+            result=p.execute(root,runner)
+            attempt=root/"02_Raw_Data"/p.ATTEMPT
+            self.assertEqual(result["reason"],"MEMBERS_UNKNOWN")
+            self.assertNotIn("private_unknown",(attempt/"refusal.json").read_text())
+            self.assertFalse((attempt/"source.zip").exists())
+            self.assertFalse((attempt/"validated.json").exists())
 
     def test_nodata_and_invalid_values(self):
         for value,reason in ((65535,"NODATA"),(10001,"VALUES")):

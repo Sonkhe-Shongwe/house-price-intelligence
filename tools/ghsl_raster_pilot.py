@@ -28,7 +28,10 @@ POINTS = ((28.0, -26.2), (28.1, -26.2))
 MEDIA = ("application/zip", "application/x-zip-compressed", "application/octet-stream")
 CODES = frozenset(("TRANSPORT", "HTTP", "MEDIA", "FRAMING", "CAP", "ARCHIVE",
                    "MEMBERS", "RIGHTS", "RASTER", "WINDOW", "NODATA", "VALUES",
-                   "DEADLINE", "WORKER", "STORAGE"))
+                   "DEADLINE", "WORKER", "STORAGE", "MEMBERS_COUNT", "MEMBERS_PATH",
+                   "MEMBERS_DUPLICATE", "MEMBERS_TYPE", "MEMBERS_MODE", "MEMBERS_ENCRYPTED",
+                   "MEMBERS_COMPRESSION", "MEMBERS_SIZE", "MEMBERS_UNKNOWN", "MEMBERS_RASTER",
+                   "RIGHTS_MISSING"))
 
 
 class PilotRefused(Refused):
@@ -104,6 +107,8 @@ def member_kind(name):
             return "raster"
         if name == prefix + "copyright.txt":
             return "rights"
+        if name in (prefix + STEM + ".tif.ovr", prefix + STEM + ".ovr"):
+            return "overview"
     return None
 
 
@@ -124,37 +129,67 @@ def copy_member(archive, info, out, deadline):
     return count
 
 
+def inspect_members(infos, deadline):
+    """Inspect central directory only. No extraction or arbitrary diagnostic strings.
+
+    OVR is a documented product auxiliary format, not an observed exact tile member.
+    Never open or extract it. Bundled rights remain mandatory in the original pilot.
+    """
+    if not 1 <= len(infos) <= 4:
+        raise PilotRefused("MEMBERS_COUNT")
+    members, names, total = {}, set(), 0
+    for info in infos:
+        remaining(deadline)
+        name = info.filename
+        if (info.orig_filename != name or not name or len(name) > 256 or
+                "\\" in name or ":" in name or name.startswith("/") or
+                any(part in ("", ".", "..") for part in name.rstrip("/").split("/")) or
+                any(ord(ch) < 32 or ord(ch) > 126 for ch in name)):
+            raise PilotRefused("MEMBERS_PATH")
+        if name.casefold() in names:
+            raise PilotRefused("MEMBERS_DUPLICATE")
+        names.add(name.casefold())
+        mode = stat.S_IFMT(info.external_attr >> 16)
+        if info.flag_bits & 1:
+            raise PilotRefused("MEMBERS_ENCRYPTED")
+        if info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+            raise PilotRefused("MEMBERS_COMPRESSION")
+        if info.is_dir():
+            if name != STEM + "/":
+                raise PilotRefused("MEMBERS_UNKNOWN")
+            if mode not in (0, stat.S_IFDIR):
+                raise PilotRefused("MEMBERS_TYPE")
+            if info.file_size:
+                raise PilotRefused("MEMBERS_SIZE")
+            continue
+        if mode not in (0, stat.S_IFREG):
+            raise PilotRefused("MEMBERS_TYPE")
+        if (info.external_attr >> 16) & 0o111:
+            raise PilotRefused("MEMBERS_MODE")
+        if not 0 < info.file_size <= EXPANDED:
+            raise PilotRefused("MEMBERS_SIZE")
+        total += info.file_size
+        if total > EXPANDED:
+            raise PilotRefused("CAP")
+        kind = member_kind(name)
+        if not kind:
+            raise PilotRefused("MEMBERS_UNKNOWN")
+        if kind in members:
+            raise PilotRefused("MEMBERS_DUPLICATE")
+        if kind == "rights" and info.file_size > 16384:
+            raise PilotRefused("CAP")
+        members[kind] = info
+    if "raster" not in members:
+        raise PilotRefused("MEMBERS_RASTER")
+    return members, total
+
+
 def unpack(archive_path, directory, deadline):
     try:
         with zipfile.ZipFile(archive_path) as archive:
-            infos = archive.infolist()
-            if not 2 <= len(infos) <= 3:
-                raise PilotRefused("MEMBERS")
-            members, names, total = {}, set(), 0
-            for info in infos:
-                name = info.filename
-                if name in names or info.orig_filename != name:
-                    raise PilotRefused("MEMBERS")
-                names.add(name)
-                mode = stat.S_IFMT(info.external_attr >> 16)
-                if info.is_dir():
-                    if name != STEM + "/" or mode not in (0, stat.S_IFDIR) or info.file_size:
-                        raise PilotRefused("MEMBERS")
-                    continue
-                kind = member_kind(name)
-                if (not kind or kind in members or mode not in (0, stat.S_IFREG) or
-                        (info.external_attr >> 16) & 0o111 or info.flag_bits & 1 or
-                        info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED) or
-                        not 0 < info.file_size <= EXPANDED):
-                    raise PilotRefused("MEMBERS")
-                total += info.file_size
-                if total > EXPANDED or (kind == "rights" and info.file_size > 16384):
-                    raise PilotRefused("CAP")
-                members[kind] = info
+            members, total = inspect_members(archive.infolist(), deadline)
             if "rights" not in members:
-                raise PilotRefused("RIGHTS")
-            if "raster" not in members:
-                raise PilotRefused("MEMBERS")
+                raise PilotRefused("RIGHTS_MISSING")
             rights_path = directory / "copyright.txt"
             copy_member(archive, members["rights"], rights_path, deadline)
             rights = rights_path.read_text(encoding="utf-8-sig")
