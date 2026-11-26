@@ -76,7 +76,8 @@ class ProductRefinementTests(unittest.TestCase):
                     region.focus();expect(region).to_be_focused()
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"),f"comparison overflow at {width}x{height}")
                     self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
-                    expect(table).to_contain_text("$525,000.00")
+                    # This summary matrix compares buyer inputs, not individual completed sale prices.
+                    expect(table.get_by_role("row").filter(has=table.get_by_role("rowheader",name="Asking price (buyer-reported)")).get_by_role("cell",name="$500,000.00",exact=True)).to_have_count(2)
                     if folder and width in (1024,768,320):page.get_by_test_id("workspace-comparison").screenshot(path=str(Path(folder)/f"comparison-{width}.png"))
                 expect(table.get_by_role("columnheader")).to_have_count(3)
                 expect(table.get_by_role("rowheader",name="Valuation")).to_be_visible()
