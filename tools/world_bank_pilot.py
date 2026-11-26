@@ -48,8 +48,10 @@ def remaining(deadline):
     return left
 
 
-def public_addresses():
-    entries = socket.getaddrinfo(HOST, 443, type=socket.SOCK_STREAM,
+def public_addresses(host=HOST):
+    if host not in (HOST, "query-next.wikidata.org"):
+        raise Refused("unapproved host")
+    entries = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM,
                                  proto=socket.IPPROTO_TCP)
     if not entries:
         raise Refused("DNS returned no addresses")
@@ -63,26 +65,28 @@ def public_addresses():
 
 
 class PinnedHTTPS(http.client.HTTPSConnection):
+    HOSTNAME = HOST
+
     def __init__(self, deadline):
         self.deadline = deadline
         self.context = ssl.create_default_context()
-        super().__init__(HOST, port=443, timeout=remaining(deadline), context=self.context)
+        super().__init__(self.HOSTNAME, port=443, timeout=remaining(deadline), context=self.context)
 
     def connect(self):
-        family, kind, proto, _, address = public_addresses()
+        family, kind, proto, _, address = public_addresses(self.HOSTNAME)
         raw = socket.socket(family, kind, proto)
         try:
             raw.settimeout(remaining(self.deadline))
             raw.connect(address)  # no second resolution, proxy or alternate address retry
             raw.settimeout(remaining(self.deadline))
-            self.sock = self.context.wrap_socket(raw, server_hostname=HOST)
+            self.sock = self.context.wrap_socket(raw, server_hostname=self.HOSTNAME)
             self.sock.settimeout(remaining(self.deadline))
         except BaseException:
             raw.close()
             raise
 
 
-def bounded_body(response):
+def bounded_body(response, media_types=("application/json",)):
     if response.status != 200:
         raise Refused("HTTP status refused; no redirect or retry")
     def single(name, default=None):
@@ -94,7 +98,7 @@ def bounded_body(response):
     encoding = single("Content-Encoding", "identity").strip().lower()
     transfer = single("Transfer-Encoding", "").strip().lower()
     length = single("Content-Length")
-    if content != "application/json" or encoding != "identity":
+    if content not in media_types or encoding != "identity":
         raise Refused("response media or encoding refused")
     if transfer not in ("", "chunked") or (transfer and length is not None):
         raise Refused("ambiguous response framing")

@@ -148,3 +148,7 @@ Owner approves bounded private offline contextual intelligence prototype using H
 ## AE0 World Bank one-time pilot authority (26 November 2026)
 
 Owner explicitly approves the exact World Bank two-request R0 pilot and applicable source terms, as specified in [side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--ae0-real-source-qualification-and-proposed-pilot). Owner-only existing Windows private workspace; conditional on safe transport and attempt guard verification, no replay, other source, joins, registration, app use, publication, expenditure, migration, phase or score approval. See [implementation and execution gate](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--approved-world-bank-pilot-implementation-and-local-execution-gate).
+
+## AE0 Wikidata one-time spatial pilot authority (26 November 2026)
+
+Owner explicitly approves the exact one-request, max 25-row, 64 KiB, R0 Wikidata spatial pilot and applicable source/API terms in [side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--ae0-second-interface-qualification-and-proposed-spatial-pilot). Owner-only existing Windows workspace after verified safeguards. No replay, other intake, registration, join, release, spend, migration or phase acceptance.
