@@ -35,3 +35,5 @@ Assume 200 range GETs per viewing session, no cache savings, 0.5 GB-month storag
 5. Production decision only after geometry field rights/as-of/privacy, measured archive costs/capacity, hard service limits and access controls, approved hosting and release. Retain existing no-geometry mode. Do not conflate G4 research with G4 actual implementation or G6 release acceptance.
 
 G4 research recommendation complete. Next G5 geographic accessibility and performance against the actual fictional renderer and schematic; local synthetic archive transport experiment only if justified, not a parallel app. Any real basemap download, provider or display is a separate bounded approval. No cost, property row, coordinate, cloud access, deployment or main merge authorised or executed.
+
+**Follow-up:** [Bounded acquisition proposal](BASEMAP_ACQUISITION_PROPOSAL_2026-11-26.md) specifies source, extent, hard caps, disposal and the separate owner gate. No acquisition executed.
