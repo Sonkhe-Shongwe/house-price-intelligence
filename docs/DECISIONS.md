@@ -108,3 +108,7 @@ Current operating scope: owner-only private beta, no external buyer accounts. On
 ## HPI-DATA-005 explicit intake decision (26 November 2026)
 
 Owner explicitly approves the bounded exact Stats SA 2022 codebook acquisition, private processing and registration: one PDF max 5 MiB, 10 pages, 52 district/metro codes, R0, private workspace, source terms/law, no public raw/derivative upload, no commercial use, no spatial join or additional acquisition. See [approved scope and local import](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-approved-offline-importer). Approval does not establish actual acquisition, source verification or P0 acceptance.
+
+## Geographic candidate experiment authority (26 November 2026)
+
+Owner explicitly approves bounded private offline comparison of HPI-DATA-003 and HPI-DATA-005, validation and exact name candidate matching, R0. No spatial joins, source modification, new acquisition, commercial use, public redistribution or accepted identity inference. [Scope and implementation](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-geographic-candidate-experiment). No alias resolution or downstream integration approval.

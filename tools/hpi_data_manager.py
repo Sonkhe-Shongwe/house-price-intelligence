@@ -1114,6 +1114,193 @@ def audit_workspace(root):
     return 0 if all(x["status"]=="integrity checks passed" for x in results) else 1
 
 
+
+# P0-GEO-CROSSWALK: read-only candidates, not a confirmed mapping.
+GEO_INDEX_HEADER = ["shape_id","source_name","source_iso","country","administrative_level",
+                    "reference_year","geometry_type","coordinate_pairs","min_longitude",
+                    "min_latitude","max_longitude","max_latitude","official_municipality_code"]
+CODE_INDEX_HEADER = ["municipality_code","municipality_name_source","geography_level",
+                     "geography_reference","source_page"]
+
+def crosswalk_rows(data, header):
+    reader = csv.reader(io.StringIO(data.decode("utf-8"), newline=""), strict=True)
+    if next(reader, None) != header:
+        raise ValueError("Unexpected registered reference header.")
+    rows = []
+    for row in reader:
+        if len(row) != len(header) or len(rows) >= 52:
+            raise ValueError("Unexpected reference row width or count.")
+        rows.append(dict(zip(header,row)))
+    if len(rows) != 52:
+        raise ValueError("Expected exactly 52 reference rows.")
+    return rows
+
+def crosswalk_candidates(geo_data, code_data):
+    import re
+    geo = crosswalk_rows(geo_data,GEO_INDEX_HEADER)
+    codes = crosswalk_rows(code_data,CODE_INDEX_HEADER)
+    def normal(name):
+        # No punctuation removal, suffix removal, translation or alias expansion.
+        return " ".join(name.split()).casefold()
+    for row in geo:
+        if (not row["shape_id"].startswith("47623444B") or not normal(row["source_name"]) or
+                row["country"]!="ZAF" or row["administrative_level"]!="ADM2" or
+                row["reference_year"]!="2020" or row["official_municipality_code"]):
+            raise ValueError("Unexpected ADM2 identity, vintage, or pre-existing official code.")
+    for row in codes:
+        key = row["municipality_code"]
+        level = row["geography_level"]
+        valid_code = (re.fullmatch(r"DC[1-9]\d?",key) if level=="district" else
+                      re.fullmatch(r"[A-Z]{3}",key) if level=="metro" else None)
+        if (not valid_code or not normal(row["municipality_name_source"]) or
+                row["geography_reference"]!="Census 2022" or row["source_page"]!="4"):
+            raise ValueError("Unexpected official code, level, vintage or provenance.")
+    for rows,key,name in ((geo,"shape_id","source_name"),(codes,"municipality_code","municipality_name_source")):
+        if len({x[key] for x in rows})!=52 or len({x[name] for x in rows})!=52:
+            raise ValueError("Duplicate source identifier or original name; no comparison.")
+    if sum(x["geography_level"]=="district" for x in codes)!=44 or sum(x["geography_level"]=="metro" for x in codes)!=8:
+        raise ValueError("Unexpected district/metro counts.")
+    def grouped(rows,name):
+        groups = {}
+        for row in rows:
+            groups.setdefault(normal(row[name]),[]).append(row)
+        return groups
+    g,c = grouped(geo,"source_name"),grouped(codes,"municipality_name_source")
+    matches,ambiguities,missing_geo,missing_code=[],[],[],[]
+    matched_geo,matched_code,ambiguous_geo,ambiguous_code=set(),set(),set(),set()
+    for key in sorted(set(g)|set(c)):
+        left,right=g.get(key,[]),c.get(key,[])
+        def geo_ref(row):
+            return {"shape_id":row["shape_id"],"source_name":row["source_name"],"reference_year":2020,"source_level":"ADM2"}
+        def code_ref(row):
+            return {"municipality_code":row["municipality_code"],"source_name":row["municipality_name_source"],"reference":"Census 2022","source_level":row["geography_level"]}
+        if len(left)>1 or len(right)>1:
+            ambiguities.append({"normalised_name":key,"geometry_candidates":[geo_ref(x) for x in left],"code_candidates":[code_ref(x) for x in right],"reason":"normalised-name collision; abstain"})
+            ambiguous_geo.update(x["shape_id"] for x in left)
+            ambiguous_code.update(x["municipality_code"] for x in right)
+        elif left and right:
+            x,y=left[0],right[0]
+            matches.append({"geometry":geo_ref(x),"official_reference":code_ref(y),"status":"exact_name_candidate_only"})
+            matched_geo.add(x["shape_id"])
+            matched_code.add(y["municipality_code"])
+        elif left:
+            missing_geo.append(geo_ref(left[0]))
+        else:
+            missing_code.append(code_ref(right[0]))
+    if len(matches)+len(ambiguous_geo)+len(missing_geo)!=52 or len(matches)+len(ambiguous_code)+len(missing_code)!=52:
+        raise ValueError("Candidate accounting mismatch.")
+    return {"summary":{"geometry_rows":52,"official_code_rows":52,"exact_name_candidates":len(matches),
+                       "ambiguous_name_groups":len(ambiguities),"ambiguous_geometry_rows":len(ambiguous_geo),
+                       "ambiguous_code_rows":len(ambiguous_code),"unmatched_geometry_rows":len(missing_geo),
+                       "unmatched_code_rows":len(missing_code),
+                       "district_candidates":sum(x["official_reference"]["source_level"]=="district" for x in matches),
+                       "metro_candidates":sum(x["official_reference"]["source_level"]=="metro" for x in matches),
+                       "crosswalk_verified":False,"boundary_equivalence_verified":False,
+                       "independent_district_metro_classification_verified":False},
+            "exact_name_candidates":matches,"ambiguous_groups":ambiguities,
+            "unmatched_geometry":missing_geo,"unmatched_official_codes":missing_code}
+
+def crosswalk_report(root,today=None,geo_pin=GEO_SHA):
+    root=workspace(root)
+    specs=[("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,10*MIB,geo_pin),
+           ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None)]
+    payloads,provenance=[],[]
+    for spec in specs:
+        sid,mp,rp,op,qp,cap,pin=spec
+        before=read_bounded(root/mp)
+        m=json.loads(before)
+        audit=audit_registered(root,spec,today)
+        if audit["status"]!="integrity checks passed":
+            raise ValueError(sid+" registration missing or incomplete.")
+        if sid=="HPI-DATA-003":
+            valid=(m.get("reference_year")==2020 and m.get("snapshot")==GEO_SNAPSHOT and
+                   m.get("source_url")==GEO_URL and m.get("source_licence")=="CC BY 3.0 IGO (publisher metadata)" and
+                   m["quality"].get("features")==52 and m["quality"].get("official_code_crosswalk_verified") is False)
+        else:
+            valid=(m.get("source_url")==CODE_URL and m.get("publication_date")=="2024-08-29" and
+                   m.get("retention_policy")==CODE_POLICY and m["quality"].get("entries")==52 and
+                   m["quality"].get("visual_page_reviewed_by_owner") is True and m["quality"].get("crosswalk_verified") is False)
+        if not valid or not m.get("attribution"):
+            raise ValueError(sid+" source identity, terms or qualification differs.")
+        data=read_bounded(root/op,1*MIB)
+        if sha(data)!=m["processed_sha256"] or read_bounded(root/mp)!=before:
+            raise ValueError(sid+" changed during validation; stop.")
+        payloads.append(data)
+        provenance.append({"dataset_id":sid,"source":m["source"],"source_url":m["source_url"],
+                           "source_sha256":m["source_sha256"],"processed_sha256":m["processed_sha256"],
+                           "source_licence":m["source_licence"],"attribution":m["attribution"],
+                           "reference":"2020 geography" if sid=="HPI-DATA-003" else "Census 2022",
+                           "deadline":m["do_not_retain_on_or_after"],"integrity":"passed"})
+    result=crosswalk_candidates(*payloads)
+    return {"experiment":"P0-GEO-CROSSWALK","mode":"private read-only terminal report","provenance":provenance,
+            **result,"limitations":["Candidate matching uses casefold and whitespace only; no aliases or fuzzy matching.",
+            "ADM2 is the shared district/metro tier; HPI-DATA-003 has no independent district-versus-metro type field.",
+            "Matching labels do not establish stable identity, temporal equivalence, topology or boundary accuracy.",
+            "Stats SA noncommercial/source terms and both source attributions apply; no public redistribution.",
+            "No files changed, no network, no geometry operations, no material join or accepted crosswalk."]}
+
+def crosswalk_self_test():
+    day=date(2026,11,26)
+    def make(header,rows):
+        out=io.StringIO(newline="")
+        w=csv.writer(out,lineterminator="\n")
+        w.writerow(header)
+        w.writerows(rows)
+        return out.getvalue().encode()
+    geo,code=[],[]
+    for i in range(52):
+        level="district" if i<44 else "metro"
+        key=f"DC{i+1}" if i<44 else "X"+chr(65+i-44)+"X"
+        name=f"Invented district {i}" if i<44 else f"Invented metro {i}"
+        geo.append([f"47623444B{i}",name,"","ZAF","ADM2","2020","Polygon","5","0","0","1","1",""])
+        code.append([key,name.upper(),level,"Census 2022","4"])
+    gb,cb=make(GEO_INDEX_HEADER,geo),make(CODE_INDEX_HEADER,code)
+    assert crosswalk_candidates(gb,cb)["summary"]["exact_name_candidates"]==52
+    code[0][1]="Different punctuation-name"
+    assert crosswalk_candidates(gb,make(CODE_INDEX_HEADER,code))["summary"]["unmatched_geometry_rows"]==1
+    code[0][1]=code[1][1].lower()
+    q=crosswalk_candidates(gb,make(CODE_INDEX_HEADER,code))["summary"]
+    assert q["ambiguous_name_groups"]==1 and q["ambiguous_code_rows"]==2 and q["exact_name_candidates"]==50 and q["unmatched_geometry_rows"]==1
+    code[0][1]=code[1][1]
+    for bad in (make(CODE_INDEX_HEADER,code),make(CODE_INDEX_HEADER,code[:-1])):
+        try:
+            crosswalk_candidates(gb,bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid table accepted")
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        raw=b"invented geography"
+        for sid,mp,rp,op,qp,data,raw_data,extra in (
+            ("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,gb,raw,
+             {"reference_year":2020,"snapshot":GEO_SNAPSHOT,"source_url":GEO_URL,"source_licence":"CC BY 3.0 IGO (publisher metadata)",
+              "retention_policy":OPEN_POLICY,"retention":OPEN_RETENTION,"quality":{"features":52,"official_code_crosswalk_verified":False}}),
+            ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,cb,b"invented PDF",
+             {"publication_date":"2024-08-29","source_url":CODE_URL,"source_licence":"Invented terms",
+              "retention_policy":CODE_POLICY,"retention":CODE_RETENTION,"visual_page_reviewed_by_owner":True,
+              "quality":{"entries":52,"visual_page_reviewed_by_owner":True,"crosswalk_verified":False}})):
+            m={"dataset_id":sid,"source":"Invented fixture","attribution":"Invented fixture","raw_path":rp,
+               "processed_path":op,"quality_report":qp,"terms_reviewed_by_owner":True,
+               "first_intake_date":day.isoformat(),"do_not_retain_on_or_after":None,"source_bytes":len(raw_data),
+               "source_sha256":sha(raw_data),"processed_sha256":sha(data),**extra}
+            for p,b in ((rp,raw_data),(op,data),(qp,json_bytes(m["quality"])),(mp,json_bytes(m))):
+                publish(root/p,b)
+        before={p.relative_to(root):p.read_bytes() for p in root.rglob("*") if p.is_file()}
+        report=crosswalk_report(root,day,sha(raw))
+        assert report["summary"]["exact_name_candidates"]==52 and report["summary"]["crosswalk_verified"] is False
+        assert before=={p.relative_to(root):p.read_bytes() for p in root.rglob("*") if p.is_file()}
+        (root/CODE_OUTPUT).write_bytes(cb+b"\n")
+        try:
+            crosswalk_report(root,day,sha(raw))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Tampered reference accepted")
+    print("PASS: read-only crosswalk, exact candidates, ambiguity, missing/duplicate rows, checksum refusal and unchanged files.")
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
@@ -1122,18 +1309,26 @@ def main():
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
     p.add_argument("--audit-workspace",action="store_true")
+    p.add_argument("--geo-crosswalk",action="store_true",help="Private read-only candidate report for HPI-DATA-003/005")
     p.add_argument("--remove-internal-deadlines",action="store_true")
     p.add_argument("--init-only",action="store_true")
     p.add_argument("--intake-date",type=date.fromisoformat)
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
+        if args.geo_crosswalk:
+            if (args.self_test or args.status or args.audit_workspace or args.remove_internal_deadlines or args.init_only or
+                    args.intake_date is not None or args.retain_until is not None or args.terms_reviewed or args.dataset != "HPI-DATA-002"):
+                raise ValueError("Geographic crosswalk must be a standalone read-only action.")
+            print(json.dumps(crosswalk_report(args.root),indent=2,ensure_ascii=False))
+            return 0
         if args.self_test:
             self_test()
             district_self_test()
             building_self_test()
             retention_self_test()
             code_self_test()
+            crosswalk_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -1167,7 +1362,7 @@ def main():
         manifest = import_rppi(root,intake,reviewed,deadline=args.retain_until)
         print(json.dumps({"import":"complete","quality":manifest["quality"],"status":status(root)},indent=2))
         return 0
-    except (ValueError, KeyError, TypeError, AttributeError, OverflowError, OSError, EOFError, InvalidOperation, zipfile.BadZipFile) as exc:
+    except (ValueError, KeyError, TypeError, AttributeError, OverflowError, OSError, EOFError, InvalidOperation, zipfile.BadZipFile, csv.Error) as exc:
         print("STOP:",str(exc))
         return 1
 

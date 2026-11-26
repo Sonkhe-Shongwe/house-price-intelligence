@@ -135,3 +135,16 @@ Enter actual download date; inspect page 2 terms and confirm private noncommerci
 Owner supplied terminal screenshots of actual PDF import from permanent development checkout and sibling private workspace. First attempt stopped on blank intake date, before registration; subsequent command supplied 2026-11-26 and --terms-reviewed. Owner confirmed all 52 name/code pairs visually match page 4. Import complete, registered true: 52 entries, 44 districts, eight metros, zero duplicate codes and names, ten pages, source page 4, visual_page_reviewed_by_owner true, crosswalk_verified false. Deadline null, retention_due_or_expired false, policy stats-sa-noncommercial-v1. Four reported private paths: 02_Raw_Data/06. Census 2022 Code lists.pdf, 03_Processed_Data/HPI-DATA-005/district_codes.csv, 07_Reports/HPI-DATA-005_quality.json, 01_Source_Catalogue/HPI-DATA-005.json. Owner attestation and observed terminal output, not independent file-byte, hash, rights or page-image verification. Exact file size/hash and complete copy inventory not shown. No repeat required; synthetic repeat passed. No material join or additional intake approved; source terms and noncommercial limitation remain binding.
 
 Exact implementation [23aedf1](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/23aedf153a581cc2757cb55665ee9ca4cf328dfe) passed all seven triggered Actions workflows (45884040787, 45884049211, 45884049056, 45884049097, 45884049070, 45884049061, 45884049229); invented PDF and 219 backend fixture tests passed. Four retained datasets across D03/D07/D09, still partial. No P0 gate/score change.
+ 
+## Private geographic candidate reconciliation (26 November 2026)
+
+Owner explicitly authorised one bounded read-only offline experiment on existing HPI-DATA-003 and HPI-DATA-005, R0, no spatial joins or modification of source datasets. After verified CI, from permanent development checkout:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --geo-crosswalk
+}
+```
+
+No new dependencies or downloads; no initialise, writes, registry changes or geometry operations. Checks registered raw and derived checksums, report consistency, source identity, retention, terms attestation, count, schema, unique original IDs/names, source years and district/metro reference counts. Conservative casefold/whitespace normalisation, one-to-one exact names only; collision groups and unmatched names on both sides explicitly reported. HPI-DATA-003 contains ADM2 tier but no independent district/metro classification, so cannot verify subtype equivalence; official reference supplies candidate type only. Local terminal JSON contains candidate rows and provenance; share summary counts only, keep detailed output private. No accepted mapping or claim of temporal/boundary equivalence, no aliases without separate approval. Invented-data CI includes successful matching, ambiguity, unmatched and invalid tables, checksum failure and unchanged file comparison. Actual local result pending; stop on failure, do not edit sources to force matches.
