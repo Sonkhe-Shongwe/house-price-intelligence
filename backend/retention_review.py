@@ -95,6 +95,18 @@ def _utc(value):
         raise ImportRefused("Retention timestamp refused") from None
 
 
+def retention_deadline(start, now):
+    """The owner-approved maximum, not permission to retain or delete data."""
+    if (not isinstance(start, datetime) or start.utcoffset() != timedelta(0)
+            or not isinstance(now, datetime) or now.utcoffset() != timedelta(0)
+            or start > now):
+        raise ImportRefused("Invalid retention window")
+    try:
+        return start + timedelta(days=RETENTION_DAYS)
+    except OverflowError:
+        raise ImportRefused("Invalid retention window") from None
+
+
 def review_retention(conn, build_id, *, now=None):
     """Count known dependencies in one read-only snapshot, never authorise deletion.
 
@@ -129,7 +141,7 @@ def review_retention(conn, build_id, *, now=None):
         start = min([_utc(row[0])]+[_utc(item[1]) for item in source_times])
         if start>now or any(_utc(item[1])>now for item in source_times) or _utc(row[0])>now:
             raise ImportRefused("Future intake timestamp")
-        expiry = start+timedelta(days=RETENTION_DAYS)
+        expiry = retention_deadline(start, now)
         counts = dict(zip(COUNTS,conn.execute(IMPACT,(build_id,)*5).fetchone()))
     return {"scope":"disposable invented historical build dependency review",
             "status":"expired" if now>=expiry else "within_retention_window",

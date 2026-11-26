@@ -187,6 +187,44 @@ class HistoricalReaderTests(unittest.TestCase):
                         finally:
                             conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents-1")
                         self.assertEqual(svc.saved_workspace(cookie=a["cookie"]),workspace)
+                        # Exercise the existing service with a fixed, earlier
+                        # operator intake date. No cloud or real-data switch.
+                        from datetime import datetime, timedelta, timezone
+                        from unittest.mock import patch
+                        started=datetime.fromisoformat(args["extracted_at_utc"])-timedelta(days=1)
+                        deadline=started+timedelta(days=30)
+                        gated=PrivateBetaRehearsal(rd,wr,seal,boundary,
+                            retention_started_at=started.isoformat())
+                        with patch("backend.private_beta_rehearsal.datetime",wraps=datetime) as clock:
+                            clock.now.return_value=deadline-timedelta(microseconds=1)
+                            self.assertEqual(gated.saved_workspace(cookie=a["cookie"]),workspace)
+                            self.assertEqual(gated.reopen(iid,cookie=a["cookie"]),saved)
+                            self.assertEqual(gated.search("1 fictional court","2025-04-01",
+                                cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"]),match)
+                            clock.now.return_value=deadline
+                            for call in (
+                                lambda:gated.saved_workspace(cookie=a["cookie"]),
+                                lambda:gated.reopen(iid,cookie=a["cookie"]),
+                                lambda:gated.search("1 fictional court","2025-04-01",
+                                    cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"]),
+                                lambda:gated.create(req,cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"]),
+                                lambda:gated.reopen_comparison(iid,cookie=a["cookie"])):
+                                with self.assertRaisesRegex(ImportRefused,"Retention window expired"):
+                                    call()
+                            self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],1)
+                            self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
+                            # Crossing the deadline inside a transaction must
+                            # roll back instead of adding another investigation.
+                            clock.now.side_effect=[deadline-timedelta(seconds=1)]*3+[deadline]
+                            with self.assertRaisesRegex(ImportRefused,"Retention window expired"):
+                                gated.create(req,cookie=a["cookie"],origin=boundary.origin,csrf=a["csrf"])
+                            self.assertEqual(conn.execute("SELECT count(*) FROM hpi_candidate.investigations").fetchone()[0],1)
+                            clock.now.side_effect=None
+                            clock.now.return_value=deadline-timedelta(seconds=1)
+                            later=PrivateBetaRehearsal(rd,wr,seal,boundary,
+                                retention_started_at=(started+timedelta(days=2)).isoformat())
+                            with self.assertRaisesRegex(ImportRefused,"cannot follow recorded intake"):
+                                later.saved_workspace(cookie=a["cookie"])
                         self._check_private_http_browser(rd,wr,seal,rp,bp)
                         # Existing records are invisible without owner context.
                         self.assertEqual(_inspect_services(rd,wr,database="hpi_ingest_fixture")["status"],"restricted_services_verified")

@@ -2,6 +2,7 @@
 No live cloud connector, real-data activation or identity provider.
 """
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from threading import RLock
 from hashlib import sha256
 from urllib.parse import urlsplit
@@ -16,6 +17,7 @@ from backend.historical_beta_projection import project_rehearsal
 from backend.investigation_contract import validate_request
 from backend.synthetic_investigation_store import _json, _utc, _exact_money_cents
 from backend.curated_ingestion_candidate import ImportRefused
+from backend.retention_review import _utc as _retention_stamp, retention_deadline
 from backend.oidc_boundary import OidcBoundary, AuthDenied
 from backend.synthetic_shortlists import MAX_ENTRIES, ShortlistError, _uuid, _note, _require_object
 
@@ -34,7 +36,7 @@ class PrivateBetaRehearsal:
     _check_connection=staticmethod(_connection)
     _verify_source=staticmethod(_verified)
 
-    def __init__(self, reader, writer, seal, boundary):
+    def __init__(self, reader, writer, seal, boundary, *, retention_started_at=None):
         self._check_connection(reader,READER)
         self._check_connection(writer,BUYER)
         if reader is writer or reader.info.port!=writer.info.port:
@@ -42,6 +44,21 @@ class PrivateBetaRehearsal:
         self.allowed_owners=self._identity_owners(boundary)
         self.reader,self.writer,self.seal,self.boundary=reader,writer,dict(seal),boundary
         self.request_lock=RLock()
+        # Explicit disposable rehearsal only. Fixed invented cloud services
+        # do not expire like real records; no real-data activation is enabled.
+        if retention_started_at is not None and type(self) is not PrivateBetaRehearsal:
+            raise ImportRefused("Disposable retention rehearsal required")
+        self._retention_start = (None if retention_started_at is None
+                                 else _retention_stamp(retention_started_at))
+
+    def _require_retention(self, source_stamp=None):
+        if self._retention_start is None:
+            return
+        if source_stamp is not None and self._retention_start > _retention_stamp(source_stamp):
+            raise ImportRefused("Retention start cannot follow recorded intake")
+        now=datetime.now(timezone.utc)
+        if now >= retention_deadline(self._retention_start, now):
+            raise ImportRefused("Retention window expired")
 
     @staticmethod
     def _identity_owners(boundary):
@@ -71,16 +88,20 @@ class PrivateBetaRehearsal:
 
     @contextmanager
     def _source(self):
+        self._require_retention()
         self._check_connection(self.reader,READER)
         with self.reader.transaction():
             self.reader.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             self.reader.execute("SET LOCAL statement_timeout='5000ms'")
             self.reader.execute("SET LOCAL lock_timeout='3000ms'")
             self.reader.execute("SELECT pg_advisory_xact_lock_shared(194323)")
-            yield self._verify_source(self.reader,self.seal)
+            verified=self._verify_source(self.reader,self.seal)
+            self._require_retention(verified[3])
+            yield verified
 
     @contextmanager
     def _buyer(self,owner):
+        self._require_retention()
         self._check_connection(self.writer,BUYER)
         with self.writer.transaction():
             self.writer.execute("SET LOCAL statement_timeout='5000ms'")
@@ -91,11 +112,15 @@ class PrivateBetaRehearsal:
                 raise ImportRefused("Unexpected buyer owner context")
             self.writer.execute("SELECT set_config('hpi.owner_id',%s,true)",(owner,))
             yield self.writer
+            # If the deadline passes during a write, roll back before commit.
+            self._require_retention()
 
     def search(self,query,analysis_date,*,cookie,origin,csrf):
         self._owner(cookie,"POST",origin,csrf)
         with self._source() as (adapter,build,ids,_):
-            return _search_verified(adapter,build,ids,query,analysis_date)
+            result=_search_verified(adapter,build,ids,query,analysis_date)
+            self._require_retention()
+            return result
 
     def create(self,request,*,cookie,origin,csrf):
         owner=self._owner(cookie,"POST",origin,csrf)
