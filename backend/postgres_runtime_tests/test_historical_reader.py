@@ -573,6 +573,12 @@ class HistoricalReaderTests(unittest.TestCase):
                         other.get_by_test_id("beta-reopen-comparison").click()
                         expect(other.get_by_test_id("beta-error")).to_be_visible()
                         self.assertEqual(other.get_by_test_id("beta-comparison").count(),0)
+                        # A second tab must clear its authenticated subtree on a genuine session rejection.
+                        stale=contexts[0].new_page()
+                        stale.goto(base+'/private-beta-rehearsal')
+                        expect(stale.get_by_test_id('beta-workspace')).to_be_visible()
+                        stale.get_by_test_id('beta-workspace-comparison').first.click()
+                        expect(stale.get_by_test_id('beta-comparison')).to_be_visible()
                         # Browser sign-out must clear the displayed evidence and revoke the old session.
                         old_cookie=next(c for c in contexts[0].cookies() if c['name']=='__Host-hpi_session')
                         page.get_by_test_id("beta-sign-out").click()
@@ -581,6 +587,14 @@ class HistoricalReaderTests(unittest.TestCase):
                         self.assertEqual(page.get_by_test_id("beta-comparison").count(),0)
                         with self.assertRaises(AuthDenied):
                             resumed_boundary.authorize(cookie=old_cookie['name']+'='+old_cookie['value'],method='GET')
+                        stale.get_by_test_id('beta-nav-saved').click()
+                        expect(stale.get_by_test_id('beta-session-recovery')).to_be_visible()
+                        expect(stale.get_by_test_id('beta-session-recovery')).to_be_focused()
+                        expect(stale.get_by_test_id('beta-comparison')).to_have_count(0)
+                        expect(stale.get_by_test_id('beta-workspace')).to_have_count(0)
+                        expect(stale.locator('#beta-note-0')).to_have_count(0)
+                        expect(stale.get_by_role('link',name='Return to sign in')).to_have_attribute('href','/')
+                        stale.close()
                         # Revocation is session-specific, and does not delete durable buyer records.
                         self.assertEqual(resumed.reopen_comparison(sid,cookie=auth['cookie'])['shortlist_id'],sid)
                         for ctx in contexts:ctx.close()

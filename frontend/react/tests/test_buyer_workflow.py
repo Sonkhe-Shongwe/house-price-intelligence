@@ -182,6 +182,35 @@ class ReactBuyerWorkflowBrowserTests(unittest.TestCase):
         expect(self.page.get_by_test_id("buyer-error")).to_contain_text(
             "valid lowercase saved investigation UUID")
 
+    def test_pending_save_lost_response_recovers_without_duplicate_write(self):
+        self.page.get_by_test_id("buyer-manual-pin").fill("00000000000001")
+        url=self.base+"/v1/investigations"
+        held=[]
+        self.page.route(url,lambda route:held.append(route))
+        self.page.get_by_test_id("buyer-create").click()
+        expect(self.page.get_by_test_id("buyer-pending")).to_be_visible()
+        expect(self.page.get_by_test_id("buyer-create")).to_be_disabled()
+        expect(self.page.get_by_test_id("buyer-result")).to_have_count(0)
+        # Programmatic form submit exercises the synchronous pending-write lock too.
+        self.page.get_by_test_id("buyer-create").evaluate("el=>el.form.requestSubmit()")
+        self.assertEqual(len(held),1)
+        response=held[0].fetch()
+        self.assertEqual(response.status,201)
+        saved=response.json()["investigation_id"]
+        held[0].abort()
+        self.page.unroute(url)
+        expect(self.page.get_by_test_id("buyer-error")).to_contain_text("check Saved properties")
+        expect(self.page.get_by_test_id("buyer-feedback")).to_have_count(0)
+        expect(self.page.get_by_test_id("buyer-result")).to_have_count(0)
+        self.page.get_by_test_id("nav-saved").click()
+        self.page.get_by_test_id("history-search").fill("00000000000001")
+        # Shared test fixture may contain other records; identify this save by its frozen ID.
+        self.page.get_by_test_id("nav-investigate").click()
+        self.page.get_by_test_id("buyer-reopen-id").fill(saved)
+        self.page.get_by_test_id("buyer-reopen").click()
+        expect(self.page.get_by_test_id("buyer-saved-id")).to_have_text(saved)
+        expect(self.page.get_by_test_id("buyer-result")).to_be_visible()
+
     def test_canonical_security_boundary(self):
         with closing(http.client.HTTPConnection("127.0.0.1",self.port,timeout=8)) as conn:
             def send_request(method,path,body=None,headers=None):

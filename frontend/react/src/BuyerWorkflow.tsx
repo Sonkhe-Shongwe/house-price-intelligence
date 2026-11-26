@@ -144,7 +144,7 @@ export default function BuyerWorkflow(){
   async function search(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();
     if(pendingWrite.current)return;
-    if(!QUERY.test(query.trim())){setError('Enter a fictional address containing 2–80 supported characters.');return;}
+    if(!QUERY.test(query.trim())){setMessage('');setError('Enter a fictional address containing 2–80 supported characters.');return;}
     const {controller,seq}=newOperation();
     setChosen(null);setManualPin('');setCandidates([]);setRecord(null);setActiveRank(null);
     setError('');setMessage('');setPhase('searching');
@@ -218,7 +218,7 @@ export default function BuyerWorkflow(){
     event?.preventDefault();
     if(pendingWrite.current)return;
     const target=(id??reopenInput).trim();
-    if(!UUID.test(target)){setError('Enter a valid lowercase saved investigation UUID.');return;}
+    if(!UUID.test(target)){setMessage('');setError('Enter a valid lowercase saved investigation UUID.');return;}
     const {controller,seq}=newOperation();
     setError('');setMessage('');setRecord(null);setActiveRank(null);setPhase('reopening');
     try{

@@ -1,5 +1,6 @@
 import {ActionButton,Field,PageHeading,StatusMessage,EmptyState,LoadingState} from './UI';
 import Icon from './Icon';
+import {SessionUnconfirmed} from './fixtureFetch';
 import {EvidenceNavigation,EvidenceJump} from './EvidenceNavigation';
 /** Explicit fixture-only historical-shape view within the existing React bundle. */
 import {useEffect,useRef,useState} from 'react';
@@ -57,6 +58,18 @@ function PrivateEvidence({result}:{result:Result}){
   </section>;
 }
 export default function PrivateBetaRehearsal(){
+  const [sessionUnconfirmed,setSessionUnconfirmed]=useState(false);
+  const recovery=useRef<HTMLElement|null>(null);
+  useEffect(()=>{if(sessionUnconfirmed)recovery.current?.focus();},[sessionUnconfirmed]);
+  // Unmount the entire authenticated subtree. In-flight completions cannot restore its draft or evidence.
+  if(sessionUnconfirmed)return <main className="pw-signed-out" ref={recovery} tabIndex={-1} aria-labelledby="session-recovery-title" data-testid="beta-session-recovery">
+    <div className="pw-brand-mark">HPI</div><h1 id="session-recovery-title">Session could not be confirmed</h1>
+    <p role="alert">Private evidence and unsaved drafts have been cleared from this workspace. Sign in again and check your saved records before repeating a save. A previous request may have completed.</p>
+    <a href="/"><Icon name="open"/>Return to sign in</a>
+  </main>;
+  return <PrivateWorkspace onSessionUnconfirmed={()=>setSessionUnconfirmed(true)}/>;
+}
+function PrivateWorkspace({onSessionUnconfirmed}:{onSessionUnconfirmed:()=>void}){
   const [address,setAddress]=useState('1 Fictional Court'),[date,setDate]=useState('2025-04-01');
   const [area,setArea]=useState('1600'),[price,setPrice]=useState('');
   const [token,setToken]=useState<string|null>(null),[status,setStatus]=useState('');
@@ -81,7 +94,7 @@ export default function PrivateBetaRehearsal(){
     setWorkspace(null);setWorkspaceError(false);setWorkspaceLoading(true);
     void service.listWorkspace(controller.signal).then(workspace=>{
       if(!controller.signal.aborted)setWorkspace(workspace);
-    }).catch(()=>{if(!controller.signal.aborted)setWorkspaceError(true);}).finally(()=>{
+    }).catch(e=>{if(!controller.signal.aborted){if(e instanceof SessionUnconfirmed)onSessionUnconfirmed();else setWorkspaceError(true);}}).finally(()=>{
       if(!controller.signal.aborted)setWorkspaceLoading(false);
     });
     return ()=>controller.abort();
@@ -90,7 +103,8 @@ export default function PrivateBetaRehearsal(){
   async function run(operation:Operation,action:()=>Promise<void>){
     if(locked.current)return;locked.current=true;setBusy(true);setError(false);setFeedback(pendingText[operation]);
     try{await action();setFeedback(completedText[operation]);}
-    catch{
+    catch(e){
+      if(e instanceof SessionUnconfirmed){onSessionUnconfirmed();return;}
       setFeedback('');setError(true);
       setFailure(operation==='saveInvestigation'||operation==='saveComparison'
         ?'Save could not be confirmed. Check saved records before trying again; the request may have completed.'
@@ -105,7 +119,7 @@ export default function PrivateBetaRehearsal(){
       // No buyer data or draft notes remain in the signed-out view. Saved records stay on the server.
       clear();setAddress('');setDate('');setArea('');setPrice('');setIid('');setEntries([]);
       setLabel('');setSid('');setComparison(null);setWorkspace(null);setError(false);setSignedOut(true);
-    }catch{setLogoutError(true);}finally{setFeedback('');locked.current=false;setBusy(false);}
+    }catch(e){if(e instanceof SessionUnconfirmed)onSessionUnconfirmed();else setLogoutError(true);}finally{setFeedback('');locked.current=false;setBusy(false);}
   }
   if(signedOut)return <main className="pw-signed-out"><div className="pw-brand-mark">HPI</div><h1>Signed out</h1><p role="status">Your session has ended. Saved investigations and comparisons remain available after signing in again.</p><a href="/"><Icon name="open"/>Return to sign in</a></main>;
   return <div className="pw-shell"><header className="pw-top"><div className="pw-brand"><span className="pw-brand-mark">HPI</span><div><strong>House Price Intelligence</strong><small>BUYER WORKSPACE</small></div></div><span className="pw-mode">Fictional data · Private</span><ActionButton className="pw-secondary" type="button" disabled={busy} data-testid="beta-sign-out" onClick={()=>void signOut()} icon="signout" variant="inverse">Sign out</ActionButton></header>
@@ -125,7 +139,8 @@ export default function PrivateBetaRehearsal(){
           clear();const m=await service.search(address,date);
           if(m.status==='one_eligible_candidate'){
             setToken(m.addressId);setStatus('One eligible parcel candidate');
-          }else if(m.status==='ambiguous'||m.status==='no_match'){setStatus('No unique eligible candidate');}
+          }else if(m.status==='ambiguous'){setStatus('Multiple eligible parcels. Refine the fictional address before saving.');}
+          else if(m.status==='no_match'){setStatus('No eligible parcel found. Check the fictional address and analysis date.');}
           else throw Error('Unavailable');
         })} icon="search" variant="primary">Search</ActionButton><p role="status" data-testid="beta-match" className="pw-match" data-matched={token!==null}>{status}</p>
         <div className="pw-fields"><div><Field label="Buyer-reported area (sq ft)" id="beta-area" type="number" min="1" value={area} onChange={e=>setArea(e.target.value)}/></div><div><Field label="Asking price (USD, optional)" id="beta-price" value={price} onChange={e=>setPrice(e.target.value)}/></div></div>
@@ -143,7 +158,7 @@ export default function PrivateBetaRehearsal(){
       {view==='home'&&<div className="pw-editorial"><div><span className="pw-kicker">FIELD GUIDE / 01</span><h2>Evidence, not estimates.</h2><p>Historical completed sales can inform a decision. They do not establish a current property value.</p><ActionButton type="button" className="pw-secondary" disabled={busy} onClick={()=>navigate('methodology')} icon="info" variant="secondary">Read methodology</ActionButton></div><div className="pw-editorial-mark" aria-hidden="true">H<span>/</span></div></div>}
       <div className="pw-card" aria-busy={workspaceLoading}><div className="pw-card-head"><div><h2>{view==='home'?'Recent research':'Your research library'}</h2><p className="pw-sub">Open records by date and evidence status. Saved addresses are not exposed by this service.</p></div><ActionButton className="pw-secondary" data-testid="beta-load-workspace" disabled={busy||workspaceLoading} onClick={()=>setWorkspaceRevision(n=>n+1)} icon="refresh" variant="secondary">Refresh records</ActionButton></div>
       {workspaceLoading&&<LoadingState className="pw-library-loading" data-testid="beta-library-loading">Loading saved records…</LoadingState>}
-      {workspaceError&&<StatusMessage tone="error">Saved records could not be verified. Refresh to retry.</StatusMessage>}
+      {workspaceError&&<StatusMessage tone="error" data-testid="beta-library-error">Saved records could not be verified. Refresh to retry.</StatusMessage>}
       {workspace&&<div className="pw-saved-grid" data-testid="beta-workspace"><div><h3>Investigations</h3>{workspace.investigations.length===0?<EmptyState className="pw-sub">No saved investigations.</EmptyState>:workspace.investigations.map(i=><div className="pw-list-row" key={i.investigation_id}><div><strong>{statusText(i.status)}</strong><small>Analysis {i.analysis_date} · Saved {savedTime(i.created_at_utc)}</small></div><ActionButton className="pw-secondary" data-testid="beta-workspace-investigation" disabled={busy} onClick={()=>void run('reopenInvestigation',async()=>{clear();const v=await service.reopenInvestigation(i.investigation_id);setResult(v);setIid(v.investigation_id);setView('investigate');})} icon="open" variant="secondary">Open</ActionButton></div>)}</div><div><h3>Comparisons</h3>{workspace.comparisons.length===0?<EmptyState className="pw-sub">No saved comparisons.</EmptyState>:workspace.comparisons.map(i=><div className="pw-list-row" key={i.shortlist_id}><div><strong>{i.label}</strong><small>Saved {savedTime(i.created_at_utc)}</small></div><ActionButton className="pw-secondary" data-testid="beta-workspace-comparison" disabled={busy} onClick={()=>void run('reopenComparison',async()=>{setComparison(null);const v=await service.reopenComparison(i.shortlist_id);setComparison(v);setSid(v.shortlist_id);setView('compare');})} icon="open" variant="secondary">Open</ActionButton></div>)}</div>{workspace.truncated&&<p className="pw-sub">Showing the most recent 50 records per category.</p>}</div>}</div></section>
       <section className="pw-view" hidden={view!=='compare'} aria-label="Compare"><div className="pw-intro"><span className="pw-kicker">COMPARISON STUDIO</span><h1>Compare with context.</h1><p>Choose two or three saved investigations, preserve notes and compare the evidence.</p><ActionButton className="pw-secondary" type="button" disabled={busy} onClick={()=>navigate('saved')} icon="saved" variant="secondary">Find saved properties</ActionButton></div><div className="pw-card" id="pw-compare" aria-label="Saved property comparison">
         <h2>Comparison draft</h2>

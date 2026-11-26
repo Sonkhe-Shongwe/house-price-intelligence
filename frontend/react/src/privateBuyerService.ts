@@ -1,11 +1,12 @@
 /** Named, same-origin private buyer operations. Transport retains session/CSRF confirmation.
  * No arbitrary route exposed, no fallback to synthetic endpoints, no client-side matching.
  */
-import {fixtureFetch} from './fixtureFetch';
+import {fixtureFetch,SessionUnconfirmed} from './fixtureFetch';
 import {decode,decodeComparison,decodeWorkspace,decodeSearch,decodeLogout,UUID,type Entry} from './privateBuyerContract';
 const ROOT='/v1/private-beta-rehearsal';
 async function request(path:string,body?:object,signal?:AbortSignal):Promise<unknown>{
   const res=await fixtureFetch(ROOT+path,body===undefined?{signal}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});
+  if(res.status===401)throw new SessionUnconfirmed();
   if(!res.ok)throw Error('Unavailable');
   return await res.json() as unknown;
 }
@@ -33,6 +34,7 @@ export const privateBuyerService={
   },
   async signOut(){
     const res=await fixtureFetch('/auth/logout',{method:'POST'});
+    if(res.status===401)throw new SessionUnconfirmed();
     if(!res.ok)throw Error('Sign out unavailable');
     decodeLogout(await res.json());
   },
