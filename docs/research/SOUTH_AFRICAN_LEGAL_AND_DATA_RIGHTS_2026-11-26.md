@@ -122,3 +122,7 @@ Before an authorised research experiment: record signed/written permission or ap
 ## SA3.3 closure (26 November 2026)
 
 [Unsent research proposal and permission packet](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) completes bounded SA3 desk deliverables and records open approval gate. City official research page and detailed guidelines rechecked; general ethics documentation versus academic institutional letter distinguished, independent requirements unresolved. Proposed metadata-only contact, no actual permission or acquisition; SA4 blocked. Explicit owner decision required; do not interpret a generic continuation as consent. No compliance/rights approval, no phase credit.
+
+## Post-contact status (26 November 2026)
+
+The one metadata-only email was sent; see [packet D](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md#d-actual-contact-event-and-process-correction-26-november-2026). No actual rights granted, reply not checked, no formal application or property rows. All operation gates remain. Future exact drafts require explicit approval. Independent IR1 design next; empirical SA4 blocked.

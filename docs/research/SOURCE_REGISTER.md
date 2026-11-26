@@ -99,3 +99,7 @@ See [legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md)
 ## SA3.3 permission packet (26 November 2026)
 
 [Unsent Cape Town enquiry and research outline](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) uses rechecked [City research page](https://www.capetown.gov.za/city-connect/access-information/submit-a-research-request) and [guidelines](https://resource.capetown.gov.za/documentcentre/Documents/Procedures%2C%20guidelines%20and%20regulations/Submit%20_Research_Request_Guidelines.pdf); text recovered, screenshots cache miss. No request sent, no access grant, no actual rows. SA3 desk complete, owner metadata-only contact decision pending, SA4 blocked.
+
+## Post-contact status (26 November 2026)
+
+[Permission packet](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) records one metadata-only contact sent to City, not an access grant. No reply verified, records or fees; no further contact without exact draft approval. [Independent readiness](../engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md) IR0 complete, IR1 contract design next.
