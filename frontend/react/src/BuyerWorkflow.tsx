@@ -1,4 +1,4 @@
-import {ActionButton,Field,StatusMessage} from './UI';
+import {ActionButton,Field,StatusMessage ,CompactDetails} from './UI';
 import Icon from './Icon';
 import {EvidenceNavigation,EvidenceJump} from './EvidenceNavigation';
 /** Source-owned fictional buyer journey. Deliberately no map geometry or price prediction. */
@@ -314,7 +314,7 @@ export default function BuyerWorkflow(){
             <div className="buyer-constraint">An address must be explicitly selected; a manually entered PIN is a separate lookup. Real geography remains unverified; a separate fictional display layer is optional.</div>
           </article>
         </div>
-        <aside className="buyer-progress">
+        <aside className="buyer-progress"><CompactDetails data-testid="buyer-workflow-details" summary="Research workflow and advanced recovery">
           <div className="buyer-section-number">RESEARCH WORKSPACE</div>
           <h2>Trace every decision.</h2><p>Server-owned parcel identity, source-verified comparable sales and reproducible saved results.</p>
           <div className="buyer-progress-line"><span className={chosen?'buyer-done':''}>1</span><div><b>Identify parcel</b><small>{chosen?'Specific synthetic PIN resolved':'Select a candidate from the search results'}</small></div></div>
@@ -325,7 +325,7 @@ export default function BuyerWorkflow(){
               value={reopenInput} onChange={e=>setReopenInput(e.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" maxLength={36}/>
               <ActionButton type="submit" data-testid="buyer-reopen" disabled={phase!=='idle'} icon="open" variant="secondary">Reopen</ActionButton></form>
-            <small>Saved IDs remain usable only while this local fixture database exists.</small></div>
+            <small>Saved IDs remain usable only while this local fixture database exists.</small></div></CompactDetails>
         </aside>
       </section>
       {error&&<StatusMessage tone="error" className="source-error" data-testid="buyer-error">{error}</StatusMessage>}
@@ -361,12 +361,12 @@ export default function BuyerWorkflow(){
               ?'Choose a sale to inspect its exact original matching explanation.'
               :'No qualified comparable sales were returned by the Python matcher.'}</p>{selected&&<dl className="pi-evidence-detail" data-testid="sale-evidence-detail"><div><dt>Recorded document</dt><dd>{selected.document}</dd></div><div><dt>Earlier sale</dt><dd>{selected.saleDate}</dd></div><div><dt>Area difference</dt><dd>{selected.areaDifferencePct}%</dd></div><div><dt>Age at analysis</dt><dd>{selected.ageDays} days</dd></div></dl>}</div>{selected&&<EvidenceProfile facts={selected}/>}</article>
           {view==='investigate'&&<GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/>}</div>
-        <details className="hpi-provenance" open><summary>Source record and investigation details</summary><div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
+        <CompactDetails className="hpi-provenance" data-testid="buyer-provenance-details" summary="Source record and investigation details"><div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
           <div><small>User-reported asking price</small><strong>{record.askingPriceText}</strong></div>
           <div><small>Fixture build</small><strong data-testid="buyer-build">{record.sourceBuildId}</strong></div>
           <div><small>Frozen snapshots</small><strong data-testid="buyer-snapshots">{record.sourceSnapshotIds.join(', ')}</strong></div>
           <div><small>Valuation</small><strong>Not produced</strong></div></div>
-          <p data-testid="buyer-build-time">Fixture build timestamp: {record.sourceBuiltAtUtc} (not a source publication date).</p><p>Matching tier: {record.tier} · Building identity unverified · Historical source availability not established</p><p>All displayed sales are invented. No publisher property records or current market valuations are shown.</p></details>
+          <p data-testid="buyer-build-time">Fixture build timestamp: {record.sourceBuiltAtUtc} (not a source publication date).</p><p>Matching tier: {record.tier}</p></CompactDetails><p className="buyer-warning">Building identity unverified. Historical source availability not established. All displayed sales are invented. No publisher property records or current market valuations are shown.</p>
         <BuyerEvidencePreview key={record.investigationId} record={record}/>
         {record.warnings.map((w,i)=><p key={i} className="buyer-warning">{w}</p>)}
       </section>}

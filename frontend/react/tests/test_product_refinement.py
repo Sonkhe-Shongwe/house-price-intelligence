@@ -43,6 +43,15 @@ class ProductRefinementTests(unittest.TestCase):
                     page.set_viewport_size({"width":width,"height":height})
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"),f"dossier overflow at {width}x{height}")
                     expect(page.get_by_test_id("buyer-sale").first).to_contain_text("$525,000.00")
+                    if width==320:
+                        disclosure=page.get_by_test_id("buyer-provenance-details")
+                        expect(disclosure).not_to_have_attribute("open","")
+                        expect(page.get_by_text("Building identity unverified. Historical source availability not established.",exact=False)).to_be_visible()
+                        disclosure.locator("summary").focus();page.keyboard.press("Enter")
+                        expect(disclosure).to_have_attribute("open","")
+                        expect(page.get_by_test_id("buyer-saved-id")).to_be_visible()
+                        page.keyboard.press("Enter")
+                        expect(disclosure).not_to_have_attribute("open","")
                     self.assertGreaterEqual(page.get_by_test_id("evidence-next").bounding_box()["height"],44)
                     if folder and width in (1024,768,320):
                         Path(folder).mkdir(parents=True,exist_ok=True)
@@ -76,6 +85,7 @@ class ProductRefinementTests(unittest.TestCase):
                     region.focus();expect(region).to_be_focused()
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"),f"comparison overflow at {width}x{height}")
                     self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
+                    expect(region.locator("..").locator(".hpi-scroll-hint")).to_have_count(0)
                     # This summary matrix compares buyer inputs, not individual completed sale prices.
                     expect(table.get_by_role("row").filter(has=page.get_by_role("rowheader",name="Asking price (buyer-reported)",exact=True)).get_by_role("cell",name="$500,000.00",exact=True)).to_have_count(2)
                     if folder and width in (1024,768,320):page.get_by_test_id("workspace-comparison").screenshot(path=str(Path(folder)/f"comparison-{width}.png"))

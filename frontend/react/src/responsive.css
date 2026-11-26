@@ -49,3 +49,28 @@
   .source-shell .geo-sale{width:44px;height:44px}
   .source-shell .hpi-provenance summary{min-height:44px}
 }
+
+/* FE7 owner-approved mobile refinement: keep material limitations outside disclosures. */
+.hpi-compact-details{min-width:0}
+.hpi-compact-details>summary{cursor:pointer;min-height:44px;font-size:13px;font-weight:650;line-height:1.5;padding:10px 0;overflow-wrap:anywhere}
+.hpi-compact-details>summary:focus-visible{outline:3px solid var(--hpi-atlas-accent);outline-offset:2px}
+.buyer-progress .hpi-compact-details>summary{color:#f0d2a0}
+.buyer-progress .hpi-compact-details>summary:focus-visible{outline-color:#ffda90}
+.buyer-progress .hpi-compact-details[open]{flex:1;min-height:0}
+.buyer-progress .hpi-compact-details>p{font-size:12px;color:#d2e3d9;line-height:1.7}
+.pw-recovery.hpi-compact-details{padding-block:4px}
+.pw-recovery.hpi-compact-details[open]{padding-bottom:14px}
+.hpi-scroll-shell{min-width:0;max-width:100%}
+.hpi-scroll-hint{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.5;color:var(--hpi-atlas-muted);margin:8px 0;overflow-wrap:anywhere}
+.hpi-scroll-hint svg{flex:none}
+@media(max-width:540px){
+  .source-shell .buyer-progress{padding:10px 14px}
+  .source-shell .buyer-pane,.source-shell .buyer-result,.pw-card{margin-bottom:12px}
+  .pw-main .pw-mode-banner{margin-bottom:16px}
+  .pw-intro{margin-bottom:16px}
+  .pw-dossier-facts{gap:10px;margin:12px 0;padding:10px 0}
+  .pw-dossier-actions{margin-bottom:14px}
+  .pw-recovery{margin-top:12px}
+  .source-shell .buyer-result-grid{gap:10px}
+  .source-shell .hpi-provenance{margin:10px 0}
+}

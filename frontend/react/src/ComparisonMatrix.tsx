@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import {ScrollRegion} from './UI';
 import './comparisonMatrix.css';
 
 type Column=Readonly<{key:string;title:string}>;
@@ -11,7 +12,7 @@ export default function ComparisonMatrix({columns,rows,caption='Saved property c
   columns:readonly Column[];rows:readonly Row[];caption?:string;
 }){
   if(columns.length<2||columns.length>3||rows.some(row=>row.values.length!==columns.length))return null;
-  return <div className="cm-region" role="region" aria-label="Property evidence comparison, scroll horizontally if needed" tabIndex={0}>
+  return <ScrollRegion className="cm-region" label="Property evidence comparison, scroll horizontally if needed">
     <table className="cm-table" data-columns={columns.length} role="table">
       <caption>{caption}</caption>
       <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Decision factor</th>
@@ -21,5 +22,5 @@ export default function ComparisonMatrix({columns,rows,caption='Saved property c
         {columns.map((column,index)=><td key={column.key} role="cell" className={row.kind?'cm-'+row.kind:undefined}>{row.values[index]}</td>)}
       </tr>)}</tbody>
     </table>
-  </div>;
+  </ScrollRegion>;
 }
