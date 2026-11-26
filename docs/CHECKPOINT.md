@@ -10,11 +10,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-GHSL-PILOT-APPROVAL",
+    "id": "P0-AE0-GHSL-LOCAL-PILOT",
     "status": "blocked",
-    "objective": "Obtain exact bounded GHSL raster pilot authority.",
-    "scope": "Metadata only; prior live pilots consumed.",
-    "acceptance": "Exact scope approval and verified archive/raster safeguards before dispatch.",
+    "objective": "Verify GHSL safeguards and observe owner-local result.",
+    "scope": "Approved exact GHSL one-request Windows pilot after CI.",
+    "acceptance": "Verified offline safeguards and local validated bundle or STOP.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await owner approval; no live dispatch, replay or P1.",
+    "stop": "Await focused CI and owner execution; no replay or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -49,7 +49,8 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [148,150,"## AE0 World Bank one-time pilot authority","Owner explicitly approves the exact World Bank"],
         [152,154,"## AE0 Wikidata one-time spatial pilot authority","Owner explicitly approves the exact one-request"],
         [156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"],
-        [160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"]
+        [160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"],
+        [164,166,"## AE0 GHSL one-time authority","Owner approves exact GHSL"]
       ],
       "docs/P_PHASE_ROADMAP.md": [
         [13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],
@@ -67,10 +68,9 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"],
-        [132,140,"## 26 November 2026 | AE0 Wikidata actual local STOP","Next: owner decision"],
         [165,171,"## 27 November 2026 | AE0 NASA actual local PASS","AE0 evidence now includes"],
-        [173,181,"## 27 November 2026 | AE0 finer spatial qualification","Acceptance: single total-built-up raster"]
+        [173,181,"## 27 November 2026 | AE0 finer spatial qualification","Acceptance: single total-built-up raster"],
+        [183,203,"## 27 November 2026 | Approved GHSL implementation","Run once, report"]
       ]
     }
   },
@@ -115,7 +115,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 4114f82 6/7 passed, React running; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. e72e763 7/7 passed; requery GHSL implementation CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -135,7 +135,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/parked. Local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. GHSL 13M tile candidate; exact pilot approval pending. DBE conditional. No new intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/parked. Local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. GHSL exact pilot approved; CI and owner run pending. DBE conditional. No other intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 

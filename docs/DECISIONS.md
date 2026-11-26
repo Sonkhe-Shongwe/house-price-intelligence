@@ -160,3 +160,7 @@ Owner explicitly directs parking Wikidata and investigating a more authoritative
 ## AE0 NASA POWER one-time authority (27 November 2026)
 
 Owner explicitly approves the exact one-request, seven-day, 64 KiB NASA POWER CSV pilot at R0 and applicable source terms, after verified safeguards. [Exact scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--owner-parks-wikidata-authoritative-alternative-qualification). Owner Windows private workspace only; no replay, other intake, registration, joins, publication, release or phase acceptance.
+
+## AE0 GHSL one-time authority (27 November 2026)
+
+Owner approves exact GHSL 25 MiB/one-request R0 raster pilot and applicable source terms, after tested safeguards. [Scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--ae0-finer-spatial-qualification-ghsl-candidate). Private Windows only; no replay, other intake, registration, joins, publication, release or phase acceptance.
