@@ -2,7 +2,7 @@
 
 **Established:** 22 November 2026. **Delivery-process extension approved:** 23 November 2026. **Planning status:** P0-P8 weights and exit gates retained. **Current owner-authorised milestone estimate:** 24 November 2026, **87.1% weighted MVP progress** (previous 85.7%; initial 22.8%).
 
-**26 November operational reconciliation:** Latest application a90a101 passed 10/10 workflows; 206 backend, 40 React and 47 PostgreSQL runtime tests passed, Python/npm known-advisory gates clean, 14-view automated accessibility passed. FE1–FE7 core qualified, Atlas owner-approved; fictional geographic and generated contextual PMTiles qualified. Bounded real basemap approval remains unused/deferred due to upstream extractor security. Combined actual Auth0/Neon invented save/compare and owner-observed reopen/sign-out verified; restricted roles disabled, zero sessions last independently verified. Actual combined restart/note persistence/cross-owner/old-cookie probes not independently demonstrated. Independent invented Drive recovery verified; local rekey CI passed, owner key replacement, storage/access/retention and permitted use remain outstanding. Focus P4/P7 private real-data readiness and P8 release after gates. [Checkpoint](CHECKPOINT.md) is sole current task handoff. All phase gates and estimates unchanged.
+**26 November operational reconciliation:** Latest application a90a101 passed 10/10 workflows; 206 backend, 40 React and 47 PostgreSQL runtime tests passed, Python/npm known-advisory gates clean, 14-view automated accessibility passed. FE1–FE7 core qualified, Atlas owner-approved; fictional geographic and generated contextual PMTiles qualified. Bounded real basemap approval remains unused/deferred due to upstream extractor security. Combined actual Auth0/Neon invented save/compare and owner-observed reopen/sign-out verified; restricted roles disabled, zero sessions last independently verified. Actual combined restart/note persistence/cross-owner/old-cookie probes not independently demonstrated. Independent invented Drive recovery verified; local rekey CI passed, owner key replacement, storage/access/retention and permitted use remain outstanding. Historical focus P4/P7 private real-data readiness and P8 release after gates; current owner-directed P0 closure supersedes it. [Checkpoint](CHECKPOINT.md) is sole current task handoff. All phase gates and estimates unchanged.
 
 ## Origin and scope
 
@@ -35,7 +35,11 @@ House Price Intelligence has a different product, market, platform and release t
 
 The [delivery milestone history](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md) preserves the full dated 24 November assessment chain, test and research evidence, rejected estimates and rationale through the owner-approved 87.1% baseline. [Exact pre-audit roadmap](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/a90a10113bec2aaf2f4ae137537045484de1c16b/docs/P_PHASE_ROADMAP.md). All P0–P8 weights, estimates, work-package IDs, progress vocabulary, acceptance criteria and exit gates below remain governing. No new percentage approval is inferred.
 
-## Phase-governed, vertical-slice delivery directive (23 November 2026)
+## Single-phase closure directive (26 November 2026)
+
+Owner directed P0 as the single active phase after review of concurrent delivery. Existing later-phase implementations are preserved, not restarted. Use the existing exit criteria as the definition of done; only a bounded dependency tied to a named active-phase requirement may interrupt focus. Keep optional improvements parked. A blocked requirement remains blocked; do not switch phases or inflate progress. Obtain applicable owner acceptance before closure and advance in dependency order. The historical vertical-slice policy below records why prior work overlapped, not authority to continue unrelated work during P0.
+
+## Phase-governed, vertical-slice delivery directive (23 November 2026; historical)
 
 Apply the [eight-step engineering lifecycle](engineering/LEAN_ENGINEERING_DIRECTIVE.md) proportionately to meaningful work. **Keep P0-P8 stage meanings, weights, acceptance and progress independent from implementation order.**
 
@@ -67,13 +71,15 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 | --- | --- | --- | --- |
 | P0.1 | Define buyer decision and narrow value proposition | RESEARCH | Owner accepts Investigate → Compare → Decide for a single buyer comparing two or three homes, not a listings marketplace |
 | P0.2 | Define explicit first-MVP inclusion/exclusion list | PARTIAL | Owner approves flagship features and non-goals, including conditional-only ML and no unverified live listings |
-| P0.3 | Research one candidate geography and property segment | RESEARCH | Official class203 definition confirmed; township 17 candidate retained, 59 later eligible subjects recoverable by exact-year diagnostic |
+| P0.3 | Research one candidate geography and property segment | RESEARCH | Official class 203 definition confirmed; canonical correction and fixed holdout verified 142 eligible 2024-2025 sales, 59 later subjects; candidate retained |
 | P0.4 | Validate source availability and property-entry feasibility | PARTIAL | Bounded exact township 17/Class 203 current-source replay: 262 of 262 keys had one nonblank address row; market-wide identity/rights not approved |
 | P0.5 | Review field-by-field data rights, privacy and attribution | BLOCKED | Four required source licenseId values null; documented field-level proposed boundary, attribution and caching/display questions; permissions remain unapproved |
 | P0.6 | Approve final first-market/class and intended buyer scenario | PARTIAL | Owner selected full real-property release and township 17/class203 candidate; final market qualification and approval open |
-| P0.7 | Issue bounded feasibility and release-path decision | BLOCKED | Full product direction selected; causal data issue identified; rights, canonical fix/holdout and final release feasibility remain |
+| P0.7 | Issue bounded feasibility and release-path decision | BLOCKED | Canonical correction/holdout verified; technical candidate feasible, durable real intake/display and final release NO-GO until rights/protection and final scope acceptance |
 
 **P0 exit:** Approved scope, first supported market/class, source register, field policy and a clear permitted release approach. Current evidence: Evanston township 17 and Class 203 are **research pilot candidates**, not permanent geography or public-display approval.
+
+**26 November P0 closure audit (single active phase):** P0.1 and P0.2 supported by prior owner-approved Investigate/Compare/Decide scope and explicit product non-goals; P0.3 candidate-market research sufficient at discovery level. P0.4 partial: prior 262/262 one-nonblank address result and later [four-source rehearsal](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45375702613) (142 eligible sales, 137 parcel-year keys, 59/59 later unique-token reviews) support bounded address-to-parcel resolution, not every current address or verified building. Proposed first market: Evanston township 17, historical Class 203; sales 2024-2025 and prior-year assessment 2023-2024; one owner, two or three investigated properties, USD exact completed sales distinct from asking prices; explicitly retrospective current-source data, abstain outside eligible cohort or ambiguous/missing address. No new geographic or public-display approval inferred. P0.5 blocked by field-use scope; see [source register](research/SOURCE_REGISTER.md) and [FR2 field matrix](engineering/FULL_RELEASE_QUALIFICATION_V1.md). P0.6 pending final owner market/class decision. P0.7 technical GO for candidate research; operational NO-GO for durable real intake/display/release until the existing rights and protection requirements pass. No formal closure, score change or new extraction. Resolve P0.4-7, do not begin P1 while P0 remains open.
 
 ### P1 | Source extraction, cleaning and historical data | Weight 12% | Approved planning estimate 98%
 
@@ -310,11 +316,10 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Near-term execution, complexity last
 
-1. Follow checkpoint: owner declined further confidential rekey; confidentiality gate remains open. Complete independent storage/access/retention and permitted-use review before unused conditional extraction; no waiver. Preserve exact cohort, canonical ingestion and disclosure guard.
-2. Extend existing P4/P5 integrated services only after verified data/rights decisions; preserve SQLite and canonical matcher until production runtime is reviewed.
-3. Complete integrated ownership/authentication, privacy, retention and final buyer UX for P6.
-4. Independently verify P7 release readiness, then seek P8 release approval. No main merge, hosting or public real-data display without permission.
-5. Reassess partial progress at meaningful verified milestones; do not close an exit gate prematurely or force ML into MVP.
+1. Close P0 against the seven existing work packages and the checkpoint; current open criteria P0.4-P0.7.
+2. Retain P1-P8 implementation and evidence without unrelated changes; named dependencies only if required to close P0.
+3. On verified P0 closure and applicable owner acceptance, select the next phase in dependency order. Existing protection, rights, data, cost, deployment and main-integration boundaries remain binding.
+4. Reassess only at meaningful accepted milestones; no automatic score or phase exit.
 
 ## Evidence and reporting policy
 

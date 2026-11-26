@@ -7,7 +7,9 @@
 
 **Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md), later refined to one continuing `development` branch plus stable `main`, with GitHub Actions for routine tests and Windows only for indispensable human/platform checks. This implements the existing lifecycle without changing its eight steps, approvals or phase gates.
 
-**Frontend execution addendum (26 November 2026):** [Professional Frontend Excellence directive](PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) defines the retained subordinate FE1–FE7 quality standard; core engineering qualified and Atlas approved. Current priority follows the checkpoint (P4/P7 real-intake readiness and P8 downstream). It reuses the current React/MapLibre implementation and preserves the eight-step lifecycle, risk-focused verification, R0 and P-stage gates. Historical technology defaults below are evaluation history, not instructions to replace integrated React/PostgreSQL.
+**Frontend execution addendum (26 November 2026):** [Professional Frontend Excellence directive](PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) defines the retained subordinate FE1–FE7 quality standard; core engineering qualified and Atlas approved. Current priority follows the checkpoint (P0 closure; prior P4/P7 real-intake readiness and P8 downstream parked). It reuses the current React/MapLibre implementation and preserves the eight-step lifecycle, risk-focused verification, R0 and P-stage gates. Historical technology defaults below are evaluation history, not instructions to replace integrated React/PostgreSQL.
+
+**Single-phase closure addendum (26 November 2026):** owner directed P0 as the single active delivery phase. Use existing phase requirements and exit gates, freeze unrelated work, retain verified implementation, and allow only a bounded named dependency required for closure. Stop at indispensable approval/rights blockers rather than creating speculative work. Existing lean lifecycle, scope, R0 and all acceptance boundaries remain binding. See [P-stage roadmap](../P_PHASE_ROADMAP.md).
 
 ## 1. Core operating principle
 

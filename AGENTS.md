@@ -13,9 +13,13 @@ This repository builds a buyer-facing historical comparable-sales investigation 
 
 Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5/P6 fictional-only capabilities have already been implemented in owner-authorised connected slices while P3 acceptance remains open; this does not waive their distinct phase exit gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
 
+## Single-phase closure focus (26 November 2026)
+
+The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
+
 ## Frontend quality standard and active release-readiness work (26 November 2026)
 
-Apply the [Professional Frontend Excellence directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) within the existing eight-step lifecycle. FE1–FE7 are unweighted execution tasks under P5/P3/P6 and P7 verification, not new delivery phases. FE1–FE7 core and fictional geographic engineering qualified; use checkpoint for exact current evidence. Bounded basemap approval unused, real extraction deferred on unresolved extractor security. Resume existing P7/P8 readiness work; use actual source/CI and rendered evidence. No new data, spending, access or release authority. Read the checkpoint for current status.
+Apply the [Professional Frontend Excellence directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) within the existing eight-step lifecycle. FE1–FE7 are unweighted execution tasks under P5/P3/P6 and P7 verification, not new delivery phases. FE1–FE7 core and fictional geographic engineering qualified; use checkpoint for exact current evidence. Bounded basemap approval unused, real extraction deferred on unresolved extractor security. P7/P8 readiness work is parked during P0 closure unless a named dependency is indispensable; use actual source/CI and rendered evidence when resumed. No new data, spending, access or release authority. Read the checkpoint for current status.
 
 ## Cloud-first development station (owner-approved 23 November 2026)
 
