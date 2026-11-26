@@ -327,3 +327,47 @@ Owner supplied rppi-2010-2023-v1.zip privately in chat, within approved one-arch
 - Source attribution: Statistics South Africa. Residential Property Price Index 2010-2023 [dataset]. Version 1. Pretoria: Statistics SA [producer], 2023. Cape Town: DataFirst [distributor], 2023. DOI 10.25828/VQ6V-2T85. Catalogue CC-BY; exact licence version and portal terms remain unconfirmed. No public source rows or processed data uploaded. Descriptive findings do not establish empirical accuracy of underlying methodology, contemporary market conditions or permission to release linked property records.
 
 **HPI-DATA-002 bounded CSV acquisition/profile/transform delivered.** Next retain locally only within approved period/terms, confirm first intake date, and pursue D02 cadastral metadata/permission plus D01 actual sale-event availability; no further index downloads or property intake implied. P0-G remains blocked; D01/D02 not solved by aggregate indices. Previous development a8d5d7b verified 7/7 CI (45853580208, 45853591508, 45853591529, 45853591538, 45853591562, 45853591671, 45853591497). No code/schema change, new provider operation, contact, spend or phase acceptance. P0 94%, weighted 87.1% unchanged historical estimates.
+
+## 26 November 2026 | D02 cadastral schema and D01 access qualification
+
+**Method:** targeted public metadata, publisher access guidance and research reproducibility documentation only. No property/feature queries, download, registration, terms assent, email, fees or provider mutations. Exact development 9f9f7fd verified 7/7 CI (45858756034, 45858769336, 45858769490, 45858769615, 45858769279, 45858769556, 45858769506); main 103c854 unchanged. HPI-DATA-001 closed; HPI-DATA-002 local acceptance complete, maximum retention through 25 Dec (deadline 26 Dec 2026, shorter applicable terms prevail). No new data acquisition authority.
+
+### D02 concrete schema and access
+
+| Route | New documentary evidence | Disposition |
+| --- | --- | --- |
+| National Chief Surveyor-General | [CSG contact page](https://csg.dlrrd.gov.za/contact.htm) indexed national request address csgdata@dlrrd.gov.za and provincial Mpumalanga address sgdatampu@dlrrd.gov.za. [Catalogue](https://csg.dlrrd.gov.za/data.htm) documents provincial downloads/autoemailer; [disclaimer](https://csg.dlrrd.gov.za/disclaimer.htm) indexed as State copyright and beta-quality warning. Prior 2022 fee schedule R0 for standard cadastral shapefile, current tariff not conclusively verified. | Primary national source-authority route. Full spatial/alpha pages timed out, disclaimer cache miss; no actual file, licence, terms, size, date or row coverage qualified. |
+| Esri South Africa [parcel layer metadata](https://imagery.esri-southafrica.com/server/rest/services/GISCOE/South_Africa_Cadastre/MapServer/2) | Full HTML schema observed: polygons EPSG:3857, SG21KEY string length 21, ParcelGuid string length 38, PROPNO 8, PTNNO 5, PROPDESC, PROPTYPE, PROPSTATUS, SGDIAGNO, DATEAPP/DATECAP/DATEMOD/Date_Updated, Shape_Area and others; JSON/GeoJSON/PBF, max record count 1000. Copyright field blank, not a licence. | Technical interface evidence only. Omit OPERATOR, other nonessential and sensitive fields. Do not query features, paginate or infer legal area from Web Mercator. Confirm actual upstream authority, vintage, semantics and allowed operations. |
+| Official [CSG viewer service](https://csggis.drdlr.gov.za/server/rest/services/CSGSearch/MapServer) and [DFFE mirror](https://dffeportal.environment.gov.za/hosting/rest/services/CSG_Cadaster/CSG_Cadastral_Data/MapServer) | Metadata indexed; registered-erven layer 202 on CSG viewer, specific layer fetch 502. DFFE service names CSG custodian. [OpenDataZA documentation](https://odza.opendata.durban/opendataza/resource/14) opened: describes 21-character LPI and historical map/table access; third-party resources subject to provider permissions. | Same underlying cadastre, not independent ground truth or licence. Do not copy viewer records or bypass restrictions. |
+| eThekwini [distribution agreement](https://gis.durban.gov.za/GIS_Website/DataDistributionAgreement/DataDistributionAgreement.pdf) | PDF text reviewed sections 1.4, 2.1-2.2, 2.6-2.8; screenshot attempts failed. Restricts use to requested purpose, digital copying/third-party transfer and publication; attribution for permitted graphics, no guaranteed updates. | Not an unrestricted open dataset. Verify applicable current agreement/fees; no use/assent or extraction. |
+| Ekurhuleni and Johannesburg | [Ekurhuleni GIS division](https://www.ekurhuleni.gov.za/geographic-information-systems-gis-division/) and [cadastre schema](https://gis.ekurhuleni.gov.za/arcgis/rest/services/CIF/CIF_Map/MapServer/2) indexed; SG_CODE field length 8, not equivalent to SG21 without crosswalk. [Johannesburg property GIS](https://eservices.joburg.org.za/sites/cgismaps/Pages/Property-Theme.aspx) indexed as including SG ID, address-related lookup and valuation, also owner details. | Independent municipal routes; avoid owner-related fields and whole records. No licensed bulk export or rights confirmed. |
+
+Proposed minimal D02 contract: source-versioned cadastral key as string (preserve leading zeros), parcel type/status, explicit survey/source reference if permitted, geometry and CRS, snapshot/effective/availability distinctions, area derived in suitable local projected CRS with method recorded. Parcel != dwelling != address != sectional unit. Do not assume unique SG21 across versions, splits/consolidations, duplicate polygons or tenure. Validate exact key, valid geometry, unit/CRS and spatial ambiguity before any join to buildings or sales. No new schema/migration required before real qualification. No row acquisition or broad location claim.
+
+### D01 transaction availability check
+
+- Retained national Deeds/municipal Template D, Johannesburg research precedent, Ekurhuleni, commercial and Cape Town options remain independent routes. Targeted new research/archive searches did not find a qualified R0 individual completed-sale archive. This is a bounded negative finding, not proof no source exists.
+- [NEDUM-2D documentation](https://cired.github.io/cape_town_NEDUM_Python/readme_link.html) explicitly states input data supplied separately on request; code GPL does not license source files. Another research access lead, not a downloadable sales file or guaranteed route. [ErfCheck](https://erfcheck.co.za/) indexed as offering individual public record views, publisher page cache miss; no data-specific bulk/reuse licence verified. No scraping or record lookup.
+- [World Bank 2025 reproducibility catalogue](https://reproducibility.worldbank.org/catalog/424/study-description) opened: includes separately licensed Google Open Buildings, GHSL, OSM, and restricted census/tax inputs, no completed-sale source demonstrated. Useful independent precedent for building derived neighbourhood context and explicitly separate source licences; no source data obtained. Contextual additions cannot compensate for D01.
+
+### Proposed metadata-only CSG enquiry (unsent)
+
+Recipient: csgdata@dlrrd.gov.za
+Subject: Cadastral spatial data access and reuse enquiry
+
+Hello,
+
+I am working on House Price Intelligence, an independent, non-commercial South African property data engineering and research project.
+
+Could you please clarify the following for the standard cadastral spatial dataset?
+
+1. Is there a current no-cost digital download or existing small-area extract for registered erven in Mpumalanga, with parcel identifiers, boundaries and a data dictionary?
+2. What are the available formats, approximate file sizes, reference dates and update frequency?
+3. What terms apply to private local analysis, temporary retention for up to 30 days, joining with appropriately licensed building and geographic data, and publishing attributed aggregate research findings without individual parcel records?
+4. Is separate permission required for eventual property-level display in a non-commercial application?
+
+At this stage I am only requesting metadata, access instructions and applicable terms, not property records or a custom paid extract.
+
+Thank you.
+
+No attachments, CC or BCC. No send unless exact text and recipient expressly approved. National rather than municipal-only identity route selected as a high-leverage clarification; no final market or permission inferred. This enquiry does not request a real-data extraction or approve product display. Continue source-independent desk qualification of D01 alternatives and open contextual sources without waiting exclusively on this reply. Next use actual source evidence to decide a bounded D02 acquisition proposal or decline, and qualify a genuinely different lawful D01 route rather than repeating searches for the same paid products. Existing P0-G no-go, P0.4/6 partial, P0.5/7 blocked; P0 94% and weighted 87.1% historic planning estimates unchanged, R0, all full gates open. No new scripts, deployment, main merge or local action required.
