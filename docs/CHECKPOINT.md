@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-GEO-ALIAS-LOCAL",
-    "status": "blocked",
-    "objective": "Run approved 12-variant private offline documentary alias comparison in existing workspace.",
-    "scope": "Read-only candidate comparison; no geometry operations, source mutation, acquisition or commercial use.",
-    "acceptance": "Preserve 40 exact candidates; validate actual labels/codes, report aliases, abstentions and remaining unmatched; no accepted identity.",
+    "id": "P0-DATA-FEASIBILITY-REVIEW",
+    "status": "ready",
+    "objective": "Investigate official boundary provenance and materially new D01/D02 direct-access evidence.",
+    "scope": "Read-only metadata, rights, identity and feasibility research; no intake, contact, joins or commercial use.",
+    "acceptance": "Record vintage, identifier and rights limits; qualify new D01/D02 leads or bounded negative result.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -26,17 +26,17 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Await local summary; stop on baseline drift; no material join, intake, contact or P1.",
+    "stop": "Stop before acquisition, material integration, contact or scope change; no repeat alias work or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[492,496,"## 26 November 2026 | Empirical geographic candidate baseline","Next bounded discovery: display only existing report's unmatched "],[498,504,"## 26 November 2026 | Geographic alias documentary qualification","**Proposed next bounded experiment (not authorised):** extend the"],[506,508,"## 26 November 2026 | Approved documentary alias candidate implem","Owner explicitly approved the twelve bounded evidence-backed name"]],
+      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[331,351,"## 26 November 2026 | D02 cadastral schema and D01 access qualifi","- [World Bank 2025 reproducibility catalogue](https://reproducibi"],[462,476,"## 26 November 2026 | Official geography code reference and compl","**Disposition:** documentary milestone delivered; formal P0 exit "],[510,514,"## 26 November 2026 | Empirical documentary alias result and next","Next: targeted read-only feasibility research on 2020 boundary pr"]],
       "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[112,114,"## Geographic candidate experiment authority (26 November 2026)","Owner explicitly approves bounded private offline comparison of H"],[116,118,"## Documentary alias experiment authority (26 November 2026)","Owner explicitly approves the twelve proposed evidence-backed var"]],
       "docs/P_PHASE_ROADMAP.md": [[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]]
     }
   },
   "blockers": [
-    "D01/D02 unresolved; 40/52 exact candidates; approved documentary alias comparison awaits local run.",
+    "D01/D02 unresolved; 52/52 name candidates, formal identity and boundary equivalence unverified.",
     "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
     "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
   ],
@@ -65,15 +65,15 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 | --- | --- | --- |
 | HPI-DATA-001 | 49 usable OSM ways; closed, no raw retained | No maintained source |
 | HPI-DATA-002 | 19 RPPI series, 157 months, 2,983 observations | Aggregate historical indices only |
-| HPI-DATA-003 | 52 valid district features, 2020 geography | 40/52 exact-name candidates; identity/topology unverified |
+| HPI-DATA-003 | 52 valid district features, 2020 geography | 52/52 name candidates; identity/topology unverified |
 | HPI-DATA-004 | 289,864 usable of 289,867 footprint records | All height/confidence missing; 673 outside tile centroids |
-| HPI-DATA-005 | 52 official district/metro codes, visual match confirmed | Census 2022; 12 unmatched, noncommercial |
+| HPI-DATA-005 | 52 official district/metro codes, visual match confirmed | Census 2022; 0 unmatched, noncommercial |
 
 002/003/004/005 registered, null deadlines owner-observed; 005 noncommercial. Bytes not independently inspected. D03/D07/D09 partial; twelve other families lack retained qualified data. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Permanent Windows Downloads/HPI-Project sibling checkout and HPI-Data-Workspace; local HEAD, uncommitted changes, actual file integrity and local audit execution not independently verified.
 
 ## Repository and verification
 
-Requery exact `development` and stable `main` heads and Actions on every restoration. Continuation v2.1 5c6b957 passed 10/10; importer 23aedf1 and [crosswalk 2608c01](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2608c01ad11ee599cf1769bd9f1826fc5a967fa7) passed 7/7 each. Main baseline 103c854; integration PR #4 historically draft, verify before authorised integration. No new product credit.
+Requery exact `development` and stable `main` heads and Actions on every restoration. Continuation v2.1 5c6b957 passed 10/10; importer 23aedf1 and [crosswalk 2608c01](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2608c01ad11ee599cf1769bd9f1826fc5a967fa7) passed 7/7 each; alias ef4c385 6/7 successful at inspection. Main baseline 103c854; integration PR #4 historically draft, verify before authorised integration. No new product credit.
 
 ## Current verified implementation on development
 
@@ -93,7 +93,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 40/52 exact candidates; [alias proposal](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--geographic-alias-documentary-qualification) approved; local summary pending. P0-A accepted, P0-B bounded research complete, P0-C/D/E conditional desk reviews complete; P0-F specification and P0-G audit delivered but not formally accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and exact-name experiment delivered; bounded documentary alias comparison approved; no downstream authority. No other intake, contact, spatial/material joins, spend, provider changes, deployment, main merge or phase acceptance.
+[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; metadata feasibility review next. P0-A accepted, P0-B bounded research complete, P0-C/D/E conditional desk reviews complete; P0-F specification and P0-G audit delivered but not formally accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. No other intake, contact, spatial/material joins, spend, provider changes, deployment, main merge or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
