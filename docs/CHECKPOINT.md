@@ -10,11 +10,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-CORE-SOURCE-REVIEW",
-    "status": "ready",
-    "objective": "Review D01/D02 and DBE source priorities.",
-    "scope": "Metadata/offline only; GHSL parked, authority closed.",
-    "acceptance": "Credible source route or explicit blocker.",
+    "id": "P0-D11-DBE-FILE-METADATA",
+    "status": "blocked",
+    "objective": "Qualify DBE Q3 2023 file metadata.",
+    "scope": "Metadata only; no intake or assent.",
+    "acceptance": "Exact file, size, format, rights and scope or park.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "No dispatch, replay, migration or P1.",
+    "stop": "Await file metadata or material D01/D02 evidence.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -69,7 +69,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [248,254,"## 27 November 2026 | AE0 staged GHSL local STOP","Next bounded task:"]
+        [256,262,"## 27 November 2026 | AE0 core-source return","AE0 retain/refactor/replace assessment"]
       ]
     }
   },
@@ -115,7 +115,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 8e0e094 6/7 passed at review; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. 264cdeb 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -135,7 +135,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/parked. Local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. GHSL STOP MEMBERS, 14,082,630 bytes, consumed; Windows 9/9 passed. Staged GHSL STOP HTTP; raster not dispatched; Windows 18/18 passed. GHSL parked. D01/D02/DBE review next; no intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/parked. Local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. GHSL STOP MEMBERS, 14,082,630 bytes, consumed; Windows 9/9 passed. Staged GHSL STOP HTTP; raster not dispatched; Windows 18/18 passed. GHSL parked. D01/D02 unresolved; DBE Q3 2023 CC BY candidate awaits file metadata. No intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
