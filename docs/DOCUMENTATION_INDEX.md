@@ -14,6 +14,7 @@
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 87.1% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
+| Review custom cartography qualification | [26 Nov cartography study](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md) | Local editable MapLibre styles, candidate runtime integration, exact-head CI pending; no real geography |
 | Review frontend convergence source audit | [26 Nov frontend convergence audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) | Actual route/component/field comparison, proposed shared adapter and next prototype specification |
 | Review current product convergence | [26 Nov product, UX and geospatial research](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md) | Shared frontend, validated adapters, separate renderer/basemap/geometry decisions; research only |
 | Review current design system | [26 Nov professional UI engineering](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md) | Candidate libraries, computed contrast, component/state inventory |

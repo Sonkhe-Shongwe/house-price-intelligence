@@ -1,0 +1,73 @@
+{
+  "version": 8,
+  "name": "HPI Intelligence Terminal / virtual evidence",
+  "metadata": {
+    "hpi:purpose": "Fictional evidence display only; no basemap or distance evidence",
+    "hpi:style-version": "1"
+  },
+  "sources": {
+    "positions": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "virtual-background",
+      "type": "background",
+      "paint": {
+        "background-color": "#19282A"
+      }
+    },
+    {
+      "id": "virtual-position-halos",
+      "type": "circle",
+      "source": "positions",
+      "paint": {
+        "circle-radius": 22,
+        "circle-color": "#81D8B5",
+        "circle-opacity": 0.09
+      }
+    },
+    {
+      "id": "virtual-selection",
+      "type": "circle",
+      "source": "positions",
+      "paint": {
+        "circle-radius": 27,
+        "circle-color": "#81D8B5",
+        "circle-opacity": [
+          "case",
+          [
+            "boolean",
+            [
+              "feature-state",
+              "selected"
+            ],
+            false
+          ],
+          0.16,
+          0
+        ],
+        "circle-stroke-color": "#D5E8E0",
+        "circle-stroke-width": 2,
+        "circle-stroke-opacity": [
+          "case",
+          [
+            "boolean",
+            [
+              "feature-state",
+              "selected"
+            ],
+            false
+          ],
+          0.85,
+          0
+        ]
+      }
+    }
+  ]
+}

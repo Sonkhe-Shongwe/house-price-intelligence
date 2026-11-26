@@ -95,6 +95,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **V3 signature screen refinement:** V2 b069987 passed all 7 CI workflows. V3 original recency/area graphics, conditional evidence, map sizing and compact mobile comparison reviewed in local Chromium; identical HTML blob verified. Exact amounts and notes preserved at 320/375px in both themes; no page errors or external requests. [Design study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) records evidence and limits. Hosted checks pending. Next visual review then shared UI/adapter qualification; no final owner theme approval, new dependencies, production changes, real-data work or progress credit.
 
+**Custom cartography candidate:** V3 bff9a46 passed all seven CI workflows. [Custom cartography qualification](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md) records Maputnik/MapLibre research and two local editable style templates applied to existing optional fictional map; selection paint, legend and theme control. No external tiles, real geography or private API expansion. Extended canonical browser regression; new exact-head CI and screenshot review pending. Maputnik import/export not yet exercised. Next: verify this slice, then shared component/private adapter qualification rather than another standalone prototype. No new dependency, access window or score credit.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.

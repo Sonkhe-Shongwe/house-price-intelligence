@@ -3,9 +3,31 @@ import * as maplibregl from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type {MapPoint} from './mapEvidence';
+import atlasStyle from './mapStyles/atlas.json';
+import terminalStyle from './mapStyles/terminal.json';
+type MapTheme='atlas'|'terminal';
+// These local style documents contain only empty GeoJSON and paint layers.
+// Populate positions exclusively from the already validated map adapter.
+function evidenceStyle(points:MapPoint[],theme:MapTheme):maplibregl.StyleSpecification{
+  const style=structuredClone(theme==='atlas'?atlasStyle:terminalStyle) as unknown as maplibregl.StyleSpecification;
+  style.sources.positions={type:'geojson',data:{type:'FeatureCollection',features:points.map(p=>({type:'Feature',id:p.rank,geometry:{type:'Point',coordinates:p.coordinates},properties:{rank:p.rank}}))}};
+  return style;
+}
 maplibregl.setWorkerUrl(workerUrl);
 
-export default function GeoVectorMap({points,selected,onSelect}:{points:MapPoint[];selected:number|null;onSelect:(n:number)=>void}){
+export default function GeoVectorMap(props:{points:MapPoint[];selected:number|null;onSelect:(n:number)=>void}){
+  const [theme,setTheme]=useState<MapTheme>('atlas');
+  return <div className="geo-themed" data-map-theme={theme}>
+    <div className="geo-style-controls" role="group" aria-label="Fictional map appearance">
+      <button type="button" aria-pressed={theme==='atlas'} onClick={()=>setTheme('atlas')}>Atlas</button>
+      <button type="button" aria-pressed={theme==='terminal'} onClick={()=>setTheme('terminal')}>Terminal</button>
+    </div>
+    <VectorCanvas key={theme} {...props} theme={theme}/>
+    <div className="geo-legend"><span><i className="geo-legend-subject" aria-hidden="true"/>Subject</span><span><i className="geo-legend-sale" aria-hidden="true"/>Ranked sale</span><span><i className="geo-legend-selected" aria-hidden="true"/>Selected sale</span></div>
+    <small>Selection halo is a screen-space highlight, not a geographic radius.</small>
+  </div>;
+}
+function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];selected:number|null;onSelect:(n:number)=>void;theme:MapTheme}){
   const node=useRef<HTMLDivElement>(null);
   const instance=useRef<maplibregl.Map|null>(null);
   const buttons=useRef(new Map<number,HTMLButtonElement>());
@@ -20,12 +42,7 @@ export default function GeoVectorMap({points,selected,onSelect}:{points:MapPoint
     const guard=window.setTimeout(fail,10000);
     try{
       map=new maplibregl.Map({container:node.current,
-        style:{version:8,sources:{positions:{type:'geojson',data:{type:'FeatureCollection',
-          features:points.map(p=>({type:'Feature',id:p.rank,geometry:{type:'Point',coordinates:p.coordinates},
-            properties:{rank:p.rank}}))}}},
-          layers:[{id:'virtual-background',type:'background',paint:{'background-color':'#e4eee7'}},
-            {id:'virtual-position-halos',type:'circle',source:'positions',
-              paint:{'circle-radius':25,'circle-color':'#245648','circle-opacity':0.10}}]},
+        style:evidenceStyle(points,theme),
         center:[0,0],zoom:11.5,minZoom:9,maxZoom:16,renderWorldCopies:false,
         dragRotate:false,pitchWithRotate:false,scrollZoom:false,attributionControl:false});
       instance.current=map;
@@ -61,7 +78,13 @@ export default function GeoVectorMap({points,selected,onSelect}:{points:MapPoint
   },[points]);
   useEffect(()=>{
     buttons.current.forEach((b,rank)=>b.setAttribute('aria-pressed',String(rank===selected)));
-  },[selected,status]);
+    if(status==='ready'){
+      const map=instance.current;
+      if(map?.getSource('positions'))for(const point of points){
+        map.setFeatureState({source:'positions',id:point.rank},{selected:point.rank!==0&&point.rank===selected});
+      }
+    }
+  },[selected,status,points]);
   return <div className="geo-vector" data-testid="geo-vector">
     <div className="geo-canvas" ref={node} hidden={status==='fallback'} aria-label="Virtual display coordinates"/>
     {status==='loading'&&<p role="status">Preparing local vector renderer…</p>}
