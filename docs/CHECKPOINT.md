@@ -84,6 +84,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Product convergence research:** [26 November research](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md) consolidates competitor workflows, information architecture, separate map renderer/basemap/geometry decisions and shared frontend adapter proposal. Private redesign 46a046d passed 11/11 registered CI workflows; no visual approval implied. Research only: no provider selection, dependency/schema changes, data, deployment, access window or score credit. Next: audit shared-component/private-contract parity and produce full-flow high-fidelity concepts.
 
+**Professional UI engineering research:** [26 November design-system study](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md) records actual frontend dependency/token audit, library selection proposals, computed contrast checks, shared component/state inventory and review/verification plan. Base UI leads a future compatibility spike; no installation or final design selection. Prior research commit c8049f9: 5/7 successful, 2 pending, 0 non-successful. Next: shared-component/private-contract audit and two complete original high-fidelity concepts. No cloud window, code change or progress credit.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
