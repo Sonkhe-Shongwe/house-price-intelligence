@@ -125,6 +125,9 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
 export function ContextualAtlasPreview(){
   const node=useRef<HTMLDivElement>(null),instance=useRef<maplibregl.Map|null>(null);
   const [status,setStatus]=useState<'idle'|'loading'|'ready'|'failed'>('idle');
+  const heading=useRef<HTMLHeadingElement>(null), controls=useRef<HTMLDivElement>(null);
+  const failureMessage=useRef<HTMLParagraphElement>(null), recoverFocus=useRef(false);
+  useEffect(()=>{if(status==='failed'&&recoverFocus.current)failureMessage.current?.focus();},[status]);
   useEffect(()=>{
     if(status!=='loading'||!node.current)return;
     const container=node.current;
@@ -139,7 +142,9 @@ export function ContextualAtlasPreview(){
     };
     const fail=()=>{
       if(disposed||failed)return;
-      failed=true;cleanup();setStatus('failed');
+      failed=true;
+      recoverFocus.current=!!(container.contains(document.activeElement)||controls.current?.contains(document.activeElement));
+      cleanup();setStatus('failed');
     };
     const guard=window.setTimeout(fail,15000);
     void (async()=>{
@@ -195,7 +200,8 @@ export function ContextualAtlasPreview(){
         map.on('error',fail);map.on('webglcontextlost',fail);
         map.once('idle',()=>{
           if(disposed||failed)return;
-          if(!map?.queryRenderedFeatures({layers:['context-water','context-park','context-road']}).length){fail();return;}
+          const layers=['context-water','context-park','context-road'];
+          if(!map||!layers.every(layer=>map!.queryRenderedFeatures({layers:[layer]}).length>0)){fail();return;}
           window.clearTimeout(guard);setStatus('ready');
         });
       }catch{fail();}
@@ -206,16 +212,16 @@ export function ContextualAtlasPreview(){
   return <main className="context-preview" data-testid="context-preview">
     <a href="/">Return to research workspace</a>
     <p className="hpi-eyebrow">ATLAS / LOCAL QUALIFICATION</p>
-    <h1>Contextual vector map test</h1>
+    <h1 ref={heading} tabIndex={-1}>Contextual vector map test</h1>
     <p role="note">Invented geometry, not real geographic context. No property markers, addresses, distances or historical claims.</p>
-    {status==='idle'&&<button type="button" className="geo-load" data-testid="context-load" onClick={()=>setStatus('loading')}>Load invented contextual map</button>}
+    {status==='idle'&&<button type="button" className="geo-load" data-testid="context-load" onClick={()=>{heading.current?.focus();setStatus('loading');}}>Load invented contextual map</button>}
     <div ref={node} className="geo-canvas" hidden={status==='idle'||status==='failed'} aria-label="Invented contextual vector map"/>
     {status==='loading'&&<p role="status">Decoding local qualification archive…</p>}
     {status==='ready'&&<><p role="status" data-testid="context-ready">Invented PMTiles vector layers rendered locally</p>
-      <div className="geo-controls"><button type="button" onClick={()=>instance.current?.zoomIn({duration:0})}>Zoom in</button>
+      <div ref={controls} className="geo-controls"><button type="button" onClick={()=>instance.current?.zoomIn({duration:0})}>Zoom in</button>
       <button type="button" onClick={()=>instance.current?.zoomOut({duration:0})}>Zoom out</button>
       <button type="button" onClick={()=>instance.current?.jumpTo({center:[0,0],zoom:0.7})}>Reset view</button></div></>}
-    {status==='failed'&&<p role="alert" data-testid="context-unavailable">Contextual map unavailable. No geographic inference is made.</p>}
+    {status==='failed'&&<p ref={failureMessage} tabIndex={-1} role="alert" data-testid="context-unavailable">Contextual map unavailable. No geographic inference is made.</p>}
     <p>Generated fixture only. No OpenStreetMap or other external geographic data loaded.</p>
   </main>;
 }

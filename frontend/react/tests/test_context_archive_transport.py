@@ -1,4 +1,4 @@
-"""Same-origin Chromium transport qualification, no tiles or archive parser."""
+"""Same-origin transport and generated vector archive qualification, no external tiles."""
 import os
 import unittest
 from playwright.sync_api import sync_playwright, expect
@@ -62,20 +62,30 @@ class ContextArchiveTransportTests(unittest.TestCase):
                 page.goto(server.base+"/context-preview")
                 expect(page.get_by_test_id("context-preview")).to_be_visible()
                 self.assertFalse(any(u.endswith(".pmtiles") for u in urls))
-                page.get_by_test_id("context-load").click()
+                page.get_by_test_id("context-load").focus()
+                page.keyboard.press("Enter")
+                expect(page.get_by_role("heading",name="Contextual vector map test")).to_be_focused()
                 expect(page.get_by_test_id("context-ready")).to_be_visible(timeout=20000)
                 self.assertTrue(any(u.endswith("/context/atlas-fixture-v1.pmtiles") for u in urls))
                 self.assertTrue(all(u.startswith(server.base+"/") for u in urls))
                 expect(page.get_by_test_id("geo-pin-0")).to_have_count(0)
                 page.get_by_role("button",name="Zoom in",exact=True).click()
                 page.get_by_role("button",name="Reset view").click()
-                page.set_viewport_size({"width":320,"height":800})
-                self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
                 from pathlib import Path
                 folder=os.environ.get("HPI_GEO_SCREENSHOTS")
                 if folder:
                     Path(folder).mkdir(parents=True,exist_ok=True)
+                    page.get_by_test_id("context-preview").screenshot(path=str(Path(folder)/"06-invented-context-atlas-desktop.png"))
+                page.set_viewport_size({"width":320,"height":800})
+                self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+                if folder:
+                    Path(folder).mkdir(parents=True,exist_ok=True)
                     page.get_by_test_id("context-preview").screenshot(path=str(Path(folder)/"05-invented-context-atlas-320.png"))
+                page.get_by_role("button",name="Reset view").focus()
+                page.locator(".geo-canvas canvas").evaluate("e=>e.dispatchEvent(new Event('webglcontextlost',{cancelable:true}))")
+                expect(page.get_by_test_id("context-unavailable")).to_be_visible(timeout=15000)
+                expect(page.get_by_test_id("context-unavailable")).to_be_focused()
+                expect(page.locator(".geo-canvas canvas")).to_have_count(0)
                 failed=browser.new_page(viewport={"width":320,"height":800})
                 failed.route("**/context/atlas-fixture-v1.pmtiles",lambda route:route.abort())
                 failed.goto(server.base+"/context-preview")

@@ -11,9 +11,9 @@ from test_persistent_restart import LocalFixtureProcess,free_port
 def main():
     script=Path(os.environ["HPI_AXE_SCRIPT"]).read_text()
     output=Path(os.environ["HPI_ACCESSIBILITY_REPORT"])
-    result={"scope":"fictional workspace, dossiers, comparison, virtual interactive map and lightweight/failure schematic; WCAG 2.2 AA tagged automated rules",
+    result={"scope":"fictional workspace, dossiers, comparison, virtual interactive map, lightweight/failure schematic and generated contextual PMTiles; WCAG 2.2 AA tagged automated rules",
             "engine":"axe-core 4.10.3","status":"blocked","views":[]}
-    server=LocalFixtureProcess(free_port(),database=None,synthetic_map=True)
+    server=LocalFixtureProcess(free_port(),database=None,synthetic_map=True,context_transport_fixture=True)
     try:
         with sync_playwright() as pw:
             opts={"headless":True,"args":["--no-sandbox","--enable-unsafe-swiftshader","--use-angle=swiftshader"]}
@@ -103,6 +103,28 @@ def main():
                 expect(page.get_by_test_id("geo-fallback")).to_be_visible(timeout=20000)
                 expect(page.get_by_test_id("geo-static-fallback")).to_be_visible()
                 scan("renderer_failure_mobile")
+                page=browser.new_page(viewport={"width":1440,"height":900},reduced_motion="reduce")
+                page.goto(server.base+"/context-preview")
+                scan("contextual_idle")
+                context_requests=[]
+                page.on("request",lambda req:context_requests.append(req.url))
+                start=time.perf_counter()
+                page.get_by_test_id("context-load").click()
+                expect(page.get_by_test_id("context-ready")).to_be_visible(timeout=20000)
+                result["context_lab"]={"measurement":"generated single-tile Chromium software-GPU sample; not real map performance",
+                    "ready_ms":round((time.perf_counter()-start)*1000),
+                    "archive_requests":sum(u.endswith("/context/atlas-fixture-v1.pmtiles") for u in context_requests),
+                    "external_requests":sum(not u.startswith(server.base+"/") for u in context_requests)}
+                assert result["context_lab"]["external_requests"]==0
+                scan("contextual_desktop")
+                page.set_viewport_size({"width":320,"height":800})
+                scan("contextual_mobile")
+                page=browser.new_page(viewport={"width":320,"height":800})
+                page.route("**/context/atlas-fixture-v1.pmtiles",lambda route:route.abort())
+                page.goto(server.base+"/context-preview")
+                page.get_by_test_id("context-load").click()
+                expect(page.get_by_test_id("context-unavailable")).to_be_visible(timeout=20000)
+                scan("contextual_failure")
                 result["status"]="completed"
                 result["gate_passed"]=all(not v["violations"] for v in result["views"])
             finally:browser.close()
