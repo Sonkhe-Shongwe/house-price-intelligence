@@ -59,7 +59,8 @@ jobs:
       - name: Test offline Wikidata spatial pilot (invented data only)
         run: python -m unittest tools.test_wikidata_spatial_pilot -v
       - name: Install pinned raster pilot wheel
-        run: python -m pip install --only-binary=:all: "rasterio==1.5.2"
+        run: |
+          python -m pip install --only-binary=:all: "rasterio==1.5.2"
       - name: Test offline GHSL raster pilot (invented data only)
         run: python -m unittest tools.test_ghsl_raster_pilot -v
       - name: Test offline HPI Data Manager (invented data only)
