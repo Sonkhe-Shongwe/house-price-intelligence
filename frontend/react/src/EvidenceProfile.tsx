@@ -12,17 +12,17 @@ export default function EvidenceProfile({facts}:{facts:EvidenceFacts}){
     <div className="ep-heading"><span>Evidence profile / {String(rank).padStart(2,'0')}</span><small>Recorded facts</small></div>
     <div className="ep-grid">
       <div className="ep-metric"><h4>Sale recency</h4><strong data-testid="profile-age">{ageDays} <small>days earlier</small></strong>
-        <svg viewBox="0 0 200 16" width="100%" height="16" aria-hidden="true" focusable="false">
+        <svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" focusable="false">
           <rect width="200" height="8" y="4" className="ep-track"/>
           <rect width={ageDays/365*200} height="8" y="4" className="ep-fill"/>
-          <line x1={ageDays/365*200} y1="0" x2={ageDays/365*200} y2="16" className="ep-tick"/>
+          <line x1={ageDays/365*200} y1="0" x2={ageDays/365*200} y2="16" className="ep-tick" vectorEffect="non-scaling-stroke"/>
         </svg><div className="ep-axis"><span>Analysis date</span><span>365 days earlier</span></div>
       </div>
       <div className="ep-metric"><h4>Area difference</h4><strong data-testid="profile-difference">{areaDifferencePct}%</strong>
-        <svg viewBox="0 0 200 16" width="100%" height="16" aria-hidden="true" focusable="false">
+        <svg viewBox="0 0 200 16" width="100%" height="16" preserveAspectRatio="none" aria-hidden="true" focusable="false">
           <rect width="200" height="8" y="4" className="ep-track"/>
           <rect width={areaDifferencePct/25*200} height="8" y="4" className="ep-fill"/>
-          <line x1={areaDifferencePct/25*200} y1="0" x2={areaDifferencePct/25*200} y2="16" className="ep-tick"/>
+          <line x1={areaDifferencePct/25*200} y1="0" x2={areaDifferencePct/25*200} y2="16" className="ep-tick" vectorEffect="non-scaling-stroke"/>
         </svg><div className="ep-axis"><span>0%</span><span>25%</span></div>
       </div>
     </div>

@@ -394,7 +394,22 @@ class HistoricalReaderTests(unittest.TestCase):
                         page.get_by_role("button",name="Inspect comparable 2",exact=True).click()
                         expect(page.get_by_test_id("profile-age")).to_have_text("88 days earlier")
                         expect(page.get_by_test_id("profile-difference")).to_have_text("0%")
+                        expect(page.get_by_test_id("beta-sale").nth(1)).to_have_attribute("data-selected","true")
+                        profile=page.get_by_test_id("evidence-profile")
+                        self.assertTrue(profile.evaluate("""el=>Array.from(el.querySelectorAll('svg')).every(svg=>{
+                            const track=svg.querySelector('.ep-track').getBoundingClientRect();
+                            const box=svg.getBoundingClientRect();
+                            return Math.abs(track.width-box.width)<1 && Math.abs(track.left-box.left)<1;
+                        })"""))
                         shot("supported-dossier",page.get_by_test_id("beta-result"))
+                        shot("investigation-full")
+                        page.set_viewport_size({"width":375,"height":850})
+                        self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+                        table=page.get_by_role("region",name="Eligible sales table, scroll horizontally if needed")
+                        table.focus()
+                        expect(table).to_be_focused()
+                        shot("supported-dossier-375",page.get_by_test_id("beta-result"))
+                        page.set_viewport_size({"width":1440,"height":1000})
                         iid=page.get_by_test_id("beta-id").input_value()
                         page.get_by_test_id("beta-add-comparison").click()
                         page.locator("#beta-note-0").fill("First property note")
@@ -423,6 +438,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(frozen.get_by_role("rowheader",name="Buyer-reported area")).to_be_visible()
                         expect(frozen.get_by_role("rowheader",name="Valuation")).to_be_visible()
                         shot("comparison",frozen)
+                        shot("comparison-full")
                         page.locator("#beta-note-0").fill("Unsaved draft change")
                         expect(frozen).to_contain_text("First property note")
                         expect(frozen).not_to_contain_text("Unsaved draft change")
@@ -465,6 +481,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         self.assertIsNone(new_writer.execute("SELECT nullif(current_setting(\'hpi.owner_id\',true),\'\')").fetchone()[0])
                         page.get_by_test_id("beta-nav-saved").click()
                         expect(page.get_by_test_id("beta-workspace-comparison")).not_to_have_count(0)
+                        expect(page.get_by_test_id("beta-workspace")).to_contain_text("UTC")
                         shot("saved-workspace")
                         page.get_by_test_id("beta-workspace-comparison").first.click()
                         expect(page.get_by_test_id("beta-comparison")).to_be_visible(timeout=15000)
