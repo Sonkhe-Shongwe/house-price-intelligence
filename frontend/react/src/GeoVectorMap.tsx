@@ -4,6 +4,7 @@ import * as maplibregl from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type {MapPoint} from './mapEvidence';
+import VirtualMapFallback from './VirtualMapFallback';
 import atlasStyle from './mapStyles/atlas.json';
 import terminalStyle from './mapStyles/terminal.json';
 type MapTheme='atlas'|'terminal';
@@ -86,12 +87,17 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
       }
     }
   },[selected,status,points]);
+  function resetView(){
+    const map=instance.current;if(!map||status!=='ready')return;
+    const bounds=new maplibregl.LngLatBounds();points.forEach(p=>bounds.extend(p.coordinates));
+    map.fitBounds(bounds,{padding:48,maxZoom:14,duration:0});
+  }
   return <div className="geo-vector" data-testid="geo-vector">
     <div className="geo-canvas" ref={node} hidden={status==='fallback'} aria-label="Virtual display coordinates"/>
     {status==='loading'&&<p role="status">Preparing local vector renderer…</p>}
-    {status==='fallback'&&<p data-testid="geo-fallback" role="status">Map unavailable. The verified sale list remains usable.</p>}
+    {status==='fallback'&&<><p data-testid="geo-fallback" role="status">Interactive map unavailable. The verified sale list remains usable.</p><VirtualMapFallback points={points} selected={selected} onSelect={onSelect}/></>}
     {status==='ready'&&<><p data-testid="geo-ready" role="status">Virtual map · No basemap · Not to scale</p>
       <div className="geo-controls"><button type="button" aria-label="Zoom in fictional map" onClick={()=>instance.current?.zoomIn({duration:0})}><Icon name="plus" size={20}/></button>
-      <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}><Icon name="minus" size={20}/></button></div></>}
+      <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}><Icon name="minus" size={20}/></button><button type="button" aria-label="Reset fictional map view" onClick={resetView}><Icon name="refresh"/> Reset view</button></div></>}
   </div>;
 }

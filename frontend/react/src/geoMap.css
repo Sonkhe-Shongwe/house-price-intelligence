@@ -23,3 +23,14 @@
 .geo-style-controls{display:flex;gap:6px;flex-wrap:wrap}.geo-style-controls button{min-height:44px;padding:8px 16px;border:1px solid #65776c;background:#fff;color:#254b3a;font:600 13px system-ui;border-radius:3px;cursor:pointer}.geo-style-controls button[aria-pressed=true]{background:#254b3a;color:white}.geo-style-controls button:focus-visible{outline:3px solid #a74429;outline-offset:2px}
 .geo-themed .geo-marker{width:36px;height:36px;border:2px solid var(--geo-ink);background:var(--geo-marker-bg);color:var(--geo-ink);box-shadow:0 2px 6px #152d2840}.geo-themed .geo-subject{border-radius:4px;background:var(--geo-ink);color:var(--geo-paper)}.geo-themed .geo-sale[aria-pressed=true]{background:var(--geo-accent);color:var(--geo-selected-ink);border-color:var(--geo-marker-bg);outline:2px solid var(--geo-accent)}.geo-themed .geo-sale:focus-visible{outline:3px solid var(--geo-accent);outline-offset:4px}
 .geo-themed .geo-controls button{min-width:44px;min-height:44px;border-color:var(--geo-ink);background:var(--geo-marker-bg);color:var(--geo-ink);border-radius:3px}.geo-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#344b40}.geo-legend span{display:flex;gap:6px;align-items:center}.geo-legend i{width:12px;height:12px;display:inline-block;border:2px solid #254b3a;border-radius:50%}.geo-legend .geo-legend-subject{border-radius:2px;background:#254b3a}.geo-legend .geo-legend-selected{background:#a74429;border-color:#a74429}.geo-themed[data-map-theme=terminal] .geo-legend .geo-legend-selected{background:#d5e8e0;border-color:#526b5f}
+
+/* Non-GPU fallback shares the Atlas evidence palette, not a real basemap. */
+.geo-static{min-width:0;background:var(--hpi-atlas-surface,#faf8f2);border:1px solid var(--hpi-atlas-shell-rule,#a7b5a4);padding:12px;border-radius:3px}
+.geo-static h4{display:flex;align-items:center;gap:7px;font:650 15px/1.4 system-ui;margin:0 0 6px;color:#254b3a}
+.geo-static p{font-size:12px;line-height:1.55;color:#405b50;margin:6px 0 10px;overflow-wrap:anywhere}
+.geo-static svg[role=img]{display:block;max-width:100%;height:auto}
+.geo-static-actions{display:flex;flex-wrap:wrap;gap:6px}
+.geo-static-actions button{min-height:44px;min-width:44px}
+.geo-static-actions button[aria-pressed=true]{background:#254b3a;color:white;border-color:#254b3a}
+.geo-static-actions button:focus-visible{outline:3px solid var(--hpi-atlas-accent,#a74429);outline-offset:2px}
+.geo-controls{display:flex;flex-wrap:wrap;gap:6px}

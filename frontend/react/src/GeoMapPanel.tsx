@@ -4,12 +4,13 @@ import {adaptMap,type MapEvidence} from './mapEvidence';
 import type {InvestigationView} from './evidenceBridge';
 import './geoMap.css';
 import CentroidPreview from './CentroidPreview';
+import VirtualMapFallback from './VirtualMapFallback';
 const VectorMap=lazy(()=>import('./GeoVectorMap'));
-class OptionalMapBoundary extends Component<{children:ReactNode},{failed:boolean}>{
+class OptionalMapBoundary extends Component<{children:ReactNode;fallback:ReactNode},{failed:boolean}>{
   state={failed:false};
   static getDerivedStateFromError(){return {failed:true};}
   render(){return this.state.failed
-    ? <p role="status" data-testid="geo-bundle-fallback">Optional map could not load. The verified sale list remains usable.</p>
+    ? <><p role="status" data-testid="geo-bundle-fallback">Optional map could not load. The verified sale list remains usable.</p>{this.props.fallback}</>
     :this.props.children;}
 }
 export default function GeoMapPanel({record,selected,onSelect}:{record:InvestigationView;selected:number|null;onSelect:(n:number)=>void}){
@@ -34,7 +35,7 @@ export default function GeoMapPanel({record,selected,onSelect}:{record:Investiga
   if(data&&data.points.length>0)return <div className="geo-evidence-stack"><article className="geo-panel" data-testid="geo-panel">
     <header><small>FICTIONAL GEOGRAPHIC EVIDENCE</small><h3>Explore saved sale positions.</h3>
       <p>Virtual points only. No streets, real locations, distances or valuation.</p></header>
-    <OptionalMapBoundary><Suspense fallback={<p role="status">Loading optional map renderer…</p>}>
+    <OptionalMapBoundary fallback={<VirtualMapFallback points={data.points} selected={selected} onSelect={onSelect}/>}><Suspense fallback={<p role="status">Loading optional map renderer…</p>}>
       <VectorMap points={data.points} selected={selected} onSelect={onSelect}/>
     </Suspense></OptionalMapBoundary>
     <small className="geo-provenance">Display source: {data.source} · SHA-256 {data.digest.slice(0,12)} · Separate from original matching coordinates</small>
