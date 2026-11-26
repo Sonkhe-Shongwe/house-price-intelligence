@@ -475,10 +475,256 @@ def district_self_test():
     print("PASS: district identity, geometry, version, retention, idempotence and conflict checks.")
 
 
+
+# HPI-DATA-004: one approved publisher partition, no network in the manager.
+BUILD_FILE = "part-00088-6362069d-6eea-4a1e-8c47-524b38a5fb20.c000.csv.gz"
+BUILD_URL = "https://bfppub.z5.web.core.windows.net/2026-07-24/global-buildings.geojsonl/RegionName=SouthAfrica/quadkey=300301302/" + BUILD_FILE
+BUILD_MANIFEST = "01_Source_Catalogue/HPI-DATA-004.json"
+BUILD_OUTPUT = "03_Processed_Data/HPI-DATA-004/building_index.csv"
+BUILD_REPORT = "07_Reports/HPI-DATA-004_quality.json"
+BUILD_RAW = "02_Raw_Data/" + BUILD_FILE
+BUILD_MAX_BYTES = 50*MIB
+BUILD_MAX_EXPANDED = 500*MIB
+BUILD_MAX_RECORDS = 500000
+BUILD_MAX_PAIRS = 5000000
+
+def building_profile(raw, max_expanded=BUILD_MAX_EXPANDED,
+                     max_records=BUILD_MAX_RECORDS, max_pairs=BUILD_MAX_PAIRS):
+    import gzip
+    import math
+    try:
+        from shapely.geometry import shape
+        from shapely.geometry.polygon import orient
+        from shapely.errors import ShapelyError
+        from pyproj import Geod
+    except ImportError as exc:
+        raise ValueError("Building adapter requires Shapely and pyproj.") from exc
+    if not 0 < len(raw) <= BUILD_MAX_BYTES:
+        raise ValueError("Compressed building size outside approved bounds.")
+    geod = Geod(ellps="WGS84")
+    q = dict(records=0,expanded_bytes=0,coordinate_pairs=0,usable=0,
+             invalid_geometry=0,exact_duplicate_geometry=0,
+             missing_height=0,missing_confidence=0,invalid_height=0,
+             invalid_confidence=0,outside_tile_centroid=0)
+    seen = set()
+    property_keys = set()
+    areas = []
+    out = io.StringIO(newline="")
+    w = csv.writer(out, lineterminator="\n")
+    w.writerow(["source_row","footprint_m2","centroid_lon","centroid_lat",
+                "estimated_height_m","detection_confidence"])
+    def optional(p, key, maximum=None):
+        value = p.get(key)
+        if value is None or value == -1:
+            q["missing_"+key] += 1
+            return ""
+        if (type(value) not in (int,float) or not math.isfinite(value) or
+                value < 0 or (maximum is not None and value > maximum)):
+            q["invalid_"+key] += 1
+            return ""
+        return str(value)
+    def reject_constant(value):
+        raise ValueError("Nonfinite JSON constant: " + value)
+    with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
+        while True:
+            # Limit both total expansion and any individual line.
+            line = stream.readline(min(4*MIB+1,max_expanded-q["expanded_bytes"]+1))
+            if not line:
+                break
+            q["expanded_bytes"] += len(line)
+            q["records"] += 1
+            if (q["expanded_bytes"] > max_expanded or len(line)>4*MIB or
+                    q["records"] > max_records):
+                raise ValueError("Expanded byte, individual line or record cap exceeded.")
+            f = json.loads(line, parse_constant=reject_constant)
+            if not isinstance(f,dict) or f.get("type") != "Feature":
+                raise ValueError("Expected line-delimited GeoJSON Features.")
+            p, g = f.get("properties"), f.get("geometry")
+            if not isinstance(p,dict) or not isinstance(g,dict):
+                raise ValueError("Missing feature properties or geometry object.")
+            property_keys.update(p)
+            if len(property_keys)>128:
+                raise ValueError("Unexpected property schema.")
+            kind = g.get("type")
+            coords = g.get("coordinates")
+            if kind not in ("Polygon","MultiPolygon"):
+                raise ValueError("Unexpected geometry type.")
+            parts = [coords] if kind == "Polygon" else coords
+            structural_valid = True
+            if not isinstance(parts,list) or not parts:
+                raise ValueError("Unexpected polygon nesting.")
+            for part in parts:
+                if not isinstance(part,list) or not part:
+                    raise ValueError("Unexpected polygon rings.")
+                for ring in part:
+                    if not isinstance(ring,list):
+                        raise ValueError("Unexpected ring structure.")
+                    if len(ring)<4 or ring[0]!=ring[-1]:
+                        structural_valid = False
+                    for point in ring:
+                        q["coordinate_pairs"] += 1
+                        if q["coordinate_pairs"] > max_pairs:
+                            raise ValueError("Coordinate cap exceeded.")
+                        if (not isinstance(point,list) or len(point)!=2 or
+                                any(type(v) not in (int,float) or not math.isfinite(v) for v in point) or
+                                not (-180<=point[0]<=180 and -90<=point[1]<=90)):
+                            raise ValueError("Unexpected longitude/latitude coordinate.")
+            height = optional(p,"height")
+            confidence = optional(p,"confidence",1)
+            if not structural_valid:
+                q["invalid_geometry"] += 1
+                continue
+            try:
+                geom = shape(g)
+                if geom.is_empty or not geom.is_valid or geom.area<=0:
+                    q["invalid_geometry"] += 1
+                    continue
+                digest = hashlib.sha256(geom.wkb).digest()
+                if digest in seen:
+                    q["exact_duplicate_geometry"] += 1
+                    continue
+                polygons = [geom] if kind=="Polygon" else geom.geoms
+                area = sum(abs(geod.geometry_area_perimeter(orient(poly,sign=1.0))[0])
+                           for poly in polygons)
+                centroid = geom.centroid
+                if not math.isfinite(area) or area<=0:
+                    q["invalid_geometry"] += 1
+                    continue
+            except ShapelyError:
+                q["invalid_geometry"] += 1
+                continue
+            seen.add(digest)
+            q["outside_tile_centroid"] += not (30.9375<=centroid.x<=31.640625 and
+                                              -25.7998911821<=centroid.y<=-25.1651733687)
+            q["usable"] += 1
+            areas.append(area)
+            w.writerow([q["records"],f"{area:.4f}",f"{centroid.x:.8f}",
+                        f"{centroid.y:.8f}",height,confidence])
+            if out.tell()>50*MIB:
+                raise ValueError("Derived CSV exceeds 50 MiB output safety cap.")
+    if not q["records"] or not q["usable"]:
+        raise ValueError("No usable building features.")
+    from statistics import median
+    q.update(source_property_names=sorted(property_keys),
+             median_footprint_m2=round(median(areas),4),
+             minimum_footprint_m2=round(min(areas),4),
+             maximum_footprint_m2=round(max(areas),4),
+             summed_footprint_m2=round(math.fsum(areas),4),
+             limitations="Imagery-derived footprint detections; not verified houses, floor area, sales, union coverage or ground truth. Centroids are geometric longitude/latitude centroids; exact WKB duplicates only. Optional attribute counts include all source records.")
+    return out.getvalue().encode("utf-8"), q
+
+def building_status(root):
+    path = root/BUILD_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-004","registered":False}
+    m = json.loads(read_bounded(path))
+    deadline = date.fromisoformat(m["do_not_retain_on_or_after"])
+    return {"dataset_id":"HPI-DATA-004","registered":True,"deadline":deadline.isoformat(),
+            "retention_due_or_expired":date.today()>=deadline,
+            "known_local_paths":[p for p in (BUILD_FILE,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MANIFEST)
+                                 if (root/p).exists()],
+            "note":"Review other copies, chat uploads, sync and backups separately; no deletion performed."}
+
+def import_buildings(root,intake,terms_reviewed,deadline=None,today=None):
+    today = today or date.today()
+    deadline = deadline or intake+timedelta(days=30)
+    if not terms_reviewed or intake>today or deadline<=intake or deadline>intake+timedelta(days=30) or today>=deadline:
+        raise ValueError("Terms, intake date or retention deadline not acceptable.")
+    source = root/BUILD_RAW
+    # Require the canonical location, rather than create another raw copy.
+    workspace(source.parent)
+    raw = read_bounded(source,BUILD_MAX_BYTES)
+    digest = sha(raw)
+    existing = root/BUILD_MANIFEST
+    if existing.exists():
+        prior = json.loads(read_bounded(existing))
+        if (prior["source_sha256"] != digest or prior["first_intake_date"] != intake.isoformat() or
+                prior["do_not_retain_on_or_after"] != deadline.isoformat()):
+            raise ValueError("Registered source or retention differs; no overwrite or renewal.")
+    result, q = building_profile(raw)
+    m = {"dataset_id":"HPI-DATA-004","manager_version":"0.3.0",
+         "source":"Microsoft Global ML Building Footprints","source_url":BUILD_URL,
+         "country":"SouthAfrica","quadkey":"300301302","catalogue_upload_date":"2026-07-24",
+         "source_licence":"CDLA Permissive 2.0","source_licence_url":"https://cdla.dev/permissive-2-0/",
+         "source_identity_evidence":"Exact catalogue filename and owner-attested download route; first received SHA-256 pinned locally, not an independent publisher checksum.",
+         "source_bytes":len(raw),"source_sha256":digest,"raw_path":BUILD_RAW,
+         "first_intake_date":intake.isoformat(),"terms_reviewed_by_owner":True,
+         "do_not_retain_on_or_after":deadline.isoformat(),
+         "retention":"Maximum 30 days or shorter terms; no automatic deletion or renewal",
+         "processed_path":BUILD_OUTPUT,"processed_sha256":sha(result),"quality_report":BUILD_REPORT,
+         "quality":q}
+    planned = [(root/BUILD_OUTPUT,result),(root/BUILD_REPORT,json_bytes(q)),
+               (existing,json_bytes(m))]
+    for path, content in planned:
+        workspace(path.parent)
+        check_target(path,content)
+    initialise(root)
+    for path, content in planned:
+        publish(path,content)
+    return m
+
+def building_cli(root,args):
+    existing = root/BUILD_MANIFEST
+    if existing.exists():
+        prior = json.loads(read_bounded(existing))
+        intake = args.intake_date or date.fromisoformat(prior["first_intake_date"])
+        deadline = args.retain_until or date.fromisoformat(prior["do_not_retain_on_or_after"])
+        reviewed = prior["terms_reviewed_by_owner"] is True
+    else:
+        if args.intake_date is None or not args.terms_reviewed or args.retain_until is None:
+            raise ValueError("First import requires --intake-date, --terms-reviewed and --retain-until from approved actual acquisition metadata. No interactive prompts.")
+        intake, deadline, reviewed = args.intake_date,args.retain_until,True
+    m = import_buildings(root,intake,reviewed,deadline)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":building_status(root)},indent=2))
+    return 0
+
+def building_self_test():
+    import gzip
+    import copy
+    f = {"type":"Feature","properties":{"height":-1,"confidence":0.8},
+         "geometry":{"type":"Polygon","coordinates":[[[31,-25.5],[31.0001,-25.5],
+             [31.0001,-25.5001],[31,-25.5001],[31,-25.5]]]}}
+    def pack(features):
+        return gzip.compress(b"".join(json_bytes(x).replace(b"\n",b"")+b"\n" for x in features),mtime=0)
+    def rejects(fn):
+        try:
+            fn()
+        except (ValueError,OSError,EOFError,KeyError,TypeError):
+            return
+        raise AssertionError("Expected building refusal.")
+    raw = pack([f,f])
+    _, q = building_profile(raw)
+    assert q["records"]==2 and q["usable"]==1 and q["exact_duplicate_geometry"]==1
+    assert q["missing_height"]==2 and q["missing_confidence"]==0 and q["coordinate_pairs"]==10
+    assert 100<q["median_footprint_m2"]<120
+    rejects(lambda: building_profile(raw,max_expanded=10))
+    rejects(lambda: building_profile(raw,max_records=1))
+    rejects(lambda: building_profile(raw,max_pairs=9))
+    rejects(lambda: building_profile(raw[:-5]))
+    bad = copy.deepcopy(f)
+    bad["geometry"]["coordinates"][0][0]=[181,0]
+    rejects(lambda: building_profile(pack([bad])))
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        (root/BUILD_RAW).write_bytes(raw)
+        day=date(2026,1,1)
+        rejects(lambda: import_buildings(root,day,False,today=day))
+        rejects(lambda: import_buildings(root,day,True,day+timedelta(days=31),day))
+        rejects(lambda: import_buildings(root,day,True,today=day+timedelta(days=30)))
+        m=import_buildings(root,day,True,today=day)
+        assert m==import_buildings(root,day,True,today=day)
+        rejects(lambda: import_buildings(root,day,True,day+timedelta(days=29),day))
+        (root/BUILD_OUTPUT).write_text("conflict")
+        rejects(lambda: import_buildings(root,day,True,today=day))
+        assert (root/BUILD_OUTPUT).read_text()=="conflict"
+    print("PASS: building streaming caps, geometry, optional attributes, retention and repeat checks.")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
@@ -490,19 +736,22 @@ def main():
         if args.self_test:
             self_test()
             district_self_test()
+            building_self_test()
             return 0
         root = workspace(args.root)
         if args.status:
-            print(json.dumps(district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         initialise(root)
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-004":
+            return building_cli(root,args)
         if args.dataset == "HPI-DATA-003":
             return district_cli(root,args)
         if args.retain_until is not None:
-            raise ValueError("--retain-until is supported only by the district adapter.")
+            raise ValueError("--retain-until is supported only by district/building adapters.")
         existing = root / MANIFEST
         if existing.exists():
             prior = json.loads(read_bounded(existing))
