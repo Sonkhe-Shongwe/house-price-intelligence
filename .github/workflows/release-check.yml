@@ -2,10 +2,10 @@ name: Release candidate accessibility and dependencies
 on:
   push:
     branches: [development]
-    paths: ['frontend/react/**','.github/workflows/release-check.yml']
+    paths: ['frontend/react/**','backend/requirements-runtime.txt','tools/review_python_dependencies.py','.github/workflows/release-check.yml']
   pull_request:
     branches: [development,main]
-    paths: ['frontend/react/**','.github/workflows/release-check.yml']
+    paths: ['frontend/react/**','backend/requirements-runtime.txt','tools/review_python_dependencies.py','.github/workflows/release-check.yml']
 permissions:
   contents: read
 jobs:
@@ -54,6 +54,25 @@ jobs:
           print(json.dumps(report,indent=2))
           if report["exit_code"]:raise SystemExit(1)
           PY
+      - name: Python runtime transitive advisory review
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-audit"
+          python -m venv "$RUNNER_TEMP/hpi-runtime-review"
+          python -m venv "$RUNNER_TEMP/hpi-auditor"
+          runtime="$RUNNER_TEMP/hpi-runtime-review/bin/python"
+          auditor="$RUNNER_TEMP/hpi-auditor/bin/python"
+          "$runtime" -m pip install --only-binary=:all: -r backend/requirements-runtime.txt
+          "$runtime" -m pip check
+          "$runtime" -m pip list --local --format=json > "$RUNNER_TEMP/runtime-inventory.json"
+          "$runtime" -m pip freeze --all > "$RUNNER_TEMP/runtime-resolved.txt"
+          "$auditor" -m pip install 'pip-audit==2.10.1'
+          set +e
+          "$auditor" -m pip_audit --strict --disable-pip --no-deps -r "$RUNNER_TEMP/runtime-resolved.txt" --format=json --output "$RUNNER_TEMP/python-audit-raw.json"
+          code=$?
+          set -e
+          python tools/review_python_dependencies.py "$RUNNER_TEMP/runtime-inventory.json" "$RUNNER_TEMP/python-audit-raw.json" "$RUNNER_TEMP/release-audit/python-audit.json" "$code"
       - name: Accessibility scan
         if: success() || failure()
         env:

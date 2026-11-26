@@ -15,7 +15,7 @@ Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEA
 
 ## Active frontend quality workstream (26 November 2026)
 
-Apply the [Professional Frontend Excellence directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) within the existing eight-step lifecycle. FE1–FE7 are unweighted execution tasks under P5/P3/P6 and P7 verification, not new delivery phases. Start with FE1 iconography; use actual source/CI and rendered evidence. Defer real basemap qualification until frontend review or justified separate research. No new data, spending, access or release authority. Read the checkpoint for current status.
+Apply the [Professional Frontend Excellence directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) within the existing eight-step lifecycle. FE1–FE7 are unweighted execution tasks under P5/P3/P6 and P7 verification, not new delivery phases. FE1–FE7 core and fictional geographic engineering qualified; use checkpoint for exact current evidence. Bounded basemap approval unused, real extraction deferred on unresolved extractor security. Resume existing P7/P8 readiness work; use actual source/CI and rendered evidence. No new data, spending, access or release authority. Read the checkpoint for current status.
 
 ## Cloud-first development station (owner-approved 23 November 2026)
 
