@@ -1,6 +1,6 @@
 # Documentation index and source-of-truth rules
 
-**Reviewed:** 25 November 2026. **Purpose:** Reduce documentation drift across research experiments, P0–P8 delivery planning and application implementation.
+**Reviewed:** 26 November 2026. **Purpose:** Reduce documentation drift across research experiments, P0–P8 delivery planning and application implementation.
 
 ## What to read first
 
@@ -8,16 +8,17 @@
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
-| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 25 November status-ledger consolidation; older [Post-P6 audit](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md) remains historical |
+| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 26 November FE directive and migration consolidation; immutable historical ledger linked |
 | Active database workstream | [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) | Restricted TLS, persistent invented buyer journey and independent encrypted Drive recovery verified; full protection/key/access gates open |
-| Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional extraction unused; isolated actual identity qualified; buyer integration open; no deployment or real buyer route |
+| Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Combined actual invented buyer milestone completed; real-intake protection/use gates open; no real buyer route or deployment |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 87.1% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review Atlas / Terminal V1–V3 | [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) and [interactive HTML](../design-prototypes/hpi-atlas-terminal-study.html) | Tested fictional prototype; Atlas candidate, not owner-approved |
+| Active professional frontend directive | [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) | FE1–FE7; first task iconography, no new phase weights |
 | Resume integrated UX development | [Current checkpoint](CHECKPOINT.md) | Actual shared components, typed private adapter, design tokens, exact-head CI, visual review and outstanding gates |
-| Review custom cartography qualification | [26 Nov cartography study](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md) | Local editable MapLibre styles, candidate runtime integration, exact-head CI pending; no real geography |
-| Review frontend convergence source audit | [26 Nov frontend convergence audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) | Actual route/component/field comparison, proposed shared adapter and next prototype specification |
+| Review custom cartography qualification | [26 Nov cartography study](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md) | Verified fictional styles and regression corrections; no real geography; future basemap deferred |
+| Review frontend convergence source audit | [26 Nov frontend convergence audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) | Dated audit; shared components/adapters since implemented; see checkpoint |
 | Review current product convergence | [26 Nov product, UX and geospatial research](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md) | Shared frontend, validated adapters, separate renderer/basemap/geometry decisions; research only |
 | Review current design system | [26 Nov professional UI engineering](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md) | Candidate libraries, computed contrast, component/state inventory |
 | Review aesthetic originality | [26 Nov art direction and design craft](design/ART_DIRECTION_AND_DESIGN_CRAFT_RESEARCH_2026-11-26.md) | Three exploratory concepts, custom cartography and visualisation; no final selection |
@@ -74,4 +75,4 @@
 
 Use [CHECKPOINT.md](CHECKPOINT.md) as the only current state/next-task ledger; [DECISIONS.md](DECISIONS.md) for authority and [P_PHASE_ROADMAP.md](P_PHASE_ROADMAP.md) for phase gates. [Master prompt](MASTER_CONTINUATION_PROMPT.md) and [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) define standing autonomy, one permanent development branch and stable main. Earlier design and engineering contracts describe their dated scope, not the latest project status.
 
-Active: [current checkpoint](CHECKPOINT.md) is the operational handoff. V3 prototype, custom fictional MapLibre styles, shared evidence graphics, navigation, comparison matrix, private service/contract extraction and Atlas candidate tokens are implemented on development. 6a0544b and 76871e3 each passed 10/10 registered workflows; visual alignment/screenshot capture f24a3b7 passed 11/11, including disposable PostgreSQL runtime push 45759328246 and PR 45759334386. Actual private screenshot review remains outstanding; synthetic renders already reviewed. Next retrieve and inspect private workspace, supported/insufficient dossier and comparison renders, refine density and authentication experience, then bounded interaction and basemap qualification subject to rights and R0. No final owner aesthetic approval. Prior combined actual Auth0/Neon invented buyer save/compare and owner-observed reopen/sign-out completed; access window closed. Actual combined restart, note persistence and cross-owner/old-cookie probes not independently demonstrated. [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) retain storage/key/use gates. P3 96%, P5 89%, P6 95%, P4 95%, P7 83%, P8 35%; **87.1%** weighted, all gates open. [Recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md) and [release runbook](engineering/RELEASE_RUNBOOK_V1.md) define browser-only release.
+Active: [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) under P5/P3/P6 and P7 verification. [Current checkpoint](CHECKPOINT.md) is the sole live state/next task; start FE1, not earlier prototypes or basemap. Latest application baseline 2283037 passed 11/11; no final owner visual approval. [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) retain real-intake gates. **87.1%** weighted, all full gates open, R0. [Recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md) and [release runbook](engineering/RELEASE_RUNBOOK_V1.md) define browser-only release.
