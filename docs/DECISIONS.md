@@ -140,3 +140,7 @@ Owner approves one bounded separate recovery, at most three additional API reque
 ## HPI-DATA-008 intake authority (26 November 2026)
 
 Owner approves one official revised Stats SA Census 2022 Municipal Fact Sheet maximum 5 MiB, four household service indicators for Cape Town and Johannesburg in 2011/2022, private processing and registration only, strict R0, no material joins or existing dataset modifications. [Approved adapter and scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-hpi-data-008-private-census-adapter). No Treasury replay, additional intake, public/commercial display, release or scope adoption.
+
+## Independent contextual proof authority (26 November 2026)
+
+Owner approves bounded private offline contextual intelligence prototype using HPI-DATA-006 and HPI-DATA-008 independently; validate integrity, implement source-specific reports and scenarios, preserve datasets/application. No material joins, persisted derived outputs, new acquisition or expenditure. [Local proof contract](engineering/DATA_MANAGER_V1.md#approved-independent-contextual-proof-26-november-2026). No scope/market adoption, release, public display or phase acceptance.

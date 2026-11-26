@@ -1667,6 +1667,7 @@ def market_self_test():
         else:
             raise AssertionError("Changed output accepted")
     print("PASS: invented market PDF, two metros, six observations, rounding intervals, refusal, repeat, historical isolation and integrity.")
+    return raw
 
 
 
@@ -2368,6 +2369,195 @@ def census_self_test():
         else:
             raise AssertionError("Changed Census output accepted")
     print("PASS: invented revised Census PDF, 16 observations, source/header/range refusal, visual review, repeat, isolation and integrity.")
+    return raw
+
+
+
+
+# Approved private contextual proof: independent source sections, no persistence.
+CONTEXT_NAMES = {"CPT":"City of Cape Town","JHB":"City of Johannesburg"}
+CONTEXT_SCENARIOS = (
+    ("different_metros",("CPT","JHB")),
+    ("same_metro",("CPT","CPT")),
+    ("three_candidates",("JHB","JHB","CPT")),
+    ("partly_supported",("CPT","unsupported")),
+    ("unknown_and_unsupported",("unknown","unsupported")),
+)
+
+def context_source(root,spec,profile,source_url,source_meta,today):
+    sid,manifest,raw,output,report,cap,_=spec
+    audit=audit_registered(root,spec,today)
+    if audit["status"]!="integrity checks passed":
+        raise ValueError(sid+" not registered; no contextual proof.")
+    m=json.loads(read_bounded(root/manifest))
+    original=read_bounded(root/raw,cap)
+    processed=read_bounded(root/output,50*MIB)
+    if (m["source_url"]!=source_url or
+            any(k not in m or m[k]!=v for k,v in source_meta.items()) or
+            not isinstance(m.get("attribution"),str) or not m["attribution"].strip() or
+            not isinstance(m.get("source_licence"),str) or "private noncommercial" not in m["source_licence"]):
+        raise ValueError(sid+" source provenance/terms metadata differs.")
+    if (sha(original)!=m["source_sha256"] or len(original)!=m["source_bytes"] or
+            sha(processed)!=m["processed_sha256"]):
+        raise ValueError(sid+" source/output changed during validation.")
+    expected,quality=profile(original)
+    quality["visual_page_reviewed_by_owner"]=True
+    if (processed!=expected or quality!=m["quality"] or quality!=audit["quality"] or
+            json.loads(read_bounded(root/report))!=quality):
+        raise ValueError(sid+" original PDF re-extraction differs from registered output/report.")
+    return list(csv.DictReader(io.StringIO(processed.decode("utf-8")))), {
+        "dataset_id":sid,"source_url":source_url,"attribution":m["attribution"],
+        "first_intake_date":m["first_intake_date"],"retention_deadline":m["do_not_retain_on_or_after"],
+        "integrity":"registered checksums, PDF re-extraction and quality parity passed",
+        "version":{"source_sha256":m["source_sha256"],"processed_sha256":m["processed_sha256"]},
+        "rights":"Private noncommercial proof only; source terms and law prevail. Offline check cannot establish subsequent rights changes.",
+        **source_meta}
+
+def context_scenarios(question):
+    result=[]
+    for case,areas in CONTEXT_SCENARIOS:
+        supported=list(dict.fromkeys(a for a in areas if a in CONTEXT_NAMES))
+        entries=[{"candidate":i+1,"selected_area":a,
+                  "status":"supported_context" if a in CONTEXT_NAMES else
+                  "unknown_area" if a=="unknown" else "unsupported_area",
+                  "area_evidence_ref":a if a in CONTEXT_NAMES else None}
+                 for i,a in enumerate(areas)]
+        if not supported:
+            next_step="Establish intended area and obtain qualified local evidence; no substitute."
+        elif len(supported)<len(set(areas)):
+            next_step="Obtain qualified evidence for unsupported or unknown area; "+question
+        elif len(supported)==1:
+            next_step="Shared metropolitan facts do not distinguish these homes; "+question
+        else:
+            next_step=question
+        result.append({"scenario":case,"candidates":entries,"area_evidence_refs":supported,
+                       "shared_area_context":any(areas.count(a)>1 for a in supported),
+                       "property_level_evidence":"unavailable","next_question":next_step})
+    return result
+
+def context_market(rows,provenance):
+    areas={}
+    for code,name in CONTEXT_NAMES.items():
+        source=[x for x in rows if x["metro_name_source"]==name]
+        latest=source[-1]
+        areas[code]={"source_area_label":name,"grain":"metro","index_base":"2020-12=100",
+                     "observations":[{"month":x["observation_month"],"index":x["index_value"]} for x in source],
+                     "published_monthly_growth_percent":latest["published_mom_percent"],
+                     "published_annual_growth_percent":latest["published_yoy_percent"],
+                     "published_weight_percent":latest["published_weight_percent"]}
+    def difference(field):
+        return str(Decimal(areas["CPT"][field])-Decimal(areas["JHB"][field]))
+    return {"source":provenance,"reference_month":"2026-06","source_table":"4, printed page 5",
+            "area_evidence":areas,
+            "source_internal_comparison":{"direction":"CPT minus JHB","unit":"percentage points",
+                                          "annual_growth_difference":difference("published_annual_growth_percent"),
+                                          "monthly_growth_difference":difference("published_monthly_growth_percent")},
+            "limitations":["Three dated index levels, not a continuous series; latest 12 months revisable.",
+                           "Aggregate market movement, not rand value, comparable sale, affordability, forecast or investment merit."],
+            "scenarios":context_scenarios("Which earlier completed sales and property-specific facts can the agent substantiate?")}
+
+def context_census(rows,provenance):
+    areas={}
+    for code,name in CONTEXT_NAMES.items():
+        metrics=[]
+        for key,label,_ in CENSUS_METRICS:
+            values={x["census_year"]:x["value"] for x in rows if x["metro_name_source"]==name and x["indicator_id"]==key}
+            metrics.append({"indicator_id":key,"source_label":label,"household_percent_by_year":values,
+                            "change_2011_to_2022_percentage_points":str(Decimal(values["2022"])-Decimal(values["2011"]))})
+        areas[code]={"source_area_label":name,"grain":"metro","indicators":metrics}
+    differences={}
+    for i,(key,_,_) in enumerate(CENSUS_METRICS):
+        values=[areas[c]["indicators"][i]["household_percent_by_year"]["2022"] for c in ("CPT","JHB")]
+        differences[key]=str(Decimal(values[0])-Decimal(values[1]))
+    return {"source":provenance,"reference_years":[2011,2022],"geography_reference":"2021 municipal frame",
+            "denominator":"Published household shares; exact indicator denominator counts not supplied.",
+            "area_evidence":areas,"source_internal_comparison":{"direction":"CPT minus JHB",
+                "reference_year":2022,"unit":"percentage points","differences":differences},
+            "limitations":["Historical aggregate service access, not current service reliability, outages or property connections.",
+                           "No household microdata, inferred counts, neighbourhood score or significance claim.",
+                           "No sale of data, processed data or application without prior Stats SA permission."],
+            "scenarios":context_scenarios("Can the agent or municipality confirm current connections and reliability at each home?")}
+
+def contextual_proof(root,today=None):
+    root=workspace(root)
+    today=today or date.today()
+    market_spec=("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None)
+    market,mp=context_source(root,market_spec,market_profile,MARKET_URL,{"publication_date":"2026-11-05"},today)
+    census,cp=context_source(root,census_spec(),census_profile,CENSUS_URL,{"publication_year":2023,
+        "revision_announcement_date":"2025-08-05","exact_revision_publication_date":None},today)
+    market_section=context_market(market,mp)
+    census_section=context_census(census,cp)
+    cases=market_section["scenarios"]+census_section["scenarios"]
+    return {"summary":{"integrity_sources_passed":2,"source_observations":{"HPI-DATA-006":len(market),"HPI-DATA-008":len(census)},
+                       "scenarios_per_source":len(CONTEXT_SCENARIOS),"scenario_evaluations":len(cases),
+                       "same_area_shared_context":all(c["shared_area_context"] and len(c["area_evidence_refs"])==1 for c in cases if c["scenario"]=="same_metro"),
+                       "unsupported_and_unknown_abstention":all(e["area_evidence_ref"] is None for c in cases for e in c["candidates"] if e["status"]!="supported_context"),
+                       "material_join":False,"persisted_outputs":False,"network_requests":0,
+                       "application_integration":False,"property_valuation":False,"buyer_utility_validated":False},
+            "market_evidence":market_section,"household_service_evidence":census_section,
+            "boundary":"Separate source sections; different dates and frames, no verified boundary equivalence, composite scores or real property identity. Private terminal review only."}
+
+def context_self_test(market_raw,census_raw):
+    day=date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/MARKET_RAW,market_raw)
+        publish(root/CENSUS_RAW,census_raw)
+        publish(root/RAW,b"untouched unrelated fixture")
+        import_market(root,day,True,lambda _:True,today=day)
+        def refusal():
+            try:
+                contextual_proof(root,day)
+            except ValueError:
+                return
+            raise AssertionError("Invalid context proof accepted")
+        refusal()
+        import_census(root,day,True,lambda _:True,today=day)
+        def snapshot():
+            return {str(p.relative_to(root)):sha(p.read_bytes()) if p.is_file() else "directory"
+                    for p in root.rglob("*")}
+        before=snapshot()
+        report=contextual_proof(root,day)
+        assert snapshot()==before
+        assert report["summary"]["source_observations"]=={"HPI-DATA-006":6,"HPI-DATA-008":16}
+        assert report["summary"]["scenario_evaluations"]==10
+        assert report["summary"]["same_area_shared_context"] and report["summary"]["unsupported_and_unknown_abstention"]
+        assert report["market_evidence"]["source_internal_comparison"]["annual_growth_difference"]=="-1.1"
+        assert report["household_service_evidence"]["area_evidence"]["CPT"]["indicators"][0]["change_2011_to_2022_percentage_points"]=="11.1"
+        for section in (report["market_evidence"],report["household_service_evidence"]):
+            cases={x["scenario"]:x for x in section["scenarios"]}
+            assert cases["different_metros"]["area_evidence_refs"]==["CPT","JHB"]
+            assert cases["same_metro"]["area_evidence_refs"]==["CPT"] and cases["same_metro"]["shared_area_context"]
+            assert cases["three_candidates"]["area_evidence_refs"]==["JHB","CPT"] and cases["three_candidates"]["shared_area_context"]
+            assert cases["partly_supported"]["candidates"][1]["area_evidence_ref"] is None
+            assert cases["unknown_and_unsupported"]["area_evidence_refs"]==[]
+            assert all(x["property_level_evidence"]=="unavailable" and x["next_question"] for x in cases.values())
+        for relative in (MARKET_RAW,CENSUS_OUTPUT,CENSUS_REPORT):
+            p=root/relative
+            original=p.read_bytes()
+            if relative==CENSUS_REPORT:
+                q=json.loads(original);q["observations"]=15;p.write_bytes(json_bytes(q))
+            else:
+                p.write_bytes(original+b" ")
+            changed=snapshot();refusal();assert snapshot()==changed
+            p.write_bytes(original)
+        manifest=root/CENSUS_MANIFEST
+        original=manifest.read_bytes()
+        for key,value in (("source_url","https://example.invalid"),("terms_reviewed_by_owner",False),
+                          ("do_not_retain_on_or_after",day.isoformat())):
+            q=json.loads(original);q[key]=value;manifest.write_bytes(json_bytes(q))
+            changed=snapshot();refusal();assert snapshot()==changed
+        data=root/CENSUS_OUTPUT
+        original_data=data.read_bytes()
+        changed_data=original_data.replace(b",11.1,",b",12.1,",1)
+        assert changed_data!=original_data
+        data.write_bytes(changed_data)
+        q=json.loads(original);q["processed_sha256"]=sha(changed_data);manifest.write_bytes(json_bytes(q))
+        changed=snapshot();refusal();assert snapshot()==changed
+        manifest.write_bytes(original);data.write_bytes(original_data)
+        assert snapshot()==before
+    print("PASS: independent contextual proof, original-PDF parity, five scenarios per source, drift/expiry refusal and no workspace writes.")
 
 
 
@@ -2377,6 +2567,7 @@ def main():
     p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
+    p.add_argument("--context-proof",action="store_true",help="Private read-only independent 006/008 contextual reports")
     p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
     p.add_argument("--recover-treasury",action="store_true",help="One separately approved 007 recovery; preserve original attempt")
     p.add_argument("--status",action="store_true")
@@ -2389,6 +2580,14 @@ def main():
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
+        if args.context_proof:
+            if (args.acquire_treasury or args.recover_treasury or args.self_test or args.status or
+                    args.audit_workspace or args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or
+                    args.init_only or args.intake_date is not None or args.retain_until is not None or
+                    args.terms_reviewed or args.dataset!="HPI-DATA-002"):
+                raise ValueError("Contextual proof must be a standalone read-only action.")
+            print(json.dumps(contextual_proof(args.root),indent=2,ensure_ascii=False))
+            return 0
         if args.acquire_treasury or args.recover_treasury:
             if (args.acquire_treasury and args.recover_treasury) or (args.dataset!="HPI-DATA-007" or args.self_test or args.status or args.audit_workspace or
                     args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or args.init_only or
@@ -2416,9 +2615,10 @@ def main():
             code_self_test()
             crosswalk_self_test()
             alias_self_test()
-            market_self_test()
+            market_raw=market_self_test()
             treasury_self_test()
-            census_self_test()
+            census_raw=census_self_test()
+            context_self_test(market_raw,census_raw)
             return 0
         root = workspace(args.root)
         if args.audit_workspace:

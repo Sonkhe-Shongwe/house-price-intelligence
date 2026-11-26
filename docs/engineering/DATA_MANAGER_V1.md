@@ -241,3 +241,22 @@ Use actual download date and review PDF page 4 terms. Adapter enforces 5 MiB loc
 ## HPI-DATA-008 local registration evidence (26 November 2026)
 
 Owner terminal screenshots show actual source preview and successful registration true, visual_page_reviewed_by_owner true, 16 observations, 16 unique and 16 percentage-range checks, 41 PDF pages with source pages 30/35, 2021 municipal frame and revision notice present. Original publication year 2023; exact revision publication date null. Household microdata, material join and property service reliability verified flags all false. Null retention deadline under stats-sa-census-private-v1, source terms and law prevail. Known local paths: 02_Raw_Data/Census_2022_Municipal_factsheet-Web.pdf, 03_Processed_Data/HPI-DATA-008/household_services.csv, 07_Reports/HPI-DATA-008_quality.json and 01_Source_Catalogue/HPI-DATA-008.json. Owner-observed registration; actual bytes, hashes and full workspace audit not independently inspected. No repeat required. [Importer 2533443](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2533443909b4244babc5dd8a3ddf5523cd6c08ec) passed all 7/7 workflows, including [focused audit job](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45892381299/job/140157913250), [React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45892388838) and [runtime](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45892388903). Existing five registrations preserved by scoped import; no material join or application change.
+
+## Approved independent contextual proof (26 November 2026)
+
+Owner approves private offline 006/008 analysis, independent source reports and scenarios; no workspace writes, new intake, material joins, application modifications or expenditure. Standalone --context-proof validates only those two registrations, policy/terms/visual attestations, retention and stored file checksums, then re-extracts original PDFs in memory and requires exact CSV and quality-report parity. Source provenance and dates checked; offline proof cannot verify later external rights changes or publisher authenticity beyond existing attestations. No crosswalk, cross-family arithmetic, addresses or user records. Five fixed hypothetical cases per source: different metros, same metro, three candidates, partially supported, unknown and unsupported. Shared area referenced once, missing data abstains, no composite score or property claim. Terminal JSON only; no persisted output, dependencies or network. After focused CI passes:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    $proofJson = python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --context-proof
+    if ($LASTEXITCODE -eq 0) {
+        $proof = $proofJson | ConvertFrom-Json
+        $proof.summary | ConvertTo-Json -Depth 5
+    } else {
+        $proofJson
+    }
+}
+```
+
+For private inspection only, display `$proof.market_evidence | ConvertTo-Json -Depth 12` and `$proof.household_service_evidence | ConvertTo-Json -Depth 12`. Share only summary or STOP error, not private reports, source files or hashes. Synthetic tests reuse invented PDFs and check workspace snapshot parity on success and failure, including coordinated processed/checksum drift. Actual local run pending; no buyer validation or public-display authority.

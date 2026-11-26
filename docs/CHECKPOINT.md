@@ -10,35 +10,37 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-CONTEXTUAL-PROOF-APPROVAL",
+    "id": "P0-CONTEXTUAL-PROOF-LOCAL",
     "status": "blocked",
-    "objective": "Decide whether to run a bounded private offline context presentation proof.",
-    "scope": "Decision only; proposed separate 006/008 source sections, no writes, joins or app changes.",
-    "acceptance": "Owner authorises exact read-only proof or alternative; no scope adoption.",
+    "objective": "Run approved independent 006/008 proof locally and assess usefulness.",
+    "scope": "No writes, network, intake, joins or app changes; terminal only.",
+    "acceptance": "Both source integrity/re-extraction checks and five cases per source; share summary only.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
       "docs/DECISIONS.md",
       "docs/P_PHASE_ROADMAP.md",
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md",
-      "docs/product/PRODUCT_BRIEF.md"
+      "docs/product/PRODUCT_BRIEF.md",
+      "docs/engineering/DATA_MANAGER_V1.md"
     ],
     "evidence": [
       "docs/reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Await proof decision or material D01/D02 evidence; no further intake, implementation or P1.",
+    "stop": "Await local result; no scope adoption, app implementation, recruitment, intake or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[621,625,"## 26 November 2026 | HPI-DATA-008 empirical registration and con","Next task: bounded desktop feasibility review of 006 and 008 as i"],[627,629,"## 26 November 2026 | Contextual evidence review delivered","006 and 008 local registration observations support two distinct "]],
-      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[140,142,"## HPI-DATA-008 intake authority (26 November 2026)","Owner approves one official revised Stats SA Census 2022 Municipa"]],
+      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"]],
       "docs/P_PHASE_ROADMAP.md": [[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]],
-      "docs/product/PRODUCT_BRIEF.md": [[126,164,"## 26 November 2026 | Direction B proposed contextual decision wo","Recommended next gate: owner authorises a bounded contextual feas"],[166,198,"## 26 November 2026 | Direction B contextual evidence review and ","Proposed B proof requires explicit owner authority: extend existi"]]
+      "docs/product/PRODUCT_BRIEF.md": [[166,198,"## 26 November 2026 | Direction B contextual evidence review and ","Proposed B proof requires explicit owner authority: extend existi"],[200,202,"### Approved bounded proof implementation (26 November 2026)","Owner approved independent private offline 006/008 reports, integ"]],
+      "docs/engineering/DATA_MANAGER_V1.md": [[245,262,"## Approved independent contextual proof (26 November 2026)","For private inspection only, display `$proof.market_evidence | Co"]]
     }
   },
   "blockers": [
-    "D01/D02 unresolved; 007 parked; 006/008 desk review delivered; proof decision pending.",
+    "D01/D02 unresolved; 007 parked; approved 006/008 proof local run pending.",
     "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
     "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
   ],
@@ -77,7 +79,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery exact `development` and stable `main` heads and Actions on every restoration. Continuation v2.1 5c6b957 passed 10/10; earlier importer/crosswalk/alias evidence in Data Manager. RPPI importer/fix and Census 2533443 passed 7/7 each; exact links in Data Manager. Main baseline 103c854; integration PR #4 historically draft, verify before authorised integration. No phase credit.
+Requery heads and exact CI at restoration. Prior continuation 5c6b957 10/10; RPPI/Census 7/7 each; evidence in Data Manager. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -97,15 +99,11 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual review delivered; proof decision next](product/PRODUCT_BRIEF.md#26-november-2026--direction-b-contextual-evidence-review-and-prototype-decision). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 delivered; 007 consumed; no new intake or proof authority. No other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
+[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual review delivered; proof local run next](product/PRODUCT_BRIEF.md#26-november-2026--direction-b-contextual-evidence-review-and-prototype-decision). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 delivered; 007 consumed; approved read-only proof pending. No other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
 [Complete historical checkpoint](archive/CONTINUATION_CHECKPOINT_2026-11-26.md) retains original dated evidence, failures, consumed approvals and old task sequences. [Original master](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/MASTER_CONTINUATION_PROMPT.md), [original checkpoint](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/CHECKPOINT.md), [decision history](archive/DECISION_HISTORY_2026-11-26.md), [delivery history](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md). Retrieve by heading or exact run rather than wholesale.
-
-## Actual combined fictional provider milestone (retained)
-
-See complete historical checkpoint; no replay or real-data acceptance.
 
 ## Continuation boundaries
 
