@@ -115,7 +115,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery exact heads and CI at restoration. a6cd471 7/7 passed; requery after NASA implementation. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. f6b0384 nine NASA tests passed; docs guidance corrected; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
