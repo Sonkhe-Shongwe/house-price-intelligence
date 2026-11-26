@@ -34,3 +34,16 @@
 .geo-static-actions button[aria-pressed=true]{background:#254b3a;color:white;border-color:#254b3a}
 .geo-static-actions button:focus-visible{outline:3px solid var(--hpi-atlas-accent,#a74429);outline-offset:2px}
 .geo-controls{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Both presentations use one validated virtual response and the same saved-sale selection. */
+.geo-display-choice{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.geo-display-choice button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:0;max-width:100%;padding:8px 12px;white-space:normal;overflow-wrap:anywhere;border:1px solid #65776c;background:#faf8f2;color:#254b3a;border-radius:3px;font:650 13px/1.4 system-ui;cursor:pointer}
+.geo-display-choice button[aria-pressed=true]{background:#254b3a;color:#fff}
+.geo-display-choice button:disabled{opacity:.7;cursor:wait}
+.geo-display-choice button:focus-visible,.geo-panel h3:focus-visible{outline:3px solid #a74429;outline-offset:3px}
+.geo-display-choice .geo-load{margin:0}
+.geo-display-choice svg{flex:none}
+.geo-selected-sale{display:grid;gap:4px;min-width:0;border-block:1px solid #a7b5a4;padding:10px 0;color:#254b3a;overflow-wrap:anywhere}
+.geo-selected-sale strong{font:650 22px/1.25 system-ui;font-variant-numeric:tabular-nums}
+.geo-selected-sale span,.geo-selected-sale small{font-size:12px;line-height:1.5}
+@media(max-width:540px){.geo-display-choice button{flex:1 1 100%}}

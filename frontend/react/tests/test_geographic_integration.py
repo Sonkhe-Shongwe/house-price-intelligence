@@ -74,6 +74,37 @@ class GeographicIntegrationTests(unittest.TestCase):
         self.page.get_by_test_id("geo-load").click()
         expect(self.page.get_by_test_id("geo-unavailable")).to_be_visible()
         expect(self.page.get_by_test_id("geo-static-fallback")).to_have_count(0)
+    def test_lightweight_choice_reuses_verified_response_without_gpu(self):
+        iid=self.save()
+        before=self.server.get("/v1/investigations/"+iid)
+        requests=[]
+        self.page.on("request",lambda r:requests.append(r.url))
+        self.page.get_by_test_id("geo-load-schematic").click()
+        expect(self.page.get_by_test_id("geo-static-fallback")).to_be_visible()
+        expect(self.page.get_by_test_id("geo-mode-schematic")).to_have_attribute("aria-pressed","true")
+        expect(self.page.get_by_test_id("geo-vector")).to_have_count(0)
+        self.assertFalse(any("GeoVectorMap-" in r or "maplibre-gl-worker-" in r for r in requests))
+        self.page.get_by_test_id("geo-static-rank-1").focus()
+        self.page.keyboard.press("Enter")
+        expect(self.page.get_by_test_id("geo-selected-sale")).to_contain_text("$525,000.00")
+        expect(self.page.get_by_test_id("buyer-sale").first).to_have_attribute("aria-pressed","true")
+        self.page.get_by_test_id("geo-mode-interactive").click()
+        expect(self.page.get_by_test_id("geo-ready")).to_be_visible(timeout=20000)
+        expect(self.page.get_by_test_id("geo-pin-1")).to_have_attribute("aria-pressed","true")
+        self.page.get_by_test_id("geo-pin-2").click()
+        self.page.get_by_test_id("geo-mode-schematic").click()
+        expect(self.page.get_by_test_id("geo-static-rank-2")).to_have_attribute("aria-pressed","true")
+        expect(self.page.get_by_test_id("geo-mode-schematic")).to_be_focused()
+        expect(self.page.get_by_test_id("geo-vector")).to_have_count(0)
+        self.assertEqual(sum(r.endswith("/"+iid+"/map") for r in requests),1)
+        self.assertEqual(before,self.server.get("/v1/investigations/"+iid))
+        self.page.set_viewport_size({"width":320,"height":800})
+        self.assertTrue(self.page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+        path=os.environ.get("HPI_GEO_SCREENSHOTS")
+        if path:
+            Path(path).mkdir(parents=True,exist_ok=True)
+            self.page.get_by_test_id("geo-panel").screenshot(path=str(Path(path)/"04-selected-lightweight-320.png"))
+
     def test_tampered_map_identity_is_rejected(self):
         iid=self.save()
         route=self.server.base+"/v1/investigations/"+iid+"/map"
