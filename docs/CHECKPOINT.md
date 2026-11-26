@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-SECOND-INTERFACE-QUALIFICATION",
-    "status": "ready",
-    "objective": "Qualify a distinct permitted institutional-amenity extraction interface.",
-    "scope": "Metadata only; World Bank pilot consumed; no new acquisition or joins.",
-    "acceptance": "Exact rights, fields, transfer cap and buyer use or explicit blocker.",
+    "id": "P0-AE0-SPATIAL-PILOT-APPROVAL",
+    "status": "blocked",
+    "objective": "Obtain exact bounded Wikidata spatial pilot approval or alternative route.",
+    "scope": "Metadata only; one proposed spatial query, no dispatch until approved.",
+    "acceptance": "Exact scope and terms approved; safeguards verified before any request.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Stop before live dispatch; seek separate acquisition authority or owner route decision.",
+    "stop": "Await explicit spatial pilot approval; no live dispatch, replay or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -66,7 +66,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
         [57,67,"## 26 November 2026 | AE0 real-source qualification","Acceptance: exactly two distinct years"],
         [69,82,"## 26 November 2026 | Approved World Bank pilot","The authorised workspace is inaccessible"],
-        [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"]
+        [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"],
+        [92,117,"## 26 November 2026 | AE0 second interface qualification","Acceptance proposal:"]
       ]
     }
   },
@@ -110,7 +111,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. 6913ce8 10/10 exact-head workflows passed; requery after empirical record. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. 6913ce8 10/10 passed; 70c2a13 focused audit passed; requery after spatial qualification. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -130,7 +131,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B research complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank owner-observed PASS, 2 requests/2 records/654 bytes; unregistered bundle, authority consumed. Next distinct interface metadata only. No new intake, joins, contact, spend, release or phase acceptance.
+P0-A accepted; B research complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank owner-observed PASS, 2 requests/2 records/654 bytes; unregistered bundle, authority consumed. WCED item rights unresolved; proposed one-query Wikidata spatial pilot awaits approval. No new intake, joins, contact, spend, release or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
