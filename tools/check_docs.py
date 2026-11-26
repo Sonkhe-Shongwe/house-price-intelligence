@@ -97,7 +97,7 @@ def active_handoff_errors(root: Path):
     """
     required = {
         "README.md": ("--fixture-db", "PRs #5 and #6"),
-        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.5", "Standing engineering autonomy", "two-to-three-property shortlist"),
+        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.6", "Standing engineering autonomy", "two-to-three-property shortlist"),
         "docs/ROADMAP.md": ("P6 two-to-three-property shortlist",),
         "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md",),
         "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),

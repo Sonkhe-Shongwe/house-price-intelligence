@@ -87,6 +87,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **26 November documentation audit:** [product convergence](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md), [UI engineering](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md) and [art direction](design/ART_DIRECTION_AND_DESIGN_CRAFT_RESEARCH_2026-11-26.md) indexed; master prompt, checkpoint, decision register and roadmap summaries reconciled with actual combined fictional buyer evidence. Art direction, Figma/Maputnik/D3/Motion and 90/100 rubric remain proposals. No software changes, access activation, new data or progress credit. Prior e1b3606 7/7 CI verified; audit-head CI pending.
 
+**Frontend convergence audit:** [26 November source audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) inventories reusable components, distinct wire contracts, private metadata/labels, atomic versus mutable comparisons, no private map capability and proposed typed adapters. Next: two high-fidelity full-flow fictional concepts, including honest geometry-unavailable state; no third production frontend. Prior audit eff72f2 documentation check failed on hard-coded v1.5 and missing shortlist wording; synthetic browser acceptance passed. This revision updates validator to v1.6 and restores shortlist guidance without weakening checks. Exact-head CI pending. No application/runtime changes or progress credit.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
