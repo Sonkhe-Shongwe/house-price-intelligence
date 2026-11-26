@@ -107,6 +107,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Workspace browser harness correction:** 72647b8 PostgreSQL HTTP runtime push 45758496264 ran 47 tests, 46 passed and one errored: old invented acceptance harness attempted hidden beta-search at new workspace home. The map activation/marker regression and updated private HTTP browser scenario did not fail in that run. Correct the remaining harness's explicit navigation across home/search/compare/restart and cross-owner denial; no assertion removed or timeout increased, no cloud qualification replay. New exact-head CI pending, comparison candidate not visually approved.
 
+**Comparison build correction:** initial 76c4e43 TypeScript build refused unchecked columns[index] in ComparisonMatrix (TS2532; React run 45758801515). Iterate validated columns directly; retain row length guard and exact values. New CI pending; no successful browser claim for this slice yet.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.

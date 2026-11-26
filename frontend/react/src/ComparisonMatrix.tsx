@@ -18,7 +18,7 @@ export default function ComparisonMatrix({columns,rows,caption='Saved property c
         {columns.map((column,index)=><th key={column.key} scope="col" role="columnheader"><small>PROPERTY {String(index+1).padStart(2,'0')}</small><span>{column.title}</span></th>)}
       </tr></thead>
       <tbody role="rowgroup">{rows.map(row=><tr key={row.label} role="row"><th scope="row" role="rowheader">{row.label}</th>
-        {row.values.map((value,index)=><td key={columns[index].key} role="cell" className={row.kind?'cm-'+row.kind:undefined}>{value}</td>)}
+        {columns.map((column,index)=><td key={column.key} role="cell" className={row.kind?'cm-'+row.kind:undefined}>{row.values[index]}</td>)}
       </tr>)}</tbody>
     </table>
   </div>;
