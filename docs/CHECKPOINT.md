@@ -109,6 +109,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Comparison build correction:** initial 76c4e43 TypeScript build refused unchecked columns[index] in ComparisonMatrix (TS2532; React run 45758801515). Iterate validated columns directly; retain row length guard and exact values. New CI pending; no successful browser claim for this slice yet.
 
+**Private service and token consolidation:** extracted the existing historical-shape response validation into privateBuyerContract.ts and named same-origin operations into privateBuyerService.ts; explicit returned-ID checks on reopen, no generic route calls from the React view, unchanged server/CSRF/ownership and separate synthetic adapter. Central Atlas candidate colour/type tokens consumed by private shell, shared evidence profile and comparison matrix; identical existing values, no global visual override. No new dependencies, real-data access, schema/API changes or final art direction. Prior 6a0544b locked build/accessibility and other workflows passing at preparation; React and PostgreSQL exact-head runs still pending. Verify both before claiming full convergence. New exact-head CI pending. Next resolve any regressions, inspect actual integrated screenshots and complete focused usability review. 87.1% and R0 unchanged.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
