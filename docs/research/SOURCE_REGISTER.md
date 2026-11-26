@@ -95,3 +95,7 @@ See [legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md)
 ## SA3.2 source-specific rights evidence (26 November 2026)
 
 [Legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) records [Cape Town Open Data Policy](https://resource.capetown.gov.za/documentcentre/Documents/Bylaws%20and%20policies/Open_Data_Policy.pdf), clauses 7.1–7.5, [research guidelines](https://resource.capetown.gov.za/documentcentre/Documents/Procedures%2C%20guidelines%20and%20regulations/Submit%20_Research_Request_Guidelines.pdf) pp.1–2, [Ekurhuleni GV2025 terms](https://publicportal.evaluations.co.za/emm/Index) full HTML and [Joburg portal](https://objections.joburg.org.za/) search excerpt. PDF text reviewed, screenshot attempts failed; open-data terms and Joburg full fetch failed. No actual source grant. Matrix and minimisation baseline complete as desk work. SA3.3 unsent packet next; no external contact or rows.
+
+## SA3.3 permission packet (26 November 2026)
+
+[Unsent Cape Town enquiry and research outline](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) uses rechecked [City research page](https://www.capetown.gov.za/city-connect/access-information/submit-a-research-request) and [guidelines](https://resource.capetown.gov.za/documentcentre/Documents/Procedures%2C%20guidelines%20and%20regulations/Submit%20_Research_Request_Guidelines.pdf); text recovered, screenshots cache miss. No request sent, no access grant, no actual rows. SA3 desk complete, owner metadata-only contact decision pending, SA4 blocked.

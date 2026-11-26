@@ -96,3 +96,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## SA3.2 handoff (26 November 2026)
 
 [Legal and rights record](../research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) completes source/field/operation matrix desk assessment. Cape Town policy exclusion criteria and research application guidelines (proposal, ethics, CVs, minimum 20 working days) documented; Ekurhuleni explicit restrictions and Joburg excerpt. No licensed real intake/display. Next SA3.3 one unsent metadata-only Cape Town enquiry, independent research proposal and checklist, then owner decision; clarify solo organisation CV and ethics requirements, no false affiliation or personal CV in Git. No actual contact, account, fee or acquisition; R0, ordinary P0-C paused.
+
+## SA3.3 handoff (26 November 2026)
+
+[Unsent research proposal and permission packet](../research/SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) contains exact draft email A, conditional research outline, data specification, ethics/CV/permissions checklist and decision. SA3 bounded desk complete (SA0-SA3 = 4/10 unweighted), actual permissions unresolved, SA4 BLOCKED. One explicit owner decision to authorise metadata-only contact or defer; no generic continuation authorises sending or data. If deferred on owner direction, resume ordinary P0-C boundary review with SA packet retained, not mission failure. No more repetitive desk tasks at this gate. No external contact or new acquisition, no score change.
