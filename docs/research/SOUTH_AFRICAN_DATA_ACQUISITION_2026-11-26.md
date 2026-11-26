@@ -454,3 +454,7 @@ D01/D02 remain unresolved, no new emails, cloud resources, phase/score or deploy
 ## 26 November 2026 | Owner removes internal open-data expiry
 
 [Policy and metadata migration](../engineering/DATA_MANAGER_V1.md#open-data-retention-policy-26-november-2026): no fixed project deadline for HPI-DATA-002/003/004 subject to applicable terms and law. Prior cap historical only after migration; actual source-specific restrictions and restricted private-beta controls remain. No new data, deletion, release or rights approval. Owner local migration pending; no reprocessing. Prior 73bb4b8 passed 7/7 CI. P0-G blocked, R0, scores unchanged.
+
+## 26 November 2026 | Open retention migration complete
+
+[Windows migration evidence](../engineering/DATA_MANAGER_V1.md#open-retention-windows-migration-evidence-26-november-2026) confirms all three retained open dataset manifests now report null deadline. Source terms and legal restrictions remain, no automatic deletion or public data upload. 7/7 workflows successful at inspection of 642e16d. Current inventory has partial D03/D07/D09 evidence, no retained qualified dataset for the other twelve families. Prioritise complementary geographic identifiers, D02 cadastre and D01 transactions; P0-G remains blocked, historical planning estimates unchanged. No new data or local setup required.
