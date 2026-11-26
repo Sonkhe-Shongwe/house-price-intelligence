@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-WORLD-BANK-LOCAL-PILOT",
-    "status": "blocked",
-    "objective": "Verify approved pilot safeguards and observe one owner-local live outcome.",
-    "scope": "Exact two-request owner Windows pilot only, after focused CI; no other intake.",
-    "acceptance": "CI safety tests and actual validated two-page bundle or documented STOP.",
+    "id": "P0-AE0-SECOND-INTERFACE-QUALIFICATION",
+    "status": "ready",
+    "objective": "Qualify a distinct permitted institutional-amenity extraction interface.",
+    "scope": "Metadata only; World Bank pilot consumed; no new acquisition or joins.",
+    "acceptance": "Exact rights, fields, transfer cap and buyer use or explicit blocker.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await exact CI and owner Windows execution; no replay, P1 or further acquisition.",
+    "stop": "Stop before live dispatch; seek separate acquisition authority or owner route decision.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -65,7 +65,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
         [57,67,"## 26 November 2026 | AE0 real-source qualification","Acceptance: exactly two distinct years"],
-        [69,82,"## 26 November 2026 | Approved World Bank pilot","The authorised workspace is inaccessible"]
+        [69,82,"## 26 November 2026 | Approved World Bank pilot","The authorised workspace is inaccessible"],
+        [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"]
       ]
     }
   },
@@ -109,7 +110,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. cc5b0ac 10/10 passed; qualification revision 33a76cb checked; requery after pilot implementation. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. 6913ce8 10/10 exact-head workflows passed; requery after empirical record. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -129,7 +130,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk and IR1/IR3 complete; SA4 blocked. 006/008 proof passed; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): synthetic proof CI passed; cadastral exact terms/layer unresolved; World Bank exact two-request pilot approved; implementation pending exact CI and owner-local run. No other live dispatch, joins, contact, spend, deployment, main merge or phase acceptance. Every email requires exact draft approval.
+P0-A accepted; B research complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank owner-observed PASS, 2 requests/2 records/654 bytes; unregistered bundle, authority consumed. Next distinct interface metadata only. No new intake, joins, contact, spend, release or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
