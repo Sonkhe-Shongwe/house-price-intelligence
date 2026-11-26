@@ -404,6 +404,22 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("First property note")
                         expect(page.get_by_test_id("beta-comparison")).to_contain_text("insufficient data")
                         sid=page.get_by_test_id("beta-comparison-id").input_value()
+                        frozen=page.get_by_test_id("beta-comparison")
+                        expect(frozen.get_by_role("columnheader")).to_have_count(3)
+                        expect(frozen.get_by_role("rowheader",name="Buyer-reported area")).to_be_visible()
+                        expect(frozen.get_by_role("rowheader",name="Valuation")).to_be_visible()
+                        page.locator("#beta-note-0").fill("Unsaved draft change")
+                        expect(frozen).to_contain_text("First property note")
+                        expect(frozen).not_to_contain_text("Unsaved draft change")
+                        original_viewport=page.viewport_size
+                        for width in (375,320):
+                            page.set_viewport_size({"width":width,"height":850})
+                            self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+                            region=frozen.get_by_role("region")
+                            self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
+                            expect(frozen).to_contain_text("600,000.02")
+                        if original_viewport:page.set_viewport_size(original_viewport)
+                        page.locator("#beta-note-0").fill("First property note")
                         # Reconstruct the service and identity boundary without
                         # reimporting data, reissuing cookies or reusing DB sessions.
                         new_reader=fresh.enter_context(psycopg.connect(ADMIN,dbname="hpi_ingest_fixture",user=ROLE,password=rp,autocommit=True))

@@ -5,6 +5,7 @@ import {
   type InvestigationView, type ShortlistView,
 } from './evidenceBridge';
 import './savedComparison.css';
+import ComparisonMatrix from './ComparisonMatrix';
 import {evidenceLabel} from './HistoryPanel';
 import {fixtureFetch} from './fixtureFetch';
 
@@ -345,22 +346,19 @@ export default function SavedComparison({active}: WorkspaceProps) {
       {!recoveryRequired&&workspace.entries.length>=2&&<section data-testid="workspace-comparison" className="pi-comparison">
         <h3>Evidence side by side</h3>
         <p>Compare the recorded facts, not an estimated selling price. Different source builds and analysis dates remain visible.</p>
-        <div className="pi-table-scroll" role="region" aria-label="Property evidence comparison, scroll horizontally if needed" tabIndex={0}>
-        <table><caption className="pi-sr-only">Saved property comparison</caption>
-          <thead><tr><th scope="col">Decision factor</th>{workspace.entries.map(e=><th scope="col" key={e.investigationId}>{e.investigation.subjectLabel}</th>)}</tr></thead>
-          <tbody>{([
-            ['Asking price (buyer-reported)',(e:ShortlistView['entries'][number])=>e.investigation.askingPriceText],
-            ['Area',e=>e.investigation.buildingAreaText],
-            ['Evidence quality',e=>evidenceLabel(e.investigation.status)],
-            ['Earlier sales',e=>String(e.investigation.selectedCount)],
-            ['Analysis date',e=>e.investigation.analysisDate],
-            ['Frozen build',e=>e.investigation.sourceBuildId],
-            ['Snapshots',e=>e.investigation.sourceSnapshotIds.join(', ')],
-            ['Matching rules',e=>e.matchPolicyVersion],
-            ['Warnings',e=>e.investigation.warnings.join(' | ')||'None'],
-            ['Valuation',()=> 'Not produced']
-          ] as [string,(e:ShortlistView['entries'][number])=>string][]).map(([label,value])=><tr key={label}><th scope="row">{label}</th>{workspace.entries.map(e=><td key={e.investigationId}>{value(e)}</td>)}</tr>)}</tbody>
-        </table></div></section>}
+        <ComparisonMatrix columns={workspace.entries.map(e=>({key:e.investigationId,title:e.investigation.subjectLabel}))}
+          rows={([
+            ['Asking price (buyer-reported)','money',e=>e.investigation.askingPriceText],
+            ['Area',undefined,e=>e.investigation.buildingAreaText],
+            ['Evidence quality','status',e=><span data-evidence={e.investigation.status}>{evidenceLabel(e.investigation.status)}</span>],
+            ['Earlier sales','count',e=>String(e.investigation.selectedCount)],
+            ['Analysis date',undefined,e=>e.investigation.analysisDate],
+            ['Frozen build',undefined,e=>e.investigation.sourceBuildId],
+            ['Snapshots',undefined,e=>e.investigation.sourceSnapshotIds.join(', ')],
+            ['Matching rules',undefined,e=>e.matchPolicyVersion],
+            ['Warnings',undefined,e=>e.investigation.warnings.join(' | ')||'None'],
+            ['Valuation',undefined,()=> 'Not produced']
+          ] as [string,'money'|'status'|'count'|undefined,(e:ShortlistView['entries'][number])=>import('react').ReactNode][]).map(([label,kind,value])=>({label,kind,values:workspace.entries.map(value)}))}/></section>}
     </>}
     {busy&&<p role="status" data-testid="workspace-busy">Confirming the change with the Python fixture service…</p>}
     {status&&<p role="status" data-testid="workspace-status" className="workspace-success">{status}</p>}

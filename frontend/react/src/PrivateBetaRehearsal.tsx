@@ -4,6 +4,7 @@ import WorkspaceNavigation,{type WorkspaceView} from './WorkspaceNavigation';
 import {fixtureFetch} from './fixtureFetch';
 import {formatExactUsd} from './evidenceBridge';
 import EvidenceProfile from './EvidenceProfile';
+import ComparisonMatrix from './ComparisonMatrix';
 import './buyerWorkflow.css';
 import './privateWorkspace.css';
 const ROOT='/v1/private-beta-rehearsal';
@@ -89,6 +90,19 @@ async function api(path:string,body?:unknown,signal?:AbortSignal){
   return await res.json() as unknown;
 }
 /** Read-only dossier. No map or subject identity is inferred from redacted evidence. */
+function privateComparisonRows(entries:Entry[]){
+  const values=(fn:(e:Entry)=>import('react').ReactNode)=>entries.map(fn);
+  return [
+    {label:'Buyer-reported asking price',kind:'money' as const,values:values(e=>e.investigation.asking_price_usd===null?'Not supplied':formatExactUsd(e.investigation.asking_price_usd))},
+    {label:'Buyer-reported area',values:values(e=>e.investigation.buyer_reported_area_sqft.toLocaleString('en-US')+' sq ft')},
+    {label:'Evidence status',kind:'status' as const,values:values(e=><span data-evidence={e.investigation.status}>{e.investigation.status.replaceAll('_',' ')}</span>)},
+    {label:'Eligible completed sales',kind:'count' as const,values:values(e=>e.investigation.selected_count)},
+    {label:'Analysis date',values:values(e=>e.investigation.analysis_date)},
+    {label:'Historical sales',values:values(e=>e.investigation.sales.length?e.investigation.sales.map(s=><div className="cm-sale" key={s.rank}><strong>{formatExactUsd(s.sale_price_usd)}</strong><small>{s.sale_date}</small></div>):'No eligible sales')},
+    {label:'Buyer notes',values:values(e=><span className="cm-note">{e.note_text||'None'}</span>)},
+    {label:'Valuation',values:values(()=> 'Not produced')},
+  ];
+}
 function PrivateEvidence({result}:{result:Result}){
   const [rank,setRank]=useState(1);
   const selected=result.sales.find(s=>s.rank===rank);
@@ -189,12 +203,17 @@ export default function PrivateBetaRehearsal(){
         <fieldset disabled={busy}>
           <legend>Choose two or three distinct fictional parcels</legend>
           <p className="pw-sub">{entries.length} / 3 properties selected. Add from an open investigation.</p>
-          {entries.map((entry,i)=><div key={entry.investigation_id}>
-            <p>Property {i+1}: {entry.investigation.analysis_date} · {entry.investigation.selected_count} eligible sales</p>
+          {entries.length===0&&<p className="pw-notice">Open a saved investigation and add it to this draft. Choose at least two properties to save a comparison.</p>}
+          <div className="pw-compare-draft" data-count={entries.length}>{entries.map((entry,i)=><article className="pw-compare-property" key={entry.investigation_id}>
+            <div className="pw-kicker">PROPERTY {String(i+1).padStart(2,'0')}</div>
+            <h3>{statusText(entry.investigation.status)}</h3>
+            <strong className="pw-draft-money">{entry.investigation.asking_price_usd===null?'Not supplied':formatExactUsd(entry.investigation.asking_price_usd)}</strong>
+            <small>Buyer-reported asking price</small>
+            <p>{entry.investigation.analysis_date} · {entry.investigation.selected_count} eligible sales</p>
             <label htmlFor={'beta-note-'+i}>Property {i+1} note</label>
-            <input id={'beta-note-'+i} maxLength={800} value={entry.note_text} onChange={e=>setEntries(old=>old.map((x,j)=>j===i?{...x,note_text:e.target.value}:x))}/>
-            <button type="button" onClick={()=>setEntries(old=>old.filter(x=>x.investigation_id!==entry.investigation_id))}>Remove property {i+1}</button>
-          </div>)}
+            <textarea id={'beta-note-'+i} rows={3} maxLength={800} value={entry.note_text} onChange={e=>setEntries(old=>old.map((x,j)=>j===i?{...x,note_text:e.target.value}:x))}/>
+            <button type="button" className="pw-secondary" onClick={()=>setEntries(old=>old.filter(x=>x.investigation_id!==entry.investigation_id))}>Remove property {i+1}</button>
+          </article>)}</div>
           <label htmlFor="beta-comparison-label">Comparison name</label><input id="beta-comparison-label" maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}/>
           <button type="button" className="buyer-save" data-testid="beta-save-comparison" disabled={entries.length<2||!label.trim()} onClick={()=>void run(async()=>{
             setComparison(null);const c=decodeComparison(await api('/shortlists',{label,entries:entries.map(({investigation_id,note_text})=>({investigation_id,note_text}))}));setComparison(c);setSid(c.shortlist_id);setWorkspace(null);
@@ -204,17 +223,11 @@ export default function PrivateBetaRehearsal(){
             setComparison(null);setComparison(decodeComparison(await api('/shortlists/'+sid)));
           })}>Reopen comparison</button></div>
         </fieldset>
-        {comparison&&<div data-testid="beta-comparison">
-          <h3>{comparison.label}</h3>
-          <div className="pw-table-wrap"><table><caption>Frozen historical evidence, not a valuation</caption><thead><tr><th scope="col">Evidence</th>{comparison.entries.map((e,i)=><th scope="col" key={e.investigation_id}>Property {i+1}</th>)}</tr></thead>
-          <tbody>
-            <tr><th scope="row">Analysis date</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.analysis_date}</td>)}</tr>
-            <tr><th scope="row">Evidence status</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.status.replaceAll('_',' ')}</td>)}</tr>
-            <tr><th scope="row">Buyer-reported asking price</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.asking_price_usd===null?'Not supplied':formatExactUsd(e.investigation.asking_price_usd)}</td>)}</tr>
-            <tr><th scope="row">Historical sales</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.investigation.sales.map(s=><div key={s.rank}>{formatExactUsd(s.sale_price_usd)} · {s.sale_date}</div>)}</td>)}</tr>
-            <tr><th scope="row">Buyer notes</th>{comparison.entries.map(e=><td key={e.investigation_id}>{e.note_text||'None'}</td>)}</tr>
-          </tbody></table></div>
-        </div>}
+        {comparison&&<section className="pw-frozen-comparison" data-testid="beta-comparison" aria-label="Frozen saved comparison">
+          <div className="pw-kicker">SAVED SNAPSHOT / READ ONLY</div><h3>{comparison.label}</h3>
+          <p className="pw-sub">This saved comparison is independent of the draft above. Notes and evidence shown here are the last server-confirmed snapshot. To save different notes, create a new comparison.</p>
+          <ComparisonMatrix columns={comparison.entries.map((e,i)=>({key:e.investigation_id,title:'Property '+(i+1)}))} rows={privateComparisonRows(comparison.entries)} caption="Frozen historical evidence, not a valuation"/>
+        </section>}
       </div></section>
       <section className="pw-view" hidden={view!=='methodology'} aria-label="Methodology"><div className="pw-intro"><span className="pw-kicker">FIELD GUIDE</span><h1>Evidence has limits.</h1><p>Understand what the private fictional service does and does not establish.</p></div><div className="pw-card"><h2>Historical evidence</h2><p>Earlier completed sales are not asking prices or current valuations. The service preserves its original ranked evidence when an investigation is reopened.</p><h2>Geographic coverage</h2><p>Property coordinates and building identity are withheld. An insufficient-evidence outcome is a valid result.</p><h2>Source and privacy</h2><p>Invented source-shaped records only. Historical availability and public display rights are unverified. Saved records belong to the authenticated workspace. Do not enter real personal information.</p></div></section>
     </main></div></div>;

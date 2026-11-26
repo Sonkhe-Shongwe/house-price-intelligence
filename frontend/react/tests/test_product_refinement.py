@@ -49,5 +49,7 @@ class ProductRefinementTests(unittest.TestCase):
                 region=page.get_by_role("region",name="Property evidence comparison, scroll horizontally if needed")
                 region.focus();expect(region).to_be_focused()
                 self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"))
-                self.assertTrue(region.evaluate("e=>e.scrollWidth>e.clientWidth"))
+                self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
+                expect(table.get_by_role("columnheader")).to_have_count(3)
+                expect(table.get_by_role("rowheader",name="Valuation")).to_be_visible()
             finally:browser.close();server.close()
