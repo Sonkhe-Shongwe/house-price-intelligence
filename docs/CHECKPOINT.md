@@ -1,6 +1,6 @@
 # House Price Intelligence: current checkpoint
 
-Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.md) governs gates/progress; [decisions](DECISIONS.md) governs authority. Schema v2 ranges: [first line, last line, first marker, last marker]; pin HEAD, verify markers, expand as needed and repair stale ranges. Hints do not grant permission. All full phase gates open.
+Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.md) governs gates/progress; [decisions](DECISIONS.md) governs authority. Schema v2 ranges: [first line, last line, first marker, last marker]; pin HEAD, verify markers, expand as needed and repair stale ranges. Hints do not grant permission. All full phase gates open.
 
 ## Continuation state
 
@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-NASA-CSV-PILOT-APPROVAL",
+    "id": "P0-AE0-NASA-LOCAL-PILOT",
     "status": "blocked",
-    "objective": "Obtain exact NASA POWER spatial CSV pilot approval or alternative route.",
-    "scope": "Metadata only; Wikidata parked and consumed; no live dispatch.",
-    "acceptance": "Exact approval and verified safeguards before one bounded request.",
+    "objective": "Verify NASA CSV safeguards and observe one owner-local outcome.",
+    "scope": "Approved one-request Windows pilot after focused CI.",
+    "acceptance": "Verified safeguards and validated bundle or fixed STOP diagnostic.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await owner approval; no live dispatch, replay or P1.",
+    "stop": "Await focused CI and owner Windows execution; no replay or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -48,7 +48,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"],
         [148,150,"## AE0 World Bank one-time pilot authority","Owner explicitly approves the exact World Bank"],
         [152,154,"## AE0 Wikidata one-time spatial pilot authority","Owner explicitly approves the exact one-request"],
-        [156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"]
+        [156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"],
+        [160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"]
       ],
       "docs/P_PHASE_ROADMAP.md": [
         [13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],
@@ -68,7 +69,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
         [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"],
         [132,140,"## 26 November 2026 | AE0 Wikidata actual local STOP","Next: owner decision"],
-        [142,150,"## 27 November 2026 | Owner parks Wikidata","Acceptance: bounded metadata"]
+        [142,150,"## 27 November 2026 | Owner parks Wikidata","Acceptance: bounded metadata"],
+        [152,163,"## 27 November 2026 | Approved NASA CSV implementation","Run once only, share aggregate"]
       ]
     }
   },
@@ -109,11 +111,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 | HPI-DATA-006 | Two metros, six RPPI observations, four growth checks | June 2026 fixed release, no merge or valuation |
 | HPI-DATA-008 | 16 household service percentages, two metros | 2011/2022 aggregate, no property reliability inference |
 
-002-006 and 008 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 local integrity/re-extraction passed; private bytes not independently inspected. D03/D07/D08/D09 partial; eleven other families lack retained qualified data. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Permanent Windows Downloads/HPI-Project sibling checkout and HPI-Data-Workspace; local HEAD, uncommitted changes, actual file integrity and local audit execution not independently verified.
+002-006 and 008 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 local integrity/re-extraction passed; private bytes not independently inspected. D03/D07/D08/D09 partial; eleven other families lack retained qualified data. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Windows sibling checkout/workspace; local state and file integrity not independently verified.
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. 2e7a966 7/7 passed; e663259 six of seven passed, React pending; requery after alternative qualification. Main 103c854; PR #4 historically draft. No phase credit.
+Requery exact heads and CI at restoration. a6cd471 7/7 passed; requery after NASA implementation. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -133,7 +135,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/owner parked. Official local GIS rights unresolved. NASA POWER CSV proposal awaits approval; no new intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/owner parked. Official local GIS rights unresolved. NASA exact pilot approved; local run after focused CI. No other intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 

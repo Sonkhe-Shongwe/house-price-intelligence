@@ -49,7 +49,7 @@ def remaining(deadline):
 
 
 def public_addresses(host=HOST):
-    if host not in (HOST, "query-next.wikidata.org"):
+    if host not in (HOST, "query-next.wikidata.org", "power.larc.nasa.gov"):
         raise Refused("unapproved host")
     entries = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM,
                                  proto=socket.IPPROTO_TCP)

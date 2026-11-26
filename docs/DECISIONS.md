@@ -156,3 +156,7 @@ Owner explicitly approves the exact one-request, max 25-row, 64 KiB, R0 Wikidata
 ## AE0 Wikidata parked (27 November 2026)
 
 Owner explicitly directs parking Wikidata and investigating a more authoritative spatial or structured website source. Consumed attempt remains closed; no replay or repair. [Alternative qualification](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--owner-parks-wikidata-authoritative-alternative-qualification) is metadata research only, not NASA acquisition approval or scope change.
+
+## AE0 NASA POWER one-time authority (27 November 2026)
+
+Owner explicitly approves the exact one-request, seven-day, 64 KiB NASA POWER CSV pilot at R0 and applicable source terms, after verified safeguards. [Exact scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--owner-parks-wikidata-authoritative-alternative-qualification). Owner Windows private workspace only; no replay, other intake, registration, joins, publication, release or phase acceptance.
