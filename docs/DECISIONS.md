@@ -105,3 +105,6 @@ Current operating scope: owner-only private beta, no external buyer accounts. On
 - A 2 km match is explanatory **candidate evidence**, not a validated valuation.
 - Missing evidence requires an explicit abstention/unsupported status; never fabricate results or silently switch data sources.
 
+## HPI-DATA-005 explicit intake decision (26 November 2026)
+
+Owner explicitly approves the bounded exact Stats SA 2022 codebook acquisition, private processing and registration: one PDF max 5 MiB, 10 pages, 52 district/metro codes, R0, private workspace, source terms/law, no public raw/derivative upload, no commercial use, no spatial join or additional acquisition. See [approved scope and local import](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-approved-offline-importer). Approval does not establish actual acquisition, source verification or P0 acceptance.

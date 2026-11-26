@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-DATA-005-APPROVAL",
+    "id": "P0-DATA-005-LOCAL-IMPORT",
     "status": "blocked",
-    "objective": "Obtain exact approval for Stats SA district/metro code reference; reconsider D01/D02 on substantive new evidence.",
-    "scope": "Metadata qualification delivered; no acquisition, transcription, material join or contact without authority.",
-    "acceptance": "If authorised: one exact PDF, max 5 MiB, 10 pages, private 52-code reference with provenance and validation; no spatial join.",
+    "objective": "Complete approved Stats SA codebook intake and visual qualification in existing private Windows workspace.",
+    "scope": "One approved PDF and offline reference registration; no join, other source intake or commercial use.",
+    "acceptance": "Exact source max 5 MiB, 10 pages, 52 unique name/code pairs visually verified, private report and manifest; owner observed actual import.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -26,17 +26,17 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Await intake approval or substantive new D01/D02 evidence; no speculative work, contact, acquisition or P1 advance.",
+    "stop": "Await local acquisition/import evidence; no duplicate downloads, material join, contact or P1 advance.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[331,351,"## 26 November 2026 | D02 cadastral schema and D01 access qualifi","- [World Bank 2025 reproducibility catalogue](https://reproducibi"],[375,400,"## 26 November 2026 | CSG metadata enquiry sent","Immediate action: owner-assisted inspection of UNISA Buildings_NG"],[454,460,"## 26 November 2026 | Owner removes internal open-data expiry","[Windows migration evidence](../engineering/DATA_MANAGER_V1.md#op"],[462,476,"## 26 November 2026 | Official geography code reference and compl","**Disposition:** documentary milestone delivered; formal P0 exit "]],
-      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"]],
+      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[375,400,"## 26 November 2026 | CSG metadata enquiry sent","Immediate action: owner-assisted inspection of UNISA Buildings_NG"],[454,460,"## 26 November 2026 | Owner removes internal open-data expiry","[Windows migration evidence](../engineering/DATA_MANAGER_V1.md#op"],[462,476,"## 26 November 2026 | Official geography code reference and compl","**Disposition:** documentary milestone delivered; formal P0 exit "],[478,480,"## 26 November 2026 | HPI-DATA-005 approved offline importer","Owner explicitly approved bounded HPI-DATA-005 acquisition, priva"]],
+      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[108,110,"## HPI-DATA-005 explicit intake decision (26 November 2026)","Owner explicitly approves the bounded exact Stats SA 2022 codeboo"]],
       "docs/P_PHASE_ROADMAP.md": [[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]]
     }
   },
   "blockers": [
-    "No qualified R0 completed-sale source or cadastral join; Stats SA code reference awaits exact intake approval.",
+    "No qualified R0 completed-sale source or cadastral join; HPI-DATA-005 approved, local intake/import not observed.",
     "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
     "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
   ],
@@ -72,7 +72,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery exact `development` and stable `main` heads and Actions on every restoration. Continuation v2.1 [5c6b957](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5c6b957375224389ed4ff76999cb9779d4ba2f75) passed 10/10 exact-head Actions ([audit push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45882219444), [React PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45882229774)); 15/15 retrieval routes verified. Newer heads require independent checks. Main baseline 103c854; integration PR #4 historically draft, verify before authorised integration. No new product credit.
+Requery exact `development` and stable `main` heads and Actions on every restoration. Continuation v2.1 [5c6b957](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5c6b957375224389ed4ff76999cb9779d4ba2f75) passed 10/10 exact-head Actions ([audit push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45882219444), [React PR](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45882229774)); 15/15 retrieval routes verified. Subsequent 7e5ca7a passed 7/7; recheck newer heads. Main baseline 103c854; integration PR #4 historically draft, verify before authorised integration. No new product credit.
 
 ## Current verified implementation on development
 
@@ -92,7 +92,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[New geography qualification](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--official-geography-code-reference-and-complementary-access-decision): HPI-DATA-005 awaits intake approval. P0-A accepted, P0-B bounded research complete, P0-C/D/E conditional desk reviews complete; P0-F specification and P0-G audit delivered but not formally accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. No acquisition, contact, material integration, spend, deployment, provider mutation, main merge or phase acceptance authorised.
+[New geography qualification](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--official-geography-code-reference-and-complementary-access-decision): HPI-DATA-005 approved; local acquisition and import pending. P0-A accepted, P0-B bounded research complete, P0-C/D/E conditional desk reviews complete; P0-F specification and P0-G audit delivered but not formally accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. Only bounded HPI-DATA-005 acquisition/registration authorised; no other intake, contact, joins, spending, deployment, provider mutation, main merge or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 

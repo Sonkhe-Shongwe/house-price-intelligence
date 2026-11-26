@@ -1,6 +1,6 @@
 # HPI Data Manager | Current operations and historical evidence
 
-**Current operating instructions (26 November 2026):** Three registered adapters (HPI-DATA-002/003/004). Use the permanent development checkout and sibling private workspace. Open retention migration completed; no mandatory internal expiry or deadline prompt, actual source conditions and law prevail. Actual acquisition date and terms confirmation remain necessary on first import; existing manifests reused. The chronological sections below record original behaviour at the time, including superseded deadlines and pending tests. They are not current instructions. See [checkpoint](../CHECKPOINT.md) and [repository audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md).
+**Current operating instructions (26 November 2026):** Three owner-observed registrations (HPI-DATA-002/003/004); HPI-DATA-005 adapter implemented, pending actual import. Use the permanent development checkout and sibling private workspace. Open retention migration completed; no mandatory internal expiry or deadline prompt, actual source conditions and law prevail. Actual acquisition date and terms confirmation remain necessary on first import; existing manifests reused. The chronological sections below record original behaviour at the time, including superseded deadlines and pending tests. They are not current instructions. See [checkpoint](../CHECKPOINT.md) and [repository audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md).
 
 Optional read-only integrity check, from the existing checkout after the next routine pull and passing CI:
 
@@ -8,7 +8,7 @@ Optional read-only integrity check, from the existing checkout after the next ro
 python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --audit-workspace
 ```
 
-Checks all three known registrations against fixed file locations, retention, exact raw and processed hashes and quality reports, without generating or changing any file. Reports missing/unregistered or inconsistent datasets and returns nonzero if any fails. Does not re-run geospatial or RPPI transformation, verify legal rights or enumerate external copies. The starter CSV is historical scaffolding; manifests and live audit are authoritative. No new download, re-import or mandatory user action.
+Checks all four supported dataset IDs against fixed file locations, retention, exact raw and processed hashes and quality reports, without generating or changing any file. Reports missing/unregistered or inconsistent datasets and returns nonzero if any fails. Does not re-run geospatial or RPPI transformation, verify legal rights or enumerate external copies. The starter CSV is historical scaffolding; manifests and live audit are authoritative. No new download, re-import or mandatory user action.
 
 ## Original v0.1 design and evidence (historical)
 
@@ -113,3 +113,19 @@ No new downloads or reprocessing. Prior 73bb4b8 7/7 CI. New CI and local metadat
 Owner terminal screenshot confirms successful migration of HPI-DATA-002, 003 and 004: each reports internal deadline removed, deadline null, retention_due_or_expired false, retention_policy open-source-terms-v1. No further owner command needed. Actual raw/processed bytes, file timestamps and complete copy inventory not independently inspected; migration implementation changes registry metadata only. 7/7 workflows successful at inspection of 642e16d. Applicable source terms and law remain binding; exact DataFirst portal agreement and newer geoBoundaries upstream metadata not independently verified. Restricted property/transaction privacy controls unchanged; no fresh data, redistribution, renewal or deletion authority inferred. Prior 26 December project cap is historical, not a current internal deadline for these three datasets.
 
 Current repertoire: D03 partial (289,864 usable imagery-derived footprints, one Mbombela-containing tile; height/confidence all missing, 673 outside nominal tile centroids); D07 partial (52 district boundaries representing 2020, official codes and cross-feature topology unverified); D09 partial (19 RPPI series, 2,983 observations, Jan 2010–Jan 2023). OSM 49-way test closed, no retained records. Other 12 inventory families have no retained qualified dataset; individual completed sales and cadastral identity are decisive gaps for comparable-sales product. No nationwide property coverage, stable property join, current price prediction or actual integrated SA buyer evidence demonstrated. Next qualify official geographic identifiers/crosswalk, cadastral and transaction direct routes; pursue complementary context sources where materially useful, not additional footprint tiles or email dependence. Derived metrics and estimates must remain distinct from observations. Existing product-first 87.1% weighted estimate and P0 94% retained as historical planning estimates, not data readiness. P0-G exit remains blocked. R0; no new acquisition, spatial integration, deployment, provider or scope changes.
+
+## v0.4 official district and metro code adapter (26 November 2026)
+
+Owner explicitly approved HPI-DATA-005 bounded acquisition, private processing and registration. Save only the [official PDF](https://isibaloweb.statssa.gov.za/metadata/CENSUS/2022/06.%20Census%202022%20Code%20lists.pdf) as `06. Census 2022 Code lists.pdf` inside the existing private workspace `02_Raw_Data` (at most 5 MiB; no other download). Do not put it in Git. The manager remains offline. From the existing development checkout after exact-head CI verification:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python -m pip install "pypdf==7.2.0"
+    if ($LASTEXITCODE -eq 0) {
+        python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --dataset HPI-DATA-005
+    }
+}
+```
+
+Enter actual download date; inspect page 2 terms and confirm private noncommercial processing, attribution and independent processing. Compare all 52 previewed code/name pairs against the actual PDF page 4 before confirming yes. Stop on discrepancies, changed terms, unexpected PDF or parser failure; no partial registration or forced correction. 44 districts, eight metros, exact 52 unique codes and names; no local-level table, no join. PDF bounded, 10 pages, source identity and terms checked, hash pinned on first successful registration (not a publisher checksum). Outputs private reference CSV, JSON report and manifest; source-specific retention and no automatic deletion; sale of original or derived data/application requires prior permission. Repeat reuses existing reviewed manifest, refuses changed source/retention/output. Read-only workspace audit recognises fourth registration. Synthetic CI uses an invented PDF, not Stats SA rows. Actual PDF acquisition, visual review and Windows registration are pending; do not claim completed until observed. Existing three adapters/retention migration unchanged. No acquisition of another source, data integration or release.

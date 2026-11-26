@@ -855,6 +855,188 @@ def retention_self_test():
 
 
 
+
+# HPI-DATA-005: explicitly approved noncommercial Stats SA reference, offline only.
+CODE_FILE = "06. Census 2022 Code lists.pdf"
+CODE_URL = "https://isibaloweb.statssa.gov.za/metadata/CENSUS/2022/06.%20Census%202022%20Code%20lists.pdf"
+CODE_RAW = "02_Raw_Data/" + CODE_FILE
+CODE_MANIFEST = "01_Source_Catalogue/HPI-DATA-005.json"
+CODE_OUTPUT = "03_Processed_Data/HPI-DATA-005/district_codes.csv"
+CODE_REPORT = "07_Reports/HPI-DATA-005_quality.json"
+CODE_MAX_BYTES = 5*MIB
+CODE_POLICY = "stats-sa-noncommercial-v1"
+CODE_RETENTION = "Private noncommercial reference; source terms and law prevail; no automatic deletion."
+CODE_PDF_VERSION = "7.2.0"
+
+def code_profile(raw):
+    import re
+    try:
+        from pypdf import PdfReader, __version__
+        from pypdf.errors import PdfReadError
+    except ImportError as exc:
+        raise ValueError("Install the tested dependency: python -m pip install pypdf==" + CODE_PDF_VERSION) from exc
+    if __version__ != CODE_PDF_VERSION:
+        raise ValueError("Use tested pypdf==" + CODE_PDF_VERSION)
+    if len(raw) > CODE_MAX_BYTES or not raw.startswith(b"%PDF-"):
+        raise ValueError("Expected bounded original PDF.")
+    try:
+        pdf = PdfReader(io.BytesIO(raw), strict=True)
+        if pdf.is_encrypted or len(pdf.pages) != 10:
+            raise ValueError("Expected unencrypted ten-page Census 2022 codebook.")
+        def words(page):
+            return " ".join(pdf.pages[page].extract_text().split()).casefold()
+        cover, rights = words(0), words(1)
+        if not all(x in cover for x in ("census 2022 metadata", "code lists", "29 august 2024")):
+            raise ValueError("Unexpected cover/version.")
+        if not all(x in rights for x in ("statistics south africa", "03-01-47", "independent processing", "prior permission", "sold or offered for sale")):
+            raise ValueError("Unexpected publisher/report/terms; review manually.")
+        layout = pdf.pages[3].extract_text(extraction_mode="layout")
+    except PdfReadError as exc:
+        raise ValueError("PDF could not be parsed; no import.") from exc
+    if "district and metropolitan municipality names and codes" not in " ".join(layout.split()).casefold():
+        raise ValueError("Expected district/metro table on PDF page 4.")
+    row = re.compile(r"^(.+?)\s+(DC[1-9]\d?|[A-Z]{3})\s+(.+?)\s+(DC[1-9]\d?|[A-Z]{3})$")
+    entries = []
+    for line in layout.splitlines():
+        match = row.fullmatch(line.strip())
+        if match:
+            for name, code in ((match[1],match[2]),(match[3],match[4])):
+                name = " ".join(name.split())
+                level = "district" if code.startswith("DC") else "metro"
+                if not name or not name[0].isalpha() or ("metropolitan area" in name.casefold()) != (level=="metro"):
+                    raise ValueError("Unexpected name/level in district table.")
+                entries.append((code,name,level))
+    if (len(entries)!=52 or len({e[0] for e in entries})!=52 or
+            len({e[1].casefold() for e in entries})!=52 or
+            sum(e[2]=="district" for e in entries)!=44 or sum(e[2]=="metro" for e in entries)!=8):
+        raise ValueError("Expected 26 two-column rows, 52 unique names/codes, 44 districts and 8 metros; no partial import.")
+    out = io.StringIO(newline="")
+    w = csv.writer(out,lineterminator="\n")
+    w.writerow(["municipality_code","municipality_name_source","geography_level","geography_reference","source_page"])
+    for code,name,level in entries:
+        w.writerow([code,name,level,"Census 2022",4])
+    q = {"entries":52,"districts":44,"metros":8,"duplicate_codes":0,"duplicate_names":0,
+         "pdf_pages":10,"source_page":4,"crosswalk_verified":False,
+         "limitations":"Independent Stats SA code reference only; no parcel identity, local-municipality table, geometry or temporal equivalence."}
+    return out.getvalue().encode("utf-8"),q
+
+def code_status(root):
+    p = root/CODE_MANIFEST
+    if not p.exists():
+        return {"dataset_id":"HPI-DATA-005","registered":False}
+    m = json.loads(read_bounded(p))
+    return {"dataset_id":"HPI-DATA-005","registered":True,**retention_status(m),
+            "known_local_paths":[x for x in (CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MANIFEST) if (root/x).exists()]}
+
+def import_codes(root,intake,terms_reviewed,confirm,deadline=None,today=None):
+    today = today or date.today()
+    if not terms_reviewed or intake>today or (deadline is not None and (deadline<=intake or today>=deadline)):
+        raise ValueError("Applicable terms, actual intake and retention must be confirmed.")
+    raw = read_bounded(root/CODE_RAW,CODE_MAX_BYTES)
+    digest = sha(raw)
+    existing = root/CODE_MANIFEST
+    if existing.exists():
+        prior = json.loads(read_bounded(existing))
+        old_deadline = stored_deadline(prior)
+        if (prior["source_sha256"]!=digest or prior["first_intake_date"]!=intake.isoformat() or
+                (deadline is not None and deadline!=old_deadline) or
+                (old_deadline is not None and today>=old_deadline) or
+                prior.get("retention_policy")!=CODE_POLICY or prior.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Registered source, retention or review differs; no overwrite/renewal.")
+        deadline = old_deadline
+    result,q = code_profile(raw)
+    if not existing.exists() and not confirm(result):
+        raise ValueError("Visual comparison not confirmed; no reference registered.")
+    q["visual_page_reviewed_by_owner"] = True
+    m = {"dataset_id":"HPI-DATA-005","manager_version":"0.4.0",
+         "source":"Statistics South Africa, Census 2022 Metadata (Code lists), report 03-01-47",
+         "source_url":CODE_URL,"publication_date":"2024-08-29","source_licence":"Stats SA 2024 report page 2 terms: attribution and independent processing; no sale without prior permission",
+         "attribution":"Statistics South Africa (2024), Census 2022 Metadata, report 03-01-47, p. 4; independent processing by HPI.",
+         "source_identity_evidence":"Official URL, validated document identity and page count, owner-attested download and visual comparison; first raw hash pinned locally, no publisher checksum.",
+         "source_bytes":len(raw),"source_sha256":digest,"raw_path":CODE_RAW,
+         "first_intake_date":intake.isoformat(),"terms_reviewed_by_owner":True,
+         "visual_page_reviewed_by_owner":True,"retention_policy":CODE_POLICY,"retention":CODE_RETENTION,
+         "do_not_retain_on_or_after":deadline.isoformat() if deadline else None,
+         "processed_path":CODE_OUTPUT,"processed_sha256":sha(result),"quality_report":CODE_REPORT,"quality":q}
+    planned = [(root/CODE_OUTPUT,result),(root/CODE_REPORT,json_bytes(q)),(existing,json_bytes(m))]
+    for path,content in planned:
+        check_target(path,content)
+    for path,content in planned:
+        publish(path,content)
+    return m
+
+def code_cli(root,args):
+    prior = json.loads(read_bounded(root/CODE_MANIFEST)) if (root/CODE_MANIFEST).exists() else None
+    intake = args.intake_date or (date.fromisoformat(prior["first_intake_date"]) if prior else
+                                  date.fromisoformat(input("Actual PDF download date (YYYY-MM-DD): ").strip()))
+    reviewed = args.terms_reviewed or (prior["terms_reviewed_by_owner"] is True if prior else
+                                      input("Read page 2; confirm private noncommercial processing, attribution and source terms (yes/no): ").strip().lower()=="yes")
+    def confirm(data):
+        print("\nPrivate preview: compare every name/code against PDF page 4, including both columns.")
+        print(data.decode("utf-8"))
+        return input("All 52 name/code pairs match the visual source page exactly (yes/no): ").strip().lower()=="yes"
+    m = import_codes(root,intake,reviewed,confirm,args.retain_until)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":code_status(root)},indent=2))
+    return 0
+
+def code_fixture_pdf(duplicate=False, wrong_terms=False):
+    # Construct an invented PDF with a plain Helvetica text layout; no source data in CI.
+    rows = [f"Invented district {i:<2} DC{i:<2}       Invented district {i+22:<2} DC{i+22:<2}" for i in range(1,23)]
+    rows += [f"Invented metro {i} Metropolitan Area A{chr(65+i)}A       Invented metro {i+4} Metropolitan Area B{chr(65+i)}B" for i in range(4)]
+    if duplicate:
+        rows[-1] = rows[-2]
+    pages = [["Census 2022 Metadata (Code lists) 29 August 2024"],
+             ["Statistics South Africa 03-01-47", "independent processing; sold or offered for sale without prior permission" if not wrong_terms else "changed terms"],
+             ["Contents"],["District and metropolitan municipality names and codes"]+rows]+[["Invented page"] for _ in range(6)]
+    objects = [b"<< /Type /Catalog /Pages 2 0 R >>",
+               ("<< /Type /Pages /Count 10 /Kids ["+" ".join(f"{4+2*i} 0 R" for i in range(10))+"] >>").encode(),
+               b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
+    for i,lines in enumerate(pages):
+        objects.append(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 792 792] /Resources << /Font << /F1 3 0 R >> >> /Contents {5+2*i} 0 R >>".encode())
+        stream = ("BT /F1 9 Tf 30 750 Td 15 TL "+" T* ".join("("+x.replace("(","\\(").replace(")","\\)")+") Tj" for x in lines)+" ET").encode()
+        objects.append(b"<< /Length "+str(len(stream)).encode()+b" >>\nstream\n"+stream+b"\nendstream")
+    buf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for i,obj in enumerate(objects,1):
+        offsets.append(len(buf))
+        buf.extend(f"{i} 0 obj\n".encode()+obj+b"\nendobj\n")
+    xref = len(buf)
+    buf.extend(f"xref\n0 {len(offsets)}\n0000000000 65535 f \n".encode())
+    for pos in offsets[1:]:
+        buf.extend(f"{pos:010d} 00000 n \n".encode())
+    buf.extend(f"trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    return bytes(buf)
+
+def code_self_test():
+    day=date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        raw=code_fixture_pdf()
+        publish(root/CODE_RAW,raw)
+        data,q=code_profile(raw)
+        assert q["entries"]==52 and q["districts"]==44 and q["metros"]==8
+        for bad in (b"not PDF",code_fixture_pdf(duplicate=True),code_fixture_pdf(wrong_terms=True)):
+            try:
+                code_profile(bad)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Invalid PDF or table accepted")
+        try:
+            import_codes(root,day,True,lambda _:False,today=day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Unreviewed table accepted")
+        assert not (root/CODE_MANIFEST).exists() and not (root/CODE_OUTPUT).exists()
+        first=import_codes(root,day,True,lambda x:x==data,today=day)
+        assert first==import_codes(root,day,True,lambda _:False,today=day)
+        assert audit_registered(root,("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None),today=day)["status"]=="integrity checks passed"
+        assert first["source_sha256"]==sha(raw) and first["quality"]["crosswalk_verified"] is False
+    print("PASS: invented ten-page PDF, 52-code validation, refusal, visual gate, repeat and integrity audit.")
+
+
 # Live inventory is derived from manifests, not the historical starter CSV.
 def audit_registered(root, spec, today=None):
     sid, manifest_path, raw_path, output_path, report_path, raw_limit, pinned = spec
@@ -873,8 +1055,12 @@ def audit_registered(root, spec, today=None):
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD}[sid]
-    if m.get("retention_policy") == OPEN_POLICY:
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION}[sid]
+    if sid == "HPI-DATA-005":
+        if (m.get("retention_policy") != CODE_POLICY or m["retention"] != CODE_RETENTION or
+                m.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Unexpected code reference policy or visual review.")
+    elif m.get("retention_policy") == OPEN_POLICY:
         if m["retention"] != OPEN_RETENTION:
             raise ValueError("Unexpected open retention policy wording.")
     elif m["retention"] != legacy or deadline is None:
@@ -915,6 +1101,7 @@ def audit_workspace(root):
         ("HPI-DATA-002",MANIFEST,RAW,OUTPUT,REPORT,10*MIB,APPROVED_SHA),
         ("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,10*MIB,GEO_SHA),
         ("HPI-DATA-004",BUILD_MANIFEST,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MAX_BYTES,None),
+        ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None),
     ]
     results = []
     for spec in specs:
@@ -930,7 +1117,7 @@ def audit_workspace(root):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
@@ -946,6 +1133,7 @@ def main():
             district_self_test()
             building_self_test()
             retention_self_test()
+            code_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -956,12 +1144,14 @@ def main():
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0
         if args.status:
-            print(json.dumps(building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         initialise(root)
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-005":
+            return code_cli(root,args)
         if args.dataset == "HPI-DATA-004":
             return building_cli(root,args)
         if args.dataset == "HPI-DATA-003":
