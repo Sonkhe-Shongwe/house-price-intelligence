@@ -27,7 +27,11 @@ def main():
     parser.add_argument("--frontend", choices=("legacy", "react"), default="legacy",
                         help="Explicitly choose the integrated React candidate; legacy remains available")
     parser.add_argument("--synthetic-map", action="store_true", help="Opt in to virtual display geography; no real locations")
+    parser.add_argument("--context-transport-fixture", action="store_true",
+                        help="Serve generated non-map bytes for local HTTP range qualification only")
     args = parser.parse_args()
+    if args.context_transport_fixture and args.frontend != "react":
+        parser.error("--context-transport-fixture requires --frontend react")
     if args.synthetic_map and args.frontend != "react":
         parser.error("--synthetic-map requires --frontend react")
     if not args.fixture_only:
@@ -42,7 +46,8 @@ def main():
         parser.error(f"Refusing fixture database: {exc}")
     try:
         # Deliberately no option to bind to 0.0.0.0 or a remote interface.
-        with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets, synthetic_map=args.synthetic_map)) as server:
+        with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets, synthetic_map=args.synthetic_map,
+                        context_transport_fixture=args.context_transport_fixture)) as server:
             print(f"Fixture-only API at http://127.0.0.1:{args.port}/health")
             print("WARNING: invented records, no auth, no CORS, NOT FOR DEPLOYMENT")
             if args.fixture_db is not None:

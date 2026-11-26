@@ -19,6 +19,7 @@ from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistServi
 from backend.synthetic_map import map_evidence
 from backend.buyer_evidence_preview import buyer_evidence_preview
 from backend.centroid_preview import centroid_preview
+from backend.context_archive_http import CONTEXT_PATH, transport_fixture
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -98,7 +99,8 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
 
 
 def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
-               react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False):
+               react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
+               context_transport_fixture: bool = False):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -109,6 +111,9 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
     shortlists = SyntheticShortlistService(store)
     if synthetic_map and react_assets is None:
         raise ValueError("Synthetic map requires the React frontend")
+    if context_transport_fixture and react_assets is None:
+        raise ValueError("Context transport fixture requires the React frontend")
+    context_archive = transport_fixture() if context_transport_fixture else None
     react_headers = [(key, value + "; worker-src 'self'" if synthetic_map and key == "Content-Security-Policy" else value)
                      for key, value in SECURITY_HEADERS]
 
@@ -130,6 +135,9 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
 
         if environ.get("QUERY_STRING"):
             return _response(start_response, 400, {"error": "query_parameters_not_supported"})
+
+        if path == CONTEXT_PATH and context_archive is not None:
+            return context_archive.serve(environ, start_response, react_headers)
 
         if react_assets is not None and path in react_assets:
             if method != "GET":
