@@ -1301,6 +1301,144 @@ def crosswalk_self_test():
 
 
 
+
+# Public documentary name variants, approved for candidate comparison only.
+# These are independently published municipal names/codes, not private shape IDs.
+RENAME_EVIDENCE = "https://census.statssa.gov.za/assets/documents/2022/Census_2022_Municipal_factsheet-Web.pdf"
+METRO_EVIDENCE = "https://www.statssa.gov.za/publications/Report-03-01-83/Report-03-01-832022.pdf"
+ALIAS_RULES = (
+    ("Cacadu","DC10","Sarah Baartman","district","documented_rename",RENAME_EVIDENCE),
+    ("Eden","DC4","Garden Route","district","documented_rename",RENAME_EVIDENCE),
+    ("Sisonke","DC43","Harry Gwala","district","documented_rename",RENAME_EVIDENCE),
+    ("Uthungulu","DC28","King Cetshwayo","district","documented_rename",RENAME_EVIDENCE),
+    ("Buffalo City","BUF","Buffalo City Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("City of Cape Town","CPT","City of Cape Town Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("City of Johannesburg","JHB","City of Johannesburg Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("City of Tshwane","TSH","City of Tshwane Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("Ekurhuleni","EKU","City of Ekurhuleni Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("eThekwini","ETH","eThekwini Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("Mangaung","MAN","Mangaung Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+    ("Nelson Mandela Bay","NMA","Nelson Mandela Bay Metropolitan Area","metro","metro_name_variant",METRO_EVIDENCE),
+)
+
+def alias_candidates(baseline, rules=ALIAS_RULES):
+    q=baseline["summary"]
+    expected={"geometry_rows":52,"official_code_rows":52,"exact_name_candidates":40,
+              "ambiguous_name_groups":0,"ambiguous_geometry_rows":0,"ambiguous_code_rows":0,
+              "unmatched_geometry_rows":12,"unmatched_code_rows":12,
+              "district_candidates":40,"metro_candidates":0}
+    if any(q.get(k)!=v for k,v in expected.items()):
+        raise ValueError("Exact-name baseline changed; review before applying aliases.")
+    if any(q.get(k) is not False for k in ("crosswalk_verified","boundary_equivalence_verified",
+                                           "independent_district_metro_classification_verified")):
+        raise ValueError("Unexpected accepted crosswalk or geography status.")
+    if (len(rules)!=12 or len({x[0] for x in rules})!=12 or len({x[1] for x in rules})!=12 or
+            len({x[2] for x in rules})!=12 or
+            sum(x[3]=="district" and x[4]=="documented_rename" for x in rules)!=4 or
+            sum(x[3]=="metro" and x[4]=="metro_name_variant" for x in rules)!=8):
+        raise ValueError("Invalid bounded alias allowlist.")
+    left,right=baseline["unmatched_geometry"],baseline["unmatched_official_codes"]
+    exact=baseline["exact_name_candidates"]
+    if len(left)!=12 or len(right)!=12 or len(exact)!=40 or baseline["ambiguous_groups"]:
+        raise ValueError("Exact baseline accounting differs.")
+    g={x["source_name"]:x for x in left}
+    c={x["municipality_code"]:x for x in right}
+    exact_g={x["geometry"]["shape_id"] for x in exact}
+    exact_c={x["official_reference"]["municipality_code"] for x in exact}
+    if (len(g)!=12 or len(c)!=12 or len(exact_g)!=40 or len(exact_c)!=40 or
+            len({x["shape_id"] for x in left})!=12 or
+            exact_g.intersection(x["shape_id"] for x in left) or exact_c.intersection(c)):
+        raise ValueError("Duplicate or previously matched identity; no alias comparison.")
+    matched_g,matched_c=set(),set()
+    aliases,abstentions=[],[]
+    for old,code,new,level,kind,evidence in rules:
+        x,y=g.get(old),c.get(code)
+        # Exact original source labels required. No fuzzy guessing, even for Buffalo City.
+        if x is None or y is None or y["source_name"]!=new or y["source_level"]!=level:
+            abstentions.append({"expected_geometry_name":old,"expected_code":code,
+                                "expected_reference_name":new,"reason":"exact approved local labels/code/level not all present"})
+            continue
+        if x["shape_id"] in matched_g or code in matched_c:
+            raise ValueError("Alias collision; no comparison.")
+        aliases.append({"geometry":x,"official_reference":y,"status":"documentary_alias_candidate_only",
+                        "alias_kind":kind,"evidence_url":evidence})
+        matched_g.add(x["shape_id"])
+        matched_c.add(code)
+    ug=[x for x in left if x["shape_id"] not in matched_g]
+    uc=[x for x in right if x["municipality_code"] not in matched_c]
+    if 40+len(aliases)+len(ug)!=52 or 40+len(aliases)+len(uc)!=52:
+        raise ValueError("Alias accounting mismatch.")
+    return {"experiment":"P0-GEO-ALIAS","mode":"private read-only terminal report",
+            "provenance":baseline["provenance"],"exact_baseline_summary":dict(q),
+            "summary":{"geometry_rows":52,"official_code_rows":52,"exact_name_candidates":40,
+                       "documentary_alias_candidates":len(aliases),"total_candidates":40+len(aliases),
+                       "historical_rename_candidates":sum(x["alias_kind"]=="documented_rename" for x in aliases),
+                       "metro_variant_candidates":sum(x["alias_kind"]=="metro_name_variant" for x in aliases),
+                       "unmatched_geometry_rows":len(ug),"unmatched_code_rows":len(uc),
+                       "abstained_alias_rules":len(abstentions),"ambiguous_name_groups":0,
+                       "district_candidates":40+sum(x["official_reference"]["source_level"]=="district" for x in aliases),
+                       "metro_candidates":sum(x["official_reference"]["source_level"]=="metro" for x in aliases),
+                       "crosswalk_verified":False,"boundary_equivalence_verified":False,
+                       "independent_district_metro_classification_verified":False},
+            "exact_name_candidates":exact,"documentary_alias_candidates":aliases,
+            "abstained_rules":abstentions,"unmatched_geometry":ug,"unmatched_official_codes":uc,
+            "limitations":["Only the approved exact documentary name variants are considered; no fuzzy matching.",
+                           "The 2020 geometry and Census 2022 reference have different vintages; historical boundary changes remain unverified.",
+                           "ADM2 is a shared tier, not independent district/metro classification.",
+                           "Both source terms and attribution, including Stats SA noncommercial restrictions, remain binding.",
+                           "No files changed, no network, no geometry operations, no accepted mapping or material join."]}
+
+def alias_self_test():
+    import copy
+    # Invented rows and rules, never actual private source rows.
+    def g(i,name):
+        return {"shape_id":f"fixture-{i}","source_name":name,"reference_year":2020,"source_level":"ADM2"}
+    def c(i,name,level):
+        return {"municipality_code":f"fixture-code-{i}","source_name":name,"reference":"Census 2022","source_level":level}
+    rules=tuple((f"Old {i}",f"fixture-code-{i}",f"New {i}","district" if i<4 else "metro",
+                 "documented_rename" if i<4 else "metro_name_variant","https://example.invalid") for i in range(12))
+    q={"geometry_rows":52,"official_code_rows":52,"exact_name_candidates":40,
+       "ambiguous_name_groups":0,"ambiguous_geometry_rows":0,"ambiguous_code_rows":0,
+       "unmatched_geometry_rows":12,"unmatched_code_rows":12,"district_candidates":40,"metro_candidates":0,
+       "crosswalk_verified":False,"boundary_equivalence_verified":False,"independent_district_metro_classification_verified":False}
+    baseline={"summary":q,"provenance":[],"ambiguous_groups":[],
+              "exact_name_candidates":[{"geometry":g(i,f"Exact {i}"),"official_reference":c(i,f"Exact {i}","district")} for i in range(12,52)],
+              "unmatched_geometry":[g(i,f"Old {i}") for i in range(12)],
+              "unmatched_official_codes":[c(i,f"New {i}","district" if i<4 else "metro") for i in range(12)]}
+    before=copy.deepcopy(baseline)
+    report=alias_candidates(baseline,rules)
+    assert report["summary"]["total_candidates"]==52 and report["summary"]["historical_rename_candidates"]==4
+    assert report["summary"]["metro_variant_candidates"]==8 and report["summary"]["crosswalk_verified"] is False
+    assert report["exact_baseline_summary"]==q and baseline==before
+    changed=copy.deepcopy(baseline)
+    changed["unmatched_geometry"][0]["source_name"]="Unexpected old name"
+    changed["unmatched_official_codes"][1]["source_name"]="Unexpected new name"
+    result=alias_candidates(changed,rules)["summary"]
+    assert result["total_candidates"]==50 and result["abstained_alias_rules"]==2 and result["unmatched_code_rows"]==2
+    changed=copy.deepcopy(baseline)
+    changed["unmatched_official_codes"][4]["source_level"]="district"
+    assert alias_candidates(changed,rules)["summary"]["total_candidates"]==51
+    for kind in ("baseline","duplicate","overlap","rules"):
+        bad=copy.deepcopy(baseline)
+        use_rules=rules
+        if kind=="baseline":
+            bad["summary"]["exact_name_candidates"]=41
+        elif kind=="duplicate":
+            bad["unmatched_geometry"][1]["shape_id"]=bad["unmatched_geometry"][0]["shape_id"]
+        elif kind=="overlap":
+            bad["unmatched_geometry"][0]["shape_id"]=bad["exact_name_candidates"][0]["geometry"]["shape_id"]
+        else:
+            use_rules=rules[:-1]+(rules[0],)
+        try:
+            alias_candidates(bad,use_rules)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid alias scope accepted")
+    print("PASS: bounded alias candidates, immutable baseline, exact labels, abstention, collision and baseline refusal.")
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
@@ -1310,17 +1448,21 @@ def main():
     p.add_argument("--status",action="store_true")
     p.add_argument("--audit-workspace",action="store_true")
     p.add_argument("--geo-crosswalk",action="store_true",help="Private read-only candidate report for HPI-DATA-003/005")
+    p.add_argument("--geo-alias",action="store_true",help="Private approved documentary alias candidate report")
     p.add_argument("--remove-internal-deadlines",action="store_true")
     p.add_argument("--init-only",action="store_true")
     p.add_argument("--intake-date",type=date.fromisoformat)
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
-        if args.geo_crosswalk:
-            if (args.self_test or args.status or args.audit_workspace or args.remove_internal_deadlines or args.init_only or
+        if args.geo_crosswalk or args.geo_alias:
+            if (args.geo_crosswalk and args.geo_alias) or (args.self_test or args.status or args.audit_workspace or args.remove_internal_deadlines or args.init_only or
                     args.intake_date is not None or args.retain_until is not None or args.terms_reviewed or args.dataset != "HPI-DATA-002"):
                 raise ValueError("Geographic crosswalk must be a standalone read-only action.")
-            print(json.dumps(crosswalk_report(args.root),indent=2,ensure_ascii=False))
+            report=crosswalk_report(args.root)
+            if args.geo_alias:
+                report=alias_candidates(report)
+            print(json.dumps(report,indent=2,ensure_ascii=False))
             return 0
         if args.self_test:
             self_test()
@@ -1329,6 +1471,7 @@ def main():
             retention_self_test()
             code_self_test()
             crosswalk_self_test()
+            alias_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:

@@ -112,3 +112,7 @@ Owner explicitly approves the bounded exact Stats SA 2022 codebook acquisition, 
 ## Geographic candidate experiment authority (26 November 2026)
 
 Owner explicitly approves bounded private offline comparison of HPI-DATA-003 and HPI-DATA-005, validation and exact name candidate matching, R0. No spatial joins, source modification, new acquisition, commercial use, public redistribution or accepted identity inference. [Scope and implementation](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-geographic-candidate-experiment). No alias resolution or downstream integration approval.
+
+## Documentary alias experiment authority (26 November 2026)
+
+Owner explicitly approves the twelve proposed evidence-backed variants for private offline HPI-DATA-003/005 candidate comparison, validating actual local labels and preserving the original datasets and 40 exact baseline, strict R0. No spatial joins, boundary equivalence assumptions, file modification, persisted mapping, other acquisition or commercial use. [Scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-documentary-alias-candidate-implementation). No downstream integration approval.

@@ -152,3 +152,16 @@ No new dependencies or downloads; no initialise, writes, registry changes or geo
 ## Geographic candidate experiment local evidence (26 November 2026)
 
 Owner terminal screenshots confirm successful local read-only execution of --geo-crosswalk and summary-only repeat. 52 geometry rows, 52 code rows, 40 exact one-to-one name candidates (76.9% coverage), 40 district candidates, zero metro candidates, zero ambiguous groups or rows on either side, 12 unmatched geometry rows and 12 unmatched official-code rows. Four district and all eight metro references unmatched. Crosswalk, boundary equivalence and independent subtype classification all false. The successful report entails the implemented local manifest/hash/quality/retention validations passed; underlying bytes and hashes not independently observed. No writes or geometry operations reported. Full unmatched lists not supplied; no alias pairs inferred. Naming conventions are a hypothesis, not established explanation. No repeat necessary for summary. Exact implementation [2608c01](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/2608c01ad11ee599cf1769bd9f1826fc5a967fa7) passed 7/7 triggered workflows (45885043170, 45885051174, 45885051166, 45885051182, 45885051190, 45885051213, 45885051236). Bounded experiment delivered, not accepted crosswalk or P0 exit. Next inspect only unmatched labels locally; research official name history before separately approved alias comparison.
+
+## Approved documentary alias comparison (26 November 2026)
+
+Owner approved only the twelve proposed name variants for 003/005. After focused CI passes, from permanent development checkout run:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --geo-alias | ConvertFrom-Json | Select-Object -ExpandProperty summary
+}
+```
+
+The existing --geo-crosswalk remains unchanged. New standalone --geo-alias reuses full manifest/hash/quality/terms validation and requires the observed exact baseline (40 candidates, 12 unmatched each, zero ambiguities). It checks the explicit public-source name/code/type allowlist against actual unmatched local labels; no automatic suffix removal or fuzzy matching. Missing or changed labels abstain, including the cropped Buffalo City label; changed baseline, duplicate or already-used identities and conflicting command modes fail closed. Report separates original exact candidates and documentary aliases, remaining unmatched and abstentions. No downloads, dependencies, writes, retained crosswalk, geometry operations or accepted identity. Both vintages and source terms remain binding. Actual run pending; share summary only. Synthetic tests use invented labels; no private records in CI.
