@@ -91,6 +91,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Original high-fidelity review candidate:** [Atlas / Terminal study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) added as standalone interactive fictional HTML, two visual directions, end-to-end review flow and geometry unavailable by default. No production source changes, dependencies or new cloud access. Browser verification and owner review pending; no final art direction approval. Next: review actual renders and fix prototype issues before shared component integration.
 
+**Prototype visual verification:** 87b873a browser run 45726994190 passed 17/17 (including full two-concept journey); actual screenshot artifact downloaded and visually reviewed. 7/7 registered workflows successful; 0 pending. [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) records second-pass refinements and local Chromium focused test of identical HTML blob. New hosted tests pending. Atlas leading recommendation, Terminal retained; owner visual acceptance outstanding. Next review comparison/mobile and design direction, then bounded technology/adapter qualification. No application runtime change, dependencies, cloud access, data or score credit.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
