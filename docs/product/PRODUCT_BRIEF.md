@@ -10,6 +10,8 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 
 **First buyer:** One individual inspecting two or three homes in one demonstrably supported local market and property class. A user may manually enter an asking price and supported property attributes. The system must not claim to provide live listing discovery, verified listing images or a current market feed until independently integrated and validated.
 
+**P0-A.8 strategic synthesis (26 November):** [Vision and positioning](PINNACLE_VISION.md#p0-a8--product-vision-and-positioning-synthesis-26-november-2026) proposes the residential property decision intelligence identity and preserves Investigate / Compare / Decide, the narrow flagship and separate future pinnacle. Proposed language awaits applicable owner review; the existing scope and acceptance checklist below are unchanged. Historical evidence must not be represented as current market coverage or a current valuation.
+
 ## Proposed end-to-end user journey
 
 1. **Add property:** Enter user-reported asking price, location, property type and supported features. Explain the covered market, data date and class restrictions.
