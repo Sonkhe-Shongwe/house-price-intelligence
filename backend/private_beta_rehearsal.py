@@ -130,18 +130,20 @@ class PrivateBetaRehearsal:
         return {"investigation_id":identifier,**preview}
 
     def saved_workspace(self,*,cookie):
-        """Bounded owner-only metadata, no source identifiers or raw input JSON."""
+        """Bounded owner-only metadata from the currently verified sealed build."""
         owner=self._owner(cookie,"GET")
-        with self._buyer(owner) as conn:
+        # Keep discovery consistent with reopen: no saved history is served
+        # when the source seal or restricted reader is unavailable.
+        with self._source() as (_,build,_,_), self._buyer(owner) as conn:
             rows=conn.execute("""SELECT investigation_id,analysis_date,evidence_status,created_at_utc
                 FROM investigations WHERE build_id=%s AND match_policy_version=%s
-                ORDER BY created_at_utc DESC,investigation_id DESC LIMIT 51""",(self.seal["build_id"],POLICY)).fetchall()
+                ORDER BY created_at_utc DESC,investigation_id DESC LIMIT 51""",(build,POLICY)).fetchall()
             comparisons=conn.execute("""SELECT s.shortlist_id,s.label,s.created_at_utc
                 FROM shortlists s JOIN shortlist_investigations m ON m.shortlist_id=s.shortlist_id
                 JOIN investigations i ON i.investigation_id=m.investigation_id
                 GROUP BY s.shortlist_id,s.label,s.created_at_utc
                 HAVING count(*) BETWEEN 2 AND 3 AND bool_and(i.build_id=%s AND i.match_policy_version=%s)
-                ORDER BY s.created_at_utc DESC,s.shortlist_id DESC LIMIT 51""",(self.seal["build_id"],POLICY)).fetchall()
+                ORDER BY s.created_at_utc DESC,s.shortlist_id DESC LIMIT 51""",(build,POLICY)).fetchall()
         return {"source_kind":"historical_shape_rehearsal",
             "investigations":[{"investigation_id":str(i),"analysis_date":str(d),"status":s,"created_at_utc":str(t)}
                 for i,d,s,t in rows[:50]],

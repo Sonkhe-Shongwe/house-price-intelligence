@@ -162,6 +162,31 @@ class HistoricalReaderTests(unittest.TestCase):
                         iid=saved["investigation_id"]
                         self.assertEqual([s["sale_price_usd"] for s in saved["sales"]],["525000.01"]*3)
                         self.assertEqual(svc.reopen(iid,cookie=a["cookie"]),saved)
+                        workspace=svc.saved_workspace(cookie=a["cookie"])
+                        self.assertEqual([item["investigation_id"] for item in workspace["investigations"]],[iid])
+                        self.assertEqual(svc.saved_workspace(cookie=b["cookie"])["investigations"],[])
+                        with self.assertRaises(AuthDenied):
+                            svc.saved_workspace(cookie="")
+                        # The workspace must not list otherwise valid saved metadata
+                        # after a source-integrity failure. Restore only the invented
+                        # fixture and verify that history becomes available again.
+                        conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents+1")
+                        try:
+                            with self.assertRaisesRegex(ImportRefused,"seal mismatch"):
+                                svc.saved_workspace(cookie=a["cookie"])
+                            from backend.private_beta_http import route, PREFIX
+                            statuses=[]
+                            payload=b"".join(route(svc,{},{
+                                "wsgi.url_scheme":"https","REMOTE_ADDR":"127.0.0.1",
+                                "REQUEST_METHOD":"GET","PATH_INFO":PREFIX+"/workspace",
+                                "HTTP_COOKIE":a["cookie"]},lambda status,headers:statuses.append(status)))
+                            self.assertEqual(statuses,["503 Service Unavailable"])
+                            import json
+                            self.assertEqual(json.loads(payload),{"error":"evidence_unavailable"})
+                            self.assertIsNone(wr.execute("SELECT nullif(current_setting('hpi.owner_id',true),'')").fetchone()[0])
+                        finally:
+                            conn.execute("UPDATE hpi_candidate.sale_transactions SET price_usd_cents=price_usd_cents-1")
+                        self.assertEqual(svc.saved_workspace(cookie=a["cookie"]),workspace)
                         self._check_private_http_browser(rd,wr,seal,rp,bp)
                         # Existing records are invisible without owner context.
                         self.assertEqual(_inspect_services(rd,wr,database="hpi_ingest_fixture")["status"],"restricted_services_verified")

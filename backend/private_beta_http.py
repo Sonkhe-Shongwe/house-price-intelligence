@@ -87,6 +87,8 @@ def route(service,assets,env,start):
     except ContractError:
         return _response(start,422,{"error":"invalid_investigation"})
     except ImportRefused:
+        if workspace:
+            return _response(start,503,{"error":"evidence_unavailable"})
         return _response(start,404 if (match or comparison) else 422,{"error":"investigation_unavailable"})
     except (psycopg.Error,RuntimeError,KeyError,TypeError):
         return _response(start,503,{"error":"evidence_unavailable"})
