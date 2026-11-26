@@ -91,3 +91,7 @@ See [local feasibility addendum](DATA_FEASIBILITY.md#26-november-2026--south-afr
 ## SA3.1 legal framework evidence (26 November 2026)
 
 See [legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) for statutory and regulator evidence, dated versions and retrieval limitations. Material MPRA s44 (ss41/42 source lineage), POPIA prior-authorisation/linkage and cross-border, PAIA R100 public-body request fee, and source-specific licensing/retention gates. PDF text available but screenshots failed for MPRA, regulator prior-authorisation guidance and 2025 regulations; no legal opinion or grant. SA3.2 matrix next; real acquisition and release blocked.
+
+## SA3.2 source-specific rights evidence (26 November 2026)
+
+[Legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) records [Cape Town Open Data Policy](https://resource.capetown.gov.za/documentcentre/Documents/Bylaws%20and%20policies/Open_Data_Policy.pdf), clauses 7.1–7.5, [research guidelines](https://resource.capetown.gov.za/documentcentre/Documents/Procedures%2C%20guidelines%20and%20regulations/Submit%20_Research_Request_Guidelines.pdf) pp.1–2, [Ekurhuleni GV2025 terms](https://publicportal.evaluations.co.za/emm/Index) full HTML and [Joburg portal](https://objections.joburg.org.za/) search excerpt. PDF text reviewed, screenshot attempts failed; open-data terms and Joburg full fetch failed. No actual source grant. Matrix and minimisation baseline complete as desk work. SA3.3 unsent packet next; no external contact or rows.

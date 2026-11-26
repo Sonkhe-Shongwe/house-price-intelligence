@@ -92,3 +92,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## SA3.1 handoff (26 November 2026)
 
 [Legal and data rights record](../research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) maps POPIA, PAIA, MPRA, Deeds, Land Survey and copyright/contract boundaries; material MPRA s44 disclosure restriction and POPIA ss57–58/s72 questions, ordinary PAIA fee barrier. Desk framework complete, not compliance/rights approval. SA3.2 source/field/operation rights and lineage assessment next, then SA3.3 one unsent permission packet. No acquisition/contact, R0, ordinary P0-C paused.
+
+## SA3.2 handoff (26 November 2026)
+
+[Legal and rights record](../research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) completes source/field/operation matrix desk assessment. Cape Town policy exclusion criteria and research application guidelines (proposal, ethics, CVs, minimum 20 working days) documented; Ekurhuleni explicit restrictions and Joburg excerpt. No licensed real intake/display. Next SA3.3 one unsent metadata-only Cape Town enquiry, independent research proposal and checklist, then owner decision; clarify solo organisation CV and ethics requirements, no false affiliation or personal CV in Git. No actual contact, account, fee or acquisition; R0, ordinary P0-C paused.
