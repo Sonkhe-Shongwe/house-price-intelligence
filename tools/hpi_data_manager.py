@@ -1763,9 +1763,15 @@ def treasury_model(raw):
     if attrs!=TREASURY_FIELDS:
         raise ValueError("Unexpected audit-opinion model fields.")
     updated=model.get("last_updated")
-    if not isinstance(updated,str) or not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])(?:-\d{2})?",updated):
-        raise ValueError("Required source update metadata missing.")
-    date.fromisoformat(updated+"-01" if len(updated)==7 else updated)
+    # Publisher source also emits YYYY-MM-DDTHH:MM for recorded imports.
+    # Preserve the exact source precision; never infer a publication date.
+    if not isinstance(updated,str) or not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])(?:-\d{2}(?:T\d{2}:\d{2})?)?",updated):
+        raise ValueError("Missing or unsupported source update metadata.")
+    if len(updated)==16:
+        from datetime import datetime
+        datetime.fromisoformat(updated)
+    else:
+        date.fromisoformat(updated+"-01" if len(updated)==7 else updated)
     if updated[:4]<"2024":
         raise ValueError("Model update predates selected year.")
     # last_updated is the source update/reference period, not publication date.
@@ -1853,7 +1859,8 @@ def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
     body_count=sum(map(len,payloads.values()))
     if body_count>3*TREASURY_CAP:
         raise ValueError("Aggregate transfer budget exceeded.")
-    if provenance["source_last_updated"][:7]>today.isoformat()[:7] or (provenance["publication_date"] and date.fromisoformat(provenance["publication_date"])>today):
+    if (date.fromisoformat(provenance["source_last_updated"]+"-01" if len(provenance["source_last_updated"])==7 else provenance["source_last_updated"][:10])>today or
+            (provenance["publication_date"] and date.fromisoformat(provenance["publication_date"])>today)):
         raise ValueError("Source metadata date is in the future.")
     q={"requested_metros":2,"reported_outcomes":sum(x["status"]=="reported" for x in facts),
        "unavailable_outcomes":sum(x["status"]=="unavailable" for x in facts),
@@ -1900,7 +1907,18 @@ def treasury_self_test():
     # Synthetic JSON and fake transport: no live requests.
     dims={d:{"attributes":{f.split(".")[1]:{"ref":f} for f in TREASURY_FIELDS if f.startswith(d+".")}}
           for d in ("financial_year_end","demarcation","opinion")}
-    model={"status":"ok","model":{"dimensions":dims,"last_updated":"2026-06"}}
+    model={"status":"ok","model":{"dimensions":dims,"last_updated":"2026-06-15T13:42"}}
+    for valid in ("2026-06","2026-06-15","2026-06-15T13:42"):
+        sample={"status":"ok","model":{"dimensions":dims,"last_updated":valid}}
+        assert treasury_model(json_bytes(sample))=={"source_last_updated":valid,"publication_date":None}
+    for invalid in (None,"","2026-06-15T25:42","2026-02-30T13:42","2026-06-15T13:99","2020-10"):
+        sample={"status":"ok","model":{"dimensions":dims,"last_updated":invalid}}
+        try:
+            treasury_model(json_bytes(sample))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid/stale update metadata accepted")
     def fact(code):
         row={"financial_year_end.year":2024,"demarcation.code":code,"demarcation.label":TREASURY_NAMES[code],
              "opinion.code":"FIXTURE","opinion.label":"Qualified Opinion","opinion.report_url":None}
