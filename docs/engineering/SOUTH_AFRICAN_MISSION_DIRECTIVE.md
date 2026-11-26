@@ -88,3 +88,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## SA2.4 handoff (26 November 2026)
 
 [Consolidated acquisition record](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) completes SA2 bounded desk stopping criterion: noncompensatory route comparison, Cape Town primary permission route, Ekurhuleni and Johannesburg fallback, conditional research/partner route, metadata-first questions and failure conditions. GO for SA3 desk legal/permission review; real acquisition/release BLOCKED, mission not no-go. SA3.1 legal/ethical framework, SA3.2 source/field/operation rights, SA3.3 unsent consolidated permission/owner decision packet; combine where justified. No new access, contact, expenditure, final market or architecture approval; SA4 subject to applicable permissions/protection. SA0-SA2 complete as research (3/10 unweighted); no phase credit.
+
+## SA3.1 handoff (26 November 2026)
+
+[Legal and data rights record](../research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) maps POPIA, PAIA, MPRA, Deeds, Land Survey and copyright/contract boundaries; material MPRA s44 disclosure restriction and POPIA ss57–58/s72 questions, ordinary PAIA fee barrier. Desk framework complete, not compliance/rights approval. SA3.2 source/field/operation rights and lineage assessment next, then SA3.3 one unsent permission packet. No acquisition/contact, R0, ordinary P0-C paused.

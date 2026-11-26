@@ -87,3 +87,7 @@ See [local feasibility addendum](DATA_FEASIBILITY.md#26-november-2026--south-afr
 ## SA2.4 consolidated acquisition disposition (26 November 2026)
 
 [SA2 acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) synthesises prior evidence only. Cape Town priority permission route, Ekurhuleni/Joburg fallback, approved academic/partner route conditional; conventional paid sources parked at R0, context/manual not substitute. Metadata-only first enquiry proposed, unsent; no source permission or property data. SA2 desk complete, SA3.1 legal/ethical framework next. Acquisition and real buyer release blocked.
+
+## SA3.1 legal framework evidence (26 November 2026)
+
+See [legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md) for statutory and regulator evidence, dated versions and retrieval limitations. Material MPRA s44 (ss41/42 source lineage), POPIA prior-authorisation/linkage and cross-border, PAIA R100 public-body request fee, and source-specific licensing/retention gates. PDF text available but screenshots failed for MPRA, regulator prior-authorisation guidance and 2025 regulations; no legal opinion or grant. SA3.2 matrix next; real acquisition and release blocked.
