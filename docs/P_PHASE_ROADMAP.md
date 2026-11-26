@@ -310,7 +310,7 @@ Classify each deliverable explicitly as **implemented, verified, integrated, acc
 
 ## Near-term execution, complexity last
 
-1. Follow checkpoint: perform owner-side confidential rekey, confirm approved owner-only scope, complete storage/access/retention and permitted-use review before the unused conditional extraction. Preserve exact cohort, canonical ingestion and disclosure guard.
+1. Follow checkpoint: owner declined further confidential rekey; confidentiality gate remains open. Complete independent storage/access/retention and permitted-use review before unused conditional extraction; no waiver. Preserve exact cohort, canonical ingestion and disclosure guard.
 2. Extend existing P4/P5 integrated services only after verified data/rights decisions; preserve SQLite and canonical matcher until production runtime is reviewed.
 3. Complete integrated ownership/authentication, privacy, retention and final buyer UX for P6.
 4. Independently verify P7 release readiness, then seek P8 release approval. No main merge, hosting or public real-data display without permission.
