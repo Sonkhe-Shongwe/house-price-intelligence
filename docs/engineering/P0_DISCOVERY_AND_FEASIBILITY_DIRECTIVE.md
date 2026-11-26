@@ -83,3 +83,8 @@ The owner requested a comprehensive standalone South African mission and return 
 ## Temporary P0-C resumption (26 November 2026)
 
 Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but externally blocked; private application drafts prepared and response watch in place. [P0-C conditional boundary review](../research/DATA_FEASIBILITY.md#26-november-2026--p0-c-supported-property-boundary-and-conditional-feasibility-review) completed; P0-D.1 desk rights reconciliation next. Original P0 sole active phase; review any substantive City response before priority change. No market, data, spending, contact, protection or release approvals inferred.
+
+
+## P0-D.1 handoff (26 November 2026)
+
+[Source-specific permitted-use reconciliation](../research/SOURCE_REGISTER.md#26-november-2026--p0-d1-source-specific-permitted-use-reconciliation) complete on retained evidence; four Cook sources have prior unspecified licences, research signal not durable storage/display/release acceptance; SA3/challengers retained. Next P0-D.2 minimum privacy/ethical operational policy delta, then conditional review. No new permission or legal clearance; P0.5/P0.7 blocked. Preserve deferred Cook contact/rekey and SA clarification watch. No new acquisition, code or phase credit.
