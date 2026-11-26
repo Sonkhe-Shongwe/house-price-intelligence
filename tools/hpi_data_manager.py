@@ -1058,8 +1058,12 @@ def audit_registered(root, spec, today=None):
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION}[sid]
-    if sid == "HPI-DATA-007":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION}[sid]
+    if sid == "HPI-DATA-008":
+        if (m.get("retention_policy") != CENSUS_POLICY or m["retention"] != CENSUS_RETENTION or
+                m.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Unexpected Census retention policy or visual review.")
+    elif sid == "HPI-DATA-007":
         if m.get("retention_policy")!=TREASURY_POLICY or m["retention"]!=TREASURY_RETENTION:
             raise ValueError("Unexpected Treasury retention policy.")
     elif sid == "HPI-DATA-006":
@@ -1114,6 +1118,7 @@ def audit_workspace(root):
         ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None),
         ("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None),
         treasury_spec(),
+        census_spec(),
     ]
     results = []
     for spec in specs:
@@ -2114,10 +2119,262 @@ def treasury_self_test():
 
 
 
+
+# HPI-DATA-008: fixed revised municipal fact sheet; two aggregate rows only.
+CENSUS_URL = "https://census.statssa.gov.za/assets/documents/2022/Census_2022_Municipal_factsheet-Web.pdf"
+CENSUS_RAW = "02_Raw_Data/Census_2022_Municipal_factsheet-Web.pdf"
+CENSUS_MANIFEST = "01_Source_Catalogue/HPI-DATA-008.json"
+CENSUS_OUTPUT = "03_Processed_Data/HPI-DATA-008/household_services.csv"
+CENSUS_REPORT = "07_Reports/HPI-DATA-008_quality.json"
+CENSUS_MAX = 5*MIB
+CENSUS_POLICY = "stats-sa-census-private-v1"
+CENSUS_RETENTION = "Private noncommercial aggregate research only; source terms and law prevail; no automatic deletion."
+CENSUS_TARGETS = (("City of Cape Town","Western Cape",30,35),
+                  ("City of Johannesburg","Gauteng",25,30))
+CENSUS_METRICS = (
+    ("flush_toilet_sewerage","Flush Toilet Connected to sewerage (%)","flush toilet connected to"),
+    ("weekly_refuse_removal","Weekly Refuse Removal (%)","weekly refuse removal"),
+    ("piped_water_on_site","Piped Water on Site (Inside dwelling and in the yard) (%)","piped water on site"),
+    ("electricity_for_lighting","Electricity for Lighting (%)","electricity for lighting"))
+CENSUS_YEARS = (2011,2022)
+
+def census_flat(value):
+    return " ".join(value.split()).casefold()
+
+def census_require(value,markers,gate):
+    flat=census_flat(value)
+    for marker in markers:
+        if marker not in flat:
+            raise ValueError("Census "+gate+" check failed: missing expected marker "+marker+".")
+
+def census_row(layout,name,province,printed,page):
+    import re
+    lines=layout.splitlines()
+    if not any(line.strip()==str(printed) for line in lines):
+        raise ValueError("Census printed page marker differs on PDF page "+str(page)+".")
+    year_lines=[i for i,line in enumerate(lines)
+                if line.split()==["2011","2022"]*4]
+    if len(year_lines)!=1:
+        raise ValueError("Census paired year header missing or ambiguous on PDF page "+str(page)+".")
+    header=lines[:year_lines[0]]
+    census_require("\n".join(header),("households (cont.)","sewerage","inside dwelling","in the yard"),"service header")
+    # Layout extraction preserves horizontal placement even when headers wrap
+    # across multiple lines. Check each column-group start left to right.
+    starts=[]
+    for _,_,anchor in CENSUS_METRICS:
+        hits=[match.start() for line in header for match in
+              re.finditer(r"\s+".join(map(re.escape,anchor.split())),line,re.I)]
+        if len(hits)!=1:
+            raise ValueError("Census indicator header missing or duplicated: "+anchor+".")
+        starts.append(hits[0])
+    if starts!=sorted(set(starts)):
+        raise ValueError("Census indicator column order differs on PDF page "+str(page)+".")
+    # Each percentage group is explicitly marked, not assumed from values.
+    if len(re.findall(r"\(\s*%\s*\)","\n".join(header)))!=4:
+        raise ValueError("Census percentage-unit headers differ on PDF page "+str(page)+".")
+    body=lines[year_lines[0]+1:]
+    if not any(re.match(r"^\s*"+re.escape(province)+r"\s+\d",line) for line in body):
+        raise ValueError("Census expected province context missing on PDF page "+str(page)+".")
+    targets=[line for line in body if re.match(r"^\s*"+re.escape(name)+r"(?=\s|$)",line)]
+    if len(targets)!=1:
+        raise ValueError("Census expected exactly one target row for "+name+"; found "+str(len(targets))+".")
+    tail=targets[0].strip()[len(name):].split()
+    if len(tail)!=8:
+        raise ValueError("Census target row cell count for "+name+": expected 8, found "+str(len(tail))+".")
+    vals=[]
+    for i,token in enumerate(tail):
+        if not re.fullmatch(r"\d{1,3},\d",token):
+            raise ValueError("Census decimal-comma format differs for "+name+" column "+str(i+1)+".")
+        v=Decimal(token.replace(",","."))
+        if not 0<=v<=100:
+            raise ValueError("Census household percentage outside 0-100 for "+name+" column "+str(i+1)+".")
+        vals.append(v)
+    return [[name,province,"metro",key,label,year,str(vals[2*i+j]),"percent",
+             "households; exact indicator denominator count not supplied in table",
+             "2021 municipal frame",printed,page,"03-01-82","revised erratum edition"]
+            for i,(key,label,_) in enumerate(CENSUS_METRICS) for j,year in enumerate(CENSUS_YEARS)]
+
+def census_profile(raw):
+    try:
+        from pypdf import PdfReader, __version__
+        from pypdf.errors import PdfReadError
+    except ImportError as exc:
+        raise ValueError("Install existing tested dependency: pypdf=="+CODE_PDF_VERSION) from exc
+    if __version__!=CODE_PDF_VERSION:
+        raise ValueError("Census requires existing tested pypdf version "+CODE_PDF_VERSION+".")
+    if len(raw)>CENSUS_MAX or not raw.startswith(b"%PDF-"):
+        raise ValueError("Census requires the bounded original PDF.")
+    try:
+        pdf=PdfReader(io.BytesIO(raw),strict=True)
+        if pdf.is_encrypted or len(pdf.pages)!=41:
+            raise ValueError("Census revised edition must have exactly 41 PDF pages, unencrypted.")
+        census_require(pdf.pages[1].extract_text(),("municipal fact sheet","statistics south africa","03-01-82"),"publication identity")
+        census_require(pdf.pages[2].extract_text(),("erratum for census 2022 municipal fact sheet","03-01-82",
+                       "978-0-621-51626-5","thaba chweu","mbombela","revised"),"revision")
+        census_require(pdf.pages[3].extract_text(),("statistics south africa","978-0-621-51626-5","2023",
+                       "original source","independent processing","offered for sale","prior permission"),"source terms")
+        census_require(pdf.pages[5].extract_text(),("census 2011 indicators","aligned census data","municipal boundaries (2021)"),"geographic frame")
+        rows=[]
+        for name,province,printed,page in CENSUS_TARGETS:
+            rows.extend(census_row(pdf.pages[page-1].extract_text(extraction_mode="layout"),
+                                  name,province,printed,page))
+    except PdfReadError as exc:
+        raise ValueError("Census PDF parsing failed; no registration.") from exc
+    if len(rows)!=16 or len({(x[0],x[3],x[5]) for x in rows})!=16:
+        raise ValueError("Census observation uniqueness/completeness failed.")
+    out=io.StringIO(newline="")
+    w=csv.writer(out,lineterminator="\n")
+    w.writerow(["metro_name_source","province_source","geography_level","indicator_id","indicator_label_source",
+                "census_year","value","unit","denominator_scope","geography_reference","printed_page","pdf_page",
+                "report_number","edition"])
+    w.writerows(rows)
+    q={"metro_rows":2,"indicators":4,"census_years":[2011,2022],"observations":16,"unique_observations":16,
+       "percentage_range_checks_passed":16,"pdf_pages":41,"source_pdf_pages":[30,35],
+       "geography_reference":"2021 municipal frame","revision_notice_present":True,
+       "source_publication_year":2023,"exact_revision_publication_date":None,
+       "household_microdata":False,"material_join":False,"property_service_reliability_verified":False}
+    return out.getvalue().encode("utf-8"),q
+
+def census_spec():
+    return ("HPI-DATA-008",CENSUS_MANIFEST,CENSUS_RAW,CENSUS_OUTPUT,CENSUS_REPORT,CENSUS_MAX,None)
+
+def census_status(root):
+    path=root/CENSUS_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-008","registered":False}
+    m=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-008","registered":True,**retention_status(m),
+            "known_local_paths":[x for x in (CENSUS_RAW,CENSUS_OUTPUT,CENSUS_REPORT,CENSUS_MANIFEST) if (root/x).exists()]}
+
+def import_census(root,intake,terms_reviewed,confirm,deadline=None,today=None):
+    root=workspace(root)
+    today=today or date.today()
+    if not terms_reviewed or not date(2025,8,5)<=intake<=today:
+        raise ValueError("Confirm revised source terms and actual valid intake date.")
+    if deadline is not None and (deadline<=intake or today>=deadline):
+        raise ValueError("Invalid or expired retention deadline.")
+    raw=read_bounded(root/CENSUS_RAW,CENSUS_MAX)
+    digest=sha(raw)
+    existing=root/CENSUS_MANIFEST
+    if existing.exists():
+        prior=json.loads(read_bounded(existing))
+        old_deadline=stored_deadline(prior)
+        if (prior["source_sha256"]!=digest or prior["first_intake_date"]!=intake.isoformat() or
+                (deadline is not None and deadline!=old_deadline) or
+                (old_deadline is not None and today>=old_deadline) or
+                prior.get("retention_policy")!=CENSUS_POLICY or prior.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Registered Census source or retention differs; no overwrite/renewal.")
+        deadline=old_deadline
+    data,q=census_profile(raw)
+    if not existing.exists() and not confirm(data):
+        raise ValueError("Census visual verification not confirmed; no registration.")
+    q["visual_page_reviewed_by_owner"]=True
+    m={"dataset_id":"HPI-DATA-008","manager_version":"0.7.0","source":"Statistics South Africa, revised Census 2022 Municipal fact sheet",
+       "source_url":CENSUS_URL,"publication_year":2023,"revision_announcement_date":"2025-08-05",
+       "exact_revision_publication_date":None,
+       "source_licence":"Printed page ii: attribute Stats SA and independent processing; no sale of data, processed data or application without permission; private noncommercial scope",
+       "attribution":"Statistics South Africa, Census 2022 Municipal fact sheet, report 03-01-82, revised erratum edition, pp25 and 30; independently processed by HPI.",
+       "source_identity_evidence":"Official URL owner attestation, checked erratum and visually reviewed tables; local hash not publisher checksum.",
+       "source_bytes":len(raw),"source_sha256":digest,"raw_path":CENSUS_RAW,"first_intake_date":intake.isoformat(),
+       "terms_reviewed_by_owner":True,"visual_page_reviewed_by_owner":True,
+       "retention_policy":CENSUS_POLICY,"retention":CENSUS_RETENTION,
+       "do_not_retain_on_or_after":deadline.isoformat() if deadline else None,
+       "processed_path":CENSUS_OUTPUT,"processed_sha256":sha(data),"quality_report":CENSUS_REPORT,"quality":q}
+    planned=[(root/CENSUS_OUTPUT,data),(root/CENSUS_REPORT,json_bytes(q)),(existing,json_bytes(m))]
+    for p,b in planned:
+        check_target(p,b)
+    for p,b in planned:
+        publish(p,b)
+    return m
+
+def census_cli(root,args):
+    prior=json.loads(read_bounded(root/CENSUS_MANIFEST)) if (root/CENSUS_MANIFEST).exists() else None
+    intake=args.intake_date or (date.fromisoformat(prior["first_intake_date"]) if prior else date.fromisoformat(input("Actual revised PDF download date (YYYY-MM-DD): ").strip()))
+    reviewed=args.terms_reviewed or (prior["terms_reviewed_by_owner"] is True if prior else
+                                    input("Confirm PDF page 4 terms, attribution and private noncommercial processing (yes/no): ").strip().lower()=="yes")
+    def confirm(data):
+        print("\nPrivate preview: compare 16 observations against PDF pages 30 and 35 (printed 25 and 30), including each metric/year header.")
+        print(data.decode("utf-8"))
+        return input("All 16 values, metro labels and indicator/year headings visually match (yes/no): ").strip().lower()=="yes"
+    m=import_census(root,intake,reviewed,confirm,args.retain_until)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":census_status(root)},indent=2))
+    return 0
+
+def census_self_test():
+    # Structural markers match public layout; every numeric value is invented.
+    def lines(name,province,printed):
+        return [str(printed),"HOUSEHOLDS (cont.)",
+                "Flush Toilet Connected to   Weekly Refuse Removal (%)   Piped Water on Site (Inside dwelling and    Electricity for Lighting (%)",
+                "sewerage (%)                                            in the yard) (%)",
+                "2011 2022 2011 2022 2011 2022 2011 2022",
+                province+"  1,0 2,0 3,0 4,0 5,0 6,0 7,0 8,0",
+                name+"  11,1 22,2 33,3 44,4 55,5 66,6 77,7 88,8"]
+    pages=[["Invented page"] for _ in range(41)]
+    pages[1]=["Municipal fact sheet Statistics South Africa 03-01-82"]
+    pages[2]=["Erratum for Census 2022 Municipal fact sheet 03-01-82 978-0-621-51626-5 Thaba Chweu Mbombela revised"]
+    pages[3]=["Statistics South Africa 2023 978-0-621-51626-5 original source independent processing offered for sale prior permission"]
+    pages[5]=["Census 2011 indicators aligned census data municipal boundaries (2021)"]
+    for name,province,printed,page in CENSUS_TARGETS:
+        pages[page-1]=lines(name,province,printed)
+    raw=fixture_pdf(pages)
+    data,q=census_profile(raw)
+    assert q["observations"]==16 and q["percentage_range_checks_passed"]==16
+    parsed=list(csv.DictReader(io.StringIO(data.decode())))
+    assert parsed[0]["value"]=="11.1" and parsed[1]["value"]=="22.2" and parsed[2]["indicator_id"]=="weekly_refuse_removal"
+    name,province,printed,page=CENSUS_TARGETS[0]
+    good="\n".join(lines(name,province,printed))
+    for bad in (good.replace("2011 2022","2022 2011",1),good.replace("88,8","101,0"),
+                good.replace("88,8","88.8"),good.replace(" 88,8",""),good+"\n"+lines(name,province,printed)[-1],
+                good.replace("Weekly Refuse Removal","Electricity for Lighting").replace("Electricity for Lighting (%)","Wrong (%)",1)):
+        try:
+            census_row(bad,name,province,printed,page)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid Census row/header accepted")
+    for index in (2,3,5):
+        bad=list(pages);bad[index]=["Wrong revision, terms or frame"]
+        try:
+            census_profile(fixture_pdf(bad))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Wrong Census source accepted")
+    day=date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/CENSUS_RAW,raw)
+        publish(root/RAW,b"existing historical fixture")
+        publish(root/MARKET_OUTPUT,b"existing market fixture")
+        for reviewed,confirmed in ((False,True),(True,False)):
+            try:
+                import_census(root,day,reviewed,lambda _:confirmed,today=day)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Unreviewed Census import accepted")
+            assert not (root/CENSUS_MANIFEST).exists() and not (root/CENSUS_OUTPUT).exists()
+        first=import_census(root,day,True,lambda d:d==data,today=day)
+        assert first==import_census(root,day,True,lambda _:False,today=day)
+        assert (root/RAW).read_bytes()==b"existing historical fixture"
+        assert (root/MARKET_OUTPUT).read_bytes()==b"existing market fixture"
+        assert audit_registered(root,census_spec(),day)["status"]=="integrity checks passed"
+        (root/CENSUS_OUTPUT).write_bytes(data+b"\n")
+        try:
+            audit_registered(root,census_spec(),day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Changed Census output accepted")
+    print("PASS: invented revised Census PDF, 16 observations, source/header/range refusal, visual review, repeat, isolation and integrity.")
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
@@ -2161,6 +2418,7 @@ def main():
             alias_self_test()
             market_self_test()
             treasury_self_test()
+            census_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -2171,7 +2429,7 @@ def main():
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0
         if args.status:
-            print(json.dumps(treasury_status(root) if args.dataset == "HPI-DATA-007" else market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(census_status(root) if args.dataset == "HPI-DATA-008" else treasury_status(root) if args.dataset == "HPI-DATA-007" else market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         if args.dataset == "HPI-DATA-007":
             raise ValueError("007 requires explicit --acquire-treasury; use --status for an existing attempt.")
@@ -2179,6 +2437,8 @@ def main():
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-008":
+            return census_cli(root,args)
         if args.dataset == "HPI-DATA-006":
             return market_cli(root,args)
         if args.dataset == "HPI-DATA-005":

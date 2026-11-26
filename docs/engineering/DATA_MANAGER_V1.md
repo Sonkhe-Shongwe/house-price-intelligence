@@ -1,6 +1,6 @@
 # HPI Data Manager | Current operations and historical evidence
 
-**Current operating instructions (26 November 2026):** Four owner-observed registrations (HPI-DATA-002/003/004/005). Use the permanent development checkout and sibling private workspace. Open retention migration completed; no mandatory internal expiry or deadline prompt, actual source conditions and law prevail. Actual acquisition date and terms confirmation remain necessary on first import; existing manifests reused. The chronological sections below record original behaviour at the time, including superseded deadlines and pending tests. They are not current instructions. See [checkpoint](../CHECKPOINT.md) and [repository audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md).
+**Current operating instructions (26 November 2026):** Five owner-observed registrations (HPI-DATA-002/003/004/005/006); 007 parked. Use the permanent development checkout and sibling private workspace. Open retention migration completed; no mandatory internal expiry or deadline prompt, actual source conditions and law prevail. Actual acquisition date and terms confirmation remain necessary on first import; existing manifests reused. The chronological sections below record original behaviour at the time, including superseded deadlines and pending tests. They are not current instructions. See [checkpoint](../CHECKPOINT.md) and [repository audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md).
 
 Optional read-only integrity check, from the existing checkout after the next routine pull and passing CI:
 
@@ -8,7 +8,7 @@ Optional read-only integrity check, from the existing checkout after the next ro
 python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --audit-workspace
 ```
 
-Checks all four supported dataset IDs against fixed file locations, retention, exact raw and processed hashes and quality reports, without generating or changing any file. Reports missing/unregistered or inconsistent datasets and returns nonzero if any fails. Does not re-run geospatial or RPPI transformation, verify legal rights or enumerate external copies. The starter CSV is historical scaffolding; manifests and live audit are authoritative. No new download, re-import or mandatory user action.
+Checks all supported dataset IDs (including unregistered/parked 007 and pending 008) against fixed file locations, retention, exact raw and processed hashes and quality reports, without generating or changing any file. Reports missing/unregistered or inconsistent datasets and returns nonzero if any fails. Does not re-run geospatial or RPPI transformation, verify legal rights or enumerate external copies. The starter CSV is historical scaffolding; manifests and live audit are authoritative. No new download, re-import or mandatory user action.
 
 ## Original v0.1 design and evidence (historical)
 
@@ -224,3 +224,16 @@ Confirm terms only if accepted. No marker removal, new dependencies, report fetc
 ## HPI-DATA-007 recovery empirical result (26 November 2026)
 
 Owner terminal screenshot confirms fast-forward to 5cac51f, terms acceptance, then recovery diagnostic request CPT, response body 595 bytes, ValueError, STOP: Treasury fact outside exact approved municipality/year scope. Code path establishes model validation succeeded, CPT response passed JSON and outer facts schema/cardinality checks, then failed the row-level combined field/code/year/type/name guard. Exact failing predicate and row are unknown; no unvalidated response retained by design. Prior timestamp correction allowed progression, but the exact first response timestamp remains unknown. Johannesburg was not dispatched. Total observed/inferred dispatches across both attempts: three (initial model, recovery model and CPT); one recovery request unused, not reusable under consumed one-time authority. Original and recovery attempt markers remain; no registration or source mutation reported. Preserve both markers and local dispatch/diagnostic evidence, no further retries or deletion. Exact [5cac51f](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5cac51fa5290bccf099e96afb9c4ceef8ab2ea32) CI 6/7 successful, 1 pending, 0 other conclusions at inspection; focused recovery tests and documentation passed. No actual private bytes independently inspected. Both live attempts consumed; park this adapter pending independent documentary evidence or explicitly authorised new direction.
+
+## Approved HPI-DATA-008 revised Census household services adapter (26 November 2026)
+
+Owner approves one [revised municipal fact sheet PDF](https://census.statssa.gov.za/assets/documents/2022/Census_2022_Municipal_factsheet-Web.pdf), max 5 MiB, private R0 only. Save original filename Census_2022_Municipal_factsheet-Web.pdf in private sibling 02_Raw_Data (not Git). Existing pypdf 7.2.0 reused. After focused CI succeeds:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --dataset HPI-DATA-008
+}
+```
+
+Use actual download date and review PDF page 4 terms. Adapter enforces 5 MiB local file cap, 41 pages, report/ISBN, erratum, rights markers, 2021 frame, printed page marker, column order/units/paired years, exact metro row and eight decimal-comma percentages each, range and uniqueness. Visual comparison of all 16 cells and their headers mandatory on PDF pages 30 and 35; no raw source values in Git/CI. Specific errors report gate, metro and column/count only; no guessed layout or other source rows printed. Separate CSV/report/manifest and checksums; independent source terms/noncommercial retention; no merge or property-level inference. 2023 bibliographic year and 2025 revision announcement distinct from unknown exact revision publication date. Synthetic fixtures only; actual local pypdf extraction, size/hash and registration unverified. Local file cap is not a network transfer limiter for manual browser download. Stop on discrepancy, do not redownload or edit original. 007 unchanged and no replay. Status and audit include 008; audit reports parked/unregistered IDs as incomplete, not corruption.
