@@ -82,6 +82,8 @@ P8 requires an authorised HTTPS browser-only demo, isolated safe recruiter acces
 
 **Private buyer UX redesign slice:** implemented scoped responsive workspace shell, navigation, structured sales table, compact controls and owner-scoped saved investigation/comparison discovery via bounded authenticated metadata endpoint. No schema, role, source, hosting or matcher changes. Existing manual-ID recovery remains secondary for compatibility; saved records without stored display-address labels are presented by evidence status/date rather than invented labels. Existing browser test IDs retained. Added provider integration assertions for list isolation and logout. Design palette is a review candidate, not final owner approval; exact-head CI and visual review pending. No cloud access window replay.
 
+**Product convergence research:** [26 November research](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md) consolidates competitor workflows, information architecture, separate map renderer/basemap/geometry decisions and shared frontend adapter proposal. Private redesign 46a046d passed 11/11 registered CI workflows; no visual approval implied. Research only: no provider selection, dependency/schema changes, data, deployment, access window or score credit. Next: audit shared-component/private-contract parity and produce full-flow high-fidelity concepts.
+
 ## Evidence versus acceptance
 
 Approved 87.1% unchanged; proposed 87.7% unapproved. [Detailed roadmap](P_PHASE_ROADMAP.md), [summary](ROADMAP.md), [decisions](DECISIONS.md). All full gates open. Documentation audit or CI is not production acceptance.
