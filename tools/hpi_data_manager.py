@@ -615,7 +615,7 @@ def import_buildings(root,intake,terms_reviewed,deadline=None,today=None):
     today = today or date.today()
     if not terms_reviewed:
         raise ValueError("Owner must confirm applicable source terms.")
-    retention = retention_fields(root,BUILD_MANIFEST,intake,deadline,today,LEGACY_GEO)
+    retention = retention_fields(root,BUILD_MANIFEST,intake,deadline,today,LEGACY_BUILD)
     source = root/BUILD_RAW
     # Require the canonical location, rather than create another raw copy.
     workspace(source.parent)
@@ -711,6 +711,7 @@ OPEN_POLICY = "open-source-terms-v1"
 OPEN_RETENTION = "No internal expiry; applicable source terms and law prevail; no automatic deletion."
 LEGACY_RPPI = "Maximum 30 days; shorter terms prevail; owner-approved disposal only; no renewal"
 LEGACY_GEO = "Maximum 30 days or shorter applicable terms; no automatic deletion or renewal"
+LEGACY_BUILD = "Maximum 30 days or shorter terms; no automatic deletion or renewal"
 
 def stored_deadline(manifest):
     value = manifest["do_not_retain_on_or_after"]
@@ -753,7 +754,7 @@ def remove_internal_deadlines(root, today=None):
     today = today or date.today()
     specs = [(MANIFEST,"HPI-DATA-002",RAW,LEGACY_RPPI,"catalogue_licence","CC BY; version not specified"),
              (GEO_MANIFEST,"HPI-DATA-003",GEO_RAW,LEGACY_GEO,"source_licence","CC BY 3.0 IGO (publisher metadata)"),
-             (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_GEO,"source_licence","CDLA Permissive 2.0")]
+             (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_BUILD,"source_licence","CDLA Permissive 2.0")]
     plan, results = [], []
     for name, sid, raw, legacy, licence_field, licence in specs:
         path = root/name
@@ -813,7 +814,7 @@ def retention_self_test():
         initialise(root)
         specs = [(MANIFEST,"HPI-DATA-002",RAW,LEGACY_RPPI,"catalogue_licence","CC BY; version not specified"),
                  (GEO_MANIFEST,"HPI-DATA-003",GEO_RAW,LEGACY_GEO,"source_licence","CC BY 3.0 IGO (publisher metadata)"),
-                 (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_GEO,"source_licence","CDLA Permissive 2.0")]
+                 (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_BUILD,"source_licence","CDLA Permissive 2.0")]
         for i,(path,sid,raw,legacy,field,licence) in enumerate(specs):
             m = {"dataset_id":sid,"raw_path":raw,field:licence,"terms_reviewed_by_owner":True,
                  "first_intake_date":day.isoformat(),"do_not_retain_on_or_after":"2026-12-26" if i != 1 else "2026-12-01",
