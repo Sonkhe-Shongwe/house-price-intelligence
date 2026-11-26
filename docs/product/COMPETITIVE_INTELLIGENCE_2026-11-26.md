@@ -1,6 +1,6 @@
 # P0-B | Market and competitive intelligence
 
-**Started:** 26 November 2026, after explicit P0-A owner acceptance. **Status:** B.1-B.4 bounded research complete; B.5 provisional market rationale/review next; market and customer acceptance open. [P0 directive](../engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md), [accepted foundation](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [product brief](PRODUCT_BRIEF.md), [jobs](JOBS_TO_BE_DONE_2026-11-26.md). No account creation, competitor interaction requiring login, individual property records, scraping, publisher contact, real extraction, purchase or implementation.
+**Started:** 26 November 2026, after explicit P0-A owner acceptance. **Status:** B.1-B.5 bounded competitive and market research complete; P0-C data feasibility next. No final market, customer demand or P0 phase acceptance. [P0 directive](../engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md), [accepted foundation](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [product brief](PRODUCT_BRIEF.md), [jobs](JOBS_TO_BE_DONE_2026-11-26.md). No account creation, competitor interaction requiring login, individual property records, scraping, publisher contact, real extraction, purchase or implementation.
 
 ## B.1 | Initial consumer-platform benchmark
 
@@ -128,3 +128,43 @@ Provisional recommendation for B.5 review: retain Cook County as measured refere
 No implementation now. Any future approved migration must address market-neutral source identity (not reuse 14-digit PIN assumption blindly), class/area definitions, currency and exact monetary units, geography, versioning, temporal joins, source-specific exclusions, retention and end-to-end regression parity. Preserve existing evidence, fictional UI and engineering; do not build multi-market abstractions speculatively. No new alternative extraction authorised.
 
 **B.4 stopping criterion:** measured incumbent and three plausible alternative markets plus local constraint check compared using official documentation, critical feasibility dimensions and explicit unknowns; no property extraction or final market approval. B.4 bounded assessment complete. Next B.5 provisional rationale and review, including disconfirming evidence, remaining P0-C/D/E dependencies and applicable owner decisions. No new app, rights, cost, data, infrastructure, deployment or progress credit.
+
+## B.5 | Market rationale and workstream review
+
+**26 November 2026.** Review B.1-B.4 against the [P0 directive](../engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md), accepted [foundation](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [product brief](PRODUCT_BRIEF.md), [success measures](PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md), [source register](../research/SOURCE_REGISTER.md) and [P0-P8 roadmap](../P_PHASE_ROADMAP.md). Bounded synthesis, not a new external-data experiment. No additional evidence of direct customer need, coverage, legal permissions or financial feasibility. All B.1-B.4 source limitations retained.
+
+### Provisional strategic recommendation
+
+Retain the accepted real-property flagship: individual prospective owner-occupier considering two or three shortlisted homes in one demonstrably supported market/class. Investigate / Compare / Decide remains the intended workflow. The product is a complementary buyer-controlled evidence workspace, not a portal, agent replacement, valuation, financial advice or a generic feature-parity exercise. Test incremental value against actual buyer alternatives with the already proposed M1-M8/G1-G7 measures; no new scope, thresholds or recruitment.
+
+Retain Cook County township 17 / Evanston Class 203 as the existing conditional candidate and measured reference, not the final or presumptively winning market. Its corrected 2024-2025 retrospective cohort of 142 eligible sales (83/59) and later 41 neighbourhood-supported / 18 exploratory subjects are material evidence, but 59/59 candidate support is not 59/59 validated neighbourhood evidence or current market coverage. Weak fallback, publication-time uncertainty, subject identity and unresolved rights/protection materially limit the current buyer proposition. NYC is the priority documented challenger: US context, sales file attributes, BBL and clearer general public-data reuse framework. England/Wales remains the next strategic lead given explicitly licensed non-address fields and prospective UPRN linkage; historical coverage and address restrictions remain material. King County and South Africa parked for documented source/access gaps. Ranking is qualitative research priority, not measured market demand, absolute quality or a guarantee of licence or R0.
+
+Do not select a final market or rewrite the app before assessing minimum viable evidence. Do not treat the currently implemented Cook-specific architecture as a requirement for future design. If a challenger provides a materially stronger lawful, current, technically sound R0 path, recommend a market migration with impact assessment and explicit owner approval; if no candidate meets indispensable requirements, report no-go or seek separate approval for a materially revised product. No synthetic substitute or loosening of acceptance criteria.
+
+### Disconfirming evidence and decision rules
+
+| Question | Evidence needed / decision consequence |
+| --- | --- |
+| Does a separate buyer workspace add value? | Existing portals already compare and save homes; RPR/agents can provide richer context, Cook Viewer offers official comparables and a manual worksheet can preserve records. H1-H4 unvalidated. If M8 and actual need do not support incremental benefit, revisit the proposition, not default to more features. |
+| Is historical evidence useful for the intended contemporary decision? | P0-C assess the dated cohort, source/update/reporting lag, applicable identity/class and earlier-sales support; no historical-as-of or current coverage inference. If insufficient, narrow the supported decision honestly or evaluate a different market; substantive scope change requires owner approval. |
+| Is the essential field projection permitted? | P0-D evaluate field-specific storage, joins, private display, attribution, privacy and retention separately for viable candidates. Cook County null licence metadata and deferred clarification remain an open blocker; NYC general terms and UK non-address OGL are positive signals, not complete rights approvals. If no documented permitted path, no real intake/release. |
+| Is a viable alternative genuinely better? | Compare the same essential field, grain, historical timing, identity, eligibility, comparable coverage, rights, and R0 gates before recommending change. Unknowns are not passes; only Cook County has project-level empirical cohort evidence. No alternative extraction authorised by B.5. |
+| Can the product operate safely at R0? | P0-E evaluate protection, confidential recovery, access, provider quotas and actual release pathway; do not substitute a public demo or invented test for real-data acceptance. If controls require spending or unacceptable exposure, stop and seek a decision. |
+
+### Workstream exit review and trace to original criteria
+
+| P0-B task / original criterion | Review |
+| --- | --- |
+| B.1 initial consumer benchmark | Complete: Zillow/Redfin official documentation and JT1-JT6 overlap, explicit unknowns. |
+| B.2 additional alternatives | Complete: Homes.com, Realtor.com, RPR, agents/CMA, Cook Viewer, manual workflow; evidence/access limits recorded. |
+| B.3 consolidated comparison | Complete: eight-alternative matrix, H1-H4 hypotheses, disconfirming conditions and rejected claims/options. |
+| B.4 geographic assessment | Complete: measured incumbent and three alternative geographies plus SA constraint check, official documentation, no property extraction. |
+| B.5 rationale and review | Complete: conditional candidate, challenger order, falsification conditions, dependencies and decision boundaries documented. |
+| P0.1 buyer problem/value | Foundation previously accepted; competitive research refines the hypothesis. Direct need/benefit unvalidated. |
+| P0.3 candidate geography/class | Bounded research supports candidate selection for further investigation, not final geographic approval; P0-C needed for precise supported scope. |
+| P0.6 final market and intended buyer | Open. Existing provisional Cook County decision and owner-approved foundation unchanged. Final choice requires evidence from C/D/E and explicit applicable owner decision. |
+| P0.7 feasibility/release | Blocked for durable real-data intake/display/release; no waiver or release-path acceptance. |
+
+B.1-B.5 satisfy the directive's bounded research stopping conditions. No new owner acceptance is asserted. Unlike A.10, B.5 requires applicable owner decisions rather than an unconditional separate workstream sign-off; existing owner-approved candidate/scope and data-first policy permit continued desk feasibility investigation without a new market decision. No specific market change, new live data acquisition, recruitment, publisher contact, paid resource, credential operation, deployment, main integration, formal phase acceptance or percentage revision requested or authorised. If a necessary decision emerges, stop at that boundary. Final market/class, applicable permissions and formal P0 closure remain owner gates.
+
+**Next P0-C:** start with source/field/grain inventory and evidence-gap analysis for the existing candidate and priority NYC challenger, using retained source metadata, official documentation and prior aggregate results only; distinguish essential fields from optional enhancements, map source grain/identity/time/units/selection flags, and record whether the minimal source contract can be supported. Then consolidate actual Cook cohort/entry/temporal evidence and evaluate alternative risks without claiming empirical parity or requesting redundant extraction. P0-D owns field-use permission, P0-E owns R0/protection/operational viability. If an indispensable new empirical acquisition or rights decision is needed, identify it precisely and stop before acquisition. No additional P-stage credit. P0 94%, overall 87.1%, R0.

@@ -49,7 +49,7 @@ Start P0-A.1 by reviewing [product brief](../product/PRODUCT_BRIEF.md), [pinnacl
 
 ## 4a. P0-B execution sequence (26 November 2026, after P0-A acceptance)
 
-P0-B is the sole active workstream following explicit foundation acceptance. Use existing [competitive intelligence record](../product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) rather than separate repetitive files. Five unweighted bounded tasks, not new gates:
+P0-B was the sole active workstream following explicit foundation acceptance; B.1-B.5 bounded research subsequently completed. See checkpoint for active workstream; final market and applicable approvals remain open. Use existing [competitive intelligence record](../product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) rather than separate repetitive files. Five unweighted bounded tasks, not new gates:
 
 | Task | Focus | Stopping criterion |
 | --- | --- | --- |
