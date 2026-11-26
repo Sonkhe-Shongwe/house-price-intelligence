@@ -116,3 +116,8 @@ Owner-requested [critical audit](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.
 ## IR3 handoff (26 November 2026)
 
 [IR3 decision](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#7-ir3-strategic-readiness-decision-26-november-2026) complete: City confirmed formal portal routing only; owner reports personally sending clarification about independent-applicant ethics and organisation profile. Await response; [lean application crosswalk](../research/SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md#f-lean-application-readiness-and-decision-gate-26-november-2026) complete as preparation outline, no actual private documents/submission. IR2 deferred; finite independent planning closed. No new contact without exact draft approval, no data or application/fee/provider operation, SA4 BLOCKED, P0-C preserved. Review genuine clarification next; no repetitive work at gate.
+
+
+## Temporary resumption of ordinary P0 work (26 November 2026)
+
+Owner requested continuation while awaiting response. Private proposal, ethics/data-management, researcher CV and project profile drafts prepared; no submission or acceptance. Hourly read-only response monitoring established. External HPI-SA gate remains blocked; preferred local direction retained, not failed. [P0-C boundary review](../research/DATA_FEASIBILITY.md#26-november-2026--p0-c-supported-property-boundary-and-conditional-feasibility-review) complete conditionally; P0-D.1 rights desk reconciliation next under sole active P0. No new contact, data or scope adoption. Review actual substantive reply before changing priority.

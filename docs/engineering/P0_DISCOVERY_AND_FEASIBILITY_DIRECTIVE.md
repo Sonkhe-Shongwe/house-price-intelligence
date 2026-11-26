@@ -78,3 +78,8 @@ At P0-G verify the approved product brief, supported first market/class and prop
 ## 7. Owner-directed HPI-SA mission overlay (26 November 2026)
 
 The owner requested a comprehensive standalone South African mission and return to P0-C if it fails. Follow the [South African mission directive](SOUTH_AFRICAN_MISSION_DIRECTIVE.md) and checkpoint for SA0-SA9. Ordinary P0-C paused at preserved supported-property boundary review; P0 remains sole active delivery phase. SA0-SA6 supply local discovery evidence, not phase exit; any SA7-SA8 implementation requires applicable original P0 acceptance and original P1-P8 gates, separate material market/architecture/data/use/release decisions. If local no-go, resume P0-C with evidence retained, no destructive rollback. No phase weights, R0, safety, contact, acquisition or release permissions changed. No new mandatory duplicate P0 research; cross-reference mission evidence.
+
+
+## Temporary P0-C resumption (26 November 2026)
+
+Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but externally blocked; private application drafts prepared and response watch in place. [P0-C conditional boundary review](../research/DATA_FEASIBILITY.md#26-november-2026--p0-c-supported-property-boundary-and-conditional-feasibility-review) completed; P0-D.1 desk rights reconciliation next. Original P0 sole active phase; review any substantive City response before priority change. No market, data, spending, contact, protection or release approvals inferred.
