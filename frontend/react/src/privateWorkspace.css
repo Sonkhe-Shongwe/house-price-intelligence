@@ -53,3 +53,17 @@
 .pw-dossier .ep-profile{margin-top:10px;padding-top:12px}
 .pw-list-row small{font-variant-numeric:tabular-nums}
 @media(max-width:760px){.pw-dossier-heading{gap:10px}.pw-evidence-state{width:100%}.pw-dossier .pw-table-wrap th,.pw-dossier .pw-table-wrap td{font-size:12px}}
+
+/* Interaction polish: truthful request states, quiet motion, no artificial delay. */
+.pw-operation:empty,.pw-match:empty{display:none}
+.pw-operation{display:flex;align-items:center;gap:9px;background:var(--hpi-atlas-quiet);border-left:3px solid var(--hpi-atlas-action);padding:10px 14px;margin:0 0 16px;font-size:13px;color:var(--hpi-atlas-ink)}
+.pw-operation-dot{width:8px;height:8px;border-radius:50%;background:var(--hpi-atlas-action);flex:none}
+.pw-operation[data-pending=true] .pw-operation-dot{background:var(--hpi-atlas-accent)}
+.pw-match{font-size:13px;color:var(--pw-muted);border-left:3px solid var(--pw-border);padding-left:10px;margin:8px 0}
+.pw-match[data-matched=true]{border-color:var(--hpi-atlas-action);color:var(--hpi-atlas-ink)}
+.pw-library-loading p{font-size:13px;color:var(--pw-muted)}
+.pw-loading-lines{display:grid;gap:12px;padding:8px 0 16px}.pw-loading-lines span{height:12px;background:var(--hpi-atlas-table-head);width:88%}.pw-loading-lines span:nth-child(2){width:72%}.pw-loading-lines span:nth-child(3){width:54%}
+.pw-shell button:not(:disabled){cursor:pointer}
+.pw-shell button:disabled{cursor:not-allowed}
+@media(prefers-reduced-motion:no-preference){.pw-view:not([hidden]){animation:pw-enter 160ms ease-out}.pw-shell button{transition:background-color 140ms ease-out,border-color 140ms ease-out,color 140ms ease-out}.pw-operation[data-pending=true] .pw-operation-dot{animation:pw-pulse 1.3s ease-in-out infinite}@keyframes pw-enter{from{opacity:.9}to{opacity:1}}@keyframes pw-pulse{50%{opacity:.45}}}
+@media(prefers-reduced-motion:reduce){.pw-shell *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

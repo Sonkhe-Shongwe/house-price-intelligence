@@ -8,6 +8,17 @@ import EvidenceProfile from './EvidenceProfile';
 import ComparisonMatrix from './ComparisonMatrix';
 import './buyerWorkflow.css';
 import './privateWorkspace.css';
+type Operation='search'|'saveInvestigation'|'reopenInvestigation'|'saveComparison'|'reopenComparison';
+const pendingText:Record<Operation,string>={
+  search:'Checking the fictional parcel…',saveInvestigation:'Saving and validating historical evidence…',
+  reopenInvestigation:'Verifying saved investigation…',saveComparison:'Saving comparison snapshot…',
+  reopenComparison:'Verifying saved comparison…',
+};
+const completedText:Record<Operation,string>={
+  search:'Parcel search complete.',saveInvestigation:'Investigation saved and validated.',
+  reopenInvestigation:'Saved investigation reopened.',saveComparison:'Comparison snapshot saved.',
+  reopenComparison:'Saved comparison reopened.',
+};
 function statusText(s:string){return ({supported_neighbourhood:'Neighbourhood evidence',exploratory_spatial:'Exploratory evidence',insufficient_data:'Insufficient evidence',out_of_coverage:'Outside coverage'} as Record<string,string>)[s]??s;}
 /** Existing timestamps only; do not derive an address or expose a recovery ID. */
 function savedTime(value:string){
@@ -47,6 +58,7 @@ export default function PrivateBetaRehearsal(){
   const [token,setToken]=useState<string|null>(null),[status,setStatus]=useState('');
   const [result,setResult]=useState<Result|null>(null),[iid,setIid]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(false);
+  const [feedback,setFeedback]=useState(''),[failure,setFailure]=useState('');
   const [signedOut,setSignedOut]=useState(false),[logoutError,setLogoutError]=useState(false);
   const [entries,setEntries]=useState<Entry[]>([]),[label,setLabel]=useState('My fictional comparison');
   const [sid,setSid]=useState(''),[comparison,setComparison]=useState<Comparison|null>(null);
@@ -57,7 +69,7 @@ export default function PrivateBetaRehearsal(){
   const content=useRef<HTMLElement|null>(null),previousView=useRef(view),locked=useRef(false);
   const libraryVisible=view==='home'||view==='saved';
   useEffect(()=>{
-    if(previousView.current!==view){previousView.current=view;content.current?.focus({preventScroll:true});}
+    if(previousView.current!==view){previousView.current=view;window.scrollTo({top:0,behavior:'instant'});content.current?.focus({preventScroll:true});}
   },[view]);
   useEffect(()=>{
     if(!libraryVisible||signedOut)return;
@@ -70,20 +82,26 @@ export default function PrivateBetaRehearsal(){
     });
     return ()=>controller.abort();
   },[libraryVisible,signedOut,workspaceRevision]);
-  function navigate(next:WorkspaceView){if(!locked.current){setError(false);setView(next);}}
-  async function run(action:()=>Promise<void>){
-    if(locked.current)return;locked.current=true;setBusy(true);setError(false);
-    try{await action();}catch{setError(true);}finally{locked.current=false;setBusy(false);}
+  function navigate(next:WorkspaceView){if(!locked.current){setError(false);setFeedback('');setView(next);}}
+  async function run(operation:Operation,action:()=>Promise<void>){
+    if(locked.current)return;locked.current=true;setBusy(true);setError(false);setFeedback(pendingText[operation]);
+    try{await action();setFeedback(completedText[operation]);}
+    catch{
+      setFeedback('');setError(true);
+      setFailure(operation==='saveInvestigation'||operation==='saveComparison'
+        ?'Save could not be confirmed. Check saved records before trying again; the request may have completed.'
+        :'Request could not be verified. Check your session and input, then retry.');
+    }finally{locked.current=false;setBusy(false);}
   }
   function clear(){setToken(null);setStatus('');setResult(null);}
   async function signOut(){
-    if(locked.current)return;locked.current=true;setBusy(true);setLogoutError(false);
+    if(locked.current)return;locked.current=true;setBusy(true);setLogoutError(false);setFeedback('Ending your HPI session…');
     try{
       await service.signOut();
       // No buyer data or draft notes remain in the signed-out view. Saved records stay on the server.
       clear();setAddress('');setDate('');setArea('');setPrice('');setIid('');setEntries([]);
       setLabel('');setSid('');setComparison(null);setWorkspace(null);setError(false);setSignedOut(true);
-    }catch{setLogoutError(true);}finally{locked.current=false;setBusy(false);}
+    }catch{setLogoutError(true);}finally{setFeedback('');locked.current=false;setBusy(false);}
   }
   if(signedOut)return <main className="pw-signed-out"><div className="pw-brand-mark">HPI</div><h1>Signed out</h1><p role="status">Your session has ended. Saved investigations and comparisons remain available after signing in again.</p><a href="/">Return to sign in</a></main>;
   return <div className="pw-shell"><header className="pw-top"><div className="pw-brand"><span className="pw-brand-mark">HPI</span><div><strong>House Price Intelligence</strong><small>BUYER WORKSPACE</small></div></div><span className="pw-mode">Fictional data · Private</span><button className="pw-secondary" type="button" disabled={busy} data-testid="beta-sign-out" onClick={()=>void signOut()}>Sign out</button></header>
@@ -91,37 +109,37 @@ export default function PrivateBetaRehearsal(){
     <main id="pw-content" ref={content} tabIndex={-1} className="pw-main">
       <div className="pw-mode-banner" role="note">Private fictional workspace · Historical evidence only · No current valuation</div>
       {logoutError&&<p role="alert">Sign out could not be confirmed. Retry before leaving this session unattended.</p>}
-      {error&&<p role="alert" data-testid="beta-error">Investigation unavailable. Check your session and input.</p>}
-      {busy&&<p className="pw-sub" role="status">Working on your request…</p>}
+      {error&&<p role="alert" data-testid="beta-error">{failure}</p>}
+      <div className="pw-operation" role="status" aria-live="polite" aria-atomic="true" data-testid="beta-operation" data-pending={busy}>{feedback&&<><span className="pw-operation-dot" aria-hidden="true"/><span>{feedback}</span></>}</div>
       <section className="pw-view" hidden={view!=='investigate'} aria-label="Investigate">
       <div className="pw-intro" id="pw-investigate"><span className="pw-kicker">PROPERTY INTELLIGENCE / PRIVATE PILOT</span><h1>Investigate historical evidence</h1><p>Search a fictional parcel, review the evidence and build a shortlist you can revisit.</p><div className="pw-notice">Invented source-shaped records only. No real property records, valuation, building identity or geographic position.</div></div>
       <section className="pw-card"><h2>Find a property</h2><p className="pw-sub">Start with an address and the date of your investigation.</p><fieldset disabled={busy}>
         <legend className="pw-sr">Resolve a fictional property</legend><div className="pw-fields"><div>
         <label htmlFor="beta-address">Address</label><input id="beta-address" value={address} onChange={e=>{setAddress(e.target.value);clear();}}/></div><div>
         <label htmlFor="beta-date">Analysis date</label><input id="beta-date" type="date" value={date} onChange={e=>{setDate(e.target.value);clear();}}/></div></div>
-        <button className="buyer-save" type="button" data-testid="beta-search" onClick={()=>void run(async()=>{
+        <button className="buyer-save" type="button" data-testid="beta-search" onClick={()=>void run('search',async()=>{
           clear();const m=await service.search(address,date);
           if(m.status==='one_eligible_candidate'){
             setToken(m.addressId);setStatus('One eligible parcel candidate');
           }else if(m.status==='ambiguous'||m.status==='no_match'){setStatus('No unique eligible candidate');}
           else throw Error('Unavailable');
-        })}>Search</button><p role="status" data-testid="beta-match">{status}</p>
+        })}>Search</button><p role="status" data-testid="beta-match" className="pw-match" data-matched={token!==null}>{status}</p>
         <div className="pw-fields"><div><label htmlFor="beta-area">Buyer-reported area (sq ft)</label><input id="beta-area" type="number" min="1" value={area} onChange={e=>setArea(e.target.value)}/></div><div><label htmlFor="beta-price">Asking price (USD, optional)</label><input id="beta-price" value={price} onChange={e=>setPrice(e.target.value)}/></div></div>
-        <button className="buyer-save" type="button" disabled={!token} data-testid="beta-create" onClick={()=>void run(async()=>{
+        <button className="buyer-save" type="button" disabled={!token} data-testid="beta-create" onClick={()=>void run('saveInvestigation',async()=>{
           if(!token)throw Error('Unavailable');setResult(null);const r=await service.createInvestigation({addressId:token,analysisDate:date,area:Number(area),askingPrice:price||null});setResult(r);setIid(r.investigation_id);setWorkspace(null);
         })}>Save investigation</button>
         <div className="pw-recovery"><span>Advanced recovery</span><label htmlFor="beta-iid">Saved investigation ID</label><input id="beta-iid" data-testid="beta-id" value={iid} onChange={e=>setIid(e.target.value)}/>
-        <button className="buyer-save" type="button" disabled={!UUID.test(iid)} data-testid="beta-reopen" onClick={()=>void run(async()=>{clear();setResult(await service.reopenInvestigation(iid));})}>Reopen saved investigation</button></div>
+        <button className="buyer-save" type="button" disabled={!UUID.test(iid)} data-testid="beta-reopen" onClick={()=>void run('reopenInvestigation',async()=>{clear();setResult(await service.reopenInvestigation(iid));})}>Reopen saved investigation</button></div>
       </fieldset></section>
       {result&&<><PrivateEvidence key={result.investigation_id} result={result}/><div className="pw-dossier-actions"><button className="pw-secondary" type="button" data-testid="beta-add-comparison" disabled={busy||entries.length>=3||entries.some(e=>e.investigation_id===result.investigation_id)} onClick={()=>{setEntries(old=>[...old,{investigation_id:result.investigation_id,note_text:'',investigation:result}]);navigate('compare');}}>Add to comparison</button><button className="pw-secondary" type="button" disabled={busy} onClick={()=>navigate('compare')}>Open comparison ({entries.length})</button></div></>}
       </section>
       <section className="pw-view" hidden={!libraryVisible} aria-label="Saved workspace">
       <div className="pw-intro pw-home-heading"><div><span className="pw-kicker">RESEARCH WORKSPACE / PRIVATE PILOT</span><h1>{view==='home'?'A clearer view of property.':'Saved properties.'}</h1><p>Return to frozen historical investigations and compare your options on your own terms.</p></div><button className="pw-primary" type="button" data-testid="beta-new-investigation" disabled={busy} onClick={()=>navigate('investigate')}>New investigation</button></div>
       {view==='home'&&<div className="pw-editorial"><div><span className="pw-kicker">FIELD GUIDE / 01</span><h2>Evidence, not estimates.</h2><p>Historical completed sales can inform a decision. They do not establish a current property value.</p><button type="button" className="pw-secondary" disabled={busy} onClick={()=>navigate('methodology')}>Read methodology</button></div><div className="pw-editorial-mark" aria-hidden="true">H<span>/</span></div></div>}
-      <div className="pw-card"><div className="pw-card-head"><div><h2>{view==='home'?'Recent research':'Your research library'}</h2><p className="pw-sub">Open records by date and evidence status. Saved addresses are not exposed by this service.</p></div><button className="pw-secondary" data-testid="beta-load-workspace" disabled={busy||workspaceLoading} onClick={()=>setWorkspaceRevision(n=>n+1)}>Refresh records</button></div>
-      {workspaceLoading&&<p role="status">Loading saved records…</p>}
+      <div className="pw-card" aria-busy={workspaceLoading}><div className="pw-card-head"><div><h2>{view==='home'?'Recent research':'Your research library'}</h2><p className="pw-sub">Open records by date and evidence status. Saved addresses are not exposed by this service.</p></div><button className="pw-secondary" data-testid="beta-load-workspace" disabled={busy||workspaceLoading} onClick={()=>setWorkspaceRevision(n=>n+1)}>Refresh records</button></div>
+      {workspaceLoading&&<div className="pw-library-loading" data-testid="beta-library-loading"><p role="status">Loading saved records…</p><div className="pw-loading-lines" aria-hidden="true"><span/><span/><span/></div></div>}
       {workspaceError&&<p role="alert">Saved records could not be verified. Refresh to retry.</p>}
-      {workspace&&<div className="pw-saved-grid" data-testid="beta-workspace"><div><h3>Investigations</h3>{workspace.investigations.length===0?<p className="pw-sub">No saved investigations.</p>:workspace.investigations.map(i=><div className="pw-list-row" key={i.investigation_id}><div><strong>{statusText(i.status)}</strong><small>Analysis {i.analysis_date} · Saved {savedTime(i.created_at_utc)}</small></div><button className="pw-secondary" data-testid="beta-workspace-investigation" disabled={busy} onClick={()=>void run(async()=>{clear();const v=await service.reopenInvestigation(i.investigation_id);setResult(v);setIid(v.investigation_id);setView('investigate');})}>Open</button></div>)}</div><div><h3>Comparisons</h3>{workspace.comparisons.length===0?<p className="pw-sub">No saved comparisons.</p>:workspace.comparisons.map(i=><div className="pw-list-row" key={i.shortlist_id}><div><strong>{i.label}</strong><small>Saved {savedTime(i.created_at_utc)}</small></div><button className="pw-secondary" data-testid="beta-workspace-comparison" disabled={busy} onClick={()=>void run(async()=>{setComparison(null);const v=await service.reopenComparison(i.shortlist_id);setComparison(v);setSid(v.shortlist_id);setView('compare');})}>Open</button></div>)}</div>{workspace.truncated&&<p className="pw-sub">Showing the most recent 50 records per category.</p>}</div>}</div></section>
+      {workspace&&<div className="pw-saved-grid" data-testid="beta-workspace"><div><h3>Investigations</h3>{workspace.investigations.length===0?<p className="pw-sub">No saved investigations.</p>:workspace.investigations.map(i=><div className="pw-list-row" key={i.investigation_id}><div><strong>{statusText(i.status)}</strong><small>Analysis {i.analysis_date} · Saved {savedTime(i.created_at_utc)}</small></div><button className="pw-secondary" data-testid="beta-workspace-investigation" disabled={busy} onClick={()=>void run('reopenInvestigation',async()=>{clear();const v=await service.reopenInvestigation(i.investigation_id);setResult(v);setIid(v.investigation_id);setView('investigate');})}>Open</button></div>)}</div><div><h3>Comparisons</h3>{workspace.comparisons.length===0?<p className="pw-sub">No saved comparisons.</p>:workspace.comparisons.map(i=><div className="pw-list-row" key={i.shortlist_id}><div><strong>{i.label}</strong><small>Saved {savedTime(i.created_at_utc)}</small></div><button className="pw-secondary" data-testid="beta-workspace-comparison" disabled={busy} onClick={()=>void run('reopenComparison',async()=>{setComparison(null);const v=await service.reopenComparison(i.shortlist_id);setComparison(v);setSid(v.shortlist_id);setView('compare');})}>Open</button></div>)}</div>{workspace.truncated&&<p className="pw-sub">Showing the most recent 50 records per category.</p>}</div>}</div></section>
       <section className="pw-view" hidden={view!=='compare'} aria-label="Compare"><div className="pw-intro"><span className="pw-kicker">COMPARISON STUDIO</span><h1>Compare with context.</h1><p>Choose two or three saved investigations, preserve notes and compare the evidence.</p><button className="pw-secondary" type="button" disabled={busy} onClick={()=>navigate('saved')}>Find saved properties</button></div><div className="pw-card" id="pw-compare" aria-label="Saved property comparison">
         <h2>Comparison draft</h2>
         <fieldset disabled={busy}>
@@ -139,11 +157,11 @@ export default function PrivateBetaRehearsal(){
             <button type="button" className="pw-secondary" onClick={()=>setEntries(old=>old.filter(x=>x.investigation_id!==entry.investigation_id))}>Remove property {i+1}</button>
           </article>)}</div>
           <label htmlFor="beta-comparison-label">Comparison name</label><input id="beta-comparison-label" maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}/>
-          <button type="button" className="buyer-save" data-testid="beta-save-comparison" disabled={entries.length<2||!label.trim()} onClick={()=>void run(async()=>{
+          <button type="button" className="buyer-save" data-testid="beta-save-comparison" disabled={entries.length<2||!label.trim()} onClick={()=>void run('saveComparison',async()=>{
             setComparison(null);const c=await service.createComparison(label,entries);setComparison(c);setSid(c.shortlist_id);setWorkspace(null);
           })}>Save comparison</button>
           <div className="pw-recovery"><span>Advanced recovery</span><label htmlFor="beta-comparison-id">Saved comparison ID</label><input id="beta-comparison-id" data-testid="beta-comparison-id" value={sid} onChange={e=>setSid(e.target.value)}/>
-          <button type="button" className="buyer-save" data-testid="beta-reopen-comparison" disabled={!UUID.test(sid)} onClick={()=>void run(async()=>{
+          <button type="button" className="buyer-save" data-testid="beta-reopen-comparison" disabled={!UUID.test(sid)} onClick={()=>void run('reopenComparison',async()=>{
             setComparison(null);setComparison(await service.reopenComparison(sid));
           })}>Reopen comparison</button></div>
         </fieldset>

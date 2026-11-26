@@ -7,3 +7,5 @@
 
 /* Align the plotted domain to the full width of the printed scale. */
 .ep-metric svg{display:block;overflow:visible}.ep-axis{margin-top:4px}
+
+@media(prefers-reduced-motion:no-preference){.ep-profile .ep-fill{transition:width 160ms ease-out}.ep-profile .ep-tick{transition:x1 160ms ease-out,x2 160ms ease-out}}
