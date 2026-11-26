@@ -102,7 +102,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. Restored 4615039, 7/7 exact-head runs successful; requery after rights decision. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. Restored 9147fc4, 7/7 exact-head runs successful; requery after side proof. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -122,7 +122,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual proof passed; prior finer context task](product/PRODUCT_BRIEF.md#actual-contextual-proof-outcome-and-next-research-question-26-november-2026). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 proof passed locally; 007 consumed. [Finer context intake blocked](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-context-access-and-rights-decision); await evidence/owner route decision; no intake authority. No other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
+[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual proof passed; prior finer context task](product/PRODUCT_BRIEF.md#actual-contextual-proof-outcome-and-next-research-question-26-november-2026). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 proof passed locally; 007 consumed. [Finer context intake blocked](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-context-access-and-rights-decision); await evidence/owner route decision; no intake authority. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): owner requested isolated fictional feasibility proof; source gate remains blocked. No intake, joins, spend, deployment or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
