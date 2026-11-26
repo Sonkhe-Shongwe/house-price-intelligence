@@ -10,3 +10,7 @@ Two editable local JSON style templates in frontend/react/src/mapStyles: [Atlas]
 
 ## Acceptance and limits
 Existing actual canonical React Chromium scenario extended to switch both themes, verify WebGL ready, preserve selected rank, bidirectional selection, unchanged frozen investigation and zero external requests; capture both map screenshots using existing artifact path. Existing rejection, unavailable geometry, optional-bundle and renderer-failure tests retained. Exact-head hosted CI and actual screenshot inspection pending; no claim of passing new code before results. Future checks include keyboard and contrast review, legend equivalence and map-style import round trip. Owner aesthetic acceptance outstanding. No dependency additions, paid costs, cloud service windows, production SQL, real data, deployment or main merge. Approved 87.1%, R0 and all gates unchanged.
+
+## Integrated regression correction
+
+Both React workflows for ed1b23f passed, but PostgreSQL HTTP runtime run 45758130828 failed one browser test because the enlarged overlaid zoom button intercepted comparable marker 2. Move controls outside the canvas in normal flow; preserve touch targets and unchanged click assertions. New exact-head verification pending. No storage, coordinate or service changes.
