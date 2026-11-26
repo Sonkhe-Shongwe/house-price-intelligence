@@ -32,8 +32,10 @@ jobs:
           node-version: '22'
       - run: npm ci --prefix frontend/react
       - run: npm run build --prefix frontend/react
-      - run: python -m pip install --only-binary=:all: --upgrade pip==26.3
-      - run: python -m pip install --only-binary=:all: -r backend/requirements-runtime.txt 'playwright==1.56.0'
+      - run: >-
+          python -m pip install --only-binary=:all: --upgrade pip==26.3
+      - run: >-
+          python -m pip install --only-binary=:all: -r backend/requirements-runtime.txt 'playwright==1.56.0'
       - run: python -m playwright install --with-deps chromium
       - name: Real PostgreSQL, HTTP concurrency, ownership, revision and Chromium
         env:
