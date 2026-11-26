@@ -150,12 +150,11 @@ def profile(archive, expected=APPROVED_SHA):
                "limitations":"Aggregate indices only; no sale prices, no individual properties, no current coverage claim."}
     return out.getvalue().encode("utf-8"), quality
 
-def import_rppi(root, intake, terms_reviewed, expected=APPROVED_SHA, today=None):
+def import_rppi(root, intake, terms_reviewed, expected=APPROVED_SHA, today=None, deadline=None):
     today = today or date.today()
     if not terms_reviewed:
         raise ValueError("Owner must review and confirm applicable terms before import.")
-    if intake > today or today >= intake + timedelta(days=30):
-        raise ValueError("Future or expired intake; no new copies or renewal.")
+    retention = retention_fields(root,MANIFEST,intake,deadline,today,LEGACY_RPPI)
     raw_path = root / RAW
     candidates = [root / ARCHIVE, raw_path]
     existing = [p for p in candidates if p.exists()]
@@ -170,8 +169,7 @@ def import_rppi(root, intake, terms_reviewed, expected=APPROVED_SHA, today=None)
         "source":"Stats SA, RPPI 2010-2023 v1; UCT DataFirst",
         "doi":"10.25828/VQ6V-2T85","catalogue_licence":"CC BY; version not specified",
         "terms_reviewed_by_owner":True,"first_intake_date":intake.isoformat(),
-        "do_not_retain_on_or_after":(intake+timedelta(days=30)).isoformat(),
-        "retention":"Maximum 30 days; shorter terms prevail; owner-approved disposal only; no renewal",
+        **retention,
         "source_sha256":sha(archive),"source_bytes":len(archive),
         "raw_path":RAW,"processed_path":OUTPUT,"processed_sha256":sha(result),
         "quality_report":REPORT,"quality":quality}
@@ -189,11 +187,9 @@ def status(root):
     if not path.exists():
         return {"registered":False}
     manifest = json.loads(read_bounded(path))
-    deadline = date.fromisoformat(manifest["do_not_retain_on_or_after"])
     copies = [p for p in (ARCHIVE, RAW, "HPI_DATA_002_processed.zip",
                  "HPI_DATA_002_processed", OUTPUT) if (root/p).exists()]
-    return {"registered":True,"dataset_id":"HPI-DATA-002","deadline":deadline.isoformat(),
-            "retention_due_or_expired":date.today() >= deadline,"known_local_paths":copies,
+    return {"registered":True,"dataset_id":"HPI-DATA-002",**retention_status(manifest),"known_local_paths":copies,
             "note":"Check other copies, chat uploads, sync and backups separately; no deletion performed."}
 
 def self_test():
@@ -221,11 +217,11 @@ def self_test():
         (root/ARCHIVE).write_bytes(archive)
         day = date(2026,1,1)
         rejects(lambda: import_rppi(root,day,False,sha(archive),day))
-        rejects(lambda: import_rppi(root,day,True,sha(archive),day+timedelta(days=30)))
+        rejects(lambda: import_rppi(root,day,True,sha(archive),day+timedelta(days=30),deadline=day+timedelta(days=30)))
         rejects(lambda: import_rppi(root,day,True,"bad",day))
         first = import_rppi(root,day,True,sha(archive),day)
         assert first["quality"]["observations"] == 2983
-        assert import_rppi(root,day,True,sha(archive),day) == first
+        assert import_rppi(root,day,True,sha(archive),day+timedelta(days=365)) == first
         rejects(lambda: import_rppi(root,day+timedelta(days=1),True,sha(archive),day+timedelta(days=1)))
         assert (root/ARCHIVE).read_bytes() == archive
         (root/OUTPUT).write_text("existing different file")
@@ -350,10 +346,7 @@ def import_districts(root, intake, terms_reviewed, deadline=None, expected=GEO_S
     today = today or date.today()
     if not terms_reviewed:
         raise ValueError("Owner must confirm applicable source terms before import.")
-    maximum = intake + timedelta(days=30)
-    deadline = deadline or maximum
-    if intake > today or deadline > maximum or deadline <= intake or today >= deadline:
-        raise ValueError("Future intake, expired retention or excessive deadline.")
+    retention = retention_fields(root,GEO_MANIFEST,intake,deadline,today,LEGACY_GEO)
     raw_path = root/GEO_RAW
     paths = [p for p in (root/GEO_FILE,raw_path) if p.exists()]
     if not paths:
@@ -373,8 +366,7 @@ def import_districts(root, intake, terms_reviewed, deadline=None, expected=GEO_S
         "attribution":"geoBoundaries (https://www.geoboundaries.org/), OCHA ROSEA, South African Municipal Demarcation Board; Runfola et al. (2020), doi:10.1371/journal.pone.0231866.",
         "changes":"Derived district index CSV; original GeoJSON preserved unmodified; no official code crosswalk.",
         "terms_reviewed_by_owner":True,"first_intake_date":intake.isoformat(),
-        "do_not_retain_on_or_after":deadline.isoformat(),
-        "retention":"Maximum 30 days or shorter applicable terms; no automatic deletion or renewal",
+        **retention,
         "source_sha256":sha(raw),"source_bytes":len(raw),"raw_path":GEO_RAW,
         "processed_path":GEO_OUTPUT,"processed_sha256":sha(result),
         "quality_report":GEO_REPORT,"quality":quality}
@@ -394,9 +386,7 @@ def district_status(root):
     if not path.exists():
         return {"dataset_id":"HPI-DATA-003","registered":False}
     m = json.loads(read_bounded(path))
-    deadline = date.fromisoformat(m["do_not_retain_on_or_after"])
-    return {"registered":True,"dataset_id":"HPI-DATA-003","deadline":deadline.isoformat(),
-            "retention_due_or_expired":date.today() >= deadline,
+    return {"registered":True,"dataset_id":"HPI-DATA-003",**retention_status(m),
             "known_local_paths":[p for p in (GEO_FILE,GEO_RAW,GEO_OUTPUT) if (root/p).exists()],
             "note":"Other copies, chat uploads, sync and backups require separate review; no deletion performed."}
 
@@ -406,14 +396,12 @@ def district_cli(root, args):
         prior = json.loads(read_bounded(existing))
         intake = args.intake_date or date.fromisoformat(prior["first_intake_date"])
         reviewed = prior["terms_reviewed_by_owner"] is True
-        deadline = args.retain_until or date.fromisoformat(prior["do_not_retain_on_or_after"])
+        deadline = args.retain_until or stored_deadline(prior)
     else:
         intake = args.intake_date or date.fromisoformat(input("Actual first download date (YYYY-MM-DD): ").strip())
         reviewed = args.terms_reviewed or input("Confirm source terms permit private import and retention (yes/no): ").strip().lower()=="yes"
         deadline = args.retain_until
-        if deadline is None:
-            entered = input("Earlier exclusive retention deadline if terms require it (YYYY-MM-DD; Enter for 30-day cap): ").strip()
-            deadline = date.fromisoformat(entered) if entered else None
+
     m = import_districts(root,intake,reviewed,deadline)
     print(json.dumps({"import":"complete","quality":m["quality"],"status":district_status(root)},indent=2))
     return 0
@@ -461,7 +449,7 @@ def district_self_test():
         (root/GEO_FILE).write_bytes(raw)
         day = date(2026,1,1)
         rejects(lambda: import_districts(root,day,False,expected=expected,today=day))
-        rejects(lambda: import_districts(root,day,True,day+timedelta(days=31),expected,day))
+        rejects(lambda: import_districts(root,day,True,day,expected,day))
         rejects(lambda: import_districts(root,day,True,day+timedelta(days=10),expected,day+timedelta(days=10)))
         first = import_districts(root,day,True,day+timedelta(days=10),expected,day)
         paths = [root/p for p in (GEO_RAW,GEO_OUTPUT,GEO_REPORT,GEO_MANIFEST)]
@@ -618,18 +606,16 @@ def building_status(root):
     if not path.exists():
         return {"dataset_id":"HPI-DATA-004","registered":False}
     m = json.loads(read_bounded(path))
-    deadline = date.fromisoformat(m["do_not_retain_on_or_after"])
-    return {"dataset_id":"HPI-DATA-004","registered":True,"deadline":deadline.isoformat(),
-            "retention_due_or_expired":date.today()>=deadline,
+    return {"dataset_id":"HPI-DATA-004","registered":True,**retention_status(m),
             "known_local_paths":[p for p in (BUILD_FILE,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MANIFEST)
                                  if (root/p).exists()],
             "note":"Review other copies, chat uploads, sync and backups separately; no deletion performed."}
 
 def import_buildings(root,intake,terms_reviewed,deadline=None,today=None):
     today = today or date.today()
-    deadline = deadline or intake+timedelta(days=30)
-    if not terms_reviewed or intake>today or deadline<=intake or deadline>intake+timedelta(days=30) or today>=deadline:
-        raise ValueError("Terms, intake date or retention deadline not acceptable.")
+    if not terms_reviewed:
+        raise ValueError("Owner must confirm applicable source terms.")
+    retention = retention_fields(root,BUILD_MANIFEST,intake,deadline,today,LEGACY_GEO)
     source = root/BUILD_RAW
     # Require the canonical location, rather than create another raw copy.
     workspace(source.parent)
@@ -639,7 +625,7 @@ def import_buildings(root,intake,terms_reviewed,deadline=None,today=None):
     if existing.exists():
         prior = json.loads(read_bounded(existing))
         if (prior["source_sha256"] != digest or prior["first_intake_date"] != intake.isoformat() or
-                prior["do_not_retain_on_or_after"] != deadline.isoformat()):
+                prior["do_not_retain_on_or_after"] != retention["do_not_retain_on_or_after"]):
             raise ValueError("Registered source or retention differs; no overwrite or renewal.")
     result, q = building_profile(raw)
     m = {"dataset_id":"HPI-DATA-004","manager_version":"0.3.0",
@@ -649,8 +635,7 @@ def import_buildings(root,intake,terms_reviewed,deadline=None,today=None):
          "source_identity_evidence":"Exact catalogue filename and owner-attested download route; first received SHA-256 pinned locally, not an independent publisher checksum.",
          "source_bytes":len(raw),"source_sha256":digest,"raw_path":BUILD_RAW,
          "first_intake_date":intake.isoformat(),"terms_reviewed_by_owner":True,
-         "do_not_retain_on_or_after":deadline.isoformat(),
-         "retention":"Maximum 30 days or shorter terms; no automatic deletion or renewal",
+         **retention,
          "processed_path":BUILD_OUTPUT,"processed_sha256":sha(result),"quality_report":BUILD_REPORT,
          "quality":q}
     planned = [(root/BUILD_OUTPUT,result),(root/BUILD_REPORT,json_bytes(q)),
@@ -668,11 +653,11 @@ def building_cli(root,args):
     if existing.exists():
         prior = json.loads(read_bounded(existing))
         intake = args.intake_date or date.fromisoformat(prior["first_intake_date"])
-        deadline = args.retain_until or date.fromisoformat(prior["do_not_retain_on_or_after"])
+        deadline = args.retain_until or stored_deadline(prior)
         reviewed = prior["terms_reviewed_by_owner"] is True
     else:
-        if args.intake_date is None or not args.terms_reviewed or args.retain_until is None:
-            raise ValueError("First import requires --intake-date, --terms-reviewed and --retain-until from approved actual acquisition metadata. No interactive prompts.")
+        if args.intake_date is None or not args.terms_reviewed:
+            raise ValueError("First import requires --intake-date and --terms-reviewed; supply --retain-until if source terms require a deadline.")
         intake, deadline, reviewed = args.intake_date,args.retain_until,True
     m = import_buildings(root,intake,reviewed,deadline)
     print(json.dumps({"import":"complete","quality":m["quality"],"status":building_status(root)},indent=2))
@@ -710,15 +695,142 @@ def building_self_test():
         (root/BUILD_RAW).write_bytes(raw)
         day=date(2026,1,1)
         rejects(lambda: import_buildings(root,day,False,today=day))
-        rejects(lambda: import_buildings(root,day,True,day+timedelta(days=31),day))
-        rejects(lambda: import_buildings(root,day,True,today=day+timedelta(days=30)))
+        rejects(lambda: import_buildings(root,day,True,day,day))
+        rejects(lambda: import_buildings(root,day,True,day+timedelta(days=30),day+timedelta(days=30)))
         m=import_buildings(root,day,True,today=day)
-        assert m==import_buildings(root,day,True,today=day)
+        assert m==import_buildings(root,day,True,today=day+timedelta(days=365))
         rejects(lambda: import_buildings(root,day,True,day+timedelta(days=29),day))
         (root/BUILD_OUTPUT).write_text("conflict")
         rejects(lambda: import_buildings(root,day,True,today=day))
         assert (root/BUILD_OUTPUT).read_text()=="conflict"
     print("PASS: building streaming caps, geometry, optional attributes, retention and repeat checks.")
+
+
+
+OPEN_POLICY = "open-source-terms-v1"
+OPEN_RETENTION = "No internal expiry; applicable source terms and law prevail; no automatic deletion."
+LEGACY_RPPI = "Maximum 30 days; shorter terms prevail; owner-approved disposal only; no renewal"
+LEGACY_GEO = "Maximum 30 days or shorter applicable terms; no automatic deletion or renewal"
+
+def stored_deadline(manifest):
+    value = manifest["do_not_retain_on_or_after"]
+    return date.fromisoformat(value) if value is not None else None
+
+def retention_fields(root, path, intake, deadline, today, legacy_text):
+    if intake > today:
+        raise ValueError("Future intake date.")
+    target = root/path
+    if target.exists():
+        prior = json.loads(read_bounded(target))
+        old = stored_deadline(prior)
+        if prior["first_intake_date"] != intake.isoformat() or (deadline is not None and deadline != old):
+            raise ValueError("Registered intake or source deadline differs; no silent change.")
+        if old is not None and today >= old:
+            raise ValueError("Retention deadline reached; review applicable terms.")
+        fields = {"do_not_retain_on_or_after":prior["do_not_retain_on_or_after"],
+                  "retention":prior["retention"]}
+        if prior.get("retention_policy") == OPEN_POLICY:
+            fields["retention_policy"] = OPEN_POLICY
+            if "previous_internal_deadline" in prior:
+                fields["previous_internal_deadline"] = prior["previous_internal_deadline"]
+        elif prior["retention"] != legacy_text or old is None:
+            raise ValueError("Unrecognised retention policy.")
+        return fields
+    if deadline is not None and (deadline <= intake or today >= deadline):
+        raise ValueError("Invalid or expired source deadline.")
+    return {"do_not_retain_on_or_after":deadline.isoformat() if deadline else None,
+            "retention":OPEN_RETENTION,"retention_policy":OPEN_POLICY}
+
+def retention_status(manifest):
+    deadline = stored_deadline(manifest)
+    return {"deadline":deadline.isoformat() if deadline else None,
+            "retention_due_or_expired":deadline is not None and date.today() >= deadline,
+            "retention_policy":manifest.get("retention_policy","legacy"),
+            "note_retention":"Applicable source terms and law prevail."}
+
+def remove_internal_deadlines(root, today=None):
+    """Explicit owner-authorised metadata migration of the three known imports only."""
+    today = today or date.today()
+    specs = [(MANIFEST,"HPI-DATA-002",RAW,LEGACY_RPPI,"catalogue_licence","CC BY; version not specified"),
+             (GEO_MANIFEST,"HPI-DATA-003",GEO_RAW,LEGACY_GEO,"source_licence","CC BY 3.0 IGO (publisher metadata)"),
+             (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_GEO,"source_licence","CDLA Permissive 2.0")]
+    plan, results = [], []
+    for name, sid, raw, legacy, licence_field, licence in specs:
+        path = root/name
+        workspace(path.parent)
+        check_path(path)
+        if not path.exists():
+            results.append({"dataset_id":sid,"result":"not registered"})
+            continue
+        before = read_bounded(path)
+        m = json.loads(before)
+        if (m["dataset_id"] != sid or m["raw_path"] != raw or
+                m[licence_field] != licence or m["terms_reviewed_by_owner"] is not True):
+            raise ValueError("Unexpected manifest identity/terms: "+sid)
+        if m.get("retention_policy") == OPEN_POLICY:
+            results.append({"dataset_id":sid,"result":"already migrated",**retention_status(m)})
+            continue
+        # Only the actual 26 Nov registrations with the documented project cap.
+        # Never clear any different or shorter deadline by inference.
+        if (m["first_intake_date"] != "2026-11-26" or
+                m["do_not_retain_on_or_after"] != "2026-12-26" or
+                m["retention"] != legacy):
+            results.append({"dataset_id":sid,"result":"unchanged: other or source-specific deadline"})
+            continue
+        if today >= stored_deadline(m):
+            raise ValueError("Old deadline already reached; review source terms before migration.")
+        m["previous_internal_deadline"] = m["do_not_retain_on_or_after"]
+        m["do_not_retain_on_or_after"] = None
+        m["retention"] = OPEN_RETENTION
+        m["retention_policy"] = OPEN_POLICY
+        plan.append((path,before,json_bytes(m)))
+        results.append({"dataset_id":sid,"result":"internal deadline removed",**retention_status(m)})
+    # All identities checked before writes. Each metadata replacement is atomic.
+    for path,before,after in plan:
+        check_path(path)
+        if read_bounded(path) != before:
+            raise ValueError("Manifest changed during migration: "+path.name)
+        tmp = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=path.parent,prefix=".retention-",delete=False) as f:
+                tmp = Path(f.name)
+                f.write(after)
+                f.flush()
+                os.fsync(f.fileno())
+            check_path(path)
+            if read_bounded(path) != before:
+                raise ValueError("Manifest changed during migration: "+path.name)
+            os.replace(tmp,path)
+        finally:
+            if tmp is not None and tmp.exists():
+                tmp.unlink()
+    return results
+
+def retention_self_test():
+    day = date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root = workspace(Path(tmp)/"private")
+        initialise(root)
+        specs = [(MANIFEST,"HPI-DATA-002",RAW,LEGACY_RPPI,"catalogue_licence","CC BY; version not specified"),
+                 (GEO_MANIFEST,"HPI-DATA-003",GEO_RAW,LEGACY_GEO,"source_licence","CC BY 3.0 IGO (publisher metadata)"),
+                 (BUILD_MANIFEST,"HPI-DATA-004",BUILD_RAW,LEGACY_GEO,"source_licence","CDLA Permissive 2.0")]
+        for i,(path,sid,raw,legacy,field,licence) in enumerate(specs):
+            m = {"dataset_id":sid,"raw_path":raw,field:licence,"terms_reviewed_by_owner":True,
+                 "first_intake_date":day.isoformat(),"do_not_retain_on_or_after":"2026-12-26" if i != 1 else "2026-12-01",
+                 "retention":legacy,"source_sha256":"fixture","quality":{"fixture":True}}
+            publish(root/path,json_bytes(m))
+        original = (root/GEO_MANIFEST).read_bytes()
+        result = remove_internal_deadlines(root,day)
+        assert result[0]["deadline"] is None and result[2]["deadline"] is None
+        assert (root/GEO_MANIFEST).read_bytes() == original
+        m = json.loads(read_bounded(root/MANIFEST))
+        assert m["source_sha256"]=="fixture" and m["previous_internal_deadline"]=="2026-12-26"
+        assert retention_fields(root,MANIFEST,day,None,day+timedelta(days=365),LEGACY_RPPI)["do_not_retain_on_or_after"] is None
+        before = [(root/p).read_bytes() for p,*_ in specs]
+        remove_internal_deadlines(root,day)
+        assert before == [(root/p).read_bytes() for p,*_ in specs]
+        assert retention_fields(root,"new.json",day,day+timedelta(days=90),day,LEGACY_GEO)["do_not_retain_on_or_after"]=="2027-02-24"
+    print("PASS: open retention migration, preservation, repeat and source-specific deadline.")
 
 
 def main():
@@ -728,6 +840,7 @@ def main():
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
+    p.add_argument("--remove-internal-deadlines",action="store_true")
     p.add_argument("--init-only",action="store_true")
     p.add_argument("--intake-date",type=date.fromisoformat)
     p.add_argument("--terms-reviewed",action="store_true")
@@ -737,8 +850,12 @@ def main():
             self_test()
             district_self_test()
             building_self_test()
+            retention_self_test()
             return 0
         root = workspace(args.root)
+        if args.remove_internal_deadlines:
+            print(json.dumps(remove_internal_deadlines(root),indent=2))
+            return 0
         if args.status:
             print(json.dumps(building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
@@ -750,8 +867,6 @@ def main():
             return building_cli(root,args)
         if args.dataset == "HPI-DATA-003":
             return district_cli(root,args)
-        if args.retain_until is not None:
-            raise ValueError("--retain-until is supported only by district/building adapters.")
         existing = root / MANIFEST
         if existing.exists():
             prior = json.loads(read_bounded(existing))
@@ -760,7 +875,7 @@ def main():
         else:
             intake = args.intake_date or date.fromisoformat(input("Actual first download date (YYYY-MM-DD): ").strip())
             reviewed = args.terms_reviewed or input("Confirm applicable terms permit this private import and retention (yes/no): ").strip().lower()=="yes"
-        manifest = import_rppi(root,intake,reviewed)
+        manifest = import_rppi(root,intake,reviewed,deadline=args.retain_until)
         print(json.dumps({"import":"complete","quality":manifest["quality"],"status":status(root)},indent=2))
         return 0
     except (ValueError, KeyError, TypeError, AttributeError, OverflowError, OSError, EOFError, InvalidOperation, zipfile.BadZipFile) as exc:

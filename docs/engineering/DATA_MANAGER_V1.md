@@ -78,3 +78,20 @@ Owner supplied terminal screenshots reporting successful HPI-DATA-004 import aft
 Four reported paths: canonical original gzip in 02_Raw_Data, derived building_index.csv under 03_Processed_Data/HPI-DATA-004, quality JSON under 07_Reports and manifest under 01_Source_Catalogue. No deletion or renewal. Broader copy inventory, backups, permissions, actual file bytes and repeat execution not independently inspected; synthetic repeat tests passed. No additional download, repeat run or raw file upload requested. Exact d0ba960 passed all seven workflows (45874166853, 45874177678, 45874177726, 45874177552, 45874177773, 45874177698, 45874179332). Prior path correction now exercised locally via relative sibling argument. HPI-DATA-004 bounded acquisition/import milestone delivered. HPI-DATA-002/003/004 share exclusive maximum deadline 26 Dec 2026 or shorter terms, no automatic disposal or renewal. Before deadline obtain timely disposal decision and inventory copies.
 
 Next: qualify official municipal geographic identifiers and lawful direct D02 cadastral / D01 completed-sale sources; prioritise a real complementary key/value dataset over additional footprint partitions. Consider a bounded private spatial integration experiment using existing 003/004 after defining and approving exact scope, ambiguity checks, CRS, boundary vintage and retention; no automatic joins or nationwide scale. No more local setup or email dependence. R0, no P0 exit, product scope or score change.
+
+## Open data retention policy (26 November 2026)
+
+Owner explicitly removed the internal blanket deadline for openly licensed repertoire data, superseding the earlier 30-day approvals for HPI-DATA-002/003/004 only as to the project-imposed cap. No fixed expiry by default for these qualified open sources, subject to actual licence, portal terms, purpose and law; any applicable source-specific deadline remains binding. DataFirst exact portal agreement and exact newer geoBoundaries upstream metadata are not independently verified; existing owner attestation and licence evidence retained, not a fresh grant of rights. No relaxation of restricted property/transaction/ownership privacy and protection controls, no new acquisition or public redistribution. Existing private storage and no automatic deletion remain.
+
+Data Manager supports null deadline for open adapters and optional source-specific deadline, preserves first intake, licence, checksums, quality and existing output compatibility. Explicit --remove-internal-deadlines migrates only the three known 26 Nov 2026 registrations with documented 26 Dec project cap and matching identity/terms fields; different deadlines are preserved, expired legacy cap requires review, no raw or processed file changes. Prior cap retained as historical metadata. Each manifest replacement is atomic; rerunning is safe, no re-import. New open imports may omit --retain-until; actual date and applicable terms confirmation still needed, no automatic assent. Older manifests remain unchanged until explicit migration. Restricted data policy in PRIVATE_REAL_DATA_BETA_V1.md unchanged.
+
+From permanent development checkout, after verified CI:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --remove-internal-deadlines
+}
+```
+
+No new downloads or reprocessing. Prior 73bb4b8 7/7 CI. New CI and local metadata migration pending. Continue complementary D01/D02 and geographic codes after correction; no phase/score change.
