@@ -260,3 +260,7 @@ if ($LASTEXITCODE -eq 0) {
 ```
 
 For private inspection only, display `$proof.market_evidence | ConvertTo-Json -Depth 12` and `$proof.household_service_evidence | ConvertTo-Json -Depth 12`. Share only summary or STOP error, not private reports, source files or hashes. Synthetic tests reuse invented PDFs and check workspace snapshot parity on success and failure, including coordinated processed/checksum drift. Actual local run pending; no buyer validation or public-display authority.
+
+### Contextual proof synthetic verification and checkpoint correction
+
+Initial [5089943](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/5089943c4c57120840ef6ff38a7121a76ef9789e) [focused CI job](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45894293337/job/140164247472) passed all Data Manager tests (including contextual proof) and 219 backend fixture tests; documentation check failed because checkpoint compression removed literal development/main guidance markers. Restored both markers without weakening the checker or modifying the proof. New revision CI pending at correction. Actual local run still pending.

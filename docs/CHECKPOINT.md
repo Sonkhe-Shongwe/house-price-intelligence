@@ -79,7 +79,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery heads and exact CI at restoration. Prior continuation 5c6b957 10/10; RPPI/Census 7/7 each; evidence in Data Manager. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. Prior continuation 5c6b957 10/10; RPPI/Census 7/7 each; evidence in Data Manager. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
