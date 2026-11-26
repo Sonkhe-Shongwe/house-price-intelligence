@@ -14,3 +14,7 @@ Existing actual canonical React Chromium scenario extended to switch both themes
 ## Integrated regression correction
 
 Both React workflows for ed1b23f passed, but PostgreSQL HTTP runtime run 45758130828 failed one browser test because the enlarged overlaid zoom button intercepted comparable marker 2. Move controls outside the canvas in normal flow; preserve touch targets and unchanged click assertions. New exact-head verification pending. No storage, coordinate or service changes.
+
+## Subsequent verification (26 November)
+
+The corrected marker-click test passed in 72647b8 PostgreSQL run 45758496264; that run failed on a separate stale workspace harness. Subsequent 6a0544b and 76871e3 each passed 10/10, f24a3b7 passed 11/11 including both runtime jobs. Actual fictional MapLibre render inspected. No real basemap or geometry permission, actual Maputnik authoring round-trip, or owner aesthetic acceptance.
