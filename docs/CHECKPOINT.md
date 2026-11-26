@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-LIVE-PILOT-QUALIFICATION",
+    "id": "P0-AE0-WORLD-BANK-LOCAL-PILOT",
     "status": "blocked",
-    "objective": "Obtain exact bounded World Bank pilot approval or alternative qualified source.",
-    "scope": "Metadata and synthetic only; no live dispatch until explicit approval.",
-    "acceptance": "Exact scope/terms approval, safe transport and attempt guard before dispatch.",
+    "objective": "Verify approved pilot safeguards and observe one owner-local live outcome.",
+    "scope": "Exact two-request owner Windows pilot only, after focused CI; no other intake.",
+    "acceptance": "CI safety tests and actual validated two-page bundle or documented STOP.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await explicit bounded pilot approval; no live acquisition or P1.",
+    "stop": "Await exact CI and owner Windows execution; no replay, P1 or further acquisition.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -45,7 +45,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],
         [74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],
         [99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],
-        [144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"]
+        [144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"],
+        [148,150,"## AE0 World Bank one-time pilot authority","Owner explicitly approves the exact World Bank"]
       ],
       "docs/P_PHASE_ROADMAP.md": [
         [13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],
@@ -63,7 +64,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [57,67,"## 26 November 2026 | AE0 real-source qualification","Acceptance: exactly two distinct years"]
+        [57,67,"## 26 November 2026 | AE0 real-source qualification","Acceptance: exactly two distinct years"],
+        [69,82,"## 26 November 2026 | Approved World Bank pilot","The authorised workspace is inaccessible"]
       ]
     }
   },
@@ -107,7 +109,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. Restored cc5b0ac, 10/10 exact-head workflows passed; requery after qualification. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. cc5b0ac 10/10 passed; qualification revision 33a76cb checked; requery after pilot implementation. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -127,7 +129,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk and IR1/IR3 complete; SA4 blocked. 006/008 proof passed; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): synthetic proof CI passed; cadastral exact terms/layer unresolved; World Bank two-request national aggregate pilot proposed, awaiting exact approval. No live dispatch, joins, contact, spend, deployment, main merge or phase acceptance. Every email requires exact draft approval.
+P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk and IR1/IR3 complete; SA4 blocked. 006/008 proof passed; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): synthetic proof CI passed; cadastral exact terms/layer unresolved; World Bank exact two-request pilot approved; implementation pending exact CI and owner-local run. No other live dispatch, joins, contact, spend, deployment, main merge or phase acceptance. Every email requires exact draft approval.
 
 ## Detailed engineering evidence and audit trail
 

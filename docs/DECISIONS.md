@@ -144,3 +144,7 @@ Owner approves one official revised Stats SA Census 2022 Municipal Fact Sheet ma
 ## Independent contextual proof authority (26 November 2026)
 
 Owner approves bounded private offline contextual intelligence prototype using HPI-DATA-006 and HPI-DATA-008 independently; validate integrity, implement source-specific reports and scenarios, preserve datasets/application. No material joins, persisted derived outputs, new acquisition or expenditure. [Local proof contract](engineering/DATA_MANAGER_V1.md#approved-independent-contextual-proof-26-november-2026). No scope/market adoption, release, public display or phase acceptance.
+
+## AE0 World Bank one-time pilot authority (26 November 2026)
+
+Owner explicitly approves the exact World Bank two-request R0 pilot and applicable source terms, as specified in [side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--ae0-real-source-qualification-and-proposed-pilot). Owner-only existing Windows private workspace; conditional on safe transport and attempt guard verification, no replay, other source, joins, registration, app use, publication, expenditure, migration, phase or score approval. See [implementation and execution gate](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--approved-world-bank-pilot-implementation-and-local-execution-gate).
