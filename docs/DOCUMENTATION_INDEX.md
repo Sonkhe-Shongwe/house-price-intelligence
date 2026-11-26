@@ -16,6 +16,7 @@
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | P0-A.1 industry research | [Residential property industry research](product/RESIDENTIAL_PROPERTY_INDUSTRY_RESEARCH_2026-11-26.md) | Verified bounded desk research; lifecycle, price semantics, reporting lag and proposed decision point; buyer demand unvalidated |
 | P0-A.2 buyer problem research | [Homebuyer problem research](product/HOMEBUYER_PROBLEM_RESEARCH_2026-11-26.md) | Verified bounded secondary research, pain and counterevidence; specific HPI demand unvalidated |
+| P0-A.3 customer segmentation | [Customer segmentation](product/CUSTOMER_SEGMENTATION_2026-11-26.md) | Verified bounded desk research; provisional behavioural primary audience, explicit excluded jobs; demand and market acceptance open |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review Atlas / Terminal V1–V3 | [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) and [interactive HTML](../design-prototypes/hpi-atlas-terminal-study.html) | Dated fictional prototypes; Atlas subsequently explicitly owner-approved, core integrated |
 | Retained professional frontend quality directive | [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) | FE1–FE7 core qualified; quality standard retained, no new phase weights |
