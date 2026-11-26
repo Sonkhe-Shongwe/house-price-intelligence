@@ -22,7 +22,10 @@ class ContextArchiveTransportTests(unittest.TestCase):
                 page.get_by_test_id("buyer-manual-pin").fill("00000000000001")
                 page.get_by_test_id("buyer-create").click()
                 expect(page.get_by_test_id("buyer-result")).to_be_visible(timeout=15000)
-                iid=page.get_by_test_id("buyer-saved-id").inner_text()
+                history=server.get("/v1/investigations/history")["investigations"]
+                self.assertEqual(len(history),1)
+                iid=history[0]["investigation_id"]
+                expect(page.get_by_test_id("buyer-saved-id")).to_have_text(iid)
                 before=server.get("/v1/investigations/"+iid)
                 self.assertFalse(any("/context/" in u for u in urls))
                 report=page.evaluate("""async () => {
