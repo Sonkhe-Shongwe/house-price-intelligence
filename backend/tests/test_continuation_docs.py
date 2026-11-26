@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from tools.check_docs import continuation_errors
+from tools.check_docs import catalogue_errors, continuation_errors, progress_errors
 
 
 class ContinuationRoutingTests(unittest.TestCase):
@@ -13,10 +13,10 @@ class ContinuationRoutingTests(unittest.TestCase):
         (self.root / "docs").mkdir()
         for name in ("MASTER_CONTINUATION_PROMPT.md", "DECISIONS.md", "P_PHASE_ROADMAP.md", "history.md"):
             (self.root / "docs" / name).write_text("test", encoding="utf-8")
-        self.state = {"schema_version": 1, "active_phase": "P0", "phase_gate": "blocked",
+        self.state = {"schema_version": 2, "active_phase": "P0", "phase_gate": "blocked",
                       "task": {"id": "P0-TEST", "status": "ready", "objective": "Inspect metadata", "scope": "read only",
                                "acceptance": "Evidence recorded", "stop": "Before intake",
-                               "read": ["docs/P_PHASE_ROADMAP.md"], "evidence": ["docs/history.md"]},
+                               "read": ["docs/P_PHASE_ROADMAP.md"], "read_ranges": {"docs/P_PHASE_ROADMAP.md": [[1, 1, "test", "test"]]}, "evidence": ["docs/history.md"]},
                       "blockers": ["rights"], "parked": [], "authority": ["docs/DECISIONS.md"], "history": ["docs/history.md"]}
 
     def write(self, raw=None, suffix=""):
@@ -57,3 +57,31 @@ class ContinuationRoutingTests(unittest.TestCase):
     def test_unsupported_status(self):
         self.state["task"]["status"] = "approved"
         self.assertTrue(self.write())
+
+    def test_stale_range_marker(self):
+        (self.root / "docs/P_PHASE_ROADMAP.md").write_text("changed", encoding="utf-8")
+        self.assertTrue(any("stale boundary" in e for e in self.write()))
+
+    def test_missing_ranges(self):
+        self.state["task"]["read_ranges"] = {}
+        self.assertTrue(self.write())
+
+    def test_overlap_and_out_of_bounds(self):
+        for value in ([[1, 1, "test", "test"], [1, 1, "test", "test"]], [[1, 2, "test", "test"]]):
+            self.state["task"]["read_ranges"]["docs/P_PHASE_ROADMAP.md"] = value
+            self.assertTrue(self.write())
+
+    def test_catalogue_missing_and_complete(self):
+        index = self.root / "docs/DOCUMENTATION_INDEX.md"
+        index.write_text("[one](history.md)", encoding="utf-8")
+        self.assertTrue(catalogue_errors(self.root))
+        index.write_text("\n".join(f"[{p.name}]({p.name})" for p in index.parent.glob("*.md") if p != index), encoding="utf-8")
+        self.assertEqual(catalogue_errors(self.root), [])
+
+    def test_canonical_progress_total(self):
+        roadmap = self.root / "docs/P_PHASE_ROADMAP.md"
+        rows = [f"| P{i} | Test | {20 if i == 0 else 10}% | 50% |" for i in range(9)]
+        roadmap.write_text("\n".join(rows + ["| **Total** | Test | 100% | **50.0% weighted** |"]), encoding="utf-8")
+        self.assertEqual(progress_errors(self.root), [])
+        roadmap.write_text(roadmap.read_text(encoding="utf-8").replace("50.0% weighted", "51.0% weighted"), encoding="utf-8")
+        self.assertTrue(progress_errors(self.root))

@@ -1,12 +1,12 @@
 # House Price Intelligence: current checkpoint
 
-Reviewed 26 November 2026. Sole live routing ledger. Progress and acceptance criteria: [P0-P8 roadmap](P_PHASE_ROADMAP.md); authority: [decisions](DECISIONS.md). Structured state routes work, not grants permission. All full phase gates remain open at this handoff.
+Reviewed 26 November 2026. Sole live routing ledger. Progress and acceptance criteria: [P0-P8 roadmap](P_PHASE_ROADMAP.md); authority: [decisions](DECISIONS.md). Structured state routes work, not grants permission. For schema v2, read_ranges are verified line-range hints, not a substitute for full authority when an action is consequential. Each tuple is [first line, last line, first marker, last marker]; retrieve at exact HEAD, verify both markers, expand when relevant, and refresh stale ranges before declaring a valid handoff. All full phase gates remain open at this handoff.
 
 ## Continuation state
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
@@ -19,13 +19,21 @@ Reviewed 26 November 2026. Sole live routing ledger. Progress and acceptance cri
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
       "docs/DECISIONS.md",
-      "docs/P_PHASE_ROADMAP.md"
+      "docs/P_PHASE_ROADMAP.md",
+      "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md"
     ],
     "evidence": [
       "docs/reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Stop before acquisition, contact, material integration or market/scope change, or when no independently useful lawful R0 discovery remains. Do not advance P1."
+    "stop": "Stop before acquisition, contact, material integration or market/scope change, or when no independently useful lawful R0 discovery remains. Do not advance P1.",
+    "read_ranges": {
+      "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],
+      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[198,243,"## 26 November 2026 | Data-first repertoire and availability","Start a bounded source-by-source qualification with **D03 and D07"],[331,351,"## 26 November 2026 | D02 cadastral schema and D01 access qualifi","- [World Bank 2025 reproducibility catalogue](https://reproducibi"],[375,400,"## 26 November 2026 | CSG metadata enquiry sent","Immediate action: owner-assisted inspection of UNISA Buildings_NG"],[454,460,"## 26 November 2026 | Owner removes internal open-data expiry","[Windows migration evidence](../engineering/DATA_MANAGER_V1.md#op"]],
+      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"]],
+      "docs/P_PHASE_ROADMAP.md": [[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],
+      "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]]
+    }
   },
   "blockers": [
     "No lawful R0 individual completed-sale source or qualified cadastral/property join; official geography codes outstanding.",

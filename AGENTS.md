@@ -1,48 +1,19 @@
 # House Price Intelligence: repository working instructions
 
-This repository builds a buyer-facing historical comparable-sales investigation and shortlist application. **This is not the PilotODIN Windows application.**
+Buyer-facing historical comparable-sales investigation and shortlist application; not PilotODIN.
 
-## Restore context before editing
+## Restore and execute
 
-1. Read [current checkpoint](docs/CHECKPOINT.md) and its JSON task routing; retrieve relevant sections of [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md), [decisions](docs/DECISIONS.md) and applicable contracts. Use [documentation index](docs/DOCUMENTATION_INDEX.md) for discovery.
-2. Use [Master Continuation Prompt](docs/MASTER_CONTINUATION_PROMPT.md) for cross-session operating method. Follow newer user directions and verified source evidence when they conflict with older descriptions.
-3. Verify current branch/HEAD, local changes and latest meaningful CI results. A GitHub copy does not expose an uninspected Windows working tree.
-4. Distinguish delivery P0-P8 from audit research phases 0-2.
+- Follow the [Master Continuation Prompt](docs/MASTER_CONTINUATION_PROMPT.md) and [current checkpoint](docs/CHECKPOINT.md). Resolve actual development/main HEAD and exact-head CI first; report unavailable Windows local state. Read task ranges at the pinned revision; expand for relevant dependencies. [Documentation index](docs/DOCUMENTATION_INDEX.md) is navigation, not live status.
+- [Decisions](docs/DECISIONS.md) are approval authority, [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md) governs gates and progress, [Lean Engineering Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) governs the approved eight-step lifecycle, and [cloud-first workflow](docs/engineering/CLOUD_FIRST_WORKFLOW.md) governs branch and test operations. Audit research phases 0-2 differ from delivery P0-P8.
+- One permanent development branch and stable main. Routine scoped research, edits, commits, synthetic CI and corrections delegated. No force push, rewrite, routine per-fix branch or review ZIP. Pull to Windows only for indispensable testing. No main integration, deployment, repository rules or live-data dispatch without applicable authority.
+- One active primary phase; use checkpoint rather than stale task sequences. Apply [P0 discovery directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) when active, [frontend quality directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) for frontend and [synthetic map contract](docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) for fictional mapping. No parked work unless directly required by a named acceptance criterion.
+- Work product-first, R0, small integrated slices, meaningful negative tests, traceable evidence; no artificial progress. Stop at verified milestone or indispensable blocker. Run python tools/check_docs.py and relevant tests, inspect exact-head Actions. Never claim unattended work.
 
-## Lean delivery policy
+## Non-negotiable boundaries
 
-Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5/P6 fictional-only capabilities have already been implemented in owner-authorised connected slices while P3 acceptance remains open; this does not waive their distinct phase exit gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
+Read applicable decisions/contracts before exceptional actions: acquisition, real data, material joins, contact (exact draft approval every email), cost, access/provider changes, destructive operations, schedule changes, scope/market/acceptance changes, valuation/model training, release/main integration. No replay of consumed permissions. Keep private data and secrets out of public Git/CI; open-source terms/law and restricted-beta protection/retention apply. Permanent Windows Downloads/HPI-Project sibling checkout and HPI-Data-Workspace; no private source/derived files in checkout. See [Data Manager](docs/engineering/DATA_MANAGER_V1.md), [acquisition register](docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Neon integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md). Reverify target before scoped development-only administration; no production default, passwords or endpoint identifiers in public Git.
 
-## Single-phase closure focus (26 November 2026)
+Separate asking price, completed sales and estimates; exploratory 2 km candidate evidence not valuation. Preserve accepted comparable invariants, fictional and real-data boundaries, historical findings and approved behaviour. No publication or real-data acceptance inferred from synthetic tests or downloads.
 
-The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Apply the [P0 Discovery and Feasibility Directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) for the sequential P0-A to P0-G workstreams; use the checkpoint for the sole live task; do not restart P0-A.1. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
-
-## Frontend quality standard and active release-readiness work (26 November 2026)
-
-Apply the [Professional Frontend Excellence directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) within the existing eight-step lifecycle. FE1–FE7 are unweighted execution tasks under P5/P3/P6 and P7 verification, not new delivery phases. FE1–FE7 core and fictional geographic engineering qualified; use checkpoint for exact current evidence. Bounded basemap approval unused, real extraction deferred on unresolved extractor security. P7/P8 readiness work is parked during P0 closure unless a named dependency is indispensable; use actual source/CI and rendered evidence when resumed. No new data, spending, access or release authority. Read the checkpoint for current status.
-
-## Cloud-first development station (owner-approved 23 November 2026)
-
-Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) alongside the unchanged eight-step directive. Use **one GitHub repository, the permanent `development` working branch, stable `main`, and GitHub Actions for routine verifiable tests**. Source changes are authored on `development` through authorised GitHub/cloud tools; Actions executes builds and checks rather than automatically writing code. Create a PR from `development` to `main` at an accepted milestone, not one new branch/PR per small fix. Never squash-merge or force-rewrite the permanent development history by default. Pull to Windows only for essential platform testing or owner UX acceptance. Never create another active app workspace or serial review ZIP as a substitute for integration. Separate observed manual tests, unmerged patches and committed CI evidence. Standing authority covers routine scoped development commits; main merge, deployment, repository rules and live-data dispatch retain their separate approval requirements.
-
-## Standing engineering autonomy (25 November 2026)
-
-Routine engineering within the approved scope is delegated: independently select and implement the next integrated task, commit to development, run and diagnose CI, correct regressions and continue toward a meaningful milestone in the available execution session. No separate owner approval for ordinary scoped edits or synthetic verification. Ask only for indispensable owner action or a genuine cost, credential/access, data-rights, live-data, destructive-operation, release or main-integration boundary. Preserve the eight-step directive, exact-head evidence and phase gates. Do not claim unattended execution after the session ends. Prefer working software to new process documents.
-
-## Engineering boundaries
-
-- Use connected Neon administration for scoped development work and read-only inspection. Reverify actual project/branch, never use production by default, retain direct application TLS/role/recovery and real-data gates, and keep secrets/endpoint identifiers out of public commits. See [cloud integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md).
-
-- Prioritise traceable data, correct joins, source/time limitations, reproducible tests, clear comparable evidence and a complete buyer workflow.
-- Do not conflate recorded sales with a property listing or user-reported asking price. Never label exploratory 2 km spatial fallback prices as validated valuations.
-- Keep publisher data, user data, property-level raw extracts and credentials out of public commits or artifacts. Publication/display rights have not been approved.
-- The integrated local **fictional-only** backend/browser/SQLite/shortlist is verified on `development`, but it is **not an approved production** database, real-property API, final buyer UI, deployment or price-prediction model. Consult the [current checkpoint](docs/CHECKPOINT.md).
-- Preserve dated audit reports; update current handoffs and decisions only with new evidence. Use `python tools/check_docs.py` for internal Markdown links and P-stage arithmetic. For map work, consult [mapping research](docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md): the original synthetic coordinates overlap; current versioned fictional MapLibre display is documented in [synthetic map contract](docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). One bounded contextual basemap attempt separately approved but unused and deferred; no real tiles acquired, geocoder, real property geometry or public display approved.
-- Standing authority permits routine commits to development within approved scope; manually dispatched live data audits, scheduled cloud jobs and deployment still require the relevant approval.
-- Never force-push or delete/rewrite uncommitted work or retained evidence.
-
-For current work, follow the latest acceptance gate and its tests. If no local checkout is visible, report that limitation rather than claiming a clean working tree.
-
-## Data-first repertoire operations (26 November 2026)
-
-Use the [current checkpoint](docs/CHECKPOINT.md), [Data Manager](docs/engineering/DATA_MANAGER_V1.md) and [acquisition register](docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md). Direct legitimate downloads and owner-assisted portals first; correspondence last resort with exact approval. Keep the permanent Windows Downloads/HPI-Project sibling folders separate: house-price-intelligence for Git, HPI-Data-Workspace for private data. No raw/processed data, secrets or private reports in public Git/CI. Open datasets have no blanket internal expiry; actual source conditions/law prevail; restricted real-property beta retention/protection remains unchanged. New acquisition, material joins, source rights, release and main integration retain separate gates. No national scale or product readiness inferred from partial repertoire.
+[Pre-consolidation instructions](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/386fd7d7312018ad5bfc5e495cba04eeae78d587/AGENTS.md) retain previous wording; current decisions and contracts remain binding.

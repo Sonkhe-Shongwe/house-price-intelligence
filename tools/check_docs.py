@@ -62,27 +62,23 @@ def phase_rows(path: Path):
 
 
 def progress_errors(root: Path):
-    brief = root / "docs" / "ROADMAP.md"
+    """The detailed roadmap is the only live numeric planning ledger."""
     full = root / "docs" / "P_PHASE_ROADMAP.md"
     errors = []
     try:
-        br, fu = phase_rows(brief), phase_rows(full)
+        phases = phase_rows(full)
         expected = {f"P{i}" for i in range(9)}
-        if set(br) != expected or set(fu) != expected:
-            errors.append("P0-P8 tables must both contain every stage exactly once")
-        if br != fu:
-            errors.append("P0-P8 stage weights/completions differ across roadmap documents")
-        if abs(sum(w for w, _ in fu.values()) - 100) > 0.001:
+        if set(phases) != expected:
+            errors.append("P0-P8 table must contain every stage exactly once")
+        if any(not 0 <= pct <= 100 or not 0 <= weight <= 100 for weight, pct in phases.values()):
+            errors.append("P0-P8 weights and estimates must be between 0 and 100")
+        if abs(sum(w for w, _ in phases.values()) - 100) > 0.001:
             errors.append("P0-P8 phase weights do not total 100%")
-        total = sum(w * pct / 100 for w, pct in fu.values())
-        expected_label = f"{total:.1f}%"
-        if expected_label not in brief.read_text(encoding="utf-8"):
-            errors.append(f"Roadmap summary does not show computed progress {expected_label}")
-        if expected_label not in full.read_text(encoding="utf-8"):
-            errors.append(f"Detailed roadmap does not show computed progress {expected_label}")
-        for rel in ("docs/DOCUMENTATION_INDEX.md", "README.md"):
-            if expected_label not in (root / rel).read_text(encoding="utf-8"):
-                errors.append(f"{rel}: current handoff lacks computed progress {expected_label}")
+        total = sum(w * pct / 100 for w, pct in phases.values())
+        label = f"{total:.1f}%"
+        totals = [line for line in full.read_text(encoding="utf-8").splitlines() if line.startswith("| **Total** |")]
+        if len(totals) != 1 or f"**{label} weighted**" not in totals[0]:
+            errors.append(f"Detailed roadmap total must show computed progress {label}")
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
     return errors
@@ -147,6 +143,48 @@ def active_handoff_errors(root: Path):
     return errors
 
 
+def read_range_errors(root: Path, task: dict):
+    """Check inclusive source bounds and boundary markers; not semantic coverage."""
+    errors = []
+    ranges = task["read_ranges"]
+    if not isinstance(ranges, dict) or set(ranges) != set(task["read"]):
+        return ["continuation: read_ranges must cover exactly the task read paths"]
+    for ref, entries in ranges.items():
+        try:
+            lines = (root / ref).read_text(encoding="utf-8").splitlines()
+            if not isinstance(entries, list) or not entries:
+                raise ValueError("missing ranges")
+            prior = 0
+            for entry in entries:
+                if not isinstance(entry, list) or len(entry) != 4:
+                    raise ValueError("range must be [start, end, first marker, last marker]")
+                start, end, first, last = entry
+                if type(start) is not int or type(end) is not int or not prior < start <= end <= len(lines):
+                    raise ValueError("invalid, overlapping or unordered bounds")
+                if any(not isinstance(v, str) or not v.strip() for v in (first, last)):
+                    raise ValueError("missing boundary marker")
+                if not lines[start - 1].strip().startswith(first) or not lines[end - 1].strip().startswith(last):
+                    raise ValueError(f"stale boundary at lines {start}-{end}; resolve against source")
+                prior = end
+        except (OSError, ValueError) as exc:
+            errors.append(f"continuation: {ref}: {exc}")
+    return errors
+
+
+def catalogue_errors(root: Path):
+    """All repository docs must remain directly discoverable, including archives."""
+    index = root / "docs" / "DOCUMENTATION_INDEX.md"
+    try:
+        contents = index.read_text(encoding="utf-8")
+        links = {unquote(token.split("#", 1)[0].split("?", 1)[0])
+                 for token in INLINE_LINK.findall(contents)}
+        expected = {p.relative_to(index.parent).as_posix()
+                    for p in documents(index.parent) if p != index}
+        return [f"documentation catalogue missing: {path}" for path in sorted(expected - links)]
+    except OSError as exc:
+        return [str(exc)]
+
+
 def continuation_errors(root: Path):
     """Check routing structure, not factual accuracy or authority."""
     errors = []
@@ -168,14 +206,14 @@ def continuation_errors(root: Path):
             return result
         state = json.loads(blocks[0], object_pairs_hook=unique)
         keys = {"schema_version", "active_phase", "phase_gate", "task", "blockers", "parked", "authority", "history"}
-        if not isinstance(state, dict) or set(state) != keys or type(state["schema_version"]) is not int or state["schema_version"] != 1:
+        if not isinstance(state, dict) or set(state) != keys or type(state["schema_version"]) is not int or state["schema_version"] != 2:
             raise ValueError("invalid routing schema")
         if state["active_phase"] not in [f"P{i}" for i in range(9)]:
             raise ValueError("invalid active phase")
         if state["phase_gate"] not in ("open", "blocked", "accepted"):
             raise ValueError("invalid phase gate")
         task = state["task"]
-        if not isinstance(task, dict) or set(task) != {"id", "status", "objective", "scope", "acceptance", "read", "evidence", "stop"}:
+        if not isinstance(task, dict) or set(task) != {"id", "status", "objective", "scope", "acceptance", "read", "evidence", "stop", "read_ranges"}:
             raise ValueError("invalid task fields")
         if task["status"] not in ("ready", "blocked", "complete"):
             raise ValueError("invalid task status")
@@ -200,19 +238,20 @@ def continuation_errors(root: Path):
                     raise ValueError(f"invalid {key} reference: {ref}")
         if "docs/DECISIONS.md" not in state["authority"] or "docs/P_PHASE_ROADMAP.md" not in task["read"]:
             raise ValueError("decision or roadmap authority missing")
+        errors.extend(read_range_errors(root, task))
     except (OSError, ValueError, TypeError, KeyError) as exc:
         errors.append(f"continuation: {exc}")
     return errors
 
 
 def main():
-    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT) + continuation_errors(ROOT)
+    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT) + continuation_errors(ROOT) + catalogue_errors(ROOT)
     if errors:
         print("Documentation checks failed:")
         for issue in errors:
             print("- " + issue)
         return 1
-    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants and continuation routing agree.")
+    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants, continuation routing, ranges and catalogue agree.")
     print("This is not a semantic audit of all historical reports, external URLs or product acceptance.")
     return 0
 
