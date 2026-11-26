@@ -19,7 +19,8 @@ from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistServi
 from backend.synthetic_map import map_evidence
 from backend.buyer_evidence_preview import buyer_evidence_preview
 from backend.centroid_preview import centroid_preview
-from backend.context_archive_http import CONTEXT_PATH, transport_fixture
+from backend.context_archive_http import CONTEXT_PATH, transport_fixture, atlas_fixture
+from backend.context_archive_fixture import ATLAS_FIXTURE_PATH
 
 MAX_BODY_BYTES = 16 * 1024
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
@@ -114,7 +115,8 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
     if context_transport_fixture and react_assets is None:
         raise ValueError("Context transport fixture requires the React frontend")
     context_archive = transport_fixture() if context_transport_fixture else None
-    react_headers = [(key, value + "; worker-src 'self'" if synthetic_map and key == "Content-Security-Policy" else value)
+    context_atlas = atlas_fixture() if context_transport_fixture else None
+    react_headers = [(key, value + "; worker-src 'self'" if (synthetic_map or context_transport_fixture) and key == "Content-Security-Policy" else value)
                      for key, value in SECURITY_HEADERS]
 
     def app(environ, start_response):
@@ -138,6 +140,11 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
 
         if path == CONTEXT_PATH and context_archive is not None:
             return context_archive.serve(environ, start_response, react_headers)
+
+        if path == ATLAS_FIXTURE_PATH and context_atlas is not None:
+            return context_atlas.serve(environ, start_response, react_headers)
+        if path == "/context-preview" and context_atlas is not None:
+            path = "/"  # existing React entry, explicitly enabled only
 
         if react_assets is not None and path in react_assets:
             if method != "GET":

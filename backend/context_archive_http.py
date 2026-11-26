@@ -9,6 +9,7 @@ import re
 
 from backend.basemap_limits import OUTPUT_LIMIT
 from backend.basemap_transport import MAX_RANGE
+from backend.context_archive_fixture import generated_atlas_archive
 
 CONTEXT_PATH = "/context/qualification-v1.pmtiles"
 FIXTURE_BYTES = bytes(range(256)) * 64
@@ -66,3 +67,7 @@ class ContextArchive:
 
 def transport_fixture():
     return ContextArchive(FIXTURE_BYTES)
+
+
+def atlas_fixture():
+    return ContextArchive(generated_atlas_archive())

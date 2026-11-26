@@ -1,4 +1,5 @@
 import {createRoot} from 'react-dom/client';
+import {lazy,Suspense} from 'react';
 import BuyerWorkflow from './BuyerWorkflow';
 import PrivateBetaRehearsal from './PrivateBetaRehearsal';
 import './style.css';
@@ -6,4 +7,6 @@ import './productRefinement.css';
 import './icons.css';
 import './ui.css';
 import './responsive.css';
-createRoot(document.getElementById('root')!).render(window.location.pathname==='/private-beta-rehearsal'?<PrivateBetaRehearsal/>:<BuyerWorkflow/>);
+const ContextualAtlasPreview=lazy(()=>import('./GeoVectorMap').then(m=>({default:m.ContextualAtlasPreview})));
+const path=window.location.pathname;
+createRoot(document.getElementById('root')!).render(path==='/private-beta-rehearsal'?<PrivateBetaRehearsal/>:path==='/context-preview'?<Suspense fallback={<p role="status">Preparing qualification view…</p>}><ContextualAtlasPreview/></Suspense>:<BuyerWorkflow/>);

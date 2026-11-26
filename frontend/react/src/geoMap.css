@@ -52,3 +52,5 @@
 .geo-gesture-help{color:#405b50;font-size:12px;line-height:1.5}
 .geo-vector [data-testid=geo-fallback]:focus-visible{outline:3px solid #a74429;outline-offset:3px}
 @media(pointer:coarse){.geo-themed .geo-sale{width:44px;height:44px}.geo-controls button{min-height:44px;min-width:44px}}
+
+.context-preview{max-width:900px;margin:24px auto;padding:16px;min-width:0;box-sizing:border-box;color:#254b3a}.context-preview .geo-canvas{height:400px}.context-preview .geo-canvas[hidden]{display:none}.context-preview a{color:#254b3a;text-decoration:underline}.context-preview .geo-controls button{min-height:44px}.context-preview p{overflow-wrap:anywhere}@media(max-width:540px){.context-preview{margin:0;padding:12px}.context-preview .geo-canvas{height:280px}}

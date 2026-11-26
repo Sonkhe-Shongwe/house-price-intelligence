@@ -120,3 +120,102 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
       <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}><Icon name="minus" size={20}/></button><button type="button" aria-label="Reset fictional map view" onClick={resetView}><Icon name="refresh"/> Reset view</button></div></>}
   </div>;
 }
+
+/** Separate opt-in, generated contextual fixture. Never receives buyer records or markers. */
+export function ContextualAtlasPreview(){
+  const node=useRef<HTMLDivElement>(null),instance=useRef<maplibregl.Map|null>(null);
+  const [status,setStatus]=useState<'idle'|'loading'|'ready'|'failed'>('idle');
+  useEffect(()=>{
+    if(status!=='loading'||!node.current)return;
+    const container=node.current;
+    let disposed=false,failed=false,protocolAdded=false;
+    const lifetime=new AbortController();
+    const url=new URL('/context/atlas-fixture-v1.pmtiles',window.location.origin).href;
+    let map:maplibregl.Map|undefined;
+    const cleanup=()=>{
+      lifetime.abort();window.clearTimeout(guard);
+      map?.remove();map=undefined;instance.current=null;
+      if(protocolAdded){maplibregl.removeProtocol('pmtiles');protocolAdded=false;}
+    };
+    const fail=()=>{
+      if(disposed||failed)return;
+      failed=true;cleanup();setStatus('failed');
+    };
+    const guard=window.setTimeout(fail,15000);
+    void (async()=>{
+      try{
+        const {PMTiles,Protocol}=await import('pmtiles');
+        const head=await fetch(url,{method:'HEAD',cache:'no-store',redirect:'error',signal:lifetime.signal});
+        const length=Number(head.headers.get('content-length')),etag=head.headers.get('etag');
+        if(!head.ok||head.headers.get('x-context-transport-fixture')!=='true'
+            ||!Number.isSafeInteger(length)||length<16384||length>50*1024**2
+            ||!etag||!/^"[0-9a-f]{64}"$/.test(etag))throw Error('fixture unavailable');
+        const source={
+          getKey:()=>url,
+          getBytes:async(offset:number,count:number,signal?:AbortSignal,expected?:string)=>{
+            if(lifetime.signal.aborted||!Number.isSafeInteger(offset)||!Number.isSafeInteger(count)
+                ||offset<0||count<1||count>8*1024**2||offset+count>length
+                ||(expected&&expected!==etag))throw Error('fixture range rejected');
+            const combined=signal?AbortSignal.any([signal,lifetime.signal]):lifetime.signal;
+            const response=await fetch(url,{headers:{Range:`bytes=${offset}-${offset+count-1}`,'If-Match':etag},
+              cache:'no-store',redirect:'error',signal:combined});
+            if(response.status!==206||response.headers.get('etag')!==etag
+                ||response.headers.get('content-range')!==`bytes ${offset}-${offset+count-1}/${length}`
+                ||Number(response.headers.get('content-length'))!==count
+                ||response.headers.get('x-context-transport-fixture')!=='true')throw Error('fixture response rejected');
+            const data=await response.arrayBuffer();
+            if(data.byteLength!==count)throw Error('fixture length mismatch');
+            return {data,etag};
+          }
+        };
+        const archive=new PMTiles(source);
+        const header=await archive.getHeader();
+        if(header.specVersion!==3||header.minZoom!==0||header.maxZoom!==0||header.tileType!==1
+            ||header.numAddressedTiles!==1)throw Error('fixture format rejected');
+        if(disposed||failed)return;
+        const protocol=new Protocol();
+        protocol.add(archive);
+        const prefix='pmtiles://'+url;
+        maplibregl.addProtocol('pmtiles',(params,abort)=>{
+          const suffix=params.url.slice(prefix.length);
+          if(!params.url.startsWith(prefix)||!(suffix===''||/^\/[0-9]+\/[0-9]+\/[0-9]+$/.test(suffix)))
+            return Promise.reject(Error('unapproved context URL'));
+          return protocol.tile(params,abort);
+        });
+        protocolAdded=true;
+        map=new maplibregl.Map({container,center:[0,0],zoom:0.7,minZoom:0,maxZoom:2,
+          renderWorldCopies:false,dragRotate:false,pitchWithRotate:false,scrollZoom:false,
+          cooperativeGestures:true,attributionControl:false,style:{version:8,
+            sources:{context:{type:'vector',url:prefix}},
+            layers:[{id:'context-paper',type:'background',paint:{'background-color':'#f0eee4'}},
+              {id:'context-water',type:'fill',source:'context','source-layer':'water',paint:{'fill-color':'#a6c4cf'}},
+              {id:'context-park',type:'fill',source:'context','source-layer':'landuse',paint:{'fill-color':'#bfd1b1'}},
+              {id:'context-road',type:'line',source:'context','source-layer':'roads',paint:{'line-color':'#a74429','line-width':3}}]}});
+        instance.current=map;map.touchZoomRotate.disableRotation();
+        map.on('error',fail);map.on('webglcontextlost',fail);
+        map.once('idle',()=>{
+          if(disposed||failed)return;
+          if(!map?.queryRenderedFeatures({layers:['context-water','context-park','context-road']}).length){fail();return;}
+          window.clearTimeout(guard);setStatus('ready');
+        });
+      }catch{fail();}
+    })();
+    return ()=>{disposed=true;cleanup();};
+  // Keep the map mounted when the readiness state changes.
+  },[status==='idle']);
+  return <main className="context-preview" data-testid="context-preview">
+    <a href="/">Return to research workspace</a>
+    <p className="hpi-eyebrow">ATLAS / LOCAL QUALIFICATION</p>
+    <h1>Contextual vector map test</h1>
+    <p role="note">Invented geometry, not real geographic context. No property markers, addresses, distances or historical claims.</p>
+    {status==='idle'&&<button type="button" className="geo-load" data-testid="context-load" onClick={()=>setStatus('loading')}>Load invented contextual map</button>}
+    <div ref={node} className="geo-canvas" hidden={status==='idle'||status==='failed'} aria-label="Invented contextual vector map"/>
+    {status==='loading'&&<p role="status">Decoding local qualification archive…</p>}
+    {status==='ready'&&<><p role="status" data-testid="context-ready">Invented PMTiles vector layers rendered locally</p>
+      <div className="geo-controls"><button type="button" onClick={()=>instance.current?.zoomIn({duration:0})}>Zoom in</button>
+      <button type="button" onClick={()=>instance.current?.zoomOut({duration:0})}>Zoom out</button>
+      <button type="button" onClick={()=>instance.current?.jumpTo({center:[0,0],zoom:0.7})}>Reset view</button></div></>}
+    {status==='failed'&&<p role="alert" data-testid="context-unavailable">Contextual map unavailable. No geographic inference is made.</p>}
+    <p>Generated fixture only. No OpenStreetMap or other external geographic data loaded.</p>
+  </main>;
+}

@@ -43,3 +43,40 @@ class ContextArchiveTransportTests(unittest.TestCase):
                 self.assertFalse(any("GeoVectorMap-" in u for u in urls))
             finally:
                 browser.close()
+
+    def test_generated_contextual_vector_archive_render(self):
+        server=LocalFixtureProcess(free_port(),database=None,context_transport_fixture=True)
+        self.addCleanup(server.close)
+        with sync_playwright() as pw:
+            options={"args":["--no-sandbox","--enable-unsafe-swiftshader","--use-angle=swiftshader"]}
+            if os.environ.get("HPI_BROWSER_EXECUTABLE"):
+                options["executable_path"]=os.environ["HPI_BROWSER_EXECUTABLE"]
+            browser=pw.chromium.launch(headless=True,**options)
+            try:
+                page=browser.new_page(viewport={"width":1366,"height":850},reduced_motion="reduce")
+                urls=[]
+                page.on("request",lambda req:urls.append(req.url))
+                page.goto(server.base+"/context-preview")
+                expect(page.get_by_test_id("context-preview")).to_be_visible()
+                self.assertFalse(any(u.endswith(".pmtiles") for u in urls))
+                page.get_by_test_id("context-load").click()
+                expect(page.get_by_test_id("context-ready")).to_be_visible(timeout=20000)
+                self.assertTrue(any(u.endswith("/context/atlas-fixture-v1.pmtiles") for u in urls))
+                self.assertTrue(all(u.startswith(server.base+"/") for u in urls))
+                expect(page.get_by_test_id("geo-pin-0")).to_have_count(0)
+                page.get_by_role("button",name="Zoom in",exact=True).click()
+                page.get_by_role("button",name="Reset view").click()
+                page.set_viewport_size({"width":320,"height":800})
+                self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
+                from pathlib import Path
+                folder=os.environ.get("HPI_GEO_SCREENSHOTS")
+                if folder:
+                    Path(folder).mkdir(parents=True,exist_ok=True)
+                    page.get_by_test_id("context-preview").screenshot(path=str(Path(folder)/"05-invented-context-atlas-320.png"))
+                failed=browser.new_page(viewport={"width":320,"height":800})
+                failed.route("**/context/atlas-fixture-v1.pmtiles",lambda route:route.abort())
+                failed.goto(server.base+"/context-preview")
+                failed.get_by_test_id("context-load").click()
+                expect(failed.get_by_test_id("context-unavailable")).to_be_visible(timeout=20000)
+            finally:
+                browser.close()
