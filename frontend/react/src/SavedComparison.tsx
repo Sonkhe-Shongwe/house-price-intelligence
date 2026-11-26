@@ -1,4 +1,4 @@
-import Icon from './Icon';
+import {ActionButton} from './UI';
 /** Isolated fictional P6 buyer workspace: source-owned shortlist state, never local notes. */
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -267,16 +267,16 @@ export default function SavedComparison({active}: WorkspaceProps) {
       <div className="workspace-input-line"><input id="workspace-label" data-testid="workspace-label"
         maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}
         disabled={busy} required/>
-        <button type="submit" data-testid="workspace-create" disabled={busy||recoveryRequired}><Icon name="plus"/>Create shortlist</button></div>
+        <ActionButton type="submit" data-testid="workspace-create" disabled={busy||recoveryRequired} icon="plus" variant="primary">Create shortlist</ActionButton></div>
     </form>}
     <section aria-label="Recent saved shortlists">
       <h3>Saved shortlists</h3>
-      <button type="button" disabled={busy} onClick={()=>void loadRecent()}><Icon name="refresh"/>Refresh saved shortlists</button>
+      <ActionButton type="button" disabled={busy} onClick={()=>void loadRecent()} icon="refresh" variant="secondary">Refresh saved shortlists</ActionButton>
       {recentError&&<p role="alert">{recentError}</p>}
       {!recent.length&&!recentError&&<p>No saved shortlists yet.</p>}
       <ul data-testid="workspace-recent">{recent.map(row=><li key={row.id}>
-        <button type="button" data-testid="workspace-open-recent" disabled={busy}
-          onClick={()=>void refresh(undefined,row.id)}><Icon name="open"/>{row.label} ({row.count}/3)</button>
+        <ActionButton type="button" data-testid="workspace-open-recent" disabled={busy}
+          onClick={()=>void refresh(undefined,row.id)} icon="open" variant="secondary">{row.label} ({row.count}/3)</ActionButton>
       </li>)}</ul>
     </section>
     <form className="workspace-reopen" onSubmit={e=>void refresh(e)}>
@@ -285,32 +285,31 @@ export default function SavedComparison({active}: WorkspaceProps) {
         data-testid="workspace-reopen-id" value={reopenId}
         onChange={e=>setReopenId(e.target.value)} maxLength={36} disabled={busy}
         placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
-        <button type="submit" data-testid="workspace-reopen" disabled={busy}><Icon name="open"/>Open saved shortlist</button></div>
+        <ActionButton type="submit" data-testid="workspace-reopen" disabled={busy} icon="open" variant="secondary">Open saved shortlist</ActionButton></div>
     </form>
     {workspace && <>
       {recoveryRequired&&<p role="alert" data-testid="workspace-recovery" className="source-error">
         Current server state is unconfirmed. The cards below are last-confirmed records and local drafts.
         Refresh this shortlist before making another change.
-        <button type="button" disabled={busy} data-testid="workspace-recover"
-          onClick={()=>void refresh(undefined,workspace.shortlistId)}><Icon name="refresh"/>Refresh current shortlist</button>
+        <ActionButton type="button" disabled={busy} data-testid="workspace-recover"
+          onClick={()=>void refresh(undefined,workspace.shortlistId)} icon="refresh" variant="secondary">Refresh current shortlist</ActionButton>
       </p>}
       <div className="workspace-summary"><div><small>Saved shortlist / Python fixture</small>
         <h3>{workspace.label}</h3><span data-testid="workspace-id">{workspace.shortlistId}</span></div>
         <div><strong data-testid="workspace-count">{workspace.entries.length} / 3</strong>
           <small>Different properties</small></div></div>
       <div className="workspace-add">
-        <button type="button" data-testid="workspace-add-current" disabled={!hasActive||busy||recoveryRequired}
-          onClick={()=>active&&void addInvestigation(active.investigationId,active)}>
-          <Icon name="plus"/>Add current saved investigation
-        </button>
+        <ActionButton type="button" data-testid="workspace-add-current" disabled={!hasActive||busy||recoveryRequired}
+          onClick={()=>active&&void addInvestigation(active.investigationId,active)} icon="plus" variant="primary">Add current saved investigation
+        </ActionButton>
         <form onSubmit={e=>{e.preventDefault();void addInvestigation(otherId);}}>
           <label htmlFor="workspace-other-id">Or add another saved investigation UUID</label>
           <div className="workspace-input-line"><input id="workspace-other-id"
             data-testid="workspace-other-id" value={otherId}
             onChange={e=>setOtherId(e.target.value)} maxLength={36}
             disabled={busy||recoveryRequired||workspace.entries.length>=3}/>
-            <button type="submit" data-testid="workspace-add-id"
-              disabled={busy||recoveryRequired||workspace.entries.length>=3}><Icon name="plus"/>Add saved ID</button></div>
+            <ActionButton type="submit" data-testid="workspace-add-id"
+              disabled={busy||recoveryRequired||workspace.entries.length>=3} icon="plus" variant="primary">Add saved ID</ActionButton></div>
         </form>
       </div>
       {workspace.entries.length===0 && <p className="workspace-empty" data-testid="workspace-empty">
@@ -334,13 +333,13 @@ export default function SavedComparison({active}: WorkspaceProps) {
               onChange={e=>setNotes(prev=>({...prev,[entry.investigationId]:e.target.value}))}/>
             <div className="workspace-card-bottom"><span data-testid="workspace-note-state">
               {recoveryRequired?'Awaiting server confirmation':dirty?'Unsaved changes':'Saved note verified'}</span>
-              <button type="button" data-testid="workspace-save-note"
-                disabled={!dirty||busy||recoveryRequired} onClick={()=>void saveNote(entry.investigationId)}><Icon name="save"/>Save note</button>
+              <ActionButton type="button" data-testid="workspace-save-note"
+                disabled={!dirty||busy||recoveryRequired} onClick={()=>void saveNote(entry.investigationId)} icon="save" variant="primary">Save note</ActionButton>
             </div>
             <div className="workspace-provenance"><span>Frozen build · {entry.investigation.sourceBuildId}</span>
               <span>No verified map geometry</span></div>
-            <button type="button" data-testid="workspace-remove" disabled={busy||dirty||recoveryRequired}
-              onClick={()=>void removeMember(entry.investigationId)}><Icon name="remove"/>Remove property</button>
+            <ActionButton type="button" data-testid="workspace-remove" disabled={busy||dirty||recoveryRequired}
+              onClick={()=>void removeMember(entry.investigationId)} icon="remove" variant="danger">Remove property</ActionButton>
           </article>;
         })}
       </div>

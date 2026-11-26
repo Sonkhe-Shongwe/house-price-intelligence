@@ -1,3 +1,4 @@
+import {ActionButton,Field,StatusMessage} from './UI';
 import Icon from './Icon';
 /** Source-owned fictional buyer journey. Deliberately no map geometry or price prediction. */
 import {useEffect, useRef, useState} from 'react';
@@ -273,10 +274,10 @@ export default function BuyerWorkflow(){
                 value={query} onChange={e=>changeQuery(e.target.value)}
                 placeholder="Try an address in the active fictional build" autoComplete="off" maxLength={80}
                 disabled={writing} required/>
-                <button type="submit" data-testid="buyer-search" disabled={phase!=='idle'}><Icon name="search"/>Search addresses</button>
+                <ActionButton type="submit" data-testid="buyer-search" disabled={phase!=='idle'} icon="search" variant="primary">Search addresses</ActionButton>
               </div>
             </form>
-            {phase==='searching'&&<p role="status" data-testid="buyer-search-loading">Searching invented addresses…</p>}
+            {phase==='searching'&&<StatusMessage data-testid="buyer-search-loading">Searching invented addresses…</StatusMessage>}
             {candidates.length>0&&<div className="buyer-candidates" role="group" aria-label="Distinct fictional parcel candidates">
               {candidates.map(c=><button key={c.addressId} type="button" data-testid="buyer-candidate"
                 disabled={phase!=='idle'} onClick={()=>void select(c)}>
@@ -289,30 +290,25 @@ export default function BuyerWorkflow(){
               <strong>{chosen.label}</strong><p>{chosen.hint??'Synthetic parcel'} · PIN {chosen.pin}</p>
               <span>Building identity not verified · Server-bound selection</span></div>}
             {phase==='resolving'&&<p role="status">Verifying candidate with the local Python API…</p>}
-            <label htmlFor="buyer-manual-pin">Or enter a fictional 14-digit parcel PIN</label>
-            <input id="buyer-manual-pin" data-testid="buyer-manual-pin" value={manualPin}
+            <Field label="Or enter a fictional 14-digit parcel PIN" hint="Technical fixture lookup only. An unknown PIN may return insufficient evidence." id="buyer-manual-pin" data-testid="buyer-manual-pin" value={manualPin}
               inputMode="numeric" maxLength={14} disabled={writing}
               onChange={e=>{if(pendingWrite.current)return;cancel();setManualPin(e.target.value);
                 setQuery('');setChosen(null);setCandidates([]);setRecord(null);setActiveRank(null);
                 setError('');setMessage('');setPhase('idle');}}/>
-            <small>Technical fixture lookup only. An unknown PIN may return insufficient evidence.</small>
+
           </article>
           <article className="buyer-pane"><div className="buyer-section-number">02 / INVESTIGATE</div>
             <h2>Review buyer-reported inputs</h2><p>Only the Python service can choose the earlier sales. This form does not calculate a price.</p>
             <form onSubmit={create} className="buyer-data-form">
-              <div className="buyer-two-fields"><div><label htmlFor="buyer-area">Building area (ft²)</label>
-                <input id="buyer-area" data-testid="buyer-area" type="number" min="1" max="100000" step="1"
+              <div className="buyer-two-fields"><div><Field label="Building area (ft²)" id="buyer-area" data-testid="buyer-area" type="number" min="1" max="100000" step="1"
                   required value={area} onChange={e=>setArea(e.target.value)} disabled={writing}/></div>
-                <div><label htmlFor="buyer-price">Asking price, USD (buyer-reported)</label>
-                <input id="buyer-price" data-testid="buyer-price" type="text" inputMode="decimal"
+                <div><Field label="Asking price, USD (buyer-reported)" id="buyer-price" data-testid="buyer-price" type="text" inputMode="decimal"
                   value={price} onChange={e=>setPrice(e.target.value)} disabled={writing}
                   placeholder="500000.00" maxLength={15}/></div></div>
-              <label htmlFor="buyer-date">Historical analysis date</label>
-              <input id="buyer-date" data-testid="buyer-date" type="date" required value={analysisDate}
+              <Field label="Historical analysis date" id="buyer-date" data-testid="buyer-date" type="date" required value={analysisDate}
                 onChange={e=>setAnalysisDate(e.target.value)} disabled={writing}/>
-              <button className="buyer-save" type="submit" data-testid="buyer-create"
-                disabled={(!chosen&&!PIN.test(manualPin)) || phase!=='idle'}>
-                <Icon name="save"/>{phase==='creating'?'Saving and verifying…':'Save fictional investigation'}</button>
+              <ActionButton className="buyer-save" type="submit" data-testid="buyer-create"
+                disabled={(!chosen&&!PIN.test(manualPin)) || phase!=='idle'} icon="save" variant="primary">{phase==='creating'?'Saving and verifying…':'Save fictional investigation'}</ActionButton>
             </form>
             <div className="buyer-constraint">An address must be explicitly selected; a manually entered PIN is a separate lookup. Real geography remains unverified; a separate fictional display layer is optional.</div>
           </article>
@@ -327,12 +323,12 @@ export default function BuyerWorkflow(){
             <form onSubmit={reopen}><input id="buyer-reopen-id" data-testid="buyer-reopen-id" type="text"
               value={reopenInput} onChange={e=>setReopenInput(e.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" maxLength={36}/>
-              <button type="submit" data-testid="buyer-reopen" disabled={phase!=='idle'}><Icon name="open"/>Reopen</button></form>
+              <ActionButton type="submit" data-testid="buyer-reopen" disabled={phase!=='idle'} icon="open" variant="secondary">Reopen</ActionButton></form>
             <small>Saved IDs remain usable only while this local fixture database exists.</small></div>
         </aside>
       </section>
-      {error&&<div className="source-error" role="alert" data-testid="buyer-error">{error}</div>}
-      {message&&<div className="buyer-feedback" role="status" data-testid="buyer-feedback">{message}</div>}
+      {error&&<StatusMessage tone="error" className="source-error" data-testid="buyer-error">{error}</StatusMessage>}
+      {message&&<StatusMessage tone="success" className="buyer-feedback" data-testid="buyer-feedback">{message}</StatusMessage>}
       {(phase==='reopening'||phase==='creating')&&<div role="status" data-testid="buyer-pending" className="source-info-state">Verifying source-owned evidence…</div>}
       {record&& <section className="buyer-result" data-testid="buyer-result"><div className="buyer-result-title">
         <div><div className="source-eyebrow">Saved investigation / frozen Python API</div><h2>{record.subjectLabel}</h2>
@@ -345,7 +341,7 @@ export default function BuyerWorkflow(){
           <div><small>EVIDENCE QUALITY</small><strong>{statusLabel(record.status)}</strong></div>
           <div><small>CURRENT VALUATION</small><strong>Not produced</strong></div>
         </div>
-        <div className="hpi-dossier-actions"><button type="button" onClick={()=>navigate('compare')} data-testid="dossier-compare"><Icon name="compare"/>Continue to comparison</button></div>
+        <div className="hpi-dossier-actions"><ActionButton type="button" onClick={()=>navigate('compare')} data-testid="dossier-compare" icon="compare" variant="secondary">Continue to comparison</ActionButton></div>
         <div className="buyer-result-grid"><article className="buyer-sale-pane"><div className="source-panel-head"><strong>Completed sale evidence</strong><small>ORIGINAL SERVER ORDER</small></div>
           {record.comparables.length? <div className="source-sale-list" data-testid="buyer-sales">
             {record.comparables.map(s=><button key={s.uiKey} type="button" data-testid="buyer-sale"
@@ -374,7 +370,7 @@ export default function BuyerWorkflow(){
       </section>
       <section hidden={view!=='compare'} className="hpi-view" aria-label="Compare">
         <div className="hpi-page-heading"><div><p className="hpi-eyebrow">PROPERTY DECISION WORKSPACE</p><h1>Compare the evidence.</h1><p>Preserve independent evidence and your own research notes.</p></div>
-          <button type="button" className="hpi-primary" onClick={()=>navigate('saved')}><Icon name="saved"/>Find saved properties</button></div>
+          <ActionButton type="button" className="hpi-primary" onClick={()=>navigate('saved')} icon="saved" variant="primary">Find saved properties</ActionButton></div>
         <SavedComparison active={record}/>
       </section>
       <footer className="source-footer"><b>HOUSE PRICE INTELLIGENCE / BUYER WORKSPACE</b>
