@@ -97,3 +97,7 @@ Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but e
 ## P0-D.3 handoff (26 November 2026)
 
 [Conditional legal/privacy feasibility review](PRIVATE_REAL_DATA_BETA_V1.md#26-november-2026--p0-d3-conditional-legal-and-privacy-feasibility-review) closes the bounded D desk deliverable, not P0.5/P0.7 or legal/rights/protection acceptance. Real intake, durable real evidence and release remain blocked. P0-E technical, financial and operational feasibility next: existing stack/CI, R0 provider allowances, bounded workload and storage/compute/recovery limits, protection/retention risks and browser-only release contingency. Retain SA priority and clarification watch, Cook clarification/rekey deferrals, all approvals and original score. No infrastructure changes, acquisition, contact or deployment.
+
+## P0-E handoff (26 November 2026)
+
+[Conditional technical/financial/operational feasibility](PRODUCTION_READINESS_V1.md#26-november-2026--p0-e-conditional-technical-financial-and-operational-feasibility) complete as bounded desk work. Retain existing stack; Render primary hosting candidate, Vercel alternative, neither approved; illustrative R0 envelope and explicit session, protection, quota, rights and deployment blockers. P0-F definitive product specification next, no phase exit, new provider, acquisition, code, scope or score change.
