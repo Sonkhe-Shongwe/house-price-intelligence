@@ -132,3 +132,7 @@ Owner explicitly approves bounded acquisition of one official Stats SA June 2026
 ## HPI-DATA-007 intake authority (26 November 2026)
 
 Owner approves bounded National Treasury Municipal Money audit_opinions acquisition for CPT/JHB, financial year 2023/24, maximum three API requests and 768 KiB combined response bodies, private processing and registration only, strict R0, no material joins or source modifications. [Exact approved endpoints and implementation](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-hpi-data-007-bounded-acquisition-adapter). No retries, pagination, report fetching, further intake, release or scope change.
+
+## HPI-DATA-007 recovery authority (26 November 2026)
+
+Owner approves one bounded separate recovery, at most three additional API requests and 768 KiB combined response bodies, original attempt record and existing datasets preserved, strict R0. Same 2023/24 CPT/JHB private scope, no joins, source modifications, further retry or release. [Recovery scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-treasury-recovery-implementation).

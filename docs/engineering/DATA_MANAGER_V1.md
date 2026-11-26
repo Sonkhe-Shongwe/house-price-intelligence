@@ -207,3 +207,16 @@ Confirm terms only if accepted. Do not rerun on error; send only STOP reason or 
 ## HPI-DATA-007 failed first attempt and metadata format correction (26 November 2026)
 
 Owner terminal shows successful pull to d1288a2, terms confirmation, then STOP: Required source update metadata missing. Code path establishes the first model request returned parseable JSON with matching dimension/attribute checks before the update-date gate; neither facts request was reached. Exact returned update value and byte count not retained or observed. The attempt guard is consumed and must not be deleted or reset. No registration, raw response bundle or change to existing datasets observed. [Publisher source](https://github.com/OpenUpSA/municipal-data/blob/837732c20e8289bca6d30d826bba2ba86804dc54/municipal_finance/views.py) emits minute-resolution timestamps for recorded updates; [publisher regression test](https://github.com/OpenUpSA/municipal-data/blob/837732c20e8289bca6d30d826bba2ba86804dc54/municipal_finance/tests/test_cube_updates.py) confirms YYYY-MM-DDTHH:MM format. Existing parser only accepted month/day dates. Corrected parser accepts these three precise formats, validates calendar/time and future date, rejects absent/malformed/stale values, preserves original precision and separates publication date. Timestamp mismatch is likely, not confirmed actual response. No further API calls in this session. Synthetic regression tests only. Original attempt remains blocked; fresh explicit authority and separately tracked attempt required for any new requests.
+
+## Approved HPI-DATA-007 recovery (26 November 2026)
+
+Owner explicitly approved one separate recovery, at most three additional requests and 768 KiB response bodies, R0, same CPT/JHB 2023/24 scope and terms. Keep original attempt marker unchanged; new exclusive recovery marker and per-request dispatch records, plus metadata-only diagnostics for validation failures (no unvalidated response body retained). Corrected update format parser remains strict; unknown format stops before facts. No replay of either attempt. After synthetic CI passes, from the permanent checkout:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --dataset HPI-DATA-007 --recover-treasury
+}
+```
+
+Confirm terms only if accepted. No marker removal, new dependencies, report fetching, join or other intake. On STOP, share only the diagnostic and error, never rerun. Maximum four requests cumulatively given observed first model request; actual previous response byte count unknown. Actual recovery not observed. No public display; source update is not publication date.

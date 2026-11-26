@@ -1676,6 +1676,7 @@ TREASURY_MANIFEST = "01_Source_Catalogue/HPI-DATA-007.json"
 TREASURY_OUTPUT = "03_Processed_Data/HPI-DATA-007/audit_opinions.json"
 TREASURY_REPORT = "07_Reports/HPI-DATA-007_quality.json"
 TREASURY_ATTEMPT = "07_Reports/HPI-DATA-007_attempt.json"
+TREASURY_RECOVERY = "07_Reports/HPI-DATA-007_recovery_attempt.json"
 TREASURY_POLICY = "treasury-private-audit-opinions-v1"
 TREASURY_RETENTION = "Private bounded qualification only; source terms and law prevail; no automatic deletion."
 TREASURY_NAMES = {"CPT":"City of Cape Town","JHB":"City of Johannesburg"}
@@ -1828,34 +1829,75 @@ def treasury_spec():
     return ("HPI-DATA-007",TREASURY_MANIFEST,TREASURY_RAW,TREASURY_OUTPUT,TREASURY_REPORT,
             3*TREASURY_CAP+4096,None)
 
-def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
+def treasury_acquire(root,reviewed,fetch=treasury_get,today=None,recovery=False):
     root=workspace(root)
     today=today or date.today()
     if not reviewed:
         raise ValueError("Review and accept the Treasury source terms before any request.")
     if not all((root/f).is_dir() for f in FOLDERS):
         raise ValueError("Use the existing initialised private workspace.")
-    for relative in (TREASURY_ATTEMPT,TREASURY_RAW,TREASURY_MANIFEST,TREASURY_OUTPUT,TREASURY_REPORT):
+    for relative in (TREASURY_ATTEMPT,TREASURY_RECOVERY,TREASURY_RAW,TREASURY_MANIFEST,TREASURY_OUTPUT,TREASURY_REPORT):
         p=root/relative
         workspace(p.parent)
         check_path(p)
-        if p.exists():
+        if p.exists() and not (recovery and relative==TREASURY_ATTEMPT):
             raise ValueError("007 attempt or output already exists; no repeat requests. Review existing status.")
-    # Exclusive creation is the one-time budget guard; failures consume this
-    # attempt. Never delete or reset it automatically, even on network failure.
-    with (root/TREASURY_ATTEMPT).open("xb") as f:
-        f.write(json_bytes({"dataset_id":"HPI-DATA-007","attempt_date":today.isoformat(),
-                            "approved_max_requests":3,"approved_body_bytes":3*TREASURY_CAP,
-                            "retry_authorised":False}))
+    original_hash=None
+    if recovery:
+        original=read_bounded(root/TREASURY_ATTEMPT,4096)
+        prior=json.loads(original)
+        if (prior.get("dataset_id")!="HPI-DATA-007" or
+                prior.get("approved_max_requests")!=3 or
+                prior.get("approved_body_bytes")!=3*TREASURY_CAP or
+                prior.get("retry_authorised") is not False or
+                date.fromisoformat(prior["attempt_date"])!=date(2026,11,26)):
+            raise ValueError("Original approved attempt marker differs; no recovery.")
+        original_hash=sha(original)
+    # Exclusive creation consumes the approved attempt, including failure.
+    # Recovery has a separate marker; neither path overwrites the original.
+    marker=TREASURY_RECOVERY if recovery else TREASURY_ATTEMPT
+    record={"dataset_id":"HPI-DATA-007","attempt_date":today.isoformat(),
+            "approved_max_requests":3,"approved_body_bytes":3*TREASURY_CAP,
+            "retry_authorised":False}
+    if recovery:
+        record.update({"attempt":"recovery-1","original_attempt_sha256":original_hash,
+                       "authority_date":"2026-11-26"})
+    with (root/marker).open("xb") as f:
+        f.write(json_bytes(record))
     payloads={}
     facts=[]
     for key,path in TREASURY_PATHS.items():
+        # Count the dispatch before transport, and preserve a small local
+        # diagnostic on failure without saving unvalidated response bodies.
+        if recovery:
+            publish(root/("07_Reports/HPI-DATA-007_recovery_"+key+"_dispatch.json"),
+                    json_bytes({"request":key,"date":today.isoformat()}))
         raw=fetch(path)
-        if key=="model":
-            provenance=treasury_model(raw)
-        else:
-            facts.append(treasury_facts(raw,key))
+        try:
+            if key=="model":
+                provenance=treasury_model(raw)
+            else:
+                facts.append(treasury_facts(raw,key))
+        except (ValueError,KeyError,TypeError,AttributeError) as exc:
+            if recovery:
+                diagnostic={"request":key,"response_body_bytes":len(raw),
+                            "response_sha256":sha(raw),"error_type":type(exc).__name__}
+                if key=="model":
+                    try:
+                        obj=treasury_json(raw)["model"]
+                        value=obj.get("last_updated")
+                        diagnostic.update({"update_field_present":"last_updated" in obj,
+                                           "update_value_type":type(value).__name__,
+                                           "update_string_length":len(value) if isinstance(value,str) else None})
+                    except (ValueError,KeyError,TypeError,AttributeError):
+                        pass
+                publish(root/("07_Reports/HPI-DATA-007_recovery_"+key+"_diagnostic.json"),
+                        json_bytes(diagnostic))
+                print("Recovery diagnostic:",json.dumps(diagnostic))
+            raise
         payloads[key]=raw
+    if recovery and sha(read_bounded(root/TREASURY_ATTEMPT,4096))!=original_hash:
+        raise ValueError("Original attempt record changed during recovery; no registration.")
     body_count=sum(map(len,payloads.values()))
     if body_count>3*TREASURY_CAP:
         raise ValueError("Aggregate transfer budget exceeded.")
@@ -1865,6 +1907,7 @@ def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
     q={"requested_metros":2,"reported_outcomes":sum(x["status"]=="reported" for x in facts),
        "unavailable_outcomes":sum(x["status"]=="unavailable" for x in facts),
        "financial_year_end":2024,"api_requests":3,"response_body_bytes":body_count,
+       "acquisition_attempt":"recovery-1" if recovery else "initial",
        "source_last_updated":provenance["source_last_updated"],"publication_date":provenance["publication_date"],
        "publication_date_verified":provenance["publication_date"] is not None,
        "display_authorised":False,"material_join":False,"report_links_followed":False}
@@ -1884,6 +1927,7 @@ def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
               **provenance,"request_urls":{key:"https://"+TREASURY_HOST+path for key,path in TREASURY_PATHS.items()},
               "response_sha256":{key:sha(raw) for key,raw in payloads.items()},
               "source_bytes":len(raw_bundle),"source_sha256":sha(raw_bundle),"raw_path":TREASURY_RAW,
+              "acquisition_attempt":"recovery-1" if recovery else "initial","original_attempt_sha256":original_hash,
               "first_intake_date":today.isoformat(),"terms_reviewed_by_owner":True,
               "retention_policy":TREASURY_POLICY,"retention":TREASURY_RETENTION,"do_not_retain_on_or_after":None,
               "processed_path":TREASURY_OUTPUT,"processed_sha256":sha(data),"quality_report":TREASURY_REPORT,"quality":q}
@@ -1898,10 +1942,11 @@ def treasury_acquire(root,reviewed,fetch=treasury_get,today=None):
 def treasury_status(root):
     path=root/TREASURY_MANIFEST
     if not path.exists():
-        return {"dataset_id":"HPI-DATA-007","registered":False,"attempt_started":(root/TREASURY_ATTEMPT).exists()}
+        return {"dataset_id":"HPI-DATA-007","registered":False,"attempt_started":(root/TREASURY_ATTEMPT).exists(),
+                "recovery_started":(root/TREASURY_RECOVERY).exists()}
     m=json.loads(read_bounded(path))
     return {"dataset_id":"HPI-DATA-007","registered":True,**retention_status(m),
-            "known_local_paths":[x for x in (TREASURY_RAW,TREASURY_OUTPUT,TREASURY_REPORT,TREASURY_MANIFEST,TREASURY_ATTEMPT) if (root/x).exists()]}
+            "known_local_paths":[x for x in (TREASURY_RAW,TREASURY_OUTPUT,TREASURY_REPORT,TREASURY_MANIFEST,TREASURY_ATTEMPT,TREASURY_RECOVERY) if (root/x).exists()]}
 
 def treasury_self_test():
     # Synthetic JSON and fake transport: no live requests.
@@ -1984,6 +2029,66 @@ def treasury_self_test():
             else:
                 raise AssertionError("Failure not propagated")
         assert len(attempted)==1 and (root/TREASURY_ATTEMPT).exists() and not (root/TREASURY_RAW).exists()
+    # Recovery is separately approved, consumes its own marker once and
+    # leaves the earlier attempt byte-for-byte unchanged.
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/RAW,b"prior untouched")
+        n=len(calls)
+        try:
+            treasury_acquire(root,True,fetch,day,recovery=True)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Recovery without original marker accepted")
+        assert len(calls)==n
+        try:
+            treasury_acquire(root,True,fail,day)
+        except ValueError:
+            pass
+        original=read_bounded(root/TREASURY_ATTEMPT)
+        m=treasury_acquire(root,True,fetch,day,recovery=True)
+        assert len(calls)==n+3 and m["quality"]["acquisition_attempt"]=="recovery-1"
+        assert m["original_attempt_sha256"]==sha(original)
+        assert read_bounded(root/TREASURY_ATTEMPT)==original
+        assert (root/RAW).read_bytes()==b"prior untouched"
+        assert (root/TREASURY_RECOVERY).exists()
+        assert audit_registered(root,treasury_spec(),day)["status"]=="integrity checks passed"
+        for mode in (False,True):
+            try:
+                treasury_acquire(root,True,fetch,day,recovery=mode)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Attempt replay accepted")
+        assert len(calls)==n+3
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        try:
+            treasury_acquire(root,True,fail,day)
+        except ValueError:
+            pass
+        original=read_bounded(root/TREASURY_ATTEMPT)
+        broken={"status":"ok","model":{"dimensions":dims}}
+        dispatched=[]
+        def broken_fetch(path):
+            dispatched.append(path)
+            return json_bytes(broken)
+        for _ in range(2):
+            try:
+                treasury_acquire(root,True,broken_fetch,day,recovery=True)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Invalid recovery accepted")
+        assert dispatched==[TREASURY_PATHS["model"]]
+        assert read_bounded(root/TREASURY_ATTEMPT)==original
+        assert not (root/TREASURY_RAW).exists()
+        diagnostic=json.loads(read_bounded(root/"07_Reports/HPI-DATA-007_recovery_model_diagnostic.json"))
+        assert diagnostic["update_field_present"] is False
+    print("PASS: one separately tracked Treasury recovery, original marker preserved, dispatch accounting and safe failure diagnostics.")
     class Response:
         status=302
         def getheader(self,k,default=None):
@@ -2016,6 +2121,7 @@ def main():
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
+    p.add_argument("--recover-treasury",action="store_true",help="One separately approved 007 recovery; preserve original attempt")
     p.add_argument("--status",action="store_true")
     p.add_argument("--audit-workspace",action="store_true")
     p.add_argument("--geo-crosswalk",action="store_true",help="Private read-only candidate report for HPI-DATA-003/005")
@@ -2026,14 +2132,14 @@ def main():
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
-        if args.acquire_treasury:
-            if (args.dataset!="HPI-DATA-007" or args.self_test or args.status or args.audit_workspace or
+        if args.acquire_treasury or args.recover_treasury:
+            if (args.acquire_treasury and args.recover_treasury) or (args.dataset!="HPI-DATA-007" or args.self_test or args.status or args.audit_workspace or
                     args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or args.init_only or
                     args.intake_date is not None or args.retain_until is not None):
                 raise ValueError("Treasury acquisition must be a standalone explicit 007 action.")
             root=workspace(args.root)
             reviewed=args.terms_reviewed or input("Read and accept Municipal Money terms (source/date attribution, no personal data; private scope) (yes/no): ").strip().lower()=="yes"
-            manifest=treasury_acquire(root,reviewed)
+            manifest=treasury_acquire(root,reviewed,recovery=args.recover_treasury)
             print(json.dumps({"import":"complete","quality":manifest["quality"],"status":treasury_status(root)},indent=2))
             return 0
         if args.geo_crosswalk or args.geo_alias:
