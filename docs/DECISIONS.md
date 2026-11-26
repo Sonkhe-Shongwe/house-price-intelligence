@@ -164,3 +164,7 @@ Owner explicitly approves the exact one-request, seven-day, 64 KiB NASA POWER CS
 ## AE0 GHSL one-time authority (27 November 2026)
 
 Owner approves exact GHSL 25 MiB/one-request R0 raster pilot and applicable source terms, after tested safeguards. [Scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--ae0-finer-spatial-qualification-ghsl-candidate). Private Windows only; no replay, other intake, registration, joins, publication, release or phase acceptance.
+
+## AE0 staged GHSL final authority (27 November 2026)
+
+Owner approves exact staged index-first and conditional raster requests, 27 MiB combined, external copyright contract, R0, verified safeguards and private Windows only. [Scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--ae0-ghsl-staged-geometry-and-rights-proposal). Prior attempt consumed. No replay, other intake, joins, registration, release or phase acceptance.

@@ -44,7 +44,7 @@ class GhslHTTPS(PinnedHTTPS):
     HOSTNAME = HOST
 
 
-def stream_body(response, target, deadline):
+def stream_body(response, target, deadline, cap=CAP):
     if response.status != 200:
         raise PilotRefused("HTTP")
     def one(name, default=""):
@@ -63,24 +63,24 @@ def stream_body(response, target, deadline):
         if not length.isascii() or not length.isdigit() or len(length) > 10:
             raise PilotRefused("FRAMING")
         expected = int(length)
-        if not 0 < expected <= CAP:
+        if not 0 < expected <= cap:
             raise PilotRefused("CAP")
     count = 0
     digest = hashlib.sha256()
     with target.open("xb") as stream:
-        while count < (expected if expected is not None else CAP):
+        while count < (expected if expected is not None else cap):
             remaining(deadline)
-            raw = response.read(min(CHUNK, (expected if expected is not None else CAP)-count))
+            raw = response.read(min(CHUNK, (expected if expected is not None else cap)-count))
             if not raw:
                 break
             count += len(raw)
-            if count > CAP:
+            if count > cap:
                 raise PilotRefused("CAP")
             stream.write(raw)
             digest.update(raw)
         if not count or (expected is not None and count != expected):
             raise PilotRefused("FRAMING")
-        if expected is None and count == CAP:
+        if expected is None and count == cap:
             raise PilotRefused("CAP")
         remaining(deadline)
         stream.flush()
@@ -100,11 +100,13 @@ def download(target, deadline):
         conn.close()
 
 
-def member_kind(name):
+def member_kind(name, staged=False):
     # Explicit flat or exact tile-folder paths; never use archive paths for writes.
     for prefix in ("", STEM + "/"):
         if name == prefix + STEM + ".tif":
             return "raster"
+        if staged and name == prefix + "GHSL_Data_Package_2023_light.pdf":
+            return "methodology"
         if name == prefix + "copyright.txt":
             return "rights"
         if name in (prefix + STEM + ".tif.ovr", prefix + STEM + ".ovr"):
@@ -129,7 +131,7 @@ def copy_member(archive, info, out, deadline):
     return count
 
 
-def inspect_members(infos, deadline):
+def inspect_members(infos, deadline, staged=False):
     """Inspect central directory only. No extraction or arbitrary diagnostic strings.
 
     OVR is a documented product auxiliary format, not an observed exact tile member.
@@ -171,7 +173,7 @@ def inspect_members(infos, deadline):
         total += info.file_size
         if total > EXPANDED:
             raise PilotRefused("CAP")
-        kind = member_kind(name)
+        kind = member_kind(name, staged)
         if not kind:
             raise PilotRefused("MEMBERS_UNKNOWN")
         if kind in members:
@@ -184,15 +186,18 @@ def inspect_members(infos, deadline):
     return members, total
 
 
-def unpack(archive_path, directory, deadline):
+def unpack(archive_path, directory, deadline, staged=False):
     try:
         with zipfile.ZipFile(archive_path) as archive:
-            members, total = inspect_members(archive.infolist(), deadline)
+            members, total = inspect_members(archive.infolist(), deadline, staged)
             if "rights" not in members:
-                raise PilotRefused("RIGHTS_MISSING")
-            rights_path = directory / "copyright.txt"
-            copy_member(archive, members["rights"], rights_path, deadline)
-            rights = rights_path.read_text(encoding="utf-8-sig")
+                if not staged:
+                    raise PilotRefused("RIGHTS_MISSING")
+                rights = "External tile-directory notice: European Union CC BY 4.0; credit and modifications required."
+            else:
+                rights_path = directory / "copyright.txt"
+                copy_member(archive, members["rights"], rights_path, deadline)
+                rights = rights_path.read_text(encoding="utf-8-sig")
             normal = " ".join(rights.casefold().split())
             # Conservative documentary gate, not an automated legal determination.
             if (not any(s in normal for s in ("cc by 4.0", "creativecommons.org/licenses/by/4.0",
@@ -208,7 +213,7 @@ def unpack(archive_path, directory, deadline):
         raise PilotRefused("ARCHIVE") from exc
 
 
-def analyse(raster):
+def analyse(raster, expected_bounds=None):
     import rasterio
     from rasterio.crs import CRS
     from rasterio.windows import Window, bounds
@@ -228,6 +233,8 @@ def analyse(raster):
                     or not all(float(v).is_integer() for v in (t.c,t.f))
                     or src.scales != (1.0,) or src.offsets != (0.0,)
                     or src.block_shapes[0][0]*src.block_shapes[0][1]*2 > 16*1024**2):
+                raise PilotRefused("RASTER")
+            if expected_bounds is not None and list(src.bounds) != expected_bounds:
                 raise PilotRefused("RASTER")
             transformer = Transformer.from_crs("EPSG:4326", "ESRI:54009", always_xy=True)
             windows, output = [], []
