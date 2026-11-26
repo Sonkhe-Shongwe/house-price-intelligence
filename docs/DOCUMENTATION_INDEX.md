@@ -49,6 +49,7 @@
 | Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | Integrated fictional code/HTTP/SQL/UI contract; provisional synthetic P3.1–P3.7 accepted, full phase exit open |
 | Review integrated P6 shortlist | [P6 synthetic shortlist contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | **Merged to `development` as PR #6**, synthetic-only; phase exit and access/privacy decisions still open |
 | Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
+| P0-C data research and feasibility | [Data feasibility](research/DATA_FEASIBILITY.md#26-november-2026--p0-c-source-field-and-grain-inventory) | Active; minimum field/grain inventory complete, Cook cohort/entry/time consolidation next; no alternative data acquired |
 | Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
 | Re-run research | [Cloud audit operations](AUTOMATED_DATA_AUDIT.md) | **Current operating guide** |
 | See the original 11 grey areas | [23 Nov continuity/directive audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | **Dated risk review**, some implementation findings superseded by current code; unresolved rights/identity risks still relevant |
