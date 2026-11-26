@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-DATA-006-APPROVAL",
+    "id": "P0-DATA-006-LOCAL-IMPORT",
     "status": "blocked",
-    "objective": "Obtain bounded approval for fixed June 2026 P0160 PDF market evidence; Treasury separate.",
-    "scope": "Proposed one exact PDF max 5 MiB; research delivered, no intake or join authorised.",
-    "acceptance": "If approved, two metro rows, six index observations, published changes, visual and provenance checks; no series merge.",
+    "objective": "Complete approved fixed P0160 PDF acquisition and registration in private workspace.",
+    "scope": "One exact PDF max 5 MiB; two metro rows only; preserve 002, no merge or Treasury intake.",
+    "acceptance": "Six index observations, four changes, two weights, visual comparison and private provenance/hash registration.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -27,18 +27,18 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Await exact PDF intake approval; Treasury separately approved; no new acquisition, material join, scope adoption or P1.",
+    "stop": "Await actual local import evidence; stop on discrepancy; no other intake, joins, scope adoption or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[529,547,"## 26 November 2026 | Direction B source and capability feasibili","Next source qualification proposal (no intake yet): resolve exact"],[549,573,"## 26 November 2026 | Bounded contextual slice exact source quali","Two independent area-level evidence cards can be evaluated on the"]],
-      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[124,126,"## Bounded contextual source research authority (26 November 2026","Owner approves contextual feasibility slice research for Stats SA"]],
+      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [[549,573,"## 26 November 2026 | Bounded contextual slice exact source quali","Two independent area-level evidence cards can be evaluated on the"],[575,577,"## 26 November 2026 | Approved HPI-DATA-006 offline registration","Owner explicitly approved one fixed official June 2026 P0160 PDF,"]],
+      "docs/DECISIONS.md": [[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[128,130,"## HPI-DATA-006 intake authority (26 November 2026)","Owner explicitly approves bounded acquisition of one official Sta"]],
       "docs/P_PHASE_ROADMAP.md": [[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]],
       "docs/product/PRODUCT_BRIEF.md": [[126,164,"## 26 November 2026 | Direction B proposed contextual decision wo","Recommended next gate: owner authorises a bounded contextual feas"]]
     }
   },
   "blockers": [
-    "D01/D02 unresolved; contextual sources desk-qualified; 006 PDF intake approval needed; workbook conditional.",
+    "D01/D02 unresolved; 006 approved, local intake pending; workbook conditional.",
     "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
     "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
   ],
@@ -95,7 +95,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 PDF intake approval next. P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. No intake, contact, material joins, spend, provider changes, deployment, main merge or phase acceptance.
+[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 approved; local acquisition and import next. P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. Only bounded 006 intake approved; no other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 

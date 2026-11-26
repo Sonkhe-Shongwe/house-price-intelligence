@@ -169,3 +169,16 @@ The existing --geo-crosswalk remains unchanged. New standalone --geo-alias reuse
 ## Documentary alias local evidence (26 November 2026)
 
 Owner supplied terminal screenshot of successful fast-forward pull and --geo-alias summary. Both sources 52 rows; exact baseline 40, twelve documentary alias candidates (four historical district renames and eight metro variants), total 52, 44 district and eight metro candidates, zero unmatched rows on either side, zero abstentions and zero ambiguous groups. This confirms the previously cropped Buffalo City label satisfied the exact allowlist. Candidate coverage 100%, not identity accuracy. Crosswalk_verified, boundary_equivalence_verified and independent_district_metro_classification_verified all false. Successful execution entails local manifest/hash/provenance/retention checks passed; private bytes and hashes not independently inspected. No persisted mapping, new intake, geometry operations or source changes reported; no repeat required. [Implementation ef4c385](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/ef4c3854eeb9e3850af26ad98e0b133cf8bc2681), audit push 45886325301 passed; 6/7 triggered workflows successful at inspection. Recheck exact-head CI. Bounded experiment delivered, not approval of downstream use. No P0 or score change.
+
+## HPI-DATA-006 fixed RPPI publication adapter (26 November 2026)
+
+Owner explicitly approved one [official P0160 June 2026 PDF](https://www.statssa.gov.za/publications/P0160/P0160June2026.pdf), at most 5 MiB, R0, private processing and registration, no merge with 002. Save as P0160June2026.pdf in existing sibling HPI-Data-Workspace/02_Raw_Data, outside Git. After focused CI passes, from permanent development checkout:
+
+```powershell
+git pull --ff-only origin development
+if ($LASTEXITCODE -eq 0) {
+    python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --dataset HPI-DATA-006
+}
+```
+
+Existing pypdf 7.2.0 reused; no additional dependencies. Actual intake date required; review printed page 11 terms (PDF page 12). Validate cover, release date, page 6 Table 4, base and revision note. Preview two metro rows transformed to six dated observations, two published weights and four reported changes; compare all values visually before confirming yes. Rounding-interval compatibility tests use half a displayed decimal unit on both indices and reported growth, not exact rounded point equality. Source values retained; weights repeated only as metadata, not summed. Output metro_index.csv, quality report and private manifest with source/output hashes and provenance; distinct private noncommercial retention policy, no overwrite, no renewal, no 002 merge. Audit/status recognise 006. Synthetic PDF with invented numeric values used in CI; actual layout, source bytes, rights and visual review not independently verified. Stop on parsing discrepancy, do not force or guess values. No other download, API call, property evidence, valuation, continuous monthly series or release. Local import pending.

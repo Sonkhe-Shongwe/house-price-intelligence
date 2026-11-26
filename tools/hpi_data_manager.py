@@ -988,8 +988,11 @@ def code_fixture_pdf(duplicate=False, wrong_terms=False):
     pages = [["Census 2022 Metadata (Code lists) 29 August 2024"],
              ["Statistics South Africa 03-01-47", "independent processing; sold or offered for sale without prior permission" if not wrong_terms else "changed terms"],
              ["Contents"],["District and metropolitan municipality names and codes"]+rows]+[["Invented page"] for _ in range(6)]
+    return fixture_pdf(pages)
+
+def fixture_pdf(pages):
     objects = [b"<< /Type /Catalog /Pages 2 0 R >>",
-               ("<< /Type /Pages /Count 10 /Kids ["+" ".join(f"{4+2*i} 0 R" for i in range(10))+"] >>").encode(),
+               (f"<< /Type /Pages /Count {len(pages)} /Kids ["+" ".join(f"{4+2*i} 0 R" for i in range(len(pages)))+"] >>").encode(),
                b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
     for i,lines in enumerate(pages):
         objects.append(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 792 792] /Resources << /Font << /F1 3 0 R >> >> /Contents {5+2*i} 0 R >>".encode())
@@ -1055,8 +1058,12 @@ def audit_registered(root, spec, today=None):
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION}[sid]
-    if sid == "HPI-DATA-005":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION}[sid]
+    if sid == "HPI-DATA-006":
+        if (m.get("retention_policy") != MARKET_POLICY or m["retention"] != MARKET_RETENTION or
+                m.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Unexpected market reference policy or visual review.")
+    elif sid == "HPI-DATA-005":
         if (m.get("retention_policy") != CODE_POLICY or m["retention"] != CODE_RETENTION or
                 m.get("visual_page_reviewed_by_owner") is not True):
             raise ValueError("Unexpected code reference policy or visual review.")
@@ -1102,6 +1109,7 @@ def audit_workspace(root):
         ("HPI-DATA-003",GEO_MANIFEST,GEO_RAW,GEO_OUTPUT,GEO_REPORT,10*MIB,GEO_SHA),
         ("HPI-DATA-004",BUILD_MANIFEST,BUILD_RAW,BUILD_OUTPUT,BUILD_REPORT,BUILD_MAX_BYTES,None),
         ("HPI-DATA-005",CODE_MANIFEST,CODE_RAW,CODE_OUTPUT,CODE_REPORT,CODE_MAX_BYTES,None),
+        ("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None),
     ]
     results = []
     for spec in specs:
@@ -1439,10 +1447,199 @@ def alias_self_test():
 
 
 
+
+# HPI-DATA-006: one fixed publication; not a continuation of 002.
+MARKET_URL = "https://www.statssa.gov.za/publications/P0160/P0160June2026.pdf"
+MARKET_RAW = "02_Raw_Data/P0160June2026.pdf"
+MARKET_MANIFEST = "01_Source_Catalogue/HPI-DATA-006.json"
+MARKET_OUTPUT = "03_Processed_Data/HPI-DATA-006/metro_index.csv"
+MARKET_REPORT = "07_Reports/HPI-DATA-006_quality.json"
+MARKET_MAX = 5*MIB
+MARKET_POLICY = "stats-sa-p0160-private-v1"
+MARKET_RETENTION = "Private noncommercial publication reference; source terms and law prevail; no automatic deletion."
+MARKET_NAMES = ("City of Cape Town","City of Johannesburg")
+MARKET_MONTHS = ("2025-06","2026-05","2026-06")
+
+def market_growth_compatible(old,new,published):
+    # One decimal shown: compare intervals, not a point estimate.
+    half=Decimal("0.05")
+    if old<=half or new<=half:
+        return False
+    lo=100*((new-half)/(old+half)-1)
+    hi=100*((new+half)/(old-half)-1)
+    return lo<=published+half and hi>=published-half
+
+def market_table(layout):
+    import re
+    flat=" ".join(layout.split()).casefold()
+    if not all(x in flat for x in ("table 4","rppi for all metropolitan areas","dec 2020","jun 2025","may 2026","jun 2026","subject to revision")):
+        raise ValueError("Expected Table 4, three observation periods, base and revision note on PDF page 6.")
+    if not re.search(r"dec 2020\s*=\s*100",flat):
+        raise ValueError("Unexpected index base.")
+    # Only read Table 4, not similarly named figure labels.
+    table=re.split(r"Figure\s+4\b",layout, maxsplit=1,flags=re.I)[0]
+    rows=[]
+    for name in MARKET_NAMES:
+        pattern=r"^\s*"+r"\s+".join(map(re.escape,name.split()))+r"\s+(\d+[,.]\d{2})\s+(\d+[,.]\d)\s+(\d+[,.]\d)\s+(\d+[,.]\d)\s+([+-]?\d+[,.]\d)\s+([+-]?\d+[,.]\d)\s*$"
+        hits=re.findall(pattern,table,re.M|re.I)
+        if len(hits)!=1:
+            raise ValueError("Expected one complete Table 4 row for "+name+"; no partial import.")
+        weight,old,prev,now,mom,yoy=(Decimal(x.replace(",",".")) for x in hits[0])
+        if not 0<weight<=100 or min(old,prev,now)<=0 or not market_growth_compatible(prev,now,mom) or not market_growth_compatible(old,now,yoy):
+            raise ValueError("Invalid weight/index or inconsistent published growth for "+name)
+        for month,idx in zip(MARKET_MONTHS,(old,prev,now)):
+            rows.append([name,"metro",month,str(idx),"2020-12=100",str(weight),
+                         str(mom) if month=="2026-06" else "",str(yoy) if month=="2026-06" else "",
+                         "2026-06","2026-11-05",5,6,"4","latest 12 months revisable"])
+    out=io.StringIO(newline="")
+    w=csv.writer(out,lineterminator="\n")
+    w.writerow(["metro_name_source","geography_level","observation_month","index_value","index_base",
+                "published_weight_percent","published_mom_percent","published_yoy_percent","release_month",
+                "publication_date","printed_page","pdf_page","source_table","revision_caveat"])
+    w.writerows(rows)
+    q={"metro_rows":2,"index_observations":6,"unique_metro_months":6,"published_change_percentages":4,
+       "published_weights":2,"growth_rounding_checks_passed":4,"index_base":"2020-12=100",
+       "observation_months":list(MARKET_MONTHS),"publication_date":"2026-11-05","printed_page":5,"pdf_page":6,
+       "continuous_time_series":False,"merged_with_002":False,"individual_sales":False}
+    return out.getvalue().encode("utf-8"),q
+
+def market_profile(raw):
+    import re
+    try:
+        from pypdf import PdfReader, __version__
+        from pypdf.errors import PdfReadError
+    except ImportError as exc:
+        raise ValueError("Install the existing tested dependency: pypdf=="+CODE_PDF_VERSION) from exc
+    if __version__!=CODE_PDF_VERSION or len(raw)>MARKET_MAX or not raw.startswith(b"%PDF-"):
+        raise ValueError("Expected bounded original PDF and tested pypdf version.")
+    try:
+        pdf=PdfReader(io.BytesIO(raw),strict=True)
+        if pdf.is_encrypted or not 12<=len(pdf.pages)<=20:
+            raise ValueError("Unexpected release page count or encryption.")
+        cover=" ".join(pdf.pages[0].extract_text().split()).casefold()
+        if not all(x in cover for x in ("p0160","residential property price index","june 2026","5 november 2026","statistics south africa")) or not re.search(r"residential property price index\s+june 2026",cover):
+            raise ValueError("Unexpected publication or release date.")
+        rights=" ".join(pdf.pages[11].extract_text().split()).casefold()
+        if not all(x in rights for x in ("copyright on this publication","acknowledge stats sa","own processing")):
+            raise ValueError("Unexpected printed page 11 source terms; review before import.")
+        data,q=market_table(pdf.pages[5].extract_text(extraction_mode="layout"))
+    except PdfReadError as exc:
+        raise ValueError("PDF parsing failed; no registration.") from exc
+    q["pdf_pages"]=len(pdf.pages)
+    return data,q
+
+def market_status(root):
+    path=root/MARKET_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-006","registered":False}
+    m=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-006","registered":True,**retention_status(m),
+            "known_local_paths":[x for x in (MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MANIFEST) if (root/x).exists()]}
+
+def import_market(root,intake,terms_reviewed,confirm,deadline=None,today=None):
+    today=today or date.today()
+    if not terms_reviewed or not date(2026,11,5)<=intake<=today or (deadline is not None and (deadline<=intake or today>=deadline)):
+        raise ValueError("Confirm applicable terms and actual valid intake/retention dates.")
+    raw=read_bounded(root/MARKET_RAW,MARKET_MAX)
+    digest=sha(raw)
+    existing=root/MARKET_MANIFEST
+    if existing.exists():
+        prior=json.loads(read_bounded(existing))
+        old_deadline=stored_deadline(prior)
+        if (prior["source_sha256"]!=digest or prior["first_intake_date"]!=intake.isoformat() or
+                (deadline is not None and deadline!=old_deadline) or
+                (old_deadline is not None and today>=old_deadline) or
+                prior.get("retention_policy")!=MARKET_POLICY or prior.get("visual_page_reviewed_by_owner") is not True):
+            raise ValueError("Registered source or retention differs; no overwrite/renewal.")
+        deadline=old_deadline
+    data,q=market_profile(raw)
+    if not existing.exists() and not confirm(data):
+        raise ValueError("Visual verification not confirmed; no registration.")
+    q["visual_page_reviewed_by_owner"]=True
+    m={"dataset_id":"HPI-DATA-006","manager_version":"0.5.0","source":"Statistics South Africa, P0160 June 2026",
+       "source_url":MARKET_URL,"publication_date":"2026-11-05",
+       "source_licence":"Stats SA publication printed page 11: attribution and identification of independent processing; private noncommercial project scope",
+       "attribution":"Statistics South Africa, Residential Property Price Index, June 2026, P0160, 5 November 2026, Table 4; independently processed by HPI.",
+       "source_identity_evidence":"Official URL owner attestation, checked publication and visually reviewed table; local hash not publisher checksum.",
+       "source_bytes":len(raw),"source_sha256":digest,"raw_path":MARKET_RAW,"first_intake_date":intake.isoformat(),
+       "terms_reviewed_by_owner":True,"visual_page_reviewed_by_owner":True,
+       "retention_policy":MARKET_POLICY,"retention":MARKET_RETENTION,
+       "do_not_retain_on_or_after":deadline.isoformat() if deadline else None,
+       "processed_path":MARKET_OUTPUT,"processed_sha256":sha(data),"quality_report":MARKET_REPORT,"quality":q}
+    planned=[(root/MARKET_OUTPUT,data),(root/MARKET_REPORT,json_bytes(q)),(existing,json_bytes(m))]
+    for path,content in planned:
+        check_target(path,content)
+    for path,content in planned:
+        publish(path,content)
+    return m
+
+def market_cli(root,args):
+    prior=json.loads(read_bounded(root/MARKET_MANIFEST)) if (root/MARKET_MANIFEST).exists() else None
+    intake=args.intake_date or (date.fromisoformat(prior["first_intake_date"]) if prior else date.fromisoformat(input("Actual PDF download date (YYYY-MM-DD): ").strip()))
+    reviewed=args.terms_reviewed or (prior["terms_reviewed_by_owner"] is True if prior else
+                                    input("Confirm printed page 11 terms, attribution and private processing (yes/no): ").strip().lower()=="yes")
+    def confirm(data):
+        print("\nPrivate preview: compare both Table 4 rows on PDF page 6 (printed page 5), cover and terms.")
+        print(data.decode("utf-8"))
+        return input("All six index observations, both weights and four changes visually match the official table (yes/no): ").strip().lower()=="yes"
+    m=import_market(root,intake,reviewed,confirm,args.retain_until)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":market_status(root)},indent=2))
+    return 0
+
+def market_self_test():
+    # Actual public metro labels, invented numeric observations only.
+    rows=["Table 4 - RPPI for all metropolitan areas",
+          "Weight Index (Dec 2020=100) Jun 2025 May 2026 Jun 2026",
+          "City of Cape Town   30,00   100,0   109,0   110,0   0,9   10,0",
+          "City of Johannesburg   20,00   90,0   99,0   100,0   1,0   11,1",
+          "The latest 12 months are subject to revision","Figure 4"]
+    pages=[["Statistics South Africa P0160 Residential Property Price Index June 2026","5 November 2026"]]+[["Invented page"] for _ in range(11)]
+    pages[5]=rows
+    pages[11]=["Stats SA has copyright on this publication; acknowledge Stats SA; own processing."]
+    raw=fixture_pdf(pages)
+    data,q=market_profile(raw)
+    assert q["index_observations"]==6 and q["growth_rounding_checks_passed"]==4
+    assert market_growth_compatible(Decimal("100.0"),Decimal("110.0"),Decimal("9.9"))
+    for bad in (rows[:2]+rows[3:],rows[:3]+[rows[2]]+rows[3:], [x.replace("10,0","90,0") for x in rows]):
+        try:
+            market_table("\n".join(bad))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Unexpected market table accepted")
+    day=date(2026,11,26)
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/MARKET_RAW,raw)
+        publish(root/RAW,b"untouched historical fixture")
+        try:
+            import_market(root,day,True,lambda _:False,today=day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Unreviewed table registered")
+        assert not (root/MARKET_MANIFEST).exists() and not (root/MARKET_OUTPUT).exists()
+        first=import_market(root,day,True,lambda d:d==data,today=day)
+        assert first==import_market(root,day,True,lambda _:False,today=day)
+        assert (root/RAW).read_bytes()==b"untouched historical fixture"
+        spec=("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None)
+        assert audit_registered(root,spec,today=day)["status"]=="integrity checks passed"
+        (root/MARKET_OUTPUT).write_bytes(data+b"\n")
+        try:
+            audit_registered(root,spec,today=day)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Changed output accepted")
+    print("PASS: invented market PDF, two metros, six observations, rounding intervals, refusal, repeat, historical isolation and integrity.")
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
@@ -1472,6 +1669,7 @@ def main():
             code_self_test()
             crosswalk_self_test()
             alias_self_test()
+            market_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -1482,12 +1680,14 @@ def main():
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0
         if args.status:
-            print(json.dumps(code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         initialise(root)
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-006":
+            return market_cli(root,args)
         if args.dataset == "HPI-DATA-005":
             return code_cli(root,args)
         if args.dataset == "HPI-DATA-004":

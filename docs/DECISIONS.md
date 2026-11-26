@@ -124,3 +124,7 @@ Owner approves evaluation of broader data-first South African property intellige
 ## Bounded contextual source research authority (26 November 2026)
 
 Owner approves contextual feasibility slice research for Stats SA RPPI and National Treasury Municipal Money, proposed metropolitan cohort, strict R0, preserving existing application and comparable-sales implementation. No new acquisition or material integration without applicable approval. [Exact source qualification and proposed intake scopes](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--bounded-contextual-slice-exact-source-qualification). No scope adoption, final market, phase acceptance, release or contact.
+
+## HPI-DATA-006 intake authority (26 November 2026)
+
+Owner explicitly approves bounded acquisition of one official Stats SA June 2026 P0160 PDF max 5 MiB, private processing and registration, strict R0. Preserve HPI-DATA-002; no merge. [Exact scope and adapter](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--approved-hpi-data-006-offline-registration). No Treasury intake, full time-series archive, material integration, commercial/public display, release or phase acceptance.
