@@ -126,3 +126,7 @@ Before an authorised research experiment: record signed/written permission or ap
 ## Post-contact status (26 November 2026)
 
 The one metadata-only email was sent; see [packet D](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md#d-actual-contact-event-and-process-correction-26-november-2026). No actual rights granted, reply not checked, no formal application or property rows. All operation gates remain. Future exact drafts require explicit approval. Independent IR1 design next; empirical SA4 blocked.
+
+## Independent audit legal gate (26 November 2026)
+
+[Audit](../engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#5-owner-requested-independent-critical-audit-26-november-2026) rechecked MPRA s44 excerpt and POPIA ss57–58 reproduced text. Neither proves a blanket prohibition or permission; source lineage, lawful processing, exact rights, required approvals, transfer/protection and retention/disposal remain open. No legal clearance; no source contact or intake.

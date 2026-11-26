@@ -104,3 +104,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## Post-contact continuity (26 November 2026)
 
 Owner authorised one concise metadata-only enquiry; Gmail returned SENT, no records/attachments. Exact shortened version not shown before transmission, acknowledged process error; owner requires review of exact recipient, subject, body and attachments plus explicit approval before every send. Primary account designated privately. No reply verified in this slice, no formal application or rights. [Independent readiness](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md) IR0 read-only assessment complete; IR1 finite local data contract/acceptance design next within P0.4/P0.6; no concurrent P-stage or premature SA7. External and independent planning lanes, original gate unchanged. No automated follow-up, actual intake, budget, architecture or scope change. SA4 empirical blocked; P0-C return point retained.
+
+## Critical audit handoff (26 November 2026)
+
+Owner-requested [critical audit](SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#5-owner-requested-independent-critical-audit-26-november-2026) completed at a871214. Conditional GO for IR1 delta design only; event completeness vs latest snapshot, dated area vs current export, valuation-selected vs all sales and joint cap requirements explicit. SA4 remains blocked, not overall mission no-go. No scope/implementation change; no duplicate desk work, further contact or new data. Historical contact proposal superseded. Original P0 estimates unchanged and not SA readiness.

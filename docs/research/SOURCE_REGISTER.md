@@ -103,3 +103,7 @@ See [legal and rights record](SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md)
 ## Post-contact status (26 November 2026)
 
 [Permission packet](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md) records one metadata-only contact sent to City, not an access grant. No reply verified, records or fees; no further contact without exact draft approval. [Independent readiness](../engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md) IR0 complete, IR1 contract design next.
+
+## Independent critical audit (26 November 2026)
+
+[Audit evidence and findings](../engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md#5-owner-requested-independent-critical-audit-26-november-2026) reverified CAHF 2018 p.77 and Gazette pp.5–6 visually; sMVPR Template C/D extracted text and policy 7.2–7.7 with screenshot failures, research page and DataFirst excerpts, POPIA text, MPRA excerpt. CAHF last-sale field does not prove full event history; current property-data extracts not proof of historical attributes. New bounded countersearch found no qualified substitute; not exhaustive. Exact Stats SA lag not independently reverified. No reply, rows, contact or permission. IR1 delta design next.
