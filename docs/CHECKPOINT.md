@@ -11,10 +11,10 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "phase_gate": "blocked",
   "task": {
     "id": "P0-FINER-CONTEXT-ACCESS-QUALIFICATION",
-    "status": "ready",
-    "objective": "Qualify exact terms and bounded transfer for two Cape Town profiles or document blocker.",
-    "scope": "Metadata only; no acquisition, contact, mapping or integration.",
-    "acceptance": "Verify item rights, retention, attribution, size, definitions and precision or explicit negative finding.",
+    "status": "blocked",
+    "objective": "Resolve profile-specific rights and size or receive owner route decision.",
+    "scope": "Metadata only; no intake, contact, mapping or integration.",
+    "acceptance": "Item rights, transfer bound, definitions and precision; otherwise park.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -29,14 +29,14 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/product/PRODUCT_BRIEF.md",
       "docs/engineering/DATA_MANAGER_V1.md"
     ],
-    "stop": "Stop before acquisition/contact or P1; unresolved rights/size require owner decision.",
+    "stop": "Await material external evidence or explicit owner decision; no repeated searches, intake or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
         [109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]
       ],
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [
-        [631,644,"## 26 November 2026 | Finer-than-metro contextual source qualifi","**Next:** qualify exact publisher terms and bounded transfer for"]
+        [646,660,"## 26 November 2026 | Finer-context access and rights decision","**Stop:** indispensable external evidence/owner decision. Recomm"]
       ],
       "docs/DECISIONS.md": [
         [13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],
@@ -55,7 +55,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]
       ],
       "docs/product/PRODUCT_BRIEF.md": [
-        [210,212,"### Finer-context research outcome (26 November 2026)","[Desk qualification](../research/SOUTH_AFRICAN_DATA_ACQUISITION_"]
+        [214,216,"### Finer-context access decision (26 November 2026)","[Access qualification](../research/SOUTH_AFRICAN_DATA_ACQUISITIO"]
       ],
       "docs/engineering/DATA_MANAGER_V1.md": [
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
@@ -63,7 +63,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
     }
   },
   "blockers": [
-    "D01/D02 unresolved; 007 parked; 006/008 proof passed; finer context rights/size unverified.",
+    "D01/D02 unresolved; 007 parked; 006/008 proof passed; finer-context intake no-go: item rights/size/precision.",
     "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
     "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
   ],
@@ -102,7 +102,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. Restored a9ff711, 7/7 exact-head runs successful; requery after research commit. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. Restored 4615039, 7/7 exact-head runs successful; requery after rights decision. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -122,7 +122,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual proof passed; prior finer context task](product/PRODUCT_BRIEF.md#actual-contextual-proof-outcome-and-next-research-question-26-november-2026). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 proof passed locally; 007 consumed. [Finer context review delivered](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-than-metro-contextual-source-qualification); rights/size next, no intake authority. No other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
+[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual proof passed; prior finer context task](product/PRODUCT_BRIEF.md#actual-contextual-proof-outcome-and-next-research-question-26-november-2026). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 proof passed locally; 007 consumed. [Finer context intake blocked](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-context-access-and-rights-decision); await evidence/owner route decision; no intake authority. No other intake, contact, joins, spend, provider changes, deployment, main merge or phase acceptance.
 
 ## Detailed engineering evidence and audit trail
 
