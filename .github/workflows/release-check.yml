@@ -63,11 +63,14 @@ jobs:
           python -m venv "$RUNNER_TEMP/hpi-auditor"
           runtime="$RUNNER_TEMP/hpi-runtime-review/bin/python"
           auditor="$RUNNER_TEMP/hpi-auditor/bin/python"
+          # Upgrade the inherited installer before resolving runtime packages.
+          "$runtime" -m pip install --only-binary=:all: --upgrade pip==26.3
+          "$auditor" -m pip install --only-binary=:all: --upgrade pip==26.3
           "$runtime" -m pip install --only-binary=:all: -r backend/requirements-runtime.txt
           "$runtime" -m pip check
           "$runtime" -m pip list --local --format=json > "$RUNNER_TEMP/runtime-inventory.json"
           "$runtime" -m pip freeze --all > "$RUNNER_TEMP/runtime-resolved.txt"
-          "$auditor" -m pip install 'pip-audit==2.10.1'
+          "$auditor" -m pip install --only-binary=:all: 'pip-audit==2.10.1'
           set +e
           "$auditor" -m pip_audit --strict --disable-pip --no-deps -r "$RUNNER_TEMP/runtime-resolved.txt" --format=json --output "$RUNNER_TEMP/python-audit-raw.json"
           code=$?
