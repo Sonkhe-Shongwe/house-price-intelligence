@@ -10,11 +10,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-D11-DBE-OFFLINE-IMPORT-APPROVAL",
+    "id": "P0-D11-DBE-LOCAL-IMPORT",
     "status": "blocked",
-    "objective": "Obtain exact supplied Q3 CSV offline import authority.",
-    "scope": "Metadata only; supplied archive, no new download.",
-    "acceptance": "Confirm actual source terms and approve bounded projection/retention.",
+    "objective": "Verify DBE adapter and observe local import.",
+    "scope": "Exact approved Q3 offline import in Windows.",
+    "acceptance": "CI safeguards and local registration or STOP.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await owner approval; no row processing or registration.",
+    "stop": "Await focused CI and local run; no joins or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -51,7 +51,8 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"],
         [160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"],
         [164,166,"## AE0 GHSL one-time authority","Owner approves exact GHSL"],
-        [168,170,"## AE0 staged GHSL final authority","Owner approves exact staged"]
+        [168,170,"## AE0 staged GHSL final authority","Owner approves exact staged"],
+        [172,174,"## HPI-DATA-009 DBE offline authority","Owner confirms exact supplied"]
       ],
       "docs/P_PHASE_ROADMAP.md": [
         [13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],
@@ -69,7 +70,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [264,268,"## 27 November 2026 | D11 owner-supplied","Proposed one offline import"]
+        [270,274,"## 27 November 2026 | D11 approved","After focused CI succeeds"]
       ]
     }
   },
@@ -115,7 +116,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 652b1d4 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. a89e8d8 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -135,7 +136,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/parked. Local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. GHSL STOP MEMBERS, 14,082,630 bytes, consumed; Windows 9/9 passed. Staged GHSL STOP HTTP; raster not dispatched; Windows 18/18 passed. GHSL parked. D01/D02 unresolved; DBE supplied archive metadata checked; Q3 offline import approval pending. No intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 approved; CI and local import pending. No new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 

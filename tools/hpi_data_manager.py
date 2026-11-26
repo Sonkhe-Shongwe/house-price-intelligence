@@ -1058,8 +1058,11 @@ def audit_registered(root, spec, today=None):
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION}[sid]
-    if sid == "HPI-DATA-008":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION,"HPI-DATA-009":OPEN_RETENTION}[sid]
+    if sid == "HPI-DATA-009":
+        if m.get("retention_policy")!=OPEN_POLICY or m["retention"]!=OPEN_RETENTION:
+            raise ValueError("Unexpected DBE retention policy.")
+    elif sid == "HPI-DATA-008":
         if (m.get("retention_policy") != CENSUS_POLICY or m["retention"] != CENSUS_RETENTION or
                 m.get("visual_page_reviewed_by_owner") is not True):
             raise ValueError("Unexpected Census retention policy or visual review.")
@@ -1119,6 +1122,7 @@ def audit_workspace(root):
         ("HPI-DATA-006",MARKET_MANIFEST,MARKET_RAW,MARKET_OUTPUT,MARKET_REPORT,MARKET_MAX,None),
         treasury_spec(),
         census_spec(),
+        dbe_spec(),
     ]
     results = []
     for spec in specs:
@@ -2561,10 +2565,258 @@ def context_self_test(market_raw,census_raw):
 
 
 
+
+# D11: fixed owner-supplied institutional snapshot, offline only.
+DBE_FILE = "masterlist-2023-v1.zip"
+DBE_SHA = "7e395fa829063955f52eceaadf99d9f7bdbabf3ccd001242481dd3fe0de2a878"
+DBE_MEMBER = "masterlist-2023-q3-anon-v1.csv"
+DBE_RAW = "02_Raw_Data/"+DBE_FILE
+DBE_MANIFEST = "01_Source_Catalogue/HPI-DATA-009.json"
+DBE_OUTPUT = "03_Processed_Data/HPI-DATA-009/schools_q3_2023.csv"
+DBE_REPORT = "07_Reports/HPI-DATA-009_quality.json"
+DBE_HEADER = ("NatEmis OldNATEMIS NewNATEMIS DataYear Quarter Province Institution_Name DoE_Status Sector Type_DoE Phase_PED Specialisation OwnerLand OwnerBuild ExDept ExamNo ExamCentre PaypointNo ComponentNo GIS_Long GIS_Lat DMunCode DMunName LMunCode LMunName Ward_ID SP_Code SP_Name EIDistrict EICircuit Township_Village Suburb Town_City Section21 Section21_Function Quintile NAS NodalArea Registration_Date NoFeeSchool Urban_Rural Allocation Demarcation_From Demarcation_To Learners_2023 Educators_2023").split()
+DBE_FIELDS = ("NatEmis DataYear Quarter Province Institution_Name DoE_Status Sector Type_DoE Phase_PED GIS_Long GIS_Lat DMunCode LMunCode Ward_ID Suburb Town_City").split()
+DBE_MEMBERS = {"masterlist-2023-q"+str(q)+"-anon-v1."+ext for q in (2,3) for ext in ("csv","dta")}
+DBE_MISSING = {"", ".", "NA", "N/A", "NULL", "NAN", "-999", "-9999"}
+DBE_LIMIT = 10*MIB
+
+def dbe_profile(raw, expected=DBE_SHA):
+    import re
+    if len(raw)>DBE_LIMIT or sha(raw)!=expected:
+        raise ValueError("DBE_ARCHIVE_HASH_OR_CAP")
+    digest=hashlib.sha256()
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
+        entries=z.infolist()
+        if (len(entries)!=4 or {i.filename for i in entries}!=DBE_MEMBERS or
+                sum(i.file_size for i in entries)>64*MIB or
+                any(i.orig_filename!=i.filename or i.is_dir() or i.flag_bits&1 or
+                    stat.S_IFMT(i.external_attr>>16) not in (0,stat.S_IFREG) or
+                    (i.external_attr>>16)&0o111 or i.compress_type!=zipfile.ZIP_DEFLATED or
+                    not 0<i.file_size<=64*MIB for i in entries)):
+            raise ValueError("DBE_ARCHIVE_MEMBERS")
+        selected=z.getinfo(DBE_MEMBER)
+        if selected.file_size>16*MIB:
+            raise ValueError("DBE_CSV_CAP")
+        # Bounded selected member only; read through EOF to check CRC.
+        chunks=[]
+        size=0
+        with z.open(selected) as f:
+            while True:
+                chunk=f.read(min(65536,16*MIB-size+1))
+                if not chunk:
+                    break
+                size+=len(chunk)
+                if size>16*MIB:
+                    raise ValueError("DBE_CSV_CAP")
+                digest.update(chunk)
+                chunks.append(chunk)
+        if size!=selected.file_size:
+            raise ValueError("DBE_CSV_SIZE")
+    try:
+        reader=csv.reader(io.StringIO(b"".join(chunks).decode("utf-8-sig"),newline=""),strict=True)
+    except UnicodeError:
+        raise ValueError("DBE_CSV_ENCODING") from None
+    if next(reader,None)!=DBE_HEADER:
+        raise ValueError("DBE_CSV_HEADER")
+    indexes=[DBE_HEADER.index(k) for k in DBE_FIELDS]
+    records=[]
+    seen={}
+    missing={k:0 for k in DBE_FIELDS}
+    quality={"rows":0,"invalid_emis":0,"duplicate_emis_rows":0,"missing_coordinate_pairs":0,
+             "invalid_coordinate_pairs":0,"plausible_coordinate_pairs":0,"missing_status":0,
+             "missing_name":0,"excluded_identity_rows":0,"source_csv_bytes":size,
+             "source_csv_sha256":digest.hexdigest(),"source_epoch":"2023 Q3",
+             "coordinate_accuracy_verified":False,"current_school_status_verified":False,
+             "property_join":False,"network_requests":0}
+    def absent(v):
+        return v.strip().upper() in DBE_MISSING
+    def coord(value):
+        if len(value)>40 or not re.fullmatch(r"[+-]?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)(?:[eE][+-]?[0-9]{1,2})?",value):
+            raise ValueError("coordinate syntax")
+        n=Decimal(value)
+        if not n.is_finite() or abs(n.as_tuple().exponent)>40:
+            raise ValueError("coordinate range")
+        return n
+    for row in reader:
+        quality["rows"]+=1
+        if quality["rows"]>100000 or len(row)!=len(DBE_HEADER):
+            raise ValueError("DBE_ROW_LIMIT_OR_WIDTH")
+        values=[row[i].strip() for i in indexes]
+        if any(len(v)>512 or any(ord(c)<32 or ord(c)==127 for c in v) for v in values):
+            raise ValueError("DBE_FIELD_LENGTH_OR_CONTROL")
+        r=dict(zip(DBE_FIELDS,values))
+        if r["DataYear"]!="2023" or r["Quarter"].casefold() not in ("3","q3","quarter 3","3.0"):
+            raise ValueError("DBE_VINTAGE")
+        for k in DBE_FIELDS:
+            if absent(r[k]):
+                missing[k]+=1
+                r[k]=""
+        eid=r["NatEmis"]
+        valid_id=bool(re.fullmatch(r"[0-9]{9}",eid)) and eid!="000000000"
+        if not valid_id:
+            quality["invalid_emis"]+=1
+        else:
+            seen[eid]=seen.get(eid,0)+1
+        if not r["DoE_Status"]:
+            quality["missing_status"]+=1
+        if not r["Institution_Name"]:
+            quality["missing_name"]+=1
+        if not r["GIS_Long"] or not r["GIS_Lat"]:
+            quality["missing_coordinate_pairs"]+=1
+            r["GIS_Long"]=r["GIS_Lat"]=""
+        else:
+            try:
+                lon,lat=coord(r["GIS_Long"]),coord(r["GIS_Lat"])
+                # Broad SA mainland/island envelope; not point-in-country validation.
+                if not (Decimal("16")<=lon<=Decimal("39") and Decimal("-48")<=lat<=Decimal("-22")):
+                    raise ValueError("coordinate bounds")
+                quality["plausible_coordinate_pairs"]+=1
+            except (ValueError,InvalidOperation):
+                quality["invalid_coordinate_pairs"]+=1
+                r["GIS_Long"]=r["GIS_Lat"]=""
+        # Identity fields retained as strings. Do not repair or infer duplicate IDs.
+        records.append((valid_id,r))
+    if not records:
+        raise ValueError("DBE_EMPTY")
+    out=io.StringIO(newline="")
+    writer=csv.writer(out,lineterminator="\n")
+    writer.writerow(DBE_FIELDS)
+    mapped=0
+    for valid,r in records:
+        duplicate=valid and seen[r["NatEmis"]]>1
+        if duplicate:
+            quality["duplicate_emis_rows"]+=1
+        if not valid or duplicate or not r["Institution_Name"]:
+            quality["excluded_identity_rows"]+=1
+            continue
+        if r["GIS_Long"] and r["GIS_Lat"]:
+            mapped+=1
+        # Prevent formula interpretation if an institutional text field is opened
+        # in a spreadsheet. Refuse instead of silently changing the source text.
+        if any(r[k].startswith(("=","+","-","@")) for k in DBE_FIELDS
+               if k not in ("GIS_Long","GIS_Lat")):
+            raise ValueError("DBE_UNSAFE_TEXT")
+        writer.writerow([r[k] for k in DBE_FIELDS])
+    quality["retained_institutions"]=quality["rows"]-quality["excluded_identity_rows"]
+    quality["retained_mapped_candidates"]=mapped
+    quality["retained_unmapped_candidates"]=quality["retained_institutions"]-mapped
+    quality["missing_fields"]=missing
+    quality["limitations"]="Historical institutional rows; coordinate envelope only, missing/invalid pairs blanked, ambiguous identities excluded, no current status, admissions, quality, true nearest school or price claim."
+    if not mapped:
+        raise ValueError("DBE_NO_MAPPED_CANDIDATES")
+    return out.getvalue().encode("utf-8"),quality
+
+def dbe_spec():
+    return ("HPI-DATA-009",DBE_MANIFEST,DBE_RAW,DBE_OUTPUT,DBE_REPORT,DBE_LIMIT,DBE_SHA)
+
+def dbe_status(root):
+    path=root/DBE_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-009","registered":False}
+    m=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-009","registered":True,**retention_status(m),
+            "known_local_paths":[x for x in (DBE_RAW,DBE_OUTPUT,DBE_REPORT,DBE_MANIFEST) if (root/x).exists()]}
+
+def import_dbe(root,intake,terms_reviewed,deadline=None,today=None,expected=DBE_SHA):
+    root=workspace(root)
+    today=today or date.today()
+    if not terms_reviewed or not date(2023,7,1)<=intake<=today:
+        raise ValueError("DBE_TERMS_OR_INTAKE")
+    retention=retention_fields(root,DBE_MANIFEST,intake,deadline,today,OPEN_RETENTION)
+    raw=read_bounded(root/DBE_RAW,DBE_LIMIT)
+    data,q=dbe_profile(raw,expected)
+    m={"dataset_id":"HPI-DATA-009","manager_version":"0.8.0",
+       "source":"Department of Basic Education, Master List of Schools 2023, v1, Q3; UCT DataFirst",
+       "source_url":"https://datafirst.uct.ac.za/dataportal/index.php/catalog/985",
+       "doi":"10.25828/1f7t-hn28","catalogue_licence":"CC BY; version not specified",
+       "attribution":"Department of Basic Education (DBE), Master List of Schools 2023 v1, UCT DataFirst; HPI field selection and coordinate screening.",
+       "source_identity_evidence":"Owner-supplied snapshot hash, not publisher checksum.",
+       "source_bytes":len(raw),"source_sha256":sha(raw),"raw_path":DBE_RAW,
+       "first_intake_date":intake.isoformat(),"terms_reviewed_by_owner":True,**retention,
+       "processed_path":DBE_OUTPUT,"processed_sha256":sha(data),"quality_report":DBE_REPORT,"quality":q}
+    planned=[(root/DBE_OUTPUT,data),(root/DBE_REPORT,json_bytes(q)),(root/DBE_MANIFEST,json_bytes(m))]
+    for p,b in planned:
+        check_target(p,b)
+    for p,b in planned:
+        publish(p,b)
+    return m
+
+def dbe_cli(root,args):
+    prior=json.loads(read_bounded(root/DBE_MANIFEST)) if (root/DBE_MANIFEST).exists() else None
+    intake=args.intake_date or (date.fromisoformat(prior["first_intake_date"]) if prior else date.fromisoformat(input("Actual first download date (YYYY-MM-DD): ").strip()))
+    reviewed=args.terms_reviewed or (prior["terms_reviewed_by_owner"] is True if prior else
+                                    input("Confirm applicable DBE/DataFirst terms and private retention (yes/no): ").strip().lower()=="yes")
+    m=import_dbe(root,intake,reviewed,args.retain_until)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":dbe_status(root)},indent=2))
+    return 0
+
+def dbe_self_test():
+    def fixture(changes=None, duplicate=False, invalid=False, extra=False):
+        base={k:"" for k in DBE_HEADER}
+        base.update({"NatEmis":"012345678","DataYear":"2023","Quarter":"3","Institution_Name":"Invented school",
+                     "Province":"Fixture","DoE_Status":"Open","GIS_Long":"28.1","GIS_Lat":"-26.2",
+                     "PaypointNo":"UNAPPROVED_FIXTURE"})
+        rows=[base]
+        second=dict(base,NatEmis="012345679",GIS_Long="0",GIS_Lat="0")
+        rows.append(second)
+        if duplicate:
+            rows.append(dict(second))
+        if invalid:
+            rows.append(dict(base,NatEmis="bad"))
+        if changes:
+            rows[0].update(changes)
+        f=io.StringIO(newline="")
+        w=csv.DictWriter(f,fieldnames=DBE_HEADER)
+        w.writeheader();w.writerows(rows)
+        buf=io.BytesIO()
+        with zipfile.ZipFile(buf,"w",compression=zipfile.ZIP_DEFLATED) as z:
+            for name in DBE_MEMBERS:
+                z.writestr(name,f.getvalue() if name==DBE_MEMBER else "not inspected")
+            if extra:
+                z.writestr("../unexpected","fixture")
+        return buf.getvalue()
+    def reject(fn,code):
+        try:
+            fn()
+        except ValueError as exc:
+            assert code in str(exc)
+            return
+        raise AssertionError("Expected refusal "+code)
+    raw=fixture(duplicate=True,invalid=True)
+    data,q=dbe_profile(raw,sha(raw))
+    assert q["rows"]==4 and q["retained_institutions"]==1 and q["retained_mapped_candidates"]==1
+    assert q["duplicate_emis_rows"]==2 and q["invalid_emis"]==1
+    assert b"012345678" in data and b"UNAPPROVED_FIXTURE" not in data and b"PaypointNo" not in data
+    raw2=fixture()
+    data2,q2=dbe_profile(raw2,sha(raw2))
+    assert q2["retained_unmapped_candidates"]==1 and q2["invalid_coordinate_pairs"]==1
+    reject(lambda:dbe_profile(raw,"bad"),"HASH")
+    for changes,code in (({"Quarter":"2"},"VINTAGE"),({"Institution_Name":"=1+1"},"UNSAFE_TEXT")):
+        bad=fixture(changes)
+        reject(lambda:dbe_profile(bad,sha(bad)),code)
+    bad=fixture(extra=True)
+    reject(lambda:dbe_profile(bad,sha(bad)),"MEMBERS")
+    with tempfile.TemporaryDirectory() as tmp:
+        root=workspace(Path(tmp)/"private")
+        initialise(root)
+        publish(root/DBE_RAW,raw2)
+        day=date(2026,11,27)
+        reject(lambda:import_dbe(root,day,False,today=day,expected=sha(raw2)),"TERMS")
+        first=import_dbe(root,day,True,today=day,expected=sha(raw2))
+        assert import_dbe(root,day,True,today=day,expected=sha(raw2))==first
+        spec=dbe_spec()[:-1]+(sha(raw2),)
+        assert audit_registered(root,spec,day)["status"]=="integrity checks passed"
+        (root/DBE_OUTPUT).write_bytes(b"changed")
+        reject(lambda:audit_registered(root,spec,day),"checksum")
+        reject(lambda:import_dbe(root,day,True,today=day,expected=sha(raw2)),"no overwrite")
+        assert (root/DBE_OUTPUT).read_bytes()==b"changed"
+    print("PASS: DBE exact archive, selected Q3 projection, vintage, coordinate abstention, duplicate exclusion, terms, audit and no overwrite.")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--context-proof",action="store_true",help="Private read-only independent 006/008 contextual reports")
@@ -2619,6 +2871,7 @@ def main():
             treasury_self_test()
             census_raw=census_self_test()
             context_self_test(market_raw,census_raw)
+            dbe_self_test()
             return 0
         root = workspace(args.root)
         if args.audit_workspace:
@@ -2629,7 +2882,7 @@ def main():
             print(json.dumps(remove_internal_deadlines(root),indent=2))
             return 0
         if args.status:
-            print(json.dumps(census_status(root) if args.dataset == "HPI-DATA-008" else treasury_status(root) if args.dataset == "HPI-DATA-007" else market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
+            print(json.dumps(dbe_status(root) if args.dataset == "HPI-DATA-009" else census_status(root) if args.dataset == "HPI-DATA-008" else treasury_status(root) if args.dataset == "HPI-DATA-007" else market_status(root) if args.dataset == "HPI-DATA-006" else code_status(root) if args.dataset == "HPI-DATA-005" else building_status(root) if args.dataset == "HPI-DATA-004" else district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         if args.dataset == "HPI-DATA-007":
             raise ValueError("007 requires explicit --acquire-treasury; use --status for an existing attempt.")
@@ -2637,6 +2890,8 @@ def main():
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-009":
+            return dbe_cli(root,args)
         if args.dataset == "HPI-DATA-008":
             return census_cli(root,args)
         if args.dataset == "HPI-DATA-006":

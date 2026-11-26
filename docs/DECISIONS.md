@@ -168,3 +168,7 @@ Owner approves exact GHSL 25 MiB/one-request R0 raster pilot and applicable sour
 ## AE0 staged GHSL final authority (27 November 2026)
 
 Owner approves exact staged index-first and conditional raster requests, 27 MiB combined, external copyright contract, R0, verified safeguards and private Windows only. [Scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--ae0-ghsl-staged-geometry-and-rights-proposal). Prior attempt consumed. No replay, other intake, joins, registration, release or phase acceptance.
+
+## HPI-DATA-009 DBE offline authority (27 November 2026)
+
+Owner confirms exact supplied DBE Q3 CSV private offline import, retention, source terms and Data Manager integration at R0. [Scope](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--d11-owner-supplied-dbe-archive-metadata-and-bounded-import-proposal). Windows private only; no new acquisition, app use, join, publication or phase acceptance.
