@@ -72,3 +72,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## SA1 handoff (26 November 2026)
 
 [Local ecosystem and buyer research](../product/SOUTH_AFRICAN_ECOSYSTEM_AND_BUYER_RESEARCH_2026-11-26.md) satisfies SA1 bounded desk stopping criterion: local lifecycle, price/type distinctions, buyer hypothesis, nine alternatives vs JT1-JT6 and four falsifiable hypotheses. Existing portals, bank guides and specialist reports materially overlap; no unique or superior claim. Next SA2 in bounded source-family slices: SA2.1 official national Deeds/CSG/Stats SA source and field/grain assessment, SA2.2 municipal routes (Cape Town first, others evidence-led), SA2.3 academic/commercial/alternative and contextual routes, SA2.4 synthesis/viability and SA3 handoff. These are execution slices, not extra mandatory gates; combine where evidence sufficient. No new live data, external contact, final market or scope approval.
+
+## SA2.1 handoff (26 November 2026)
+
+[Acquisition record](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) records national registry/eDRS conventional paid route (Gazette 54225, pp.5–6 screenshots), SG21/CSG and provincial metadata as conditional identity, Stats SA aggregate context, and a promising municipal Template D sales-file schema. No real data acquired, rights or R0 route established. SA2.2 municipal routes next, Cape Town first; examine exact municipal sales-file, open data and authorised research access candidates rather than relying on a public roll or inspection UI. Preserve gates.

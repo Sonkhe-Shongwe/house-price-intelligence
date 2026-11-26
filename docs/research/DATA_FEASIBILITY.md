@@ -236,3 +236,7 @@ Local design implications to assess, not implement: ZAR, square metres, South Af
 ## 26 November | HPI-SA mission overlay
 
 Owner requested comprehensive dedicated South African mission and return to P0-C if it fails. [Mission directive](../engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md) governs SA0-SA9. Ordinary P0-C paused at supported-boundary review, prior evidence preserved. SA0 documented official Cape Town independent research request and open-data suggestion routes, no approval/availability/cost guarantee or contact. SA1 national ecosystem and customer research next, SA2 source-family assessment and SA3 permissions follow. No property acquisition, architecture migration or final market change. All previous empirical results, R0 and rights/protection gates retained.
+
+## HPI-SA SA2.1 national assessment (26 November 2026)
+
+See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): published conventional Deeds fees conflict with R0, eDRS digital access not bulk rights, CSG/SG21 potentially supports identity, Stats SA context only. Municipal valuation sales-file schema materially strengthens local research route. No empirical data or rights. SA2.2 municipal assessment next; original P0-C remains paused.
