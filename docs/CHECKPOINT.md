@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-FINER-CONTEXT-ACCESS-QUALIFICATION",
+    "id": "P0-AE0-LIVE-PILOT-QUALIFICATION",
     "status": "blocked",
-    "objective": "Resolve profile-specific rights and size or receive owner route decision.",
-    "scope": "Metadata only; no intake, contact, mapping or integration.",
-    "acceptance": "Item rights, transfer bound, definitions and precision; otherwise park.",
+    "objective": "Obtain exact bounded World Bank pilot approval or alternative qualified source.",
+    "scope": "Metadata and synthetic only; no live dispatch until explicit approval.",
+    "acceptance": "Exact scope/terms approval, safe transport and attempt guard before dispatch.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -22,14 +22,16 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/P_PHASE_ROADMAP.md",
       "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md",
       "docs/product/PRODUCT_BRIEF.md",
-      "docs/engineering/DATA_MANAGER_V1.md"
+      "docs/engineering/DATA_MANAGER_V1.md",
+      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
     "evidence": [
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
       "docs/product/PRODUCT_BRIEF.md",
-      "docs/engineering/DATA_MANAGER_V1.md"
+      "docs/engineering/DATA_MANAGER_V1.md",
+      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await material external evidence or explicit owner decision; no repeated searches, intake or P1.",
+    "stop": "Await explicit bounded pilot approval; no live acquisition or P1.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -59,6 +61,9 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       ],
       "docs/engineering/DATA_MANAGER_V1.md": [
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
+      ],
+      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
+        [57,67,"## 26 November 2026 | AE0 real-source qualification","Acceptance: exactly two distinct years"]
       ]
     }
   },
@@ -102,7 +107,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. Restored 9147fc4, 7/7 exact-head runs successful; requery after side proof. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. Restored cc5b0ac, 10/10 exact-head workflows passed; requery after qualification. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -122,7 +127,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-[005 import evidence](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-005-empirical-import-and-proposed-crosswalk): complete; 52/52 candidates; contextual source review delivered; 006 registered; [Contextual proof passed; prior finer context task](product/PRODUCT_BRIEF.md#actual-contextual-proof-outcome-and-next-research-question-26-november-2026). P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk work and IR1/IR3 complete; IR2 not required now; SA4 blocked. Existing private drafts not submitted. Direct access first, existing enquiries parallel; exact recipient, subject, body and attachments require approval before EVERY email. No inbox observation in optimisation. 005 intake and both candidate experiments delivered; no downstream authority. 006/008 proof passed locally; 007 consumed. [Finer context intake blocked](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-context-access-and-rights-decision); await evidence/owner route decision; no intake authority. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): owner requested isolated fictional feasibility proof; source gate remains blocked. No intake, joins, spend, deployment or phase acceptance.
+P0-A accepted, B research complete, C/D/E conditional, F/G delivered not accepted. SA0-SA3 desk and IR1/IR3 complete; SA4 blocked. 006/008 proof passed; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): synthetic proof CI passed; cadastral exact terms/layer unresolved; World Bank two-request national aggregate pilot proposed, awaiting exact approval. No live dispatch, joins, contact, spend, deployment, main merge or phase acceptance. Every email requires exact draft approval.
 
 ## Detailed engineering evidence and audit trail
 
