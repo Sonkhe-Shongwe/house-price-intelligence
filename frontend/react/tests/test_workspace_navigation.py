@@ -70,9 +70,12 @@ class WorkspaceNavigationTests(unittest.TestCase):
                 if path_env:
                     dest=Path(path_env);dest.mkdir(parents=True,exist_ok=True)
                     page.screenshot(path=str(dest/"01-workspace-desktop.png"),full_page=True)
-                for width in (375,320):
+                for width in (1440,1366,1024,768,375,320):
                     page.set_viewport_size({"width":width,"height":800})
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"))
+                    for button in nav.get_by_role("button").all():
+                        self.assertGreaterEqual(button.bounding_box()["height"],44)
+                    if path_env and width in (1024,768):page.screenshot(path=str(dest/("workspace-"+str(width)+".png")),full_page=True)
                     expect(page.get_by_test_id("nav-methodology").locator("svg")).to_be_visible()
                     expect(page.get_by_test_id("nav-methodology")).to_have_accessible_name("Methodology")
                     page.get_by_test_id("nav-methodology").focus()

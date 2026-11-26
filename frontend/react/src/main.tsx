@@ -5,4 +5,5 @@ import './style.css';
 import './productRefinement.css';
 import './icons.css';
 import './ui.css';
+import './responsive.css';
 createRoot(document.getElementById('root')!).render(window.location.pathname==='/private-beta-rehearsal'?<PrivateBetaRehearsal/>:<BuyerWorkflow/>);

@@ -449,8 +449,13 @@ class HistoricalReaderTests(unittest.TestCase):
                         })"""))
                         shot("supported-dossier",page.get_by_test_id("beta-result"))
                         shot("investigation-full")
+                        for width,height in ((1440,1000),(1366,850),(1024,768),(768,1024),(375,850),(320,800),(800,375)):
+                            page.set_viewport_size({"width":width,"height":height})
+                            self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"),f"private dossier overflow at {width}x{height}")
+                            expect(page.get_by_test_id("beta-sale").first).to_contain_text("525,000.01")
+                            self.assertGreaterEqual(page.get_by_test_id("evidence-next").bounding_box()["height"],44)
+                            if width in (1024,768,320):shot("dossier-"+str(width),page.get_by_test_id("beta-result"))
                         page.set_viewport_size({"width":375,"height":850})
-                        self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
                         table=page.get_by_role("region",name="Eligible sales table, scroll horizontally if needed")
                         table.focus()
                         expect(table).to_be_focused()
@@ -491,13 +496,13 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(frozen).to_contain_text("First property note")
                         expect(frozen).not_to_contain_text("Unsaved draft change")
                         original_viewport=page.viewport_size
-                        for width in (375,320):
-                            page.set_viewport_size({"width":width,"height":850})
+                        for width,height in ((1440,1000),(1366,850),(1024,768),(768,1024),(375,850),(320,800),(800,375)):
+                            page.set_viewport_size({"width":width,"height":height})
                             self.assertTrue(page.evaluate("document.documentElement.scrollWidth<=innerWidth+2"))
                             region=frozen.get_by_role("region")
                             self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
                             expect(frozen).to_contain_text("600,000.02")
-                            shot("comparison-"+str(width),frozen)
+                            if width in (1024,768,375,320):shot("comparison-"+str(width),frozen)
                         if original_viewport:page.set_viewport_size(original_viewport)
                         page.locator("#beta-note-0").fill("First property note")
                         # Reconstruct the service and identity boundary without
