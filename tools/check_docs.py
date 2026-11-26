@@ -7,6 +7,7 @@ External links and anchor fragments are not validated here.
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import re
 import sys
 from urllib.parse import unquote, urlsplit
@@ -79,8 +80,7 @@ def progress_errors(root: Path):
             errors.append(f"Roadmap summary does not show computed progress {expected_label}")
         if expected_label not in full.read_text(encoding="utf-8"):
             errors.append(f"Detailed roadmap does not show computed progress {expected_label}")
-        for rel in ("docs/CHECKPOINT.md", "docs/DOCUMENTATION_INDEX.md", "README.md",
-                    "docs/MASTER_CONTINUATION_PROMPT.md"):
+        for rel in ("docs/DOCUMENTATION_INDEX.md", "README.md"):
             if expected_label not in (root / rel).read_text(encoding="utf-8"):
                 errors.append(f"{rel}: current handoff lacks computed progress {expected_label}")
     except (OSError, ValueError) as exc:
@@ -97,7 +97,7 @@ def active_handoff_errors(root: Path):
     """
     required = {
         "README.md": ("--fixture-db", "PRs #5 and #6", "--frontend react", "protected-storage", "South African data foundation", "DATA_MANAGER_V1.md"),
-        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.9", "Standing engineering autonomy", "two-to-three-property shortlist", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
+        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt", "Standing engineering autonomy", "two-to-three-property shortlist", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/ROADMAP.md": ("P6 two-to-three-property shortlist",),
         "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md", "archive/CHECKPOINT_EVIDENCE_2026-11-26.md", "archive/DECISION_HISTORY_2026-11-26.md", "archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md"),
         "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),
@@ -147,14 +147,72 @@ def active_handoff_errors(root: Path):
     return errors
 
 
+def continuation_errors(root: Path):
+    """Check routing structure, not factual accuracy or authority."""
+    errors = []
+    try:
+        checkpoint = (root / "docs/CHECKPOINT.md").read_text(encoding="utf-8")
+        master = (root / "docs/MASTER_CONTINUATION_PROMPT.md").read_text(encoding="utf-8")
+        for name, content, limit in (("checkpoint", checkpoint, 12000), ("master", master, 8000)):
+            if len(content.encode("utf-8")) > limit:
+                errors.append(f"{name} exceeds bootstrap budget {limit}")
+        blocks = re.findall(r"(?ms)^\x60\x60\x60json\s*\n(.*?)^\x60\x60\x60\s*$", checkpoint)
+        if len(blocks) != 1:
+            raise ValueError("checkpoint must contain exactly one JSON routing block")
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ValueError(f"duplicate routing key: {key}")
+                result[key] = value
+            return result
+        state = json.loads(blocks[0], object_pairs_hook=unique)
+        keys = {"schema_version", "active_phase", "phase_gate", "task", "blockers", "parked", "authority", "history"}
+        if not isinstance(state, dict) or set(state) != keys or type(state["schema_version"]) is not int or state["schema_version"] != 1:
+            raise ValueError("invalid routing schema")
+        if state["active_phase"] not in [f"P{i}" for i in range(9)]:
+            raise ValueError("invalid active phase")
+        if state["phase_gate"] not in ("open", "blocked", "accepted"):
+            raise ValueError("invalid phase gate")
+        task = state["task"]
+        if not isinstance(task, dict) or set(task) != {"id", "status", "objective", "scope", "acceptance", "read", "evidence", "stop"}:
+            raise ValueError("invalid task fields")
+        if task["status"] not in ("ready", "blocked", "complete"):
+            raise ValueError("invalid task status")
+        for key in ("id", "objective", "scope", "acceptance", "stop"):
+            if not isinstance(task[key], str) or not task[key].strip():
+                raise ValueError(f"empty or invalid task {key}")
+        if not task["id"].startswith(state["active_phase"] + "-"):
+            raise ValueError("task ID must belong to active phase")
+        for key in ("blockers", "parked"):
+            if not isinstance(state[key], list) or any(not isinstance(v, str) or not v.strip() for v in state[key]):
+                raise ValueError(f"invalid {key}")
+        if (state["phase_gate"] == "blocked" or task["status"] == "blocked") and not state["blockers"]:
+            raise ValueError("blocked phase/task needs a blocker")
+        for key, refs in (("read", task["read"]), ("evidence", task["evidence"]), ("authority", state["authority"]), ("history", state["history"])):
+            if not isinstance(refs, list) or not refs or any(not isinstance(v, str) or not v.strip() for v in refs):
+                raise ValueError(f"invalid {key} references")
+            if len(set(refs)) != len(refs):
+                raise ValueError(f"duplicate {key} references")
+            for ref in refs:
+                target = (root / ref).resolve()
+                if Path(ref).is_absolute() or not target.is_relative_to(root.resolve()) or not target.is_file():
+                    raise ValueError(f"invalid {key} reference: {ref}")
+        if "docs/DECISIONS.md" not in state["authority"] or "docs/P_PHASE_ROADMAP.md" not in task["read"]:
+            raise ValueError("decision or roadmap authority missing")
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        errors.append(f"continuation: {exc}")
+    return errors
+
+
 def main():
-    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT)
+    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT) + continuation_errors(ROOT)
     if errors:
         print("Documentation checks failed:")
         for issue in errors:
             print("- " + issue)
         return 1
-    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants agree.")
+    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants and continuation routing agree.")
     print("This is not a semantic audit of all historical reports, external URLs or product acceptance.")
     return 0
 

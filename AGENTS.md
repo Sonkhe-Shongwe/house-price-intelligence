@@ -4,7 +4,7 @@ This repository builds a buyer-facing historical comparable-sales investigation 
 
 ## Restore context before editing
 
-1. Read [the documentation index](docs/DOCUMENTATION_INDEX.md), [current checkpoint](docs/CHECKPOINT.md), [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md), [decisions](docs/DECISIONS.md) and the relevant engineering/phase documents.
+1. Read [current checkpoint](docs/CHECKPOINT.md) and its JSON task routing; retrieve relevant sections of [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md), [decisions](docs/DECISIONS.md) and applicable contracts. Use [documentation index](docs/DOCUMENTATION_INDEX.md) for discovery.
 2. Use [Master Continuation Prompt](docs/MASTER_CONTINUATION_PROMPT.md) for cross-session operating method. Follow newer user directions and verified source evidence when they conflict with older descriptions.
 3. Verify current branch/HEAD, local changes and latest meaningful CI results. A GitHub copy does not expose an uninspected Windows working tree.
 4. Distinguish delivery P0-P8 from audit research phases 0-2.
@@ -15,7 +15,7 @@ Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEA
 
 ## Single-phase closure focus (26 November 2026)
 
-The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Apply the [P0 Discovery and Feasibility Directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) for the sequential P0-A to P0-G workstreams; begin P0-A.1 and use the checkpoint for the sole live task. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
+The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Apply the [P0 Discovery and Feasibility Directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) for the sequential P0-A to P0-G workstreams; use the checkpoint for the sole live task; do not restart P0-A.1. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
 
 ## Frontend quality standard and active release-readiness work (26 November 2026)
 
