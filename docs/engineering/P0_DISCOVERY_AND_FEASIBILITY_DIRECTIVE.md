@@ -101,3 +101,7 @@ Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but e
 ## P0-E handoff (26 November 2026)
 
 [Conditional technical/financial/operational feasibility](PRODUCTION_READINESS_V1.md#26-november-2026--p0-e-conditional-technical-financial-and-operational-feasibility) complete as bounded desk work. Retain existing stack; Render primary hosting candidate, Vercel alternative, neither approved; illustrative R0 envelope and explicit session, protection, quota, rights and deployment blockers. P0-F definitive product specification next, no phase exit, new provider, acquisition, code, scope or score change.
+
+## P0-F handoff (26 November 2026)
+
+[Canonical MVP requirements and conditional scope](../product/PRODUCT_BRIEF.md#26-november-2026--p0-f-definitive-mvp-requirements-and-conditional-scope) consolidates the accepted buyer direction, F1-F8 trace references, G1-G7/M1-M8, conditional source boundary and operational requirements. Bounded specification delivered; final market, rights, protection, applicable owner decisions and full acceptance remain open. P0-G independent conditional audit next, not phase closure or P1 advance. Preserve all scope, score, R0 and approval boundaries.
