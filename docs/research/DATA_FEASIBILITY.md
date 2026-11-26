@@ -248,3 +248,7 @@ See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26
 ## HPI-SA SA2.3 alternative source assessment (26 November 2026)
 
 See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): academic RPPI index vs raw deeds distinguished; CAHF historic municipal file use, Stats SA purchased input and registration lag, paid commercial and conditional contextual/manual routes. No lawful R0 sale-level source or local empirical evidence. SA2.4 synthesis next; original P0-C paused.
+
+## HPI-SA SA2.4 acquisition synthesis (26 November 2026)
+
+[South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): source families compared without numerical scoring or new access. Cape Town proposed permission route, Ekurhuleni/Joburg fallback; no qualified R0 sale-level source, local cohort or final geography. SA2 complete as desk research, GO SA3 desk qualification, real acquisition/release BLOCKED. Ordinary P0-C paused; all original gates retained.
