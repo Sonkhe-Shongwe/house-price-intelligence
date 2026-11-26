@@ -18,6 +18,7 @@
 | P0-A.2 buyer problem research | [Homebuyer problem research](product/HOMEBUYER_PROBLEM_RESEARCH_2026-11-26.md) | Verified bounded secondary research, pain and counterevidence; specific HPI demand unvalidated |
 | P0-A.3 customer segmentation | [Customer segmentation](product/CUSTOMER_SEGMENTATION_2026-11-26.md) | Verified bounded desk research; provisional behavioural primary audience, explicit excluded jobs; demand and market acceptance open |
 | P0-A.4 buyer personas | [Buyer personas](product/BUYER_PERSONAS_2026-11-26.md) | Verified bounded synthesis; one provisional behavioural persona and unfamiliar-market variation, validation and acceptance open |
+| P0-A.5 customer journey | [Customer journey map](product/CUSTOMER_JOURNEY_MAP_2026-11-26.md) | Verified bounded synthesis; lifecycle, HPI touchpoints, alternative paths, professional boundaries and existing contract traceability; observed journey unvalidated |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
 | Review Atlas / Terminal V1–V3 | [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) and [interactive HTML](../design-prototypes/hpi-atlas-terminal-study.html) | Dated fictional prototypes; Atlas subsequently explicitly owner-approved, core integrated |
 | Retained professional frontend quality directive | [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) | FE1–FE7 core qualified; quality standard retained, no new phase weights |
