@@ -240,3 +240,7 @@ Owner requested comprehensive dedicated South African mission and return to P0-C
 ## HPI-SA SA2.1 national assessment (26 November 2026)
 
 See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): published conventional Deeds fees conflict with R0, eDRS digital access not bulk rights, CSG/SG21 potentially supports identity, Stats SA context only. Municipal valuation sales-file schema materially strengthens local research route. No empirical data or rights. SA2.2 municipal assessment next; original P0-C remains paused.
+
+## HPI-SA SA2.2 municipal assessment (26 November 2026)
+
+See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): national professional Template D and multiple procurement specs substantiate possible sales-file route, not actual data. Cape Town first proposed permission route, Ekurhuleni second (restrictive terms), Joburg research precedent third. All named municipalities assessed; minimised request proposal unsent. No property-level rights/coverage, final city or R0 acquisition. SA2.3 alternative acquisition research next; original P0-C paused.
