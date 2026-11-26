@@ -365,10 +365,22 @@ class HistoricalReaderTests(unittest.TestCase):
                             ctx.add_cookies([{"name":name,"value":value,"url":base,"secure":True,"httpOnly":True,"sameSite":"Lax"}])
                             contexts.append(ctx)
                         page=contexts[0].new_page()
+                        # Disposable invented fixtures only. Mask recovery identifiers; never capture auth/cookies.
+                        from pathlib import Path
+                        shots=os.environ.get("HPI_RELEASE_SCREENSHOTS")
+                        def shot(name,locator=None):
+                            if not shots:return
+                            folder=Path(shots);folder.mkdir(parents=True,exist_ok=True)
+                            mask=[page.get_by_test_id("beta-id"),page.get_by_test_id("beta-comparison-id")]
+                            target=str(folder/("private-"+name+".png"))
+                            if locator is None:page.screenshot(path=target,full_page=True,mask=mask,animations="disabled")
+                            else:locator.screenshot(path=target,mask=mask,animations="disabled")
+                        page.set_viewport_size({"width":1440,"height":1000})
                         page.goto(base+"/private-beta-rehearsal")
                         expect(page.get_by_test_id("beta-nav-home")).to_have_attribute("aria-current","page")
                         expect(page.get_by_test_id("beta-workspace")).to_be_visible(timeout=15000)
                         expect(page.get_by_test_id("beta-search")).not_to_be_visible()
+                        shot("workspace")
                         page.get_by_test_id("beta-new-investigation").click()
                         page.get_by_test_id("beta-search").click()
                         expect(page.get_by_test_id("beta-match")).to_have_text("One eligible parcel candidate")
@@ -382,6 +394,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         page.get_by_role("button",name="Inspect comparable 2",exact=True).click()
                         expect(page.get_by_test_id("profile-age")).to_have_text("88 days earlier")
                         expect(page.get_by_test_id("profile-difference")).to_have_text("0%")
+                        shot("supported-dossier",page.get_by_test_id("beta-result"))
                         iid=page.get_by_test_id("beta-id").input_value()
                         page.get_by_test_id("beta-add-comparison").click()
                         page.locator("#beta-note-0").fill("First property note")
@@ -396,6 +409,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(page.get_by_test_id("beta-result")).to_contain_text("insufficient data")
                         expect(page.get_by_test_id("beta-sale")).to_have_count(0)
                         expect(page.get_by_test_id("evidence-profile")).to_have_count(0)
+                        shot("insufficient-dossier",page.get_by_test_id("beta-result"))
                         second=page.get_by_test_id("beta-id").input_value()
                         self.assertNotEqual(iid,second)
                         page.get_by_test_id("beta-add-comparison").click()
@@ -408,6 +422,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         expect(frozen.get_by_role("columnheader")).to_have_count(3)
                         expect(frozen.get_by_role("rowheader",name="Buyer-reported area")).to_be_visible()
                         expect(frozen.get_by_role("rowheader",name="Valuation")).to_be_visible()
+                        shot("comparison",frozen)
                         page.locator("#beta-note-0").fill("Unsaved draft change")
                         expect(frozen).to_contain_text("First property note")
                         expect(frozen).not_to_contain_text("Unsaved draft change")
@@ -418,6 +433,7 @@ class HistoricalReaderTests(unittest.TestCase):
                             region=frozen.get_by_role("region")
                             self.assertTrue(region.evaluate("e=>e.scrollWidth<=e.clientWidth+1"))
                             expect(frozen).to_contain_text("600,000.02")
+                            shot("comparison-"+str(width),frozen)
                         if original_viewport:page.set_viewport_size(original_viewport)
                         page.locator("#beta-note-0").fill("First property note")
                         # Reconstruct the service and identity boundary without
@@ -449,6 +465,7 @@ class HistoricalReaderTests(unittest.TestCase):
                         self.assertIsNone(new_writer.execute("SELECT nullif(current_setting(\'hpi.owner_id\',true),\'\')").fetchone()[0])
                         page.get_by_test_id("beta-nav-saved").click()
                         expect(page.get_by_test_id("beta-workspace-comparison")).not_to_have_count(0)
+                        shot("saved-workspace")
                         page.get_by_test_id("beta-workspace-comparison").first.click()
                         expect(page.get_by_test_id("beta-comparison")).to_be_visible(timeout=15000)
                         page.get_by_test_id("beta-comparison-id").fill(sid)

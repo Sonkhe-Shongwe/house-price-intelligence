@@ -1,3 +1,4 @@
+@import './designTokens.css';
 /* Product refinement: keep established interaction contracts; no external assets. */
 .source-shell{color:#19352e;background:#f5f7f3}
 .source-shell .source-topbar{background:#142f2b;min-height:73px}
@@ -64,3 +65,20 @@
 .source-shell .buyer-disabled-icon{color:#285d46}
 
 .source-shell .buyer-result-title>div:last-child small{color:#405b50}
+
+/* Integrated visual audit: align the fictional shell with the existing Atlas candidate.
+ * Keep layout and all semantic, focus, fixture and evidence contracts unchanged. */
+.source-shell{background:var(--hpi-atlas-canvas);color:var(--hpi-atlas-ink)}
+.source-shell .source-topbar{background:var(--hpi-atlas-ink)}
+.source-shell .hpi-sidebar{background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-shell-rule)}
+.source-shell .hpi-sidebar nav button[aria-current=page]{background:var(--hpi-atlas-table-head);border-color:var(--hpi-atlas-outline);box-shadow:inset 3px 0 var(--hpi-atlas-action)}
+.source-shell .buyer-pane,.source-shell .buyer-result,.source-shell .workspace-shell,.source-shell .hpi-metric,.source-shell .hpi-history-card{border-color:var(--hpi-atlas-shell-rule);border-radius:4px;box-shadow:none;background:var(--hpi-atlas-surface)}
+.source-shell .hpi-dossier-summary>div{background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-shell-rule);border-radius:3px}
+.source-shell .source-intro h1,.source-shell .hpi-page-heading h1{font-family:var(--hpi-atlas-display);font-weight:400}
+.source-shell .source-sale-list button[aria-pressed=true]{background:var(--hpi-atlas-table-head);box-shadow:inset 3px 0 var(--hpi-atlas-accent)}
+.source-shell .pi-sale-facts span{border-radius:3px;background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-rule)}
+.source-shell .pi-evidence-detail div{border-radius:3px;background:var(--hpi-atlas-quiet)}
+.source-shell .pi-comparison h3{font-family:var(--hpi-atlas-display);color:var(--hpi-atlas-ink)}
+.source-shell .buyer-pane input,.source-shell .workspace-input-line input,.source-shell .workspace-card textarea{border-color:var(--hpi-atlas-outline)}
+.source-shell :is(button,a,input,textarea,select,summary,[tabindex]):focus-visible{outline-color:var(--hpi-atlas-accent)}
+.source-shell .buyer-progress :is(button,input):focus-visible{outline-color:#ffda90}
