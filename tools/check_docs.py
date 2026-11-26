@@ -97,7 +97,7 @@ def active_handoff_errors(root: Path):
     """
     required = {
         "README.md": ("--fixture-db", "PRs #5 and #6", "--frontend react", "protected-storage"),
-        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.7", "Standing engineering autonomy", "two-to-three-property shortlist", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md"),
+        "docs/MASTER_CONTINUATION_PROMPT.md": ("Master Continuation Prompt v1.9", "Standing engineering autonomy", "two-to-three-property shortlist", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/ROADMAP.md": ("P6 two-to-three-property shortlist",),
         "docs/DOCUMENTATION_INDEX.md": ("PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md", "archive/CHECKPOINT_EVIDENCE_2026-11-26.md", "archive/DECISION_HISTORY_2026-11-26.md", "archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md"),
         "docs/GITHUB_SETUP.md": ("`development`", "git switch development", "git pull --ff-only origin development"),
@@ -106,8 +106,14 @@ def active_handoff_errors(root: Path):
             "## Current synthetic API and data contract on `development`",
             "`p3-draft-v0.3`", "`synthetic_address_candidates`",
         ),
-        "docs/CHECKPOINT.md": ("## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md"),
-        "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8"),
+        "docs/CHECKPOINT.md": ("## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
+        "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
+        "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": (
+            "P0-A Product foundation", "P0-B Market and competitive intelligence",
+            "P0-C Data research and feasibility", "P0-D Legal, privacy and ethics",
+            "P0-E Technical, financial and operational feasibility", "P0-F Definitive product specification",
+            "P0-G Acceptance and closure", "P0-A.1", "P0-A.10", "P0.1-P0.7",
+        ),
     }
     forbidden = {
         "README.md": ("not a public service or durable shortlist", "Actual provider-to-buyer integration, full protected storage"),

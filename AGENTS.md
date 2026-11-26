@@ -15,7 +15,7 @@ Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEA
 
 ## Single-phase closure focus (26 November 2026)
 
-The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
+The owner directed P0 to be the single active delivery phase after reviewing concurrent development. Follow the closure checklist in [P-stage roadmap](docs/P_PHASE_ROADMAP.md) and current checkpoint. Freeze unrelated P1-P8 work, preserve verified implementations, and allow only bounded dependencies necessary to resolve a named P0 acceptance criterion. Apply the [P0 Discovery and Feasibility Directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) for the sequential P0-A to P0-G workstreams; begin P0-A.1 and use the checkpoint for the sole live task. Record evidence and stop at an indispensable approval or rights blocker rather than creating optional tasks. Do not infer final market, rights, phase acceptance, or release approval from this sequencing decision.
 
 ## Frontend quality standard and active release-readiness work (26 November 2026)
 

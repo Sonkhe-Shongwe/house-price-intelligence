@@ -1,4 +1,4 @@
-# House Price Intelligence | Master Continuation Prompt v1.8
+# House Price Intelligence | Master Continuation Prompt v1.9
 
 **Purpose:** General-purpose continuation across sessions, phases, tools and workstreams. This prompt is not limited to P3, research or any particular technology stack. Its first duty is to restore the **current verified state** before deciding what to do.
 
@@ -12,13 +12,13 @@ Routine engineering within the approved scope is delegated: independently select
 
 ## Single-phase closure focus (26 November 2026)
 
-Owner directed commencement with P0 following the review of concurrent delivery. Use one active primary phase, explicit existing exit criteria, a fixed closure checklist and dependency exceptions only when required by a named criterion. Preserve all prior implementation and evidence; park unrelated improvements. Satisfied requirements are not routinely rebuilt. Closure requires evidence and any applicable owner approval; do not advance to the next phase while the active gate is unresolved, or fabricate acceptance to keep moving. At an indispensable blocker report the specific decision or evidence needed and stop unrelated work. This supersedes overlapping implementation as the current execution method; stage weights, gates, data rights, R0 and approval boundaries are unchanged.
+Owner directed commencement with P0 following the review of concurrent delivery. Use one active primary phase, explicit existing exit criteria, a fixed closure checklist and dependency exceptions only when required by a named criterion. Preserve all prior implementation and evidence; park unrelated improvements. Satisfied requirements are not routinely rebuilt. Closure requires evidence and any applicable owner approval; do not advance to the next phase while the active gate is unresolved, or fabricate acceptance to keep moving. At an indispensable blocker report the specific decision or evidence needed and stop unrelated work. Apply [P0 Discovery and Feasibility Directive](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md): sequential P0-A to P0-G, research/analysis/planning/implementation/verification with existing evidence reused. Workstream implementation means discovery deliverables or essential safe feasibility tests, not unrelated features. This supersedes overlapping implementation as the current execution method; stage weights, gates, data rights, R0 and approval boundaries are unchanged.
 
 ## Current working handoff (26 November 2026)
 
 Read [current checkpoint](CHECKPOINT.md) for the sole live handoff: **87.1%** approved weighted MVP estimate (24 November), R0, all full gates open. Exact application a90a101 passed 10/10, 206 backend, 40 React, 47 PostgreSQL runtime; Python/npm known-advisory and 14-view accessibility gates passed. FE1–FE7 core qualified, Atlas owner-approved; generated PMTiles contextual renderer verified. Real basemap proposal 02ff692 approved once, unused/deferred on upstream extractor security. Do not repeat completed frontend or fictional recovery drills.
 
-**Next: P0 discovery and feasibility closure.** Latest application [07db9cb](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/07db9cbe5d35f5b389a1df1abb06eb8573b6a67b) passed 10/10 workflows, runtime 48/48 including retention access-stop rehearsal. See the [P0 closure audit](P_PHASE_ROADMAP.md) and checkpoint for exact next steps. Existing candidate-market research supports bounded historical evidence; final market approval, property-entry boundary, permitted hosted retention/display and release feasibility remain open. Publisher contact deferred, no new real extraction or disclosure. P1-P8 implementation is parked; protected storage, confidentiality, access inventory, real-intake conditions, and P8 release approvals remain mandatory and unchanged. No deployment, new resources, service window or main merge. 
+**Next: P0-A.1 residential property industry research.** Follow the [P0 directive](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) and checkpoint; earlier P0.4-first order superseded by owner-requested comprehensive discovery strategy. Latest application [07db9cb](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/07db9cbe5d35f5b389a1df1abb06eb8573b6a67b) passed 10/10 workflows, runtime 48/48. Preserve the two-to-three-property shortlist and prior implementations. P0.1-P0.3 discovery evidence retained; customer/differentiation assumptions require refinement, property-entry, market acceptance, rights and release feasibility open. P1-P8 parked except indispensable named dependencies; no new data collection, publisher contact, rekey, service window, paid resource, deployment or main merge. The earlier documentation revision ddd0cab had two checker failures; see checkpoint for the correction and exact new verification state.
 
 The [detailed evidence archive](archive/CHECKPOINT_EVIDENCE_2026-11-26.md), [decision history](archive/DECISION_HISTORY_2026-11-26.md) and [delivery milestone history](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md) preserve the underlying chronology, original run references, failures, approvals and estimates. [Pre-audit master snapshot](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/a90a10113bec2aaf2f4ae137537045484de1c16b/docs/MASTER_CONTINUATION_PROMPT.md). The remainder of this prompt is the standing operating method, not a competing status ledger.
 
@@ -30,7 +30,7 @@ Read relevant current sources in order:
 
 1. Root `AGENTS.md` and any more-specific local engineering instructions, if available.
 2. `docs/DOCUMENTATION_INDEX.md` for canonical sources and document precedence.
-3. `docs/CHECKPOINT.md` for the newest verified handoff and next acceptance blocker.
+3. `docs/CHECKPOINT.md` for the newest verified handoff and next acceptance blocker; while P0 is active, read [the P0 directive](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) before selecting work.
 4. `docs/P_PHASE_ROADMAP.md` and `docs/DECISIONS.md` for delivery P0-P8, percentages, approved versus open choices, and phase gates.
 5. `docs/product/PRODUCT_BRIEF.md`, `docs/engineering/ENGINEERING_CONTRACT.md`, the active `docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md` and the relevant architecture/API or implementation contract, once created.
 6. `docs/research/SOURCE_REGISTER.md`, the latest dated Phase 0-2 or subsequent research findings, and `docs/AUTOMATED_DATA_AUDIT.md` when data is involved.
@@ -52,11 +52,11 @@ Prioritise, in order:
 
 - Correctness, safety, source provenance and protection of user or publisher data.
 - Unmet phase acceptance requirements and critical blockers.
-- A working buyer journey and integration of existing components on the permanent `development` branch with GitHub Actions, not repeated planning, short-lived branches per fix or review ZIPs.
+- When the active phase requires it, a working buyer journey and integration of existing components on the permanent `development` branch with GitHub Actions, not repeated planning, short-lived branches per fix or review ZIPs.
 - Regression prevention, maintainability and testable evidence.
 - Optional refinements only after the essential workflow is solid.
 
-For the selected task, establish the requirement, exact current implementation, smallest useful change, targeted tests and the result that would change the next decision. Reuse working code, agreed design and verified research rather than rediscovering them. Do not create elaborate proposals when a small implementation is already sufficiently justified.
+For the selected task, establish the requirement, current evidence or implementation, smallest useful discovery or engineering change, targeted verification and the result that would change the next decision. During P0 select the named discovery task before any application improvement. Reuse working code, agreed design and verified research rather than rediscovering them. Do not create elaborate proposals when a small implementation is already sufficiently justified.
 
 The checkpoint determines the active stage and next task. Revalidate it every session; never hard-code a previous stage as the permanent next step.
 

@@ -31,7 +31,8 @@ Evidence: [Phase 0](docs/research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](docs/
 | [Documentation index](docs/DOCUMENTATION_INDEX.md) | Canonical navigation, historical evidence and contracts |
 | [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md) | Acceptance gates and weights |
 | [Decisions](docs/DECISIONS.md) | Approved scope and open boundaries |
-| [Neon integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md) | Active cloud database workstream |
+| [P0 Discovery and Feasibility Directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) | Active discovery execution method and workstream criteria |
+| [Neon integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md) | Parked cloud database workstream; protection gates retained |
 | [Private beta](docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Conditional real-data scope |
 | [Product brief](docs/product/PRODUCT_BRIEF.md) | Buyer workflow |
 | [Lean engineering directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) | Eight-step lifecycle and Definition of Done |
@@ -50,7 +51,7 @@ Manual local runs are optional for debugging; see [Phase 0](audit/phase0/README.
 
 **Bounded flagship:** One supported geography and property class, user-entered enquiry, transparently selected historical comparables, insufficient-evidence handling, saved investigations and side-by-side shortlist comparison.
 
-**Next:** Owner deferred further rekey; confidential-backup gate remains open. Continue access/protected-storage, retention and permitted-use review for the approved owner-only scope, then qualify controlled real-data private beta. Actual combined invented identity integration already demonstrated; real and remaining lifecycle tests pending. Real regional basemap deferred and not a prerequisite to core beta. One conditional bounded extraction remains unused; no real collection until its gates are met. The final recruiter experience must run from one authorised HTTPS URL, without presenter-side terminal or infrastructure setup. See [checkpoint](docs/CHECKPOINT.md) and [P8 acceptance](docs/P_PHASE_ROADMAP.md).
+**Next:** P0 only, beginning P0-A.1 residential property industry research under the [P0 directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md). Preserve the integrated two-to-three-property shortlist and all verified later-phase implementations; P1-P8 parked except indispensable named dependencies. Existing protected-storage, confidentiality, permitted-use and private-beta gates remain open; publisher inquiry/rekey deferred, conditional real extraction unused. No public property display, deployment or main merge. The final recruiter experience still requires one authorised HTTPS URL without presenter-side terminal or infrastructure setup. See [checkpoint](docs/CHECKPOINT.md).
 
 **Conditional only:** Price prediction requires independent chronological evaluation and defensible uncertainty. Live listings, real-time valuations, mortgages, alerts and multi-market expansion are outside this MVP.
 
