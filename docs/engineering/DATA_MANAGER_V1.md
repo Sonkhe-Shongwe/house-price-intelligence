@@ -43,3 +43,13 @@ python tools/hpi_data_manager.py --root "$HOME\Downloads\HPI-Data-Workspace" --d
 ```
 
 Place the already supplied geoBoundaries-ZAF-ADM2_simplified.geojson in that workspace root or 02_Raw_Data first; no new download. The district adapter needs Shapely (already observed installed during HPI-DATA-001 on Windows, same Python environment required). It prompts for actual first intake date, applicable terms confirmation, and earlier exclusive deadline if applicable. --retain-until accepts an earlier date; existing manifest cannot be overwritten or extended. A second run reuses registered details. --status --dataset HPI-DATA-003 gives local registry status. Default remains RPPI; v0.1 RPPI manifest remains byte-compatible. --self-test runs both adapters with invented fixtures. CI installs test-only Shapely 2.1.2. No auto network, deletion, public data upload, or execution from untrusted PR. Only exact approved bytes accepted. District index is CSV (source name/ID, type, coordinate count, bounds, source year; official municipal code intentionally blank); source geometry stays in canonical raw file. No spatial join, topology or positional accuracy qualification. Source licence and supplied snapshot evidence limits in [acquisition record](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--hpi-data-003-approved-manager-integration). Actual Windows import/repeat not yet observed. Do not create another checkout or retain data after deadline.
+
+## Permanent Windows checkout and sibling workspace (26 November 2026)
+
+Owner established Downloads/HPI-Project with separate house-price-intelligence development checkout and HPI-Data-Workspace sibling. Clone succeeded; first district import stopped before processing because lexical parent traversal in the workspace guard incorrectly identified a sibling as inside Git. Absolute path workaround supplied. Corrected guard checks original path for symlink/reparse points, normalises parent traversal, rechecks the normalised path, and rejects actual Git ancestors. Synthetic regression covers sibling relative path from checkout and true nested Git refusal; no manifest version or output change. Run from existing checkout:
+
+```powershell
+python tools/hpi_data_manager.py --root "$HOME\Downloads\HPI-Project\HPI-Data-Workspace" --dataset HPI-DATA-003
+```
+
+No fresh clone, data move, security bypass or source download. Exact d5db086 implementation passed 7/7 CI before this fix; corrected revision CI and local import pending. Keep prior checkout untouched and private data outside Git.

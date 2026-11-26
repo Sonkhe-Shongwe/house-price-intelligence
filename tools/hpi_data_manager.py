@@ -6,6 +6,7 @@ from decimal import Decimal, InvalidOperation
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import stat
 import tempfile
@@ -40,9 +41,18 @@ def check_path(path):
             raise ValueError("Symlink/reparse point refused: " + str(part))
 
 def workspace(root):
-    root = Path(root).expanduser().absolute()
+    root = Path(root).expanduser()
+    if not root.is_absolute():
+        if root.anchor:
+            raise ValueError("Use a fully qualified path or ordinary relative path.")
+        root = Path.cwd() / root
+    # Inspect the original traversal before collapsing parent components, so
+    # a symlink or junction followed by '..' cannot evade the boundary check.
     check_path(root)
-    if any((p / ".git").exists() for p in (root, *root.parents)):
+    root = Path(os.path.normpath(root))
+    check_path(root)
+    if any((p / ".git").exists() or (p / ".git").is_symlink()
+           for p in (root, *root.parents)):
         raise ValueError("Use a private workspace outside every Git checkout.")
     return root
 
@@ -221,6 +231,23 @@ def self_test():
         (root/OUTPUT).write_text("existing different file")
         rejects(lambda: import_rppi(root,day,True,sha(archive),day))
         assert (root/OUTPUT).read_text() == "existing different file"
+        checkout = Path(tmp)/"checkout"
+        checkout.mkdir()
+        (checkout/".git").mkdir()
+        assert workspace(checkout/".."/"private") == root
+        previous_cwd = Path.cwd()
+        try:
+            os.chdir(checkout)
+            assert workspace(Path("..")/"private") == root
+            rejects(lambda: workspace(Path("..")/"checkout"/"nested"))
+            rejects(lambda: workspace(Path(".")))
+        finally:
+            os.chdir(previous_cwd)
+        # Windows symlink creation may require additional privileges.
+        if os.name != "nt":
+            alias = Path(tmp)/"alias"
+            alias.symlink_to(checkout, target_is_directory=True)
+            rejects(lambda: workspace(alias/".."/"private"))
         (root/".git").mkdir()
         rejects(lambda: workspace(root))
     print("PASS: offline import, limits, retention, exact-version, idempotence, no overwrite and Git boundary checks.")
