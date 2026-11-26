@@ -93,3 +93,7 @@ Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but e
 ## P0-D.2 handoff (26 November 2026)
 
 [Minimum operational privacy/ethics policy](PRIVATE_REAL_DATA_BETA_V1.md#26-november-2026--p0-d2-minimum-privacy-and-ethical-operational-policy) consolidates existing controls and gaps, including source restriction/expiry, correction, incident, dependent frozen evidence and verified disposal. Design only, no real-data clearance or enforcement. D.3 conditional legal/privacy review and P0-E handoff next; no duplicate research or speculative tasks. P0.5/P0.7 blocked, deferred contact/rekey preserved, SA clarification pending. No phase credit.
+
+## P0-D.3 handoff (26 November 2026)
+
+[Conditional legal/privacy feasibility review](PRIVATE_REAL_DATA_BETA_V1.md#26-november-2026--p0-d3-conditional-legal-and-privacy-feasibility-review) closes the bounded D desk deliverable, not P0.5/P0.7 or legal/rights/protection acceptance. Real intake, durable real evidence and release remain blocked. P0-E technical, financial and operational feasibility next: existing stack/CI, R0 provider allowances, bounded workload and storage/compute/recovery limits, protection/retention risks and browser-only release contingency. Retain SA priority and clarification watch, Cook clarification/rekey deferrals, all approvals and original score. No infrastructure changes, acquisition, contact or deployment.
