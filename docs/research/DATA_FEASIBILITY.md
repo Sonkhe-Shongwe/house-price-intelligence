@@ -244,3 +244,7 @@ See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26
 ## HPI-SA SA2.2 municipal assessment (26 November 2026)
 
 See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): national professional Template D and multiple procurement specs substantiate possible sales-file route, not actual data. Cape Town first proposed permission route, Ekurhuleni second (restrictive terms), Joburg research precedent third. All named municipalities assessed; minimised request proposal unsent. No property-level rights/coverage, final city or R0 acquisition. SA2.3 alternative acquisition research next; original P0-C paused.
+
+## HPI-SA SA2.3 alternative source assessment (26 November 2026)
+
+See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): academic RPPI index vs raw deeds distinguished; CAHF historic municipal file use, Stats SA purchased input and registration lag, paid commercial and conditional contextual/manual routes. No lawful R0 sale-level source or local empirical evidence. SA2.4 synthesis next; original P0-C paused.

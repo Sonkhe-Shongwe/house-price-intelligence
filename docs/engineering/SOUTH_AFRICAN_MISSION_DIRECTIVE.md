@@ -80,3 +80,7 @@ No adopted schema, stack migration or added must-haves yet. SA6 tests complexity
 ## SA2.2 handoff (26 November 2026)
 
 [Acquisition record](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) records SACPVP professional Template D, multiple municipal tender specifications, all named municipalities, explicit portal restrictions, and a minimised proposed request contract. Cape Town first proposed permission route, Ekurhuleni second, Joburg research precedent third. No licensed R0 sale dataset, measured coverage, contact or city approval. SA2.3 academic/commercial/alternative and contextual source routes next, then SA2.4 synthesis and SA3. No change to approval boundaries.
+
+## SA2.3 handoff (26 November 2026)
+
+[Acquisition record](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) assesses academic, commercial, manual and contextual routes. Stats SA 2026 method text confirms purchased data/average registration lag; CAHF 2018 p.77 visually verified historical Cape Town transaction file. No lawful R0 transaction dataset qualified. SA2.4 synthesis next, then SA3; no contact or actual data operations.
