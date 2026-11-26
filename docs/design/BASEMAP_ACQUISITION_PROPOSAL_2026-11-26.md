@@ -1,6 +1,6 @@
 # Bounded contextual basemap acquisition proposal | 26 November 2026
 
-**Status: pending explicit owner approval.** G1–G3/G5 fictional geography qualified, G4 research and G6 technical review recorded. Application 1d40d1e passed 10/10 workflows. Existing Atlas identity, 87.1% approved weighted MVP, R0 and all full P-stage gates unchanged. This proposal is one local/disposable regional basemap proof, not activation of property geometry, permission for real-property source extraction, hosted service or release.
+**Status: explicitly owner-approved 26 November 2026 at proposal commit 02ff692; one bounded attempt unused.** G1–G3/G5 fictional geography qualified, G4 research and G6 technical review recorded. Application 1d40d1e passed 10/10 workflows. Existing Atlas identity, 87.1% approved weighted MVP, R0 and all full P-stage gates unchanged. This proposal is one local/disposable regional basemap proof, not activation of property geometry, permission for real-property source extraction, hosted service or release.
 
 ## Fixed source and area
 
