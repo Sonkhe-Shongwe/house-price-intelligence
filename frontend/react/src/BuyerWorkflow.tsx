@@ -8,6 +8,7 @@ import GeoMapPanel from './GeoMapPanel';
 import HistoryPanel from './HistoryPanel';
 import Methodology from './Methodology';
 import BuyerEvidencePreview from './BuyerEvidencePreview';
+import EvidenceProfile from './EvidenceProfile';
 import './workspaceShell.css';
 import {fixtureFetch} from './fixtureFetch';
 
@@ -366,7 +367,7 @@ export default function BuyerWorkflow(){
           <div className="source-sale-detail" role="status" aria-live="polite"><small>SERVER MATCHING EXPLANATION</small>
             <p data-testid="buyer-explanation">{selected?selected.explanation:record.comparables.length
               ?'Choose a sale to inspect its exact original matching explanation.'
-              :'No qualified comparable sales were returned by the Python matcher.'}</p>{selected&&<dl className="pi-evidence-detail" data-testid="sale-evidence-detail"><div><dt>Recorded document</dt><dd>{selected.document}</dd></div><div><dt>Earlier sale</dt><dd>{selected.saleDate}</dd></div><div><dt>Area difference</dt><dd>{selected.areaDifferencePct}%</dd></div><div><dt>Age at analysis</dt><dd>{selected.ageDays} days</dd></div></dl>}</div></article>
+              :'No qualified comparable sales were returned by the Python matcher.'}</p>{selected&&<dl className="pi-evidence-detail" data-testid="sale-evidence-detail"><div><dt>Recorded document</dt><dd>{selected.document}</dd></div><div><dt>Earlier sale</dt><dd>{selected.saleDate}</dd></div><div><dt>Area difference</dt><dd>{selected.areaDifferencePct}%</dd></div><div><dt>Age at analysis</dt><dd>{selected.ageDays} days</dd></div></dl>}</div>{selected&&<EvidenceProfile facts={selected}/>}</article>
           {view==='investigate'&&<GeoMapPanel key={record.investigationId} record={record} selected={activeRank} onSelect={setActiveRank}/>}</div>
         <details className="hpi-provenance" open><summary>Source record and investigation details</summary><div className="buyer-provenance"><div><small>Investigation ID</small><strong data-testid="buyer-saved-id">{record.investigationId}</strong></div>
           <div><small>User-reported asking price</small><strong>{record.askingPriceText}</strong></div>

@@ -22,6 +22,7 @@ class ProductRefinementTests(unittest.TestCase):
                 expect(sale).to_have_attribute("aria-pressed","true")
                 expect(page.get_by_test_id("sale-evidence-detail")).to_contain_text("Area difference")
                 expect(page.get_by_test_id("sale-evidence-detail")).to_contain_text("Age at analysis")
+                expect(page.get_by_test_id("evidence-profile")).to_be_visible()
                 folder=os.environ.get("HPI_WORKSPACE_SCREENSHOTS")
                 if folder:
                     Path(folder).mkdir(parents=True,exist_ok=True)

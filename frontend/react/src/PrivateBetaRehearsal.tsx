@@ -2,11 +2,12 @@
 import {useState} from 'react';
 import {fixtureFetch} from './fixtureFetch';
 import {formatExactUsd} from './evidenceBridge';
+import EvidenceProfile from './EvidenceProfile';
 import './buyerWorkflow.css';
 import './privateWorkspace.css';
 const ROOT='/v1/private-beta-rehearsal';
 type Sale={rank:number;sale_date:string;sale_price_usd:string;assessment_year:number;assessed_area_sqft:number;area_difference_pct:number;age_days:number;location_evidence:string};
-type Result={investigation_id:string;status:string;analysis_date:string;selected_count:number;sales:Sale[];asking_price_usd:string|null};
+type Result={investigation_id:string;status:string;analysis_date:string;selected_count:number;sales:Sale[];asking_price_usd:string|null;buyer_reported_area_sqft:number;provenance:{build_revision:string;retrieved_at_utc:string}};
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 function record(x:unknown):Record<string,unknown>{
   if(!x||typeof x!=='object'||Array.isArray(x))throw Error('Unavailable');
@@ -14,6 +15,11 @@ function record(x:unknown):Record<string,unknown>{
 }
 function exact(r:Record<string,unknown>,keys:string){
   if(Object.keys(r).sort().join(' ')!==keys.split(' ').sort().join(' '))throw Error('Unavailable');
+}
+function dateOnly(x:unknown):x is string{
+  if(typeof x!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(x))return false;
+  const t=Date.parse(x+'T00:00:00Z');
+  return Number.isFinite(t)&&new Date(t).toISOString().slice(0,10)===x;
 }
 function decode(x:unknown):Result{
   const r=record(x);
@@ -24,16 +30,22 @@ function decode(x:unknown):Result{
     ||typeof r.investigation_id!=='string'||!UUID.test(r.investigation_id)
     ||r.valuation!==null||r.geometry_available!==false||r.building_identity_verified!==false
     ||p.publisher_attributed!==false||p.historical_asof_verified!==false||p.public_display_approved!==false
-    ||r.asking_price_source!=='buyer_reported'||typeof r.analysis_date!=='string'
+    ||r.asking_price_source!=='buyer_reported'||!dateOnly(r.analysis_date)
+    ||typeof r.buyer_reported_area_sqft!=='number'||!Number.isFinite(r.buyer_reported_area_sqft)||r.buyer_reported_area_sqft<=0
+    ||typeof p.build_revision!=='string'||!p.build_revision||typeof p.retrieved_at_utc!=='string'||!Number.isFinite(Date.parse(p.retrieved_at_utc))
     ||!['supported_neighbourhood','exploratory_spatial','insufficient_data','out_of_coverage'].includes(String(r.status))
     ||!Array.isArray(r.sales)||r.sales.length!==r.selected_count||r.sales.length>5
+    ||!((r.status==='supported_neighbourhood'&&r.tier==='same_neighborhood'&&r.sales.length>=3)||(r.status==='exploratory_spatial'&&r.tier==='spatial_fallback'&&r.sales.length>=3)||((r.status==='insufficient_data'||r.status==='out_of_coverage')&&r.tier==='none'&&r.sales.length===0))
     ||(r.asking_price_usd!==null&&(typeof r.asking_price_usd!=='string'||!/^[0-9]+\.[0-9]{2}$/.test(r.asking_price_usd))))throw Error('Unavailable');
   for(const [i,item] of r.sales.entries()){
     const s=record(item);
     exact(s,'rank sale_date sale_price_usd assessment_year assessed_area_sqft area_difference_pct age_days location_evidence');
     if(s.rank!==i+1||typeof s.sale_price_usd!=='string'||!/^[0-9]+\.[0-9]{2}$/.test(s.sale_price_usd)
-       ||typeof s.sale_date!=='string'||typeof s.assessed_area_sqft!=='number'||typeof s.assessment_year!=='number'
-       ||typeof s.age_days!=='number'||typeof s.area_difference_pct!=='number'
+       ||!dateOnly(s.sale_date)||typeof s.assessed_area_sqft!=='number'||!Number.isFinite(s.assessed_area_sqft)||s.assessed_area_sqft<1000||s.assessed_area_sqft>1800
+       ||s.assessment_year!==Number(s.sale_date.slice(0,4))-1
+       ||typeof s.age_days!=='number'||!Number.isInteger(s.age_days)||s.age_days<1||s.age_days>365||s.age_days!==(Date.parse(r.analysis_date+'T00:00:00Z')-Date.parse(s.sale_date+'T00:00:00Z'))/86400000
+       ||typeof s.area_difference_pct!=='number'||!Number.isFinite(s.area_difference_pct)||s.area_difference_pct<0||s.area_difference_pct>25
+       ||(r.status==='supported_neighbourhood'&&s.location_evidence!=='same_neighbourhood')
        ||!['same_neighbourhood','exploratory_spatial'].includes(String(s.location_evidence)))throw Error('Unavailable');
   }
   return r as unknown as Result;
@@ -74,6 +86,20 @@ async function api(path:string,body?:unknown){
   const res=await fixtureFetch(ROOT+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok)throw Error('Unavailable');
   return await res.json() as unknown;
+}
+/** Read-only dossier. No map or subject identity is inferred from redacted evidence. */
+function PrivateEvidence({result}:{result:Result}){
+  const [rank,setRank]=useState(1);
+  const selected=result.sales.find(s=>s.rank===rank);
+  return <section className="pw-card pw-dossier" data-testid="beta-result" aria-label="Saved evidence">
+    <div className="pw-kicker">FROZEN HISTORICAL INVESTIGATION</div><h2>Saved evidence</h2>
+    <p>{result.selected_count} eligible sales · {result.status.replaceAll('_',' ')} · {result.analysis_date}</p>
+    <dl className="pw-dossier-facts"><div><dt>Buyer-reported asking price</dt><dd>{result.asking_price_usd===null?'Not supplied':formatExactUsd(result.asking_price_usd)}</dd></div><div><dt>Buyer-reported area</dt><dd>{result.buyer_reported_area_sqft.toLocaleString('en-US')} sq ft</dd></div></dl>
+    {result.sales.length?<div className="pw-table-wrap"><table><caption>Eligible completed sales · ranked by evidence policy</caption><thead><tr><th scope="col">Rank</th><th scope="col">Sale price</th><th scope="col">Sale date</th><th scope="col">Assessed area</th><th scope="col">Age / area difference</th><th scope="col">Location evidence</th></tr></thead><tbody>{result.sales.map(s=><tr key={s.rank} data-testid="beta-sale"><td><button type="button" className="pw-rank" aria-label={'Inspect comparable '+s.rank} aria-pressed={rank===s.rank} onClick={()=>setRank(s.rank)}>{s.rank}</button></td><td><strong>{formatExactUsd(s.sale_price_usd)}</strong></td><td>{s.sale_date}</td><td>{s.assessed_area_sqft} sq ft ({s.assessment_year})</td><td>{s.age_days} days · {s.area_difference_pct}%</td><td>{s.location_evidence.replaceAll('_',' ')}</td></tr>)}</tbody></table></div>:<p className="pw-notice">No eligible sales. The available evidence does not support a comparison with previous sales.</p>}
+    {selected&&<EvidenceProfile facts={{rank:selected.rank,ageDays:selected.age_days,areaDifferencePct:selected.area_difference_pct}}/>}
+    <div className="pw-notice" data-testid="beta-geometry-unavailable"><strong>Geographic evidence unavailable.</strong> No verified property coordinates or building identity are displayed.</div>
+    <p className="pw-sub">Fictional source-shaped evidence. Historical source availability and public display rights are unverified. Historical evidence is not a valuation.</p>
+  </section>;
 }
 export default function PrivateBetaRehearsal(){
   const [address,setAddress]=useState('1 Fictional Court'),[date,setDate]=useState('2025-04-01');
@@ -126,12 +152,7 @@ export default function PrivateBetaRehearsal(){
       {logoutError&&<p role="alert">Sign out could not be confirmed. Retry before leaving this session unattended.</p>}
       {error&&<p role="alert" data-testid="beta-error">Investigation unavailable. Check your session and input.</p>}
       {busy&&<p className="pw-sub" role="status">Working on your request…</p>}
-      {result&&<section className="pw-card" data-testid="beta-result" aria-label="Saved evidence">
-        <h2>Saved evidence</h2><p>{result.selected_count} eligible sales · {result.status.replaceAll('_',' ')} · {result.analysis_date}</p>
-        <p>Buyer-reported asking price: {result.asking_price_usd===null?'Not supplied':formatExactUsd(result.asking_price_usd)}</p>
-        {result.sales.length?<div className="pw-table-wrap"><table><caption>Eligible completed sales · ranked by evidence policy</caption><thead><tr><th>Rank</th><th>Sale price</th><th>Sale date</th><th>Assessed area</th><th>Age / area difference</th><th>Location evidence</th></tr></thead><tbody>{result.sales.map(s=><tr key={s.rank} data-testid="beta-sale"><td>{s.rank}</td><td><strong>{formatExactUsd(s.sale_price_usd)}</strong></td><td>{s.sale_date}</td><td>{s.assessed_area_sqft} sq ft ({s.assessment_year})</td><td>{s.age_days} days · {s.area_difference_pct}%</td><td>{s.location_evidence.replaceAll('_',' ')}</td></tr>)}</tbody></table></div>:<p className="pw-notice">No eligible sales. The available evidence does not support a comparison with previous sales.</p>}
-        <p className="pw-sub">Historical evidence is not a valuation.</p>
-      </section>}
+      {result&&<PrivateEvidence key={result.investigation_id} result={result}/>}
       <section className="pw-card" id="pw-saved" aria-label="Saved workspace"><div className="pw-card-head"><div><h2>Saved workspace</h2><p className="pw-sub">Reopen your investigations and comparisons without entering an ID.</p></div><button className="pw-secondary" data-testid="beta-load-workspace" disabled={busy} onClick={()=>void run(async()=>{setWorkspace(decodeWorkspace(await api('/workspace')));})}>{workspace?'Refresh':'Load saved records'}</button></div>
       {workspace&&<div className="pw-saved-grid" data-testid="beta-workspace"><div><h3>Investigations</h3>{workspace.investigations.length===0?<p className="pw-sub">No saved investigations.</p>:workspace.investigations.map(i=><div className="pw-list-row" key={i.investigation_id}><div><strong>{statusText(i.status)}</strong><small>Analysis {i.analysis_date} · Saved {i.created_at_utc.slice(0,10)}</small></div><button className="pw-secondary" data-testid="beta-workspace-investigation" disabled={busy} onClick={()=>void run(async()=>{setResult(null);const v=decode(await api('/investigations/'+i.investigation_id));setResult(v);setIid(v.investigation_id);})}>Open</button></div>)}</div><div><h3>Comparisons</h3>{workspace.comparisons.length===0?<p className="pw-sub">No saved comparisons.</p>:workspace.comparisons.map(i=><div className="pw-list-row" key={i.shortlist_id}><div><strong>{i.label}</strong><small>Saved {i.created_at_utc.slice(0,10)}</small></div><button className="pw-secondary" data-testid="beta-workspace-comparison" disabled={busy} onClick={()=>void run(async()=>{setComparison(null);const v=decodeComparison(await api('/shortlists/'+i.shortlist_id));setComparison(v);setSid(v.shortlist_id);})}>Open</button></div>)}</div>{workspace.truncated&&<p className="pw-sub">Showing the most recent 50 records per category.</p>}</div>}</section>
       <section className="pw-card" id="pw-compare" aria-label="Saved property comparison">
