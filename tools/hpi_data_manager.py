@@ -1503,6 +1503,16 @@ def market_table(layout):
        "continuous_time_series":False,"merged_with_002":False,"individual_sales":False}
     return out.getvalue().encode("utf-8"),q
 
+def market_cover(text):
+    import re
+    cover=" ".join(text.split()).casefold()
+    # The actual publisher logo is not extracted as text. Check the printed
+    # official domain, release identifier, title/month and embargo date instead.
+    if not (re.search(r"\bwww\.statssa\.gov\.za\b",cover) and
+            re.search(r"\bstatistical release\s+p0160\s+residential property price index\s+june 2026\b",cover) and
+            re.search(r"\bembargoed until:\s+5 november 2026\b",cover)):
+        raise ValueError("Unexpected publication or release date; expected official P0160 June 2026 cover and embargo date.")
+
 def market_profile(raw):
     import re
     try:
@@ -1514,11 +1524,9 @@ def market_profile(raw):
         raise ValueError("Expected bounded original PDF and tested pypdf version.")
     try:
         pdf=PdfReader(io.BytesIO(raw),strict=True)
-        if pdf.is_encrypted or not 12<=len(pdf.pages)<=20:
-            raise ValueError("Unexpected release page count or encryption.")
-        cover=" ".join(pdf.pages[0].extract_text().split()).casefold()
-        if not all(x in cover for x in ("p0160","residential property price index","june 2026","5 november 2026","statistics south africa")) or not re.search(r"residential property price index\s+june 2026",cover):
-            raise ValueError("Unexpected publication or release date.")
+        if pdf.is_encrypted or len(pdf.pages)!=12:
+            raise ValueError("Unexpected release page count or encryption; expected twelve pages.")
+        market_cover(pdf.pages[0].extract_text())
         rights=" ".join(pdf.pages[11].extract_text().split()).casefold()
         if not all(x in rights for x in ("copyright on this publication","acknowledge stats sa","own processing")):
             raise ValueError("Unexpected printed page 11 source terms; review before import.")
@@ -1593,7 +1601,24 @@ def market_self_test():
           "City of Cape Town   30,00   100,0   109,0   110,0   0,9   10,0",
           "City of Johannesburg   20,00   90,0   99,0   100,0   1,0   11,1",
           "The latest 12 months are subject to revision","Figure 4"]
-    pages=[["Statistics South Africa P0160 Residential Property Price Index June 2026","5 November 2026"]]+[["Invented page"] for _ in range(11)]
+    # Reproduce the observed cover structure, omitting contact details.
+    cover_lines=["www.statssa.gov.za", "STATISTICAL RELEASE", "P0160", "",
+                 "Residential Property Price Index", "", "June 2026",
+                 "Embargoed until:", "5 November 2026", "09:00",
+                 "FORTHCOMING ISSUE: EXPECTED RELEASE DATE:", "July 2026 3 December 2026"]
+    cover_text=" \n ".join(cover_lines)
+    market_cover(cover_text)
+    for bad in (cover_text.replace("www.statssa.gov.za","example.invalid"),
+                cover_text.replace("P0160","P0161"),
+                cover_text.replace("June 2026","May 2026"),
+                cover_text.replace("5 November 2026","4 November 2026")+" 5 November 2026"):
+        try:
+            market_cover(bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Incorrect publication identity accepted")
+    pages=[cover_lines]+[["Invented page"] for _ in range(11)]
     pages[5]=rows
     pages[11]=["Stats SA has copyright on this publication; acknowledge Stats SA; own processing."]
     raw=fixture_pdf(pages)
