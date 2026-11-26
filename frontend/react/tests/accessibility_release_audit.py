@@ -10,7 +10,7 @@ from test_persistent_restart import LocalFixtureProcess,free_port
 def main():
     script=Path(os.environ["HPI_AXE_SCRIPT"]).read_text()
     output=Path(os.environ["HPI_ACCESSIBILITY_REPORT"])
-    result={"scope":"fictional workspace, supported dossier and two-property comparison",
+    result={"scope":"fictional workspace, supported/insufficient dossiers and two-property comparison; WCAG 2.2 AA tagged automated rules",
             "engine":"axe-core 4.10.3","status":"blocked","views":[]}
     server=LocalFixtureProcess(free_port(),database=None)
     try:
@@ -24,7 +24,7 @@ def main():
                 def scan(label):
                     if not page.evaluate("typeof window.axe !== 'undefined'"):page.evaluate(script)
                     raw=page.evaluate("""async () => {
-                        const result=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+                        const result=await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}});
                         return {passes:result.passes.length,incomplete:result.incomplete.length,
                           violations:result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length,colors:[...new Set(v.nodes.flatMap(n=>n.any.map(c=>c.data&&typeof c.data.fgColor==='string'&&typeof c.data.bgColor==='string'?c.data.fgColor+'/'+c.data.bgColor:null).filter(Boolean)))]}))};
                     }""")
@@ -46,6 +46,7 @@ def main():
                 page.get_by_test_id("buyer-manual-pin").fill("99999999999999")
                 page.get_by_test_id("buyer-create").click()
                 expect(page.get_by_test_id("buyer-insufficient")).to_be_visible(timeout=15000)
+                scan("insufficient_dossier")
                 page.get_by_test_id("dossier-compare").click()
                 page.get_by_test_id("workspace-add-current").click()
                 expect(page.get_by_test_id("workspace-count")).to_have_text("2 / 3")

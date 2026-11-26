@@ -49,6 +49,20 @@ jobs:
           HPI_BUYER_SCREENSHOTS: ${{ runner.temp }}/hpi-react-buyer
           HPI_SHORTLIST_SCREENSHOTS: ${{ runner.temp }}/hpi-react-shortlist
         run: python -m unittest discover -s frontend/react/tests -p 'test_*.py' -v
+      - name: Install additional pinned browser engines
+        run: python -m playwright install --with-deps firefox webkit
+      - name: Cross-browser core journey and lab performance
+        env:
+          HPI_CROSS_BROWSER_REPORT: ${{ runner.temp }}/hpi-quality/cross-browser.json
+        run: python frontend/react/tests/cross_browser_qualification.py
+      - name: Publish aggregate cross-browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpi-cross-browser-qualification
+          path: ${{ runner.temp }}/hpi-quality/*.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Publish fictional visual evidence
         if: always()
         uses: actions/upload-artifact@v4
