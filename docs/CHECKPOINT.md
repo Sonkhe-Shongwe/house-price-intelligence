@@ -10,11 +10,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-NASA-LOCAL-PILOT",
-    "status": "blocked",
-    "objective": "Verify NASA CSV safeguards and observe one owner-local outcome.",
-    "scope": "Approved one-request Windows pilot after focused CI.",
-    "acceptance": "Verified safeguards and validated bundle or fixed STOP diagnostic.",
+    "id": "P0-AE0-FINER-SPATIAL-SOURCE-QUALIFICATION",
+    "status": "ready",
+    "objective": "Qualify finer buyer-context GHSL or official DBE source against D01/D02 priorities.",
+    "scope": "Metadata only; NASA and World Bank consumed; Wikidata parked.",
+    "acceptance": "Exact rights, bounded interface/transfer, grain and buyer relevance or explicit blocker.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await focused CI and owner Windows execution; no replay or P1.",
+    "stop": "Stop before new dispatch or architecture/phase change; seek exact authority.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -70,7 +70,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"],
         [132,140,"## 26 November 2026 | AE0 Wikidata actual local STOP","Next: owner decision"],
         [142,150,"## 27 November 2026 | Owner parks Wikidata","Acceptance: bounded metadata"],
-        [152,163,"## 27 November 2026 | Approved NASA CSV implementation","Run once only, share aggregate"]
+        [165,171,"## 27 November 2026 | AE0 NASA actual local PASS","AE0 evidence now includes"]
       ]
     }
   },
@@ -115,7 +115,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. f6b0384 nine NASA tests passed; docs guidance corrected; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. 6e117f4 7/7 passed; requery after NASA evidence record. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -135,7 +135,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/owner parked. Official local GIS rights unresolved. NASA exact pilot approved; local run after focused CI. No other intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS consumed; Wikidata STOP consumed/owner parked. Official local GIS rights unresolved. NASA owner-observed PASS 1 request/7 rows/652 bytes; consumed, unregistered. Next GHSL/DBE metadata only. No new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
