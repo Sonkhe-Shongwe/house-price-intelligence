@@ -40,6 +40,8 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 - [ ] Tests cover future sales, excluded transactions, unsupported homes and stale/inconsistent snapshots.
 - [ ] If prediction ships, compare with a comparable-sales baseline on a chronological holdout; report accuracy and interval coverage and width.
 
+**P0-A.9 measurement proposal (26 November):** [Product principles and success definition](PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md) defines proposed buyer-task measures and validation, distinct from the existing mandatory acceptance checklist above. Targets await owner review at A.10; no customer results or change to existing phase gates.
+
 ## Scope boundaries
 
 **No v1 commitment:** Multi-market listing search, professional appraisal accuracy, live property photographs, mortgages, AI assistant, property alerts, investor portfolio management or a global valuation model.
