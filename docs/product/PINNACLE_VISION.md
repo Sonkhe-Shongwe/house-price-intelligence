@@ -32,7 +32,7 @@ Define data coverage, record grain, user flows, reliability expectations and tes
 
 ## P0-A.8 | Product vision and positioning synthesis (26 November 2026)
 
-**Status:** proposed strategic language for P0-A.10 review, not a new owner-approved scope, commercial positioning, market approval, brand redesign, public release or proof of customer demand. The original pinnacle exploration above remains aspirational; its first implementation slice describes the historical approach, not today's active task. Follow the [P0 directive](../engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) and [checkpoint](../CHECKPOINT.md).
+**Status:** internal strategic direction accepted at P0-A.10 on 26 November 2026, subject to documented limitations; not a new owner-approved scope, commercial positioning, market approval, brand redesign, public release or proof of customer demand. The original pinnacle exploration above remains aspirational; its first implementation slice describes the historical approach, not today's active task. Follow the [P0 directive](../engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) and [checkpoint](../CHECKPOINT.md).
 
 ### Purpose, vision and mission
 

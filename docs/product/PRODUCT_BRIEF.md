@@ -10,7 +10,7 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 
 **First buyer:** One individual inspecting two or three homes in one demonstrably supported local market and property class. A user may manually enter an asking price and supported property attributes. The system must not claim to provide live listing discovery, verified listing images or a current market feed until independently integrated and validated.
 
-**P0-A.8 strategic synthesis (26 November):** [Vision and positioning](PINNACLE_VISION.md#p0-a8--product-vision-and-positioning-synthesis-26-november-2026) proposes the residential property decision intelligence identity and preserves Investigate / Compare / Decide, the narrow flagship and separate future pinnacle. Proposed language awaits applicable owner review; the existing scope and acceptance checklist below are unchanged. Historical evidence must not be represented as current market coverage or a current valuation.
+**P0-A.8 strategic synthesis (26 November):** [Vision and positioning](PINNACLE_VISION.md#p0-a8--product-vision-and-positioning-synthesis-26-november-2026) proposes the residential property decision intelligence identity and preserves Investigate / Compare / Decide, the narrow flagship and separate future pinnacle. Internal strategic language accepted by owner on 26 November, subject to documented limitations; the existing scope and acceptance checklist below are unchanged. Historical evidence must not be represented as current market coverage or a current valuation.
 
 ## Proposed end-to-end user journey
 
@@ -40,9 +40,9 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 - [ ] Tests cover future sales, excluded transactions, unsupported homes and stale/inconsistent snapshots.
 - [ ] If prediction ships, compare with a comparable-sales baseline on a chronological holdout; report accuracy and interval coverage and width.
 
-**P0-A.9 measurement proposal (26 November):** [Product principles and success definition](PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md) defines proposed buyer-task measures and validation, distinct from the existing mandatory acceptance checklist above. Targets await owner review at A.10; no customer results or change to existing phase gates.
+**P0-A.9 measurement proposal (26 November):** [Product principles and success definition](PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md) defines proposed buyer-task measures and validation, distinct from the existing mandatory acceptance checklist above. Provisional validation plan accepted at A.10, with final study design and permission still required; no customer results or change to existing phase gates.
 
-**P0-A.10 foundation review (26 November):** [Review and consolidated owner decision](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md) reconciles the nine research tasks with existing intent and gates. Review complete, owner acceptance pending; no change to the original flagship checklist or approved scope.
+**P0-A.10 foundation review (26 November):** [Review and consolidated owner decision](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md) reconciles the nine research tasks with existing intent and gates. Review complete, foundation direction explicitly accepted 26 November; no change to the original flagship checklist or approved scope.
 
 ## Scope boundaries
 

@@ -47,6 +47,20 @@ Do not turn optional methods (SWOT, persona variants, full commercial TAM, etc.)
 
 Start P0-A.1 by reviewing [product brief](../product/PRODUCT_BRIEF.md), [pinnacle vision](../product/PINNACLE_VISION.md), [existing UX research](../design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) and [data feasibility](../research/DATA_FEASIBILITY.md); conduct bounded public-document research for the missing industry context, focused on the intended US homebuyer and candidate Cook County market. Do not re-extract property rows, develop another feature, redo design work or conduct competitor research beyond what is required to understand the buyer's existing process. Record the industry map, sourced findings, limits and product implications. Next task follows the checkpoint, not an automatic batch execution of all ten tasks.
 
+## 4a. P0-B execution sequence (26 November 2026, after P0-A acceptance)
+
+P0-B is the sole active workstream following explicit foundation acceptance. Use existing [competitive intelligence record](../product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) rather than separate repetitive files. Five unweighted bounded tasks, not new gates:
+
+| Task | Focus | Stopping criterion |
+| --- | --- | --- |
+| P0-B.1 | Initial consumer-platform benchmark | Two material US consumer references using official documentation and JT1-JT6, explicit overlap/unknowns, no inferred absence |
+| P0-B.2 | Additional products and alternative workflows | Relevant other consumer/specialist references, agent/CMA, official records and manual workflows; scope/access, jobs, strengths and evidence limits |
+| P0-B.3 | Consolidated competitive comparison | Evidence-based job/capability matrix; distinguish actual overlap, unknowns and testable differentiation; rejected claims and alternatives |
+| P0-B.4 | Bounded geographic market assessment | Compare Cook County candidate with a small set of plausible data-first alternatives using existing evidence and public source documentation, no extraction or final market approval |
+| P0-B.5 | Market rationale and review | Defensible provisional market and opportunity recommendation with disconfirming evidence, unresolved dependencies and applicable owner decisions; no P0 closure |
+
+Do not create new mandatory tasks or exhaustive commercial sizing. Actual source coverage and use-rights verification remain P0-C/D; no competitor scraping, account creation, contact, new property collection or paid tools. Use checkpoint for current task.
+
 ## 5. Evidence and documentation ownership
 
 - [Product brief](../product/PRODUCT_BRIEF.md) and [pinnacle vision](../product/PINNACLE_VISION.md): product intent and future vision; refine only on evidence and applicable decisions.
