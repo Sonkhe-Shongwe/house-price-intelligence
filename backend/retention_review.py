@@ -23,6 +23,11 @@ WITH snaps AS (
     UNION SELECT transaction_id FROM curated_build_transactions WHERE build_id=%s
 ), inv AS (
     SELECT investigation_id FROM investigations WHERE build_id=%s
+), external_evidence AS (
+    SELECT investigation_id FROM comparable_evidence
+    WHERE investigation_id NOT IN (SELECT investigation_id FROM inv)
+      AND (source_snapshot_id IN (SELECT snapshot_id FROM snaps)
+           OR transaction_id IN (SELECT transaction_id FROM txns))
 ), members AS (
     SELECT shortlist_id, investigation_id FROM shortlist_investigations
     WHERE investigation_id IN (SELECT investigation_id FROM inv)
@@ -67,13 +72,17 @@ SELECT
       OR EXISTS (SELECT 1 FROM synthetic_address_candidates r WHERE r.pin=p.pin)
       OR EXISTS (SELECT 1 FROM buildings r WHERE r.pin=p.pin)
       OR EXISTS (SELECT 1 FROM investigations r WHERE r.subject_pin=p.pin
-        AND r.investigation_id NOT IN (SELECT investigation_id FROM inv)))
+        AND r.investigation_id NOT IN (SELECT investigation_id FROM inv))),
+    (SELECT count(*) FROM sale_transaction_parcels WHERE transaction_id IN (SELECT transaction_id FROM txns)),
+    (SELECT count(*) FROM external_evidence),
+    (SELECT count(DISTINCT investigation_id) FROM external_evidence)
 """
 COUNTS = ("source_snapshots", "sale_transactions", "assessment_records",
           "geographies", "address_states", "investigations", "frozen_results",
           "comparable_evidence", "shortlist_memberships", "affected_shortlists",
           "mixed_shortlists", "parcel_keys", "shared_snapshots", "shared_transactions",
-          "parcel_keys_with_other_references")
+          "parcel_keys_with_other_references", "sale_transaction_parcel_links",
+          "other_comparable_evidence", "other_investigations_with_evidence_dependencies")
 
 
 def _utc(value):
@@ -87,7 +96,12 @@ def _utc(value):
 
 
 def review_retention(conn, build_id, *, now=None):
-    """Count known dependencies in one read-only snapshot, never authorise deletion."""
+    """Count known dependencies in one read-only snapshot, never authorise deletion.
+
+    Direct evidence references outside the selected build are counted separately.
+    A shared or inconsistent reference requires operator review, not automatic
+    deletion or reassignment of another build's frozen evidence.
+    """
     _check(conn)
     if not isinstance(build_id, str) or not re.fullmatch(r"historical-[0-9a-f]{64}", build_id):
         raise ImportRefused("Historical build required")

@@ -40,7 +40,8 @@ class RetentionReviewTests(unittest.TestCase):
                         conn.execute("""INSERT INTO hpi_candidate.shortlist_investigations
                           (shortlist_id,investigation_id) VALUES ('retention-fixture',%s)""",(key,))
                     tables=("curated_builds","source_snapshots","sale_transactions","investigations",
-                            "investigation_results","shortlists","shortlist_investigations","parcels")
+                            "investigation_results","shortlists","shortlist_investigations","parcels",
+                            "comparable_evidence","curated_build_transactions","curated_build_sources")
                     def counts():
                         return tuple(conn.execute("SELECT count(*) FROM hpi_candidate."+t).fetchone()[0] for t in tables)
                     before=counts()
@@ -54,7 +55,9 @@ class RetentionReviewTests(unittest.TestCase):
                         "geographies":4,"address_states":4,"investigations":1,"frozen_results":1,
                         "comparable_evidence":0,"shortlist_memberships":1,"affected_shortlists":1,
                         "mixed_shortlists":1,"parcel_keys":4,"shared_snapshots":0,
-                        "shared_transactions":0,"parcel_keys_with_other_references":4}
+                        "shared_transactions":0,"parcel_keys_with_other_references":4,
+                        "sale_transaction_parcel_links":4,"other_comparable_evidence":0,
+                        "other_investigations_with_evidence_dependencies":0}
                     self.assertEqual(report["counts"],expected)
                     self.assertFalse(report["deletion_authorised"])
                     self.assertTrue(report["external_copy_inventory_required"])
@@ -67,5 +70,35 @@ class RetentionReviewTests(unittest.TestCase):
                     with self.assertRaises(ImportRefused):
                         review_retention(conn,first,now=datetime(2026,12,24))
                     self.assertEqual(counts(),before)
+
+                    # Deliberately introduce shared and inconsistent references
+                    # that are relationally legal but must never be silently
+                    # overlooked during disposal review. Use invented data only.
+                    def sale(build):
+                        return conn.execute("""SELECT t.transaction_id,t.snapshot_id,t.price_usd_cents
+                            FROM hpi_candidate.sale_transactions t
+                            JOIN hpi_candidate.curated_build_transactions c USING(transaction_id)
+                            WHERE c.build_id=%s ORDER BY t.transaction_id LIMIT 1""",(build,)).fetchone()
+                    txn, snap, cents = sale(first)
+                    other_txn, _, other_cents = sale(second)
+                    conn.execute("""INSERT INTO hpi_candidate.curated_build_sources
+                        (build_id,snapshot_id,source_role) VALUES (%s,%s,'sales')""",(second,snap))
+                    conn.execute("""INSERT INTO hpi_candidate.curated_build_transactions
+                        (build_id,transaction_id) VALUES (%s,%s)""",(second,txn))
+                    for rank, transaction, price in ((1,txn,cents),(2,other_txn,other_cents)):
+                        conn.execute("""INSERT INTO hpi_candidate.comparable_evidence
+                            (investigation_id,build_id,rank,transaction_id,selection_tier,
+                             explanation,source_snapshot_id,sale_price_usd_cents)
+                            VALUES ('retention-fixture-b',%s,%s,%s,'same_neighborhood','Invented',%s,%s)""",
+                            (second,rank,transaction,snap,price))
+                    before_shared=counts()
+                    shared=review_retention(conn,first,now=boundary)
+                    self.assertEqual(shared["counts"]["shared_snapshots"],1)
+                    self.assertEqual(shared["counts"]["shared_transactions"],1)
+                    self.assertEqual(shared["counts"]["other_comparable_evidence"],2)
+                    self.assertEqual(shared["counts"]["other_investigations_with_evidence_dependencies"],1)
+                    self.assertEqual(shared["counts"]["comparable_evidence"],0)
+                    self.assertFalse(shared["deletion_authorised"])
+                    self.assertEqual(counts(),before_shared)
             finally:
                 admin.execute("DROP DATABASE hpi_ingest_fixture")
