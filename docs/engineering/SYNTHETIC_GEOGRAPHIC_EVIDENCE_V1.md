@@ -21,3 +21,5 @@ The original virtual map source and validated adapter remain authoritative. If t
 
 ## Explicit lightweight mode (26 November 2026)
 Renderer resilience commit 016ecbd passed 10/10 registered workflows and four browser geographic scenarios; 320px fallback screenshot reviewed. Offer the same schematic deliberately before fetching the immutable virtual display response. Both visual modes share one validated response and comparable selection, with selected completed-sale price/date from the existing frozen investigation only. No eager map asset on schematic-first path, no second geography request on switching. Switching unmounts the interactive renderer. Unavailable or invalid response still abstains. The additional regression and actual mobile render require exact-head verification; neither view establishes physical locations or distances.
+
+**Verified:** 6a8e059 passed all ten registered workflows including 36 React regressions. See [G4 basemap qualification](../design/BASEMAP_QUALIFICATION_2026-11-26.md) for research-only next steps; real basemap and geometry remain gated.
