@@ -152,3 +152,7 @@ Owner explicitly approves the exact World Bank two-request R0 pilot and applicab
 ## AE0 Wikidata one-time spatial pilot authority (26 November 2026)
 
 Owner explicitly approves the exact one-request, max 25-row, 64 KiB, R0 Wikidata spatial pilot and applicable source/API terms in [side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#26-november-2026--ae0-second-interface-qualification-and-proposed-spatial-pilot). Owner-only existing Windows workspace after verified safeguards. No replay, other intake, registration, join, release, spend, migration or phase acceptance.
+
+## AE0 Wikidata parked (27 November 2026)
+
+Owner explicitly directs parking Wikidata and investigating a more authoritative spatial or structured website source. Consumed attempt remains closed; no replay or repair. [Alternative qualification](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--owner-parks-wikidata-authoritative-alternative-qualification) is metadata research only, not NASA acquisition approval or scope change.
