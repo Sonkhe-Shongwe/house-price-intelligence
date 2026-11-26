@@ -146,3 +146,7 @@ The audit does not replace the roadmap's existing status vocabulary or weights. 
 ## Data-first correction (26 November 2026, owner-directed)
 
 [Initial data repertoire and availability](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--data-first-repertoire-and-availability) documents source/constructible data families and public contextual leads before revised product feasibility. This is bounded P0 discovery prompted by owner direction, not an automatic P0 exit, replacement of original gates, or scope/architecture migration. Qualify accessible contextual sources without waiting exclusively on Cape Town; no new intake, contact, provider, spending or score authority. Existing P0-G verdict remains binding and checkpoint specifies next qualification task.
+
+### Direct-access-first refinement (26 November 2026)
+
+The owner directed minimal email dependence: prefer verifiable direct downloads, open research archives and legitimate portal-assisted manual downloads before institutional enquiries. See [data acquisition strategy](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--direct-access-first-and-minimal-email-dependence). Preserve rights, approved scope, R0, private handling and retention; no new correspondence without exact approval and no intake without applicable authority. Use existing GitHub/pull-first tooling. Existing enquiries are parallel opportunities, not exclusive dependencies; do not equate public availability with permitted use or substitute invented sales evidence.
