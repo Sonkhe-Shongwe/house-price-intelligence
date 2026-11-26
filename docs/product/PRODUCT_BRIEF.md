@@ -42,6 +42,8 @@ A prospective homebuyer has shortlisted houses whose asking prices are visible, 
 
 **P0-A.9 measurement proposal (26 November):** [Product principles and success definition](PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md) defines proposed buyer-task measures and validation, distinct from the existing mandatory acceptance checklist above. Targets await owner review at A.10; no customer results or change to existing phase gates.
 
+**P0-A.10 foundation review (26 November):** [Review and consolidated owner decision](../reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md) reconciles the nine research tasks with existing intent and gates. Review complete, owner acceptance pending; no change to the original flagship checklist or approved scope.
+
 ## Scope boundaries
 
 **No v1 commitment:** Multi-market listing search, professional appraisal accuracy, live property photographs, mortgages, AI assistant, property alerts, investor portfolio management or a global valuation model.
