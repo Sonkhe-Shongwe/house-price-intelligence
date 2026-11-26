@@ -276,7 +276,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
       {!recent.length&&!recentError&&<p>No saved shortlists yet.</p>}
       <ul data-testid="workspace-recent">{recent.map(row=><li key={row.id}>
         <button type="button" data-testid="workspace-open-recent" disabled={busy}
-          onClick={()=>void refresh(undefined,row.id)}>{row.label} ({row.count}/3)</button>
+          onClick={()=>void refresh(undefined,row.id)}><Icon name="open"/>{row.label} ({row.count}/3)</button>
       </li>)}</ul>
     </section>
     <form className="workspace-reopen" onSubmit={e=>void refresh(e)}>
@@ -292,7 +292,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
         Current server state is unconfirmed. The cards below are last-confirmed records and local drafts.
         Refresh this shortlist before making another change.
         <button type="button" disabled={busy} data-testid="workspace-recover"
-          onClick={()=>void refresh(undefined,workspace.shortlistId)}>Refresh current shortlist</button>
+          onClick={()=>void refresh(undefined,workspace.shortlistId)}><Icon name="refresh"/>Refresh current shortlist</button>
       </p>}
       <div className="workspace-summary"><div><small>Saved shortlist / Python fixture</small>
         <h3>{workspace.label}</h3><span data-testid="workspace-id">{workspace.shortlistId}</span></div>
@@ -301,7 +301,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
       <div className="workspace-add">
         <button type="button" data-testid="workspace-add-current" disabled={!hasActive||busy||recoveryRequired}
           onClick={()=>active&&void addInvestigation(active.investigationId,active)}>
-          Add current saved investigation
+          <Icon name="plus"/>Add current saved investigation
         </button>
         <form onSubmit={e=>{e.preventDefault();void addInvestigation(otherId);}}>
           <label htmlFor="workspace-other-id">Or add another saved investigation UUID</label>
@@ -310,7 +310,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
             onChange={e=>setOtherId(e.target.value)} maxLength={36}
             disabled={busy||recoveryRequired||workspace.entries.length>=3}/>
             <button type="submit" data-testid="workspace-add-id"
-              disabled={busy||recoveryRequired||workspace.entries.length>=3}>Add saved ID</button></div>
+              disabled={busy||recoveryRequired||workspace.entries.length>=3}><Icon name="plus"/>Add saved ID</button></div>
         </form>
       </div>
       {workspace.entries.length===0 && <p className="workspace-empty" data-testid="workspace-empty">
@@ -335,7 +335,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
             <div className="workspace-card-bottom"><span data-testid="workspace-note-state">
               {recoveryRequired?'Awaiting server confirmation':dirty?'Unsaved changes':'Saved note verified'}</span>
               <button type="button" data-testid="workspace-save-note"
-                disabled={!dirty||busy||recoveryRequired} onClick={()=>void saveNote(entry.investigationId)}>Save note</button>
+                disabled={!dirty||busy||recoveryRequired} onClick={()=>void saveNote(entry.investigationId)}><Icon name="save"/>Save note</button>
             </div>
             <div className="workspace-provenance"><span>Frozen build · {entry.investigation.sourceBuildId}</span>
               <span>No verified map geometry</span></div>

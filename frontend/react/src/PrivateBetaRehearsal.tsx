@@ -104,7 +104,7 @@ export default function PrivateBetaRehearsal(){
       setLabel('');setSid('');setComparison(null);setWorkspace(null);setError(false);setSignedOut(true);
     }catch{setLogoutError(true);}finally{setFeedback('');locked.current=false;setBusy(false);}
   }
-  if(signedOut)return <main className="pw-signed-out"><div className="pw-brand-mark">HPI</div><h1>Signed out</h1><p role="status">Your session has ended. Saved investigations and comparisons remain available after signing in again.</p><a href="/">Return to sign in</a></main>;
+  if(signedOut)return <main className="pw-signed-out"><div className="pw-brand-mark">HPI</div><h1>Signed out</h1><p role="status">Your session has ended. Saved investigations and comparisons remain available after signing in again.</p><a href="/"><Icon name="open"/>Return to sign in</a></main>;
   return <div className="pw-shell"><header className="pw-top"><div className="pw-brand"><span className="pw-brand-mark">HPI</span><div><strong>House Price Intelligence</strong><small>BUYER WORKSPACE</small></div></div><span className="pw-mode">Fictional data · Private</span><button className="pw-secondary" type="button" disabled={busy} data-testid="beta-sign-out" onClick={()=>void signOut()}><Icon name="signout"/>Sign out</button></header>
     <a className="hpi-skip" href="#pw-content">Skip to content</a><div className="pw-layout"><aside className="pw-side"><p>WORKSPACE</p><WorkspaceNavigation view={view} onNavigate={navigate} disabled={busy} prefix="beta-nav" label="Workspace navigation"/><div className="pw-side-note"><strong>Evidence, not estimates</strong><p>Historical sale records support investigation, not a current market valuation.</p></div></aside>
     <main id="pw-content" ref={content} tabIndex={-1} className="pw-main">
@@ -160,11 +160,11 @@ export default function PrivateBetaRehearsal(){
           <label htmlFor="beta-comparison-label">Comparison name</label><input id="beta-comparison-label" maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}/>
           <button type="button" className="buyer-save" data-testid="beta-save-comparison" disabled={entries.length<2||!label.trim()} onClick={()=>void run('saveComparison',async()=>{
             setComparison(null);const c=await service.createComparison(label,entries);setComparison(c);setSid(c.shortlist_id);setWorkspace(null);
-          })}>Save comparison</button>
+          })}><Icon name="save"/>Save comparison</button>
           <div className="pw-recovery"><span>Advanced recovery</span><label htmlFor="beta-comparison-id">Saved comparison ID</label><input id="beta-comparison-id" data-testid="beta-comparison-id" value={sid} onChange={e=>setSid(e.target.value)}/>
           <button type="button" className="buyer-save" data-testid="beta-reopen-comparison" disabled={!UUID.test(sid)} onClick={()=>void run('reopenComparison',async()=>{
             setComparison(null);setComparison(await service.reopenComparison(sid));
-          })}>Reopen comparison</button></div>
+          })}><Icon name="open"/>Reopen comparison</button></div>
         </fieldset>
         {comparison&&<section className="pw-frozen-comparison" data-testid="beta-comparison" aria-label="Frozen saved comparison">
           <div className="pw-kicker">SAVED SNAPSHOT / READ ONLY</div><h3>{comparison.label}</h3>

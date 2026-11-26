@@ -89,6 +89,7 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertIn("form-action 'self'",csp)
         self.assertEqual(dict(headers)["Cache-Control"],"no-store")
         self.assertIn(b'<form method="post" action="/auth/logout">',body)
+        self.assertIn(b'</svg>Sign out</button>',body)
         csrf=re.search(rb'name="csrf" value="([A-Za-z0-9_-]{43})"',body).group(1)
         raw=b"csrf="+csrf
         def submit(payload=raw,**overrides):
@@ -133,6 +134,9 @@ class IdentityHttpTests(unittest.TestCase):
         self.assertNotIn(b"<script",body)
         self.assertNotIn(b"Open buyer workspace",body)
         self.assertIn(b'<form method="post" action="/auth/start">',body)
+        self.assertIn(b'aria-hidden="true" focusable="false"',body)
+        self.assertIn(b'</svg>Sign in</button>',body)
+        self.assertNotIn(b'<img',body)
         self.assertIn(b'HPI identity qualification',body)
         _,headers,_=self.request("/auth/session")
         self.assertNotIn("style-src",dict(headers)["Content-Security-Policy"])

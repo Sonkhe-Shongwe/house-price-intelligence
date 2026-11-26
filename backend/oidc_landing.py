@@ -18,6 +18,7 @@ p{margin:0 0 18px;color:var(--muted);max-width:53ch}
 h2{font:400 32px/1.15 Georgia,serif;letter-spacing:-.025em;margin:14px 0}
 button,.action{display:block;width:100%;min-height:48px;border:1px solid var(--action);background:var(--action);color:white;padding:12px 16px;text-align:center;text-decoration:none;font:650 15px/1.4 system-ui,sans-serif;cursor:pointer}
 button.secondary{background:transparent;color:var(--action)}
+.access-icon{display:inline-block;vertical-align:-.22em;margin-inline-end:.4em}
 button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
 form{margin:20px 0 12px}.action+form{margin-top:12px}
 .access small{display:block;color:var(--muted);font-size:13px;line-height:1.55}
@@ -25,6 +26,18 @@ footer{padding:16px clamp(20px,5vw,76px);border-top:1px solid var(--rule);font-s
 @media(max-width:760px){header{padding:16px 20px;flex-wrap:wrap}main{display:grid;grid-template-columns:1fr;min-height:0;gap:24px;padding:24px 20px 32px}h1{font-size:clamp(38px,10vw,58px);margin:12px 0 18px}.access{padding:22px}h2{font-size:27px}}
 """
 STYLE_SOURCE="'sha256-"+b64encode(sha256(STYLE.encode("utf-8")).digest()).decode("ascii")+"'"
+
+
+# Fixed first-party shapes matching the React action icon system; never accept markup from a request.
+def _action_icon(name):
+    shapes={
+        "signin": '<path d="M14 4h5v16h-5M3 12h12m-5-5 5 5-5 5"/>',
+        "signout": '<path d="M10 4H5v16h5M9 12h12m-5-5 5 5-5 5"/>',
+        "open": '<path d="M13 4h7v7M20 4l-9 9M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"/>',
+    }
+    return ('<svg class="access-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" '
+            'stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" '
+            'aria-hidden="true" focusable="false">'+shapes[name]+'</svg>')
 
 
 def render_landing(*,buyer,csrf=None):
@@ -36,18 +49,18 @@ def render_landing(*,buyer,csrf=None):
                      if buyer else "This local qualification verifies identity only. No property data or buyer workspace is available.")
         access=('<div class="kicker">01 / Account access</div><h2>Sign in</h2>'
                 '<p>Continue with the configured identity provider.</p>'
-                '<form method="post" action="/auth/start"><button type="submit">Sign in</button></form>'
+                '<form method="post" action="/auth/start"><button type="submit">'+_action_icon("signin")+'Sign in</button></form>'+
                 '<small>Authentication is handled by Auth0. HPI does not collect your password on this page. Access is restricted to approved accounts.</small>')
     else:
         title="Identity verified"
         description=("Your authenticated private fictional workspace is ready." if buyer else
                      "Local identity qualification only. No property data.")
         access=('<div class="kicker">02 / Session verified</div><h2>Continue securely</h2>'+
-                ('<a class="action" href="/private-beta-rehearsal">Open buyer workspace</a>' if buyer else
+                ('<a class="action" href="/private-beta-rehearsal">'+_action_icon("open")+'Open buyer workspace</a>' if buyer else
                  '<p>The identity check is complete. No buyer workspace is enabled in this mode.</p>')+
                 '<form method="post" action="/auth/logout">'
                 f'<input type="hidden" name="csrf" value="{escape(csrf,quote=True)}">'
-                '<button class="secondary" type="submit">Sign out</button></form>'
+                '<button class="secondary" type="submit">'+_action_icon("signout")+'Sign out</button></form>'+
                 '<small>Sign out ends the HPI session on this device. It does not promise sign-out from every identity-provider session.</small>')
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
