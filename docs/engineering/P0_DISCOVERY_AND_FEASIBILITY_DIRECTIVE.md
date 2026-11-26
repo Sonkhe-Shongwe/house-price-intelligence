@@ -88,3 +88,8 @@ Owner asked to continue while awaiting Cape Town. HPI-SA remains preferred but e
 ## P0-D.1 handoff (26 November 2026)
 
 [Source-specific permitted-use reconciliation](../research/SOURCE_REGISTER.md#26-november-2026--p0-d1-source-specific-permitted-use-reconciliation) complete on retained evidence; four Cook sources have prior unspecified licences, research signal not durable storage/display/release acceptance; SA3/challengers retained. Next P0-D.2 minimum privacy/ethical operational policy delta, then conditional review. No new permission or legal clearance; P0.5/P0.7 blocked. Preserve deferred Cook contact/rekey and SA clarification watch. No new acquisition, code or phase credit.
+
+
+## P0-D.2 handoff (26 November 2026)
+
+[Minimum operational privacy/ethics policy](PRIVATE_REAL_DATA_BETA_V1.md#26-november-2026--p0-d2-minimum-privacy-and-ethical-operational-policy) consolidates existing controls and gaps, including source restriction/expiry, correction, incident, dependent frozen evidence and verified disposal. Design only, no real-data clearance or enforcement. D.3 conditional legal/privacy review and P0-E handoff next; no duplicate research or speculative tasks. P0.5/P0.7 blocked, deferred contact/rekey preserved, SA clarification pending. No phase credit.
