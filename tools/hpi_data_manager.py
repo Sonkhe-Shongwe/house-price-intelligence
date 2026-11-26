@@ -225,9 +225,234 @@ def self_test():
         rejects(lambda: workspace(root))
     print("PASS: offline import, limits, retention, exact-version, idempotence, no overwrite and Git boundary checks.")
 
+
+# RPPI's VERSION remains 0.1.0 to preserve byte-identical accepted manifests.
+MANAGER_VERSION = "0.2.0"
+GEO_FILE = "geoBoundaries-ZAF-ADM2_simplified.geojson"
+GEO_SHA = "bb4800b804811ce9cfa5f6bf535466e3f812751249f0e1b7375d5f5753570e7c"
+GEO_MANIFEST = "01_Source_Catalogue/HPI-DATA-003.json"
+GEO_RAW = "02_Raw_Data/" + GEO_FILE
+GEO_OUTPUT = "03_Processed_Data/HPI-DATA-003/district_index.csv"
+GEO_REPORT = "07_Reports/HPI-DATA-003_quality.json"
+GEO_CRS = {"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}
+GEO_SNAPSHOT = "1c423398df24ddf6e730b116567d2181c9782778d0459c3f3b76ca2f9f12b6bc"
+GEO_URL = "https://www.geoboundaries.org/data/snapshots/" + GEO_SNAPSHOT + "/gbOpen/ZAF/ADM2/" + GEO_FILE
+
+def profile_districts(raw, expected=GEO_SHA):
+    import math
+    try:
+        from shapely.geometry import shape
+        from shapely.errors import ShapelyError
+    except ImportError as exc:
+        raise ValueError("District adapter requires Shapely in this Python environment.") from exc
+    if len(raw) > 10*MIB or sha(raw) != expected:
+        raise ValueError("Unexpected district snapshot or size.")
+    data = json.loads(raw)
+    if not isinstance(data, dict) or data.get("type") != "FeatureCollection" or data.get("crs") != GEO_CRS:
+        raise ValueError("Expected CRS84 FeatureCollection.")
+    features = data.get("features")
+    if not isinstance(features, list) or len(features) > 100 or len(features) != 52:
+        raise ValueError("Expected 52 district features within cap.")
+    ids, names, geometries = set(), set(), set()
+    pairs = 0
+    polygons = multipolygons = missing_iso = 0
+    out = io.StringIO(newline="")
+    w = csv.writer(out, lineterminator="\n")
+    w.writerow(["shape_id","source_name","source_iso","country","administrative_level",
+                "reference_year","geometry_type","coordinate_pairs",
+                "min_longitude","min_latitude","max_longitude","max_latitude",
+                "official_municipality_code"])
+    for f in features:
+        if f.get("type") != "Feature":
+            raise ValueError("Expected Feature.")
+        p, g = f["properties"], f["geometry"]
+        if set(p) != {"shapeID","shapeName","shapeISO","shapeGroup","shapeType"}:
+            raise ValueError("Unexpected property fields.")
+        sid, name, iso = p["shapeID"], p["shapeName"], p["shapeISO"]
+        if (not isinstance(sid,str) or not sid.startswith("47623444B") or sid in ids or
+                not isinstance(name,str) or not name.strip() or name in names or
+                not isinstance(iso,str) or p["shapeGroup"] != "ZAF" or p["shapeType"] != "ADM2"):
+            raise ValueError("Invalid or duplicate district identity.")
+        ids.add(sid)
+        names.add(name)
+        missing_iso += not iso.strip()
+        kind, coords = g["type"], g["coordinates"]
+        if kind == "Polygon":
+            parts = [coords]
+            polygons += 1
+        elif kind == "MultiPolygon":
+            parts = coords
+            multipolygons += 1
+        else:
+            raise ValueError("Unsupported district geometry.")
+        count = 0
+        if not isinstance(parts,list) or not parts:
+            raise ValueError("Empty geometry.")
+        for part in parts:
+            if not isinstance(part,list) or not part:
+                raise ValueError("Empty polygon.")
+            for ring in part:
+                if not isinstance(ring,list) or len(ring) < 4 or ring[0] != ring[-1]:
+                    raise ValueError("Unclosed or short ring.")
+                for point in ring:
+                    if (not isinstance(point,list) or len(point) != 2 or
+                            any(type(v) not in (int,float) or not math.isfinite(v) for v in point) or
+                            not (-180 <= point[0] <= 180 and -90 <= point[1] <= 90)):
+                        raise ValueError("Invalid CRS84 coordinate.")
+                    pairs += 1
+                    count += 1
+                    if pairs > 500000:
+                        raise ValueError("Coordinate cap exceeded.")
+        try:
+            geom = shape(g)
+            if geom.is_empty or not geom.is_valid or geom.area <= 0 or geom.wkb in geometries:
+                raise ValueError("Empty, invalid or exact duplicate geometry.")
+            geometries.add(geom.wkb)
+        except ShapelyError as exc:
+            raise ValueError("Geometry validation failed.") from exc
+        w.writerow([sid,name,iso,"ZAF","ADM2",2020,kind,count,*geom.bounds,""])
+    quality = {"features":len(ids),"valid_geometries":len(geometries),"coordinate_pairs":pairs,
+               "polygons":polygons,"multipolygons":multipolygons,"missing_shape_iso":missing_iso,
+               "duplicate_shape_ids":0,"duplicate_shape_names":0,"empty_geometries":0,
+               "exact_duplicate_geometries":0,"official_code_crosswalk_verified":False,
+               "topology_across_features_verified":False,"boundary_accuracy_verified":False,
+               "limitations":"2020 simplified district geography; not current official codes, parcels or sales."}
+    return out.getvalue().encode("utf-8"), quality
+
+def import_districts(root, intake, terms_reviewed, deadline=None, expected=GEO_SHA, today=None):
+    today = today or date.today()
+    if not terms_reviewed:
+        raise ValueError("Owner must confirm applicable source terms before import.")
+    maximum = intake + timedelta(days=30)
+    deadline = deadline or maximum
+    if intake > today or deadline > maximum or deadline <= intake or today >= deadline:
+        raise ValueError("Future intake, expired retention or excessive deadline.")
+    raw_path = root/GEO_RAW
+    paths = [p for p in (root/GEO_FILE,raw_path) if p.exists()]
+    if not paths:
+        raise ValueError("Place the supplied approved GeoJSON in workspace root or 02_Raw_Data.")
+    raw = read_bounded(paths[0])
+    if any(read_bounded(p) != raw for p in paths[1:]):
+        raise ValueError("Conflicting district source copies.")
+    result, quality = profile_districts(raw, expected)
+    manifest = {"dataset_id":"HPI-DATA-003","manager_version":MANAGER_VERSION,
+        "source":"geoBoundaries; OCHA ROSEA; South African Municipal Demarcation Board",
+        "source_url":GEO_URL,"snapshot":GEO_SNAPSHOT,"boundary_id":"ZAF-ADM2-47623444",
+        "reference_year":2020,"build_date_supplied":"2026-11-02",
+        "source_licence":"CC BY 3.0 IGO (publisher metadata)",
+        "source_licence_url":"https://creativecommons.org/licenses/by/3.0/igo/",
+        "publisher_terms_url":"https://www.geoboundaries.org/",
+        "licence_evidence_limit":"Upstream HDX page not independently retrieved; newer build metadata supplied by owner.",
+        "attribution":"geoBoundaries (https://www.geoboundaries.org/), OCHA ROSEA, South African Municipal Demarcation Board; Runfola et al. (2020), doi:10.1371/journal.pone.0231866.",
+        "changes":"Derived district index CSV; original GeoJSON preserved unmodified; no official code crosswalk.",
+        "terms_reviewed_by_owner":True,"first_intake_date":intake.isoformat(),
+        "do_not_retain_on_or_after":deadline.isoformat(),
+        "retention":"Maximum 30 days or shorter applicable terms; no automatic deletion or renewal",
+        "source_sha256":sha(raw),"source_bytes":len(raw),"raw_path":GEO_RAW,
+        "processed_path":GEO_OUTPUT,"processed_sha256":sha(result),
+        "quality_report":GEO_REPORT,"quality":quality}
+    planned = [(root/GEO_MANIFEST,json_bytes(manifest)),(raw_path,raw),
+               (root/GEO_OUTPUT,result),(root/GEO_REPORT,json_bytes(quality))]
+    for path, content in planned:
+        workspace(path.parent)
+        check_target(path,content)
+    initialise(root)
+    # Existing manifest is checked before any copy; publish the manifest last.
+    for path, content in planned[1:] + planned[:1]:
+        publish(path,content)
+    return manifest
+
+def district_status(root):
+    path = root/GEO_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-003","registered":False}
+    m = json.loads(read_bounded(path))
+    deadline = date.fromisoformat(m["do_not_retain_on_or_after"])
+    return {"registered":True,"dataset_id":"HPI-DATA-003","deadline":deadline.isoformat(),
+            "retention_due_or_expired":date.today() >= deadline,
+            "known_local_paths":[p for p in (GEO_FILE,GEO_RAW,GEO_OUTPUT) if (root/p).exists()],
+            "note":"Other copies, chat uploads, sync and backups require separate review; no deletion performed."}
+
+def district_cli(root, args):
+    existing = root/GEO_MANIFEST
+    if existing.exists():
+        prior = json.loads(read_bounded(existing))
+        intake = args.intake_date or date.fromisoformat(prior["first_intake_date"])
+        reviewed = prior["terms_reviewed_by_owner"] is True
+        deadline = args.retain_until or date.fromisoformat(prior["do_not_retain_on_or_after"])
+    else:
+        intake = args.intake_date or date.fromisoformat(input("Actual first download date (YYYY-MM-DD): ").strip())
+        reviewed = args.terms_reviewed or input("Confirm source terms permit private import and retention (yes/no): ").strip().lower()=="yes"
+        deadline = args.retain_until
+        if deadline is None:
+            entered = input("Earlier exclusive retention deadline if terms require it (YYYY-MM-DD; Enter for 30-day cap): ").strip()
+            deadline = date.fromisoformat(entered) if entered else None
+    m = import_districts(root,intake,reviewed,deadline)
+    print(json.dumps({"import":"complete","quality":m["quality"],"status":district_status(root)},indent=2))
+    return 0
+
+def district_self_test():
+    # Entirely invented geometry, never the supplied file in CI.
+    features = []
+    for i in range(52):
+        x, y = i%10, i//10
+        ring = [[x,y],[x+.5,y],[x+.5,y+.5],[x,y+.5],[x,y]]
+        features.append({"type":"Feature","properties":{"shapeID":f"47623444Bfixture{i}",
+            "shapeName":f"Invented {i}","shapeISO":"","shapeGroup":"ZAF","shapeType":"ADM2"},
+            "geometry":{"type":"Polygon","coordinates":[ring]}})
+    data = {"type":"FeatureCollection","crs":GEO_CRS,"features":features}
+    raw = json_bytes(data)
+    def rejects(fn):
+        try:
+            fn()
+        except (ValueError,OSError,KeyError,TypeError):
+            return
+        raise AssertionError("Expected district refusal.")
+    expected = sha(raw)
+    _, q = profile_districts(raw,expected)
+    assert q["features"] == 52 and q["coordinate_pairs"] == 260
+    rejects(lambda: profile_districts(raw,"wrong"))
+    bad = json.loads(raw)
+    bad["features"][0]["geometry"]["coordinates"][0] = [[0,0],[1,1],[0,1],[1,0],[0,0]]
+    b = json_bytes(bad)
+    rejects(lambda: profile_districts(b,sha(b)))
+    bad = json.loads(raw)
+    bad["features"][1]["properties"]["shapeID"] = bad["features"][0]["properties"]["shapeID"]
+    b = json_bytes(bad)
+    rejects(lambda: profile_districts(b,sha(b)))
+    bad = json.loads(raw)
+    bad["features"][1]["geometry"] = bad["features"][0]["geometry"]
+    b = json_bytes(bad)
+    rejects(lambda: profile_districts(b,sha(b)))
+    bad = json.loads(raw)
+    bad["crs"] = {}
+    b = json_bytes(bad)
+    rejects(lambda: profile_districts(b,sha(b)))
+    with tempfile.TemporaryDirectory() as tmp:
+        root = workspace(Path(tmp)/"private")
+        initialise(root)
+        (root/GEO_FILE).write_bytes(raw)
+        day = date(2026,1,1)
+        rejects(lambda: import_districts(root,day,False,expected=expected,today=day))
+        rejects(lambda: import_districts(root,day,True,day+timedelta(days=31),expected,day))
+        rejects(lambda: import_districts(root,day,True,day+timedelta(days=10),expected,day+timedelta(days=10)))
+        first = import_districts(root,day,True,day+timedelta(days=10),expected,day)
+        paths = [root/p for p in (GEO_RAW,GEO_OUTPUT,GEO_REPORT,GEO_MANIFEST)]
+        before = [(p.read_bytes(),p.stat().st_mtime_ns) for p in paths]
+        assert import_districts(root,day,True,day+timedelta(days=10),expected,day) == first
+        assert before == [(p.read_bytes(),p.stat().st_mtime_ns) for p in paths]
+        rejects(lambda: import_districts(root,day,True,day+timedelta(days=11),expected,day))
+        (root/GEO_OUTPUT).write_text("conflict")
+        rejects(lambda: import_districts(root,day,True,day+timedelta(days=10),expected,day))
+        assert (root/GEO_OUTPUT).read_text()=="conflict"
+    print("PASS: district identity, geometry, version, retention, idempotence and conflict checks.")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003"),default="HPI-DATA-002")
+    p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--status",action="store_true")
     p.add_argument("--init-only",action="store_true")
@@ -237,15 +462,20 @@ def main():
     try:
         if args.self_test:
             self_test()
+            district_self_test()
             return 0
         root = workspace(args.root)
         if args.status:
-            print(json.dumps(status(root),indent=2))
+            print(json.dumps(district_status(root) if args.dataset == "HPI-DATA-003" else status(root),indent=2))
             return 0
         initialise(root)
         if args.init_only:
             print("Workspace initialised; existing files preserved.")
             return 0
+        if args.dataset == "HPI-DATA-003":
+            return district_cli(root,args)
+        if args.retain_until is not None:
+            raise ValueError("--retain-until is supported only by the district adapter.")
         existing = root / MANIFEST
         if existing.exists():
             prior = json.loads(read_bounded(existing))
@@ -257,7 +487,7 @@ def main():
         manifest = import_rppi(root,intake,reviewed)
         print(json.dumps({"import":"complete","quality":manifest["quality"],"status":status(root)},indent=2))
         return 0
-    except (ValueError, KeyError, TypeError, OSError, EOFError, InvalidOperation, zipfile.BadZipFile) as exc:
+    except (ValueError, KeyError, TypeError, AttributeError, OverflowError, OSError, EOFError, InvalidOperation, zipfile.BadZipFile) as exc:
         print("STOP:",str(exc))
         return 1
 
