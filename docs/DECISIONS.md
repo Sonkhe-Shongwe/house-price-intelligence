@@ -120,3 +120,7 @@ Owner explicitly approves the twelve proposed evidence-backed variants for priva
 ## Direction B evaluation authority (26 November 2026)
 
 Owner approves evaluation of broader data-first South African property intelligence, research and comparison of feasible capabilities before proposing revised requirements; preserve existing comparable-sales implementation and strict R0. [Proposed requirements and tradeoffs](product/PRODUCT_BRIEF.md#26-november-2026--direction-b-proposed-contextual-decision-workspace-not-adopted) and [source review](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--direction-b-source-and-capability-feasibility). Evaluation only; no approval of scope migration, final market, data intake, contact, material joins, implementation, release or phase acceptance.
+
+## Bounded contextual source research authority (26 November 2026)
+
+Owner approves contextual feasibility slice research for Stats SA RPPI and National Treasury Municipal Money, proposed metropolitan cohort, strict R0, preserving existing application and comparable-sales implementation. No new acquisition or material integration without applicable approval. [Exact source qualification and proposed intake scopes](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--bounded-contextual-slice-exact-source-qualification). No scope adoption, final market, phase acceptance, release or contact.
