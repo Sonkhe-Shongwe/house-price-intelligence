@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import {useEffect,useRef,useState} from 'react';
 import * as maplibregl from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -90,7 +91,7 @@ function VectorCanvas({points,selected,onSelect,theme}:{points:MapPoint[];select
     {status==='loading'&&<p role="status">Preparing local vector renderer…</p>}
     {status==='fallback'&&<p data-testid="geo-fallback" role="status">Map unavailable. The verified sale list remains usable.</p>}
     {status==='ready'&&<><p data-testid="geo-ready" role="status">Virtual map · No basemap · Not to scale</p>
-      <div className="geo-controls"><button type="button" aria-label="Zoom in fictional map" onClick={()=>instance.current?.zoomIn({duration:0})}>+</button>
-      <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}>−</button></div></>}
+      <div className="geo-controls"><button type="button" aria-label="Zoom in fictional map" onClick={()=>instance.current?.zoomIn({duration:0})}><Icon name="plus" size={20}/></button>
+      <button type="button" aria-label="Zoom out fictional map" onClick={()=>instance.current?.zoomOut({duration:0})}><Icon name="minus" size={20}/></button></div></>}
   </div>;
 }

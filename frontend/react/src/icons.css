@@ -1,0 +1,9 @@
+/* Local decorative icons inherit action/status colour; no external assets or inline styles. */
+.hpi-icon{display:inline-block;vertical-align:-.22em;flex:none}
+button .hpi-icon{margin-inline-end:.4em}
+.hpi-sidebar nav button .hpi-icon,.pw-side nav button .hpi-icon,.geo-controls button .hpi-icon,.buyer-candidate-symbol .hpi-icon{margin:0}
+.geo-controls button .hpi-icon{vertical-align:middle}
+.source-empty>.hpi-icon{color:#a78142}
+@media(max-width:540px){
+  .source-shell .hpi-sidebar nav button{flex-direction:column;gap:4px;min-height:48px}
+}

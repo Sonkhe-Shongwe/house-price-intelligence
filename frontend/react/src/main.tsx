@@ -3,4 +3,5 @@ import BuyerWorkflow from './BuyerWorkflow';
 import PrivateBetaRehearsal from './PrivateBetaRehearsal';
 import './style.css';
 import './productRefinement.css';
+import './icons.css';
 createRoot(document.getElementById('root')!).render(window.location.pathname==='/private-beta-rehearsal'?<PrivateBetaRehearsal/>:<BuyerWorkflow/>);

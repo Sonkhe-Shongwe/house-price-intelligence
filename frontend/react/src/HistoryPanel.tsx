@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import {useEffect,useState} from 'react';
 import {adaptHistory,type HistoryIndex,type ActualStatus} from './evidenceBridge';
 export const evidenceLabel=(s:ActualStatus)=>({supported_neighbourhood:'Neighbourhood evidence',
@@ -32,15 +33,15 @@ export default function HistoryPanel({mode,revision,onOpen,onNew,onCompare,onHis
       <h1>{mode==='home'?'Make an informed choice.':'Saved investigations'}</h1>
       <p>{mode==='home'?'Investigate earlier sales, preserve evidence and compare the properties you are considering.':
       'Reopen frozen evidence from your current local database. Search the latest 30 enquiries.'}</p></div>
-      <button className="hpi-primary" type="button" disabled={disabled} onClick={onNew} data-testid="workspace-new-investigation">+ New investigation</button></div>
+      <button className="hpi-primary" type="button" disabled={disabled} onClick={onNew} data-testid="workspace-new-investigation"><Icon name="plus"/>New investigation</button></div>
     {mode==='home'&&<div className="hpi-home-grid">
       <article className="hpi-metric"><small>RECENT SAVED INVESTIGATIONS</small><strong>{data?data.items.length+(data.truncated?'+':''):'—'}</strong><p>Verified in the current fixture database</p></article>
       <article className="hpi-metric"><small>YOUR NEXT DECISION</small><h2>Compare properties</h2><p>Resume an existing shortlist or create one with up to three properties.</p>
-      <button type="button" onClick={onCompare}>Open comparison workspace</button></article>
+      <button type="button" onClick={onCompare}><Icon name="compare"/>Open comparison workspace</button></article>
       <article className="hpi-metric"><small>DATA BOUNDARY</small><h2>Fictional only</h2><p>Recorded sale fixtures, no real addresses, no current value estimate.</p></article>
     </div>}
     <div className="hpi-history-card"><div className="hpi-history-heading"><div><h2>{mode==='home'?'Recent investigations':'Investigation library'}</h2>
-      <p>Earlier completed sales, not live listings or valuations.</p></div><button type="button" onClick={()=>setRefresh(n=>n+1)} data-testid="history-refresh">Refresh</button></div>
+      <p>Earlier completed sales, not live listings or valuations.</p></div><button type="button" onClick={()=>setRefresh(n=>n+1)} data-testid="history-refresh"><Icon name="refresh"/>Refresh</button></div>
       {mode==='saved'&&<div className="hpi-history-filters"><label>Search address, parcel or analysis date<input data-testid="history-search" value={query} onChange={e=>setQuery(e.target.value)} maxLength={120}/></label>
         <label>Evidence status<select value={filter} data-testid="history-status-filter" onChange={e=>setFilter(e.target.value)}>
           <option value="all">All statuses</option><option value="supported_neighbourhood">Neighbourhood evidence</option><option value="exploratory_spatial">Exploratory evidence</option><option value="insufficient_data">Insufficient evidence</option><option value="out_of_coverage">Outside coverage</option>
@@ -51,10 +52,10 @@ export default function HistoryPanel({mode,revision,onOpen,onNew,onCompare,onHis
       {data&&<ul className="hpi-history-list" data-testid="history-list">{rows.slice(0,mode==='home'?3:30).map(item=><li key={item.id}>
         <div><strong>{item.label}</strong><small>Parcel {item.pin??'unresolved'} · Analysis {item.analysisDate}</small></div>
         <div><span className="hpi-evidence-status">{evidenceLabel(item.status)}</span><small>{item.count} earlier sales · Asking {item.askingPriceText}</small></div>
-        <button type="button" data-testid="history-open" disabled={disabled} onClick={()=>onOpen(item.id)}>Open evidence</button>
+        <button type="button" data-testid="history-open" disabled={disabled} onClick={()=>onOpen(item.id)}><Icon name="open"/>Open evidence</button>
       </li>)}</ul>}
       {data?.truncated&&<p className="hpi-history-limit">Showing the latest 30 investigations. Older saved IDs can still be reopened in Investigate.</p>}
-      {mode==='home'&&<button type="button" onClick={onHistory}>View saved investigations</button>}
+      {mode==='home'&&<button type="button" onClick={onHistory}><Icon name="saved"/>View saved investigations</button>}
     </div>
   </section>;
 }

@@ -1,3 +1,4 @@
+import Icon from './Icon';
 /** Source-owned fictional buyer journey. Deliberately no map geometry or price prediction. */
 import {useEffect, useRef, useState} from 'react';
 import {adaptInvestigation, type InvestigationView} from './evidenceBridge';
@@ -272,14 +273,14 @@ export default function BuyerWorkflow(){
                 value={query} onChange={e=>changeQuery(e.target.value)}
                 placeholder="Try an address in the active fictional build" autoComplete="off" maxLength={80}
                 disabled={writing} required/>
-                <button type="submit" data-testid="buyer-search" disabled={phase!=='idle'}>Search addresses</button>
+                <button type="submit" data-testid="buyer-search" disabled={phase!=='idle'}><Icon name="search"/>Search addresses</button>
               </div>
             </form>
             {phase==='searching'&&<p role="status" data-testid="buyer-search-loading">Searching invented addresses…</p>}
             {candidates.length>0&&<div className="buyer-candidates" role="group" aria-label="Distinct fictional parcel candidates">
               {candidates.map(c=><button key={c.addressId} type="button" data-testid="buyer-candidate"
                 disabled={phase!=='idle'} onClick={()=>void select(c)}>
-                <span className="buyer-candidate-symbol">⌂</span>
+                <span className="buyer-candidate-symbol"><Icon name="parcel" size={22}/></span>
                 <span><strong>{c.label}</strong>
                   <small>{c.ambiguous?c.hint:'Unique synthetic parcel candidate'} · Parcel only</small></span>
                 <span className="buyer-candidate-select">Select</span>
@@ -311,7 +312,7 @@ export default function BuyerWorkflow(){
                 onChange={e=>setAnalysisDate(e.target.value)} disabled={writing}/>
               <button className="buyer-save" type="submit" data-testid="buyer-create"
                 disabled={(!chosen&&!PIN.test(manualPin)) || phase!=='idle'}>
-                {phase==='creating'?'Saving and verifying…':'Save fictional investigation'}</button>
+                <Icon name="save"/>{phase==='creating'?'Saving and verifying…':'Save fictional investigation'}</button>
             </form>
             <div className="buyer-constraint">An address must be explicitly selected; a manually entered PIN is a separate lookup. Real geography remains unverified; a separate fictional display layer is optional.</div>
           </article>
@@ -326,7 +327,7 @@ export default function BuyerWorkflow(){
             <form onSubmit={reopen}><input id="buyer-reopen-id" data-testid="buyer-reopen-id" type="text"
               value={reopenInput} onChange={e=>setReopenInput(e.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" maxLength={36}/>
-              <button type="submit" data-testid="buyer-reopen" disabled={phase!=='idle'}>Reopen</button></form>
+              <button type="submit" data-testid="buyer-reopen" disabled={phase!=='idle'}><Icon name="open"/>Reopen</button></form>
             <small>Saved IDs remain usable only while this local fixture database exists.</small></div>
         </aside>
       </section>
@@ -344,7 +345,7 @@ export default function BuyerWorkflow(){
           <div><small>EVIDENCE QUALITY</small><strong>{statusLabel(record.status)}</strong></div>
           <div><small>CURRENT VALUATION</small><strong>Not produced</strong></div>
         </div>
-        <div className="hpi-dossier-actions"><button type="button" onClick={()=>navigate('compare')} data-testid="dossier-compare">Continue to comparison</button></div>
+        <div className="hpi-dossier-actions"><button type="button" onClick={()=>navigate('compare')} data-testid="dossier-compare"><Icon name="compare"/>Continue to comparison</button></div>
         <div className="buyer-result-grid"><article className="buyer-sale-pane"><div className="source-panel-head"><strong>Completed sale evidence</strong><small>ORIGINAL SERVER ORDER</small></div>
           {record.comparables.length? <div className="source-sale-list" data-testid="buyer-sales">
             {record.comparables.map(s=><button key={s.uiKey} type="button" data-testid="buyer-sale"
@@ -353,7 +354,7 @@ export default function BuyerWorkflow(){
               <span className="source-sale-main"><strong>{s.sameNeighbourhood?'Same neighbourhood':'Spatial evidence'}</strong><small>{s.saleDate} · Parcel {s.pin}</small>
               <span className="pi-sale-facts"><span>{s.areaDifferencePct}% area difference</span><span>{s.ageDays} days earlier</span></span></span>
               <span className="source-sale-price">{s.priceText}<small>Earlier completed sale</small></span>
-            </button>)}</div>:<div className="source-empty" data-testid="buyer-insufficient"><span>∅</span>
+            </button>)}</div>:<div className="source-empty" data-testid="buyer-insufficient"><Icon name="warning" size={32}/>
               <h3>Not enough eligible earlier sales</h3><p>No sale-based valuation can be inferred from this result.</p>
               <small>Backend reason: {record.reason??'Not available'}</small></div>}
           <div className="source-sale-detail" role="status" aria-live="polite"><small>SERVER MATCHING EXPLANATION</small>
@@ -373,7 +374,7 @@ export default function BuyerWorkflow(){
       </section>
       <section hidden={view!=='compare'} className="hpi-view" aria-label="Compare">
         <div className="hpi-page-heading"><div><p className="hpi-eyebrow">PROPERTY DECISION WORKSPACE</p><h1>Compare the evidence.</h1><p>Preserve independent evidence and your own research notes.</p></div>
-          <button type="button" className="hpi-primary" onClick={()=>navigate('saved')}>Find saved properties</button></div>
+          <button type="button" className="hpi-primary" onClick={()=>navigate('saved')}><Icon name="saved"/>Find saved properties</button></div>
         <SavedComparison active={record}/>
       </section>
       <footer className="source-footer"><b>HOUSE PRICE INTELLIGENCE / BUYER WORKSPACE</b>

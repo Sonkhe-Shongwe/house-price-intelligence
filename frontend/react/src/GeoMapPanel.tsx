@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import {Component,lazy,Suspense,useEffect,useRef,useState,type ReactNode} from 'react';
 import {adaptMap,type MapEvidence} from './mapEvidence';
 import type {InvestigationView} from './evidenceBridge';
@@ -38,10 +39,10 @@ export default function GeoMapPanel({record,selected,onSelect}:{record:Investiga
     </Suspense></OptionalMapBoundary>
     <small className="geo-provenance">Display source: {data.source} · SHA-256 {data.digest.slice(0,12)} · Separate from original matching coordinates</small>
   </article><CentroidPreview record={record} selected={selected} onSelect={onSelect}/></div>;
-  return <div className="geo-evidence-stack"><article className="buyer-map-disabled" data-testid="buyer-no-geometry"><div className="buyer-disabled-icon" aria-hidden="true">⌾</div>
+  return <div className="geo-evidence-stack"><article className="buyer-map-disabled" data-testid="buyer-no-geometry"><div className="buyer-disabled-icon" aria-hidden="true"><Icon name="map" size={32}/></div>
     <span>REAL GEOLOCATION EVIDENCE / NOT AVAILABLE</span><h3>Map withheld.</h3>
     <p>Real geographic coordinates remain unverified. The optional fictional display layer does not alter saved comparable evidence.</p>
-    <button type="button" className="geo-load" data-testid="geo-load" disabled={busy} onClick={()=>void load()}>{busy?'Verifying map…':'Explore fictional map'}</button>
+    <button type="button" className="geo-load" data-testid="geo-load" disabled={busy} onClick={()=>void load()}><Icon name="map"/>{busy?'Verifying map…':'Explore fictional map'}</button>
     {error&&<p role="alert" data-testid="geo-error">{error}</p>}
     {data?.reason&&<p role="status" data-testid="geo-unavailable">{data.reason==='map_disabled'?'Fictional map mode is not enabled.': 'No verified fictional display points for this result.'}</p>}
     <strong>NO REAL MAP MARKERS · NO VALUATION</strong>

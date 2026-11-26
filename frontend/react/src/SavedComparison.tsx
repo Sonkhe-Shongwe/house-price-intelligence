@@ -1,3 +1,4 @@
+import Icon from './Icon';
 /** Isolated fictional P6 buyer workspace: source-owned shortlist state, never local notes. */
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -266,11 +267,11 @@ export default function SavedComparison({active}: WorkspaceProps) {
       <div className="workspace-input-line"><input id="workspace-label" data-testid="workspace-label"
         maxLength={80} value={label} onChange={e=>setLabel(e.target.value)}
         disabled={busy} required/>
-        <button type="submit" data-testid="workspace-create" disabled={busy||recoveryRequired}>Create shortlist</button></div>
+        <button type="submit" data-testid="workspace-create" disabled={busy||recoveryRequired}><Icon name="plus"/>Create shortlist</button></div>
     </form>}
     <section aria-label="Recent saved shortlists">
       <h3>Saved shortlists</h3>
-      <button type="button" disabled={busy} onClick={()=>void loadRecent()}>Refresh saved shortlists</button>
+      <button type="button" disabled={busy} onClick={()=>void loadRecent()}><Icon name="refresh"/>Refresh saved shortlists</button>
       {recentError&&<p role="alert">{recentError}</p>}
       {!recent.length&&!recentError&&<p>No saved shortlists yet.</p>}
       <ul data-testid="workspace-recent">{recent.map(row=><li key={row.id}>
@@ -284,7 +285,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
         data-testid="workspace-reopen-id" value={reopenId}
         onChange={e=>setReopenId(e.target.value)} maxLength={36} disabled={busy}
         placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
-        <button type="submit" data-testid="workspace-reopen" disabled={busy}>Open saved shortlist</button></div>
+        <button type="submit" data-testid="workspace-reopen" disabled={busy}><Icon name="open"/>Open saved shortlist</button></div>
     </form>
     {workspace && <>
       {recoveryRequired&&<p role="alert" data-testid="workspace-recovery" className="source-error">
@@ -339,7 +340,7 @@ export default function SavedComparison({active}: WorkspaceProps) {
             <div className="workspace-provenance"><span>Frozen build · {entry.investigation.sourceBuildId}</span>
               <span>No verified map geometry</span></div>
             <button type="button" data-testid="workspace-remove" disabled={busy||dirty||recoveryRequired}
-              onClick={()=>void removeMember(entry.investigationId)}>Remove property</button>
+              onClick={()=>void removeMember(entry.investigationId)}><Icon name="remove"/>Remove property</button>
           </article>;
         })}
       </div>

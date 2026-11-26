@@ -21,6 +21,10 @@ class WorkspaceNavigationTests(unittest.TestCase):
                 page.goto(server.base+"/")
                 expect(page.get_by_test_id("history-empty")).to_be_visible()
                 expect(page.get_by_test_id("nav-home")).to_have_attribute("aria-current","page")
+                nav=page.get_by_role("navigation",name="Main navigation")
+                expect(nav.get_by_role("button",name="Workspace",exact=True)).to_be_visible()
+                expect(nav.locator("svg[data-icon][aria-hidden=true][focusable=false]")).to_have_count(5)
+                expect(page.get_by_test_id("workspace-new-investigation")).to_have_accessible_name("New investigation")
                 page.get_by_test_id("workspace-new-investigation").click()
                 expect(page.locator("#hpi-content")).to_be_focused()
                 def save(pin):
@@ -65,6 +69,8 @@ class WorkspaceNavigationTests(unittest.TestCase):
                 for width in (375,320):
                     page.set_viewport_size({"width":width,"height":800})
                     self.assertTrue(page.evaluate("document.documentElement.scrollWidth <= innerWidth+2"))
+                    expect(page.get_by_test_id("nav-methodology").locator("svg")).to_be_visible()
+                    expect(page.get_by_test_id("nav-methodology")).to_have_accessible_name("Methodology")
                     page.get_by_test_id("nav-methodology").focus()
                     page.keyboard.press("Enter")
                     expect(page.get_by_test_id("methodology")).to_be_visible()
