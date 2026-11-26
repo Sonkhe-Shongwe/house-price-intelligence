@@ -9,14 +9,9 @@ import HistoryPanel from './HistoryPanel';
 import Methodology from './Methodology';
 import BuyerEvidencePreview from './BuyerEvidencePreview';
 import EvidenceProfile from './EvidenceProfile';
+import WorkspaceNavigation,{type WorkspaceView as View} from './WorkspaceNavigation';
 import './workspaceShell.css';
 import {fixtureFetch} from './fixtureFetch';
-
-type View='home'|'investigate'|'saved'|'compare'|'methodology';
-const NAV:readonly {id:View;label:string;symbol:string}[]=[
-  {id:'home',label:'Workspace',symbol:'⌂'},{id:'investigate',label:'Investigate',symbol:'⌕'},
-  {id:'saved',label:'Saved properties',symbol:'▤'},{id:'compare',label:'Compare',symbol:'▥'},
-  {id:'methodology',label:'Methodology',symbol:'ⓘ'}];
 
 type Candidate = {
   addressId: string; label: string; hint: string | null; ambiguous: boolean;
@@ -254,10 +249,7 @@ export default function BuyerWorkflow(){
     <a className="hpi-skip" href="#hpi-content">Skip to content</a>
     <div className="hpi-app-layout">
       <aside className="hpi-sidebar"><div className="hpi-nav-title">RESEARCH WORKSPACE</div>
-        <nav aria-label="Main navigation">{NAV.map(item=><button key={item.id} type="button"
-          data-testid={'nav-'+item.id} aria-current={view===item.id?'page':undefined} disabled={writing}
-          onClick={()=>navigate(item.id)}>
-          <span aria-hidden="true">{item.symbol}</span>{item.label}</button>)}</nav>
+        <WorkspaceNavigation view={view} onNavigate={navigate} disabled={writing}/>
         <div className="hpi-sidebar-note"><b>Local fixture</b><p>Fictional data only. No valuation or real locations.</p></div></aside>
       <main id="hpi-content" className="source-container hpi-main" ref={contentFocus} tabIndex={-1}>
         <div className="hpi-top-warning" role="note">Fictional data · Local-only workspace · No real property records or valuations</div>
