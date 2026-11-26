@@ -1,5 +1,6 @@
 import {ActionButton,Field,StatusMessage} from './UI';
 import Icon from './Icon';
+import {EvidenceNavigation,EvidenceJump} from './EvidenceNavigation';
 /** Source-owned fictional buyer journey. Deliberately no map geometry or price prediction. */
 import {useEffect, useRef, useState} from 'react';
 import {adaptInvestigation, type InvestigationView} from './evidenceBridge';
@@ -160,7 +161,7 @@ export default function BuyerWorkflow(){
   async function select(candidate:Candidate){
     if(pendingWrite.current)return;
     const {controller,seq}=newOperation();
-    setError('');setChosen(null);setRecord(null);setActiveRank(null);
+    setError('');setMessage('');setChosen(null);setRecord(null);setActiveRank(null);
     setPhase('resolving');
     try{
       const raw=await request('/v1/addresses/'+encodeURIComponent(candidate.addressId),controller.signal);
@@ -186,7 +187,7 @@ export default function BuyerWorkflow(){
     }
     pendingWrite.current=true;
     const {controller,seq}=newOperation();
-    setRecord(null);setActiveRank(null);setError('');setPhase('creating');
+    setRecord(null);setActiveRank(null);setError('');setMessage('');setPhase('creating');
     const target=chosen??{pin:manualPin,addressId:null,label:'Fictional parcel '+manualPin};
     try{
       const original=await request('/v1/investigations',controller.signal,{
@@ -219,7 +220,7 @@ export default function BuyerWorkflow(){
     const target=(id??reopenInput).trim();
     if(!UUID.test(target)){setError('Enter a valid lowercase saved investigation UUID.');return;}
     const {controller,seq}=newOperation();
-    setError('');setRecord(null);setActiveRank(null);setPhase('reopening');
+    setError('');setMessage('');setRecord(null);setActiveRank(null);setPhase('reopening');
     try{
       const view=adaptInvestigation(await request('/v1/investigations/'+target,controller.signal));
       if(view.investigationId!==target)throw Error('Reopened the wrong saved investigation');
@@ -328,9 +329,10 @@ export default function BuyerWorkflow(){
         </aside>
       </section>
       {error&&<StatusMessage tone="error" className="source-error" data-testid="buyer-error">{error}</StatusMessage>}
-      {message&&<StatusMessage tone="success" className="buyer-feedback" data-testid="buyer-feedback">{message}</StatusMessage>}
+      {message&&<StatusMessage className="buyer-feedback" data-testid="buyer-feedback">{message}</StatusMessage>}
       {(phase==='reopening'||phase==='creating')&&<div role="status" data-testid="buyer-pending" className="source-info-state">Verifying source-owned evidence…</div>}
-      {record&& <section className="buyer-result" data-testid="buyer-result"><div className="buyer-result-title">
+      {record&&phase==='idle'&&<EvidenceJump targetId="buyer-evidence-result"/>}
+      {record&& <section id="buyer-evidence-result" tabIndex={-1} aria-label="Saved investigation evidence" className="buyer-result" data-testid="buyer-result"><div className="buyer-result-title">
         <div><div className="source-eyebrow">Saved investigation / frozen Python API</div><h2>{record.subjectLabel}</h2>
           <p>Parcel {record.subjectPin??'unresolved'} · {record.analysisDate}</p></div>
         <div><b data-testid="buyer-count">{record.selectedCount} eligible sale{record.selectedCount===1?'':'s'}</b>
@@ -353,6 +355,7 @@ export default function BuyerWorkflow(){
             </button>)}</div>:<div className="source-empty" data-testid="buyer-insufficient"><Icon name="warning" size={32}/>
               <h3>Not enough eligible earlier sales</h3><p>No sale-based valuation can be inferred from this result.</p>
               <small>Backend reason: {record.reason??'Not available'}</small></div>}
+          <EvidenceNavigation ranks={record.comparables.map(s=>s.rank)} selected={activeRank} onSelect={setActiveRank}/>
           <div className="source-sale-detail" role="status" aria-live="polite"><small>SERVER MATCHING EXPLANATION</small>
             <p data-testid="buyer-explanation">{selected?selected.explanation:record.comparables.length
               ?'Choose a sale to inspect its exact original matching explanation.'

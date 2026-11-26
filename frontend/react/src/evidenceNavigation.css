@@ -1,0 +1,11 @@
+.hpi-evidence-navigation{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;margin:8px 0;border-top:1px solid var(--hpi-atlas-shell-rule)}
+.hpi-evidence-navigation p{font:650 12px/1.4 system-ui,sans-serif;color:var(--hpi-atlas-muted);text-align:center;flex:1;min-width:82px;margin:0}
+.hpi-evidence-navigation .hpi-action{margin:0}
+.hpi-evidence-navigation [aria-disabled=true]{opacity:.55;cursor:not-allowed}
+.hpi-evidence-navigation [aria-disabled=true]:hover{filter:none}
+[data-testid=evidence-jump]{margin-block:8px}
+#buyer-evidence-result,#private-evidence-result{scroll-margin-top:16px}
+#buyer-evidence-result:focus,#private-evidence-result:focus{outline:2px solid var(--hpi-atlas-accent);outline-offset:4px}
+@media(max-width:520px){.hpi-evidence-navigation{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hpi-evidence-navigation p{grid-column:1/-1;grid-row:1}.hpi-evidence-navigation .hpi-action{width:100%;padding-inline:6px}}
+@media(prefers-reduced-motion:no-preference){.hpi-evidence-navigation .hpi-action{transition:background-color 120ms ease-out,border-color 120ms ease-out}}
+@media(prefers-reduced-motion:reduce){.hpi-evidence-navigation .hpi-action{transition:none!important}}

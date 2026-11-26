@@ -1,5 +1,6 @@
 import {ActionButton,Field,PageHeading,StatusMessage,EmptyState,LoadingState} from './UI';
 import Icon from './Icon';
+import {EvidenceNavigation,EvidenceJump} from './EvidenceNavigation';
 /** Explicit fixture-only historical-shape view within the existing React bundle. */
 import {useEffect,useRef,useState} from 'react';
 import WorkspaceNavigation,{type WorkspaceView} from './WorkspaceNavigation';
@@ -45,10 +46,11 @@ function privateComparisonRows(entries:Entry[]){
 function PrivateEvidence({result}:{result:Result}){
   const [rank,setRank]=useState(1);
   const selected=result.sales.find(s=>s.rank===rank);
-  return <section className="pw-card pw-dossier" data-testid="beta-result" aria-label="Saved evidence">
+  return <section id="private-evidence-result" tabIndex={-1} className="pw-card pw-dossier" data-testid="beta-result" aria-label="Saved evidence">
     <div className="pw-dossier-heading"><div><div className="pw-kicker">FROZEN HISTORICAL INVESTIGATION</div><h2>Saved evidence</h2></div><div className="pw-evidence-state" data-status={result.status}><strong>{statusText(result.status)}</strong><span>{result.selected_count} eligible sales · {result.status.replaceAll('_',' ')} · {result.analysis_date}</span></div></div>
     <dl className="pw-dossier-facts"><div><dt>Buyer-reported asking price</dt><dd>{result.asking_price_usd===null?'Not supplied':formatExactUsd(result.asking_price_usd)}</dd></div><div><dt>Buyer-reported area</dt><dd>{result.buyer_reported_area_sqft.toLocaleString('en-US')} sq ft</dd></div></dl>
     {result.sales.length?<div className="pw-table-wrap pw-evidence-table" role="region" tabIndex={0} aria-label="Eligible sales table, scroll horizontally if needed"><table><caption>Eligible completed sales · ranked by evidence policy</caption><thead><tr><th scope="col">Rank</th><th scope="col">Sale price</th><th scope="col">Sale date</th><th scope="col">Assessed area</th><th scope="col">Age / area difference</th><th scope="col">Location evidence</th></tr></thead><tbody>{result.sales.map(s=><tr key={s.rank} data-testid="beta-sale" data-selected={rank===s.rank}><td><button type="button" className="pw-rank" aria-label={'Inspect comparable '+s.rank} aria-pressed={rank===s.rank} onClick={()=>setRank(s.rank)}>{s.rank}</button></td><td><strong>{formatExactUsd(s.sale_price_usd)}</strong></td><td>{s.sale_date}</td><td>{s.assessed_area_sqft} sq ft ({s.assessment_year})</td><td>{s.age_days} days · {s.area_difference_pct}%</td><td>{s.location_evidence.replaceAll('_',' ')}</td></tr>)}</tbody></table></div>:<p className="pw-notice">No eligible sales. The available evidence does not support a comparison with previous sales.</p>}
+    <EvidenceNavigation ranks={result.sales.map(s=>s.rank)} selected={rank} onSelect={setRank}/>
     {selected&&<EvidenceProfile facts={{rank:selected.rank,ageDays:selected.age_days,areaDifferencePct:selected.area_difference_pct}}/>}
     <div className="pw-notice" data-testid="beta-geometry-unavailable"><strong>Geographic evidence unavailable.</strong> No verified property coordinates or building identity are displayed.</div>
     <p className="pw-sub pw-dossier-limits">Fictional source-shaped evidence. Historical source availability and public display rights are unverified. Historical evidence is not a valuation.</p>
@@ -133,6 +135,7 @@ export default function PrivateBetaRehearsal(){
         <div className="pw-recovery"><span>Advanced recovery</span><Field label="Saved investigation ID" id="beta-iid" data-testid="beta-id" value={iid} onChange={e=>setIid(e.target.value)}/>
         <ActionButton className="buyer-save" type="button" disabled={!UUID.test(iid)} data-testid="beta-reopen" onClick={()=>void run('reopenInvestigation',async()=>{clear();setResult(await service.reopenInvestigation(iid));})} icon="open" variant="primary">Reopen saved investigation</ActionButton></div>
       </fieldset></section>
+      {result&&!busy&&<EvidenceJump targetId="private-evidence-result"/>}
       {result&&<><PrivateEvidence key={result.investigation_id} result={result}/><div className="pw-dossier-actions"><ActionButton className="pw-secondary" type="button" data-testid="beta-add-comparison" disabled={busy||entries.length>=3||entries.some(e=>e.investigation_id===result.investigation_id)} onClick={()=>{setEntries(old=>[...old,{investigation_id:result.investigation_id,note_text:'',investigation:result}]);navigate('compare');}} icon="plus" variant="secondary">Add to comparison</ActionButton><ActionButton className="pw-secondary" type="button" disabled={busy} onClick={()=>navigate('compare')} icon="compare" variant="secondary">Open comparison ({entries.length})</ActionButton></div></>}
       </section>
       <section className="pw-view" hidden={!libraryVisible} aria-label="Saved workspace">
