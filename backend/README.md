@@ -28,7 +28,7 @@ The disposable PostgreSQL 17 runtime, split-role historical reader/buyer persist
 
 ## Isolated actual identity qualification
 
-See the [private beta contract](../docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md) for operator-only Auth0 loopback launcher and the [checkpoint](../docs/CHECKPOINT.md) for next diagnostic. No property routes or Neon connection; actual identity acceptance pending.
+See the [private beta contract](../docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md) for operator-only Auth0 loopback launcher and the [checkpoint](../docs/CHECKPOINT.md) for next diagnostic. Isolated actual Auth0 login/restart/logout and later combined invented buyer milestone verified; no real property routes or production release. Do not replay prior consumed windows.
 
 ## Optional durable fictional investigations (development only)
 

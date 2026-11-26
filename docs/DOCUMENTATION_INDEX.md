@@ -8,33 +8,33 @@
 | --- | --- | --- |
 | Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
 | Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and next acceptance/design gate |
-| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 26 November FE directive and migration consolidation; immutable historical ledger linked |
+| Inspect latest documentation cleanup | [Current checkpoint](CHECKPOINT.md) | 26 November release-readiness audit; detailed historical ledgers preserved |
 | Active database workstream | [Neon Cloud Integration V1](engineering/NEON_CLOUD_INTEGRATION_V1.md) | Restricted TLS, persistent invented buyer journey and independent encrypted Drive recovery verified; full protection/key/access gates open |
 | Active private beta boundary | [Private Real-Data Beta V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md) | Combined actual invented buyer milestone completed; real-intake protection/use gates open; no real buyer route or deployment |
 | Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 87.1% estimated |
 | Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
 | Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
-| Review Atlas / Terminal V1–V3 | [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) and [interactive HTML](../design-prototypes/hpi-atlas-terminal-study.html) | Tested fictional prototype; Atlas candidate, not owner-approved |
-| Active professional frontend directive | [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) | FE1–FE7; first task iconography, no new phase weights |
+| Review Atlas / Terminal V1–V3 | [Visual study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md) and [interactive HTML](../design-prototypes/hpi-atlas-terminal-study.html) | Dated fictional prototypes; Atlas subsequently explicitly owner-approved, core integrated |
+| Active professional frontend directive | [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) | FE1–FE7 core qualified; quality standard retained, no new phase weights |
 | Resume integrated UX development | [Current checkpoint](CHECKPOINT.md) | Actual shared components, typed private adapter, design tokens, exact-head CI, visual review and outstanding gates |
 | Review custom cartography qualification | [26 Nov cartography study](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md) | Verified fictional styles and regression corrections; no real geography; future basemap deferred |
 | Review frontend convergence source audit | [26 Nov frontend convergence audit](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md) | Dated audit; shared components/adapters since implemented; see checkpoint |
 | Review current product convergence | [26 Nov product, UX and geospatial research](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md) | Shared frontend, validated adapters, separate renderer/basemap/geometry decisions; research only |
 | Review current design system | [26 Nov professional UI engineering](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md) | Candidate libraries, computed contrast, component/state inventory |
-| Review aesthetic originality | [26 Nov art direction and design craft](design/ART_DIRECTION_AND_DESIGN_CRAFT_RESEARCH_2026-11-26.md) | Three exploratory concepts, custom cartography and visualisation; no final selection |
+| Review aesthetic originality | [26 Nov art direction and design craft](design/ART_DIRECTION_AND_DESIGN_CRAFT_RESEARCH_2026-11-26.md) | Dated exploratory concepts; later Atlas primary direction approved |
 | Review UX research and visual concepts | [UX research and product direction, 23 Nov](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | **Exploratory, not approved**; inspiration, palettes, screen architecture, accessibility and design decisions |
-| Review professional UI baseline proposal | [Visual Foundation V1 implementation proposal](design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | **Owner review pending**; proposes screen hierarchy, prototype tokens, staged frontend work and acceptance tests; no UI changes approved |
+| Review professional UI baseline proposal | [Visual Foundation V1 implementation proposal](design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md) | Dated proposal; subsequent React/Atlas implementation separately approved; original proposal retained |
 | Review interactive visual-map concepts | [Map-linked Visual Study V1 review](design/MAP_LINKED_VISUAL_STUDY_V1_REVIEW_2026-11-23.md) and [offline HTML prototype](../design-prototypes/map-evidence-studio.html) | **Review-ready standalone fiction-only study**; two visual directions, linked diagram/card selection, responsive UI and shortlist; no integration, accurate geography or style approval |
 | Review map and professional-UI grey areas | [Professional UI and mapping research](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) | **Research only**; map data coordinate blocker, renderer/provider/legal/CSP separations, linked-map buyer UX, frontend choices, cost/security/a11y/performance gates |
 | Review tested MapLibre v6 frontend feasibility | [React/MapLibre compatibility spike](design/REACT_MAPLIBRE_V6_COMPATIBILITY_SPIKE_2026-11-23.md) | **Passing small Vite/TypeScript/Chromium WebGL proof** with bundle measurements; not a source/property map acceptance |
-| Review full React ESM hosted validation | [24 Nov exact-source WebGL verification](design/REACT_FULL_ESM_HOSTED_VALIDATION_2026-11-24.md) and [23 Nov preliminary offline study](design/REACT_FULL_UI_SOURCE_VALIDATION_2026-11-23.md) | **6/6 real Chrome/Vite ESM UI tests including MapLibre WebGL ready, clean npm ci, 320px/375px and bundle measurements** on isolated feature branch; **no framework adoption, geographic-map permission or merge approval** |
+| Review full React ESM hosted validation | [24 Nov exact-source WebGL verification](design/REACT_FULL_ESM_HOSTED_VALIDATION_2026-11-24.md) and [23 Nov preliminary offline study](design/REACT_FULL_UI_SOURCE_VALIDATION_2026-11-23.md) | Historical 6/6 Chrome/Vite ESM compatibility proof; subsequent React/MapLibre adoption on development separately approved, no real-map or release approval implied |
 | Review integrated synthetic map | [Synthetic Geographic Evidence V1](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) | Owner-authorised implementation; verify exact-head CI, no real geography or release |
 | Review workspace consolidation | [Buyer Workspace and UX V1](engineering/BUYER_WORKSPACE_UX_V1.md) | Owner-authorised implementation; P3.1–P3.7 provisional synthetic acceptance, verify CI |
 | Review production/data readiness | [Production Architecture and Data Readiness V1](engineering/PRODUCTION_READINESS_V1.md) | PostgreSQL candidate, synthetic CI and bounded aggregate research authorised; no deployment |
 | Apply quality/invariants | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) | **Binding engineering guardrails** |
 | Develop efficiently and consistently | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) | **Active eight-step engineering process**, approved 23 Nov |
 | Run the two-branch development station | [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) | **Current operating method:** ongoing `development`, accepted `main`, hosted CI implemented |
-| Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | **Synthetic-only code/HTTP/SQL/UI review candidate; acceptance pending** |
+| Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | Integrated fictional code/HTTP/SQL/UI contract; provisional synthetic P3.1–P3.7 accepted, full phase exit open |
 | Review integrated P6 shortlist | [P6 synthetic shortlist contract](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md) | **Merged to `development` as PR #6**, synthetic-only; phase exit and access/privacy decisions still open |
 | Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
 | Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
@@ -57,6 +57,18 @@
 
 **Full product qualification:** [FR1–FR3](engineering/FULL_RELEASE_QUALIFICATION_V1.md).
 
+## Detailed archives and current qualification
+
+| Document | Role |
+| --- | --- |
+| [Latest documentation audit](reviews/RELEASE_READINESS_DOCUMENTATION_AUDIT_2026-11-26.md) | Scope, drift corrections, preservation approach, evidence and limitations |
+| [Checkpoint evidence archive](archive/CHECKPOINT_EVIDENCE_2026-11-26.md) | Full dated FE/G/basemap/security/rekey engineering ledger |
+| [Decision history](archive/DECISION_HISTORY_2026-11-26.md) | Dated owner authorisations, approvals, rejected choices and outcomes |
+| [Delivery milestone history](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md) | Historical progress calculations and rationale |
+| [Bounded contextual basemap proposal](design/BASEMAP_ACQUISITION_PROPOSAL_2026-11-26.md) | One approved attempt, unused/deferred on security; strict scope/limits retained |
+| [Geographic evidence integration](engineering/GEOGRAPHIC_EVIDENCE_INTEGRATION_V1.md) | Virtual/source-shaped/private geometry boundaries |
+| [Release runbook](engineering/RELEASE_RUNBOOK_V1.md) | Current security qualification and browser-only release boundary |
+
 ## Terminology: two separate kinds of phases
 
 - **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.
@@ -75,4 +87,4 @@
 
 Use [CHECKPOINT.md](CHECKPOINT.md) as the only current state/next-task ledger; [DECISIONS.md](DECISIONS.md) for authority and [P_PHASE_ROADMAP.md](P_PHASE_ROADMAP.md) for phase gates. [Master prompt](MASTER_CONTINUATION_PROMPT.md) and [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) define standing autonomy, one permanent development branch and stable main. Earlier design and engineering contracts describe their dated scope, not the latest project status.
 
-Active: [Professional Frontend Excellence directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) under P5/P3/P6 and P7 verification. [Current checkpoint](CHECKPOINT.md) is the sole live state/next task; start FE1, not earlier prototypes or basemap. Latest application baseline 2283037 passed 11/11; no final owner visual approval. [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) retain real-intake gates. **87.1%** weighted, all full gates open, R0. [Recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md) and [release runbook](engineering/RELEASE_RUNBOOK_V1.md) define browser-only release.
+Active: P4/P7 protected storage and permitted-use acceptance, then bounded private real-data beta and P8 release readiness. [Frontend directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) core FE1–FE7 qualified, Atlas owner-approved; generated contextual PMTiles verified, real basemap deferred. [Checkpoint](CHECKPOINT.md) is the sole live state/next-task ledger; never restart completed work from dated instructions. [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) govern real-intake gates. **87.1%**, R0, all full gates open. [Recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md) and [release runbook](engineering/RELEASE_RUNBOOK_V1.md) govern browser-only release.

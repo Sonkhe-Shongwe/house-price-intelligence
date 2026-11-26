@@ -1,8 +1,8 @@
 # Frontend: fictional property-investigation browser
 
-**Verified synthetic-only browser baseline (23 November 2026):** The existing HTML/CSS/JavaScript is served by a local Python WSGI API backed by fictional SQLite records. Owner-approved [PR #6](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/6) integrated shortlist and comparison into `development`. The unchanged application merge passed [172 Python and 9 hosted Chromium tests](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45254283750). This describes the historical legacy baseline. React/TypeScript and fictional MapLibre were subsequently integrated on development; see [current checkpoint](../docs/CHECKPOINT.md) and [React guide](react/README.md). Final visual/real-map acceptance remains open.
+**Verified synthetic-only browser baseline (23 November 2026):** The existing HTML/CSS/JavaScript is served by a local Python WSGI API backed by fictional SQLite records. Owner-approved [PR #6](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/6) integrated shortlist and comparison into `development`. The unchanged application merge passed [172 Python and 9 hosted Chromium tests](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45254283750). This describes the historical legacy baseline. React/TypeScript and fictional MapLibre were subsequently integrated on development; see [current checkpoint](../docs/CHECKPOINT.md) and [React guide](react/README.md). Atlas direction subsequently owner-approved; final real-buyer acceptance and real-map qualification remain open.
 
-## Implemented browser journey
+## Implemented browser journey (legacy and integrated React foundation)
 
 1. Enter an **invented** street-address query, such as `Fictional Way` or `105 Fictional Court`. The browser sends `POST /v1/addresses/search` and displays candidate IDs/labels without silently selecting a parcel.
 2. Two parcels can share `105 Fictional Court`. Each option has an explicit fictional parcel hint. A click calls `GET /v1/addresses/{address_id}`, returning one server-owned parcel key with `identity_scope=parcel_only` and `building_identity_verified=false`. The selection is not a verified physical building. The internal synthetic 14-digit PIN remains available as an alternative technical entry.
@@ -14,7 +14,7 @@
 
 ## Run and verify
 
-From the repository root:
+The commands below run the retained **legacy** frontend. For the current Atlas React application, follow the [React guide](react/README.md). From the repository root:
 
 ```bash
 python -m backend.run_synthetic_api --fixture-only --port 8765
@@ -25,8 +25,8 @@ python tools/dev_check.py
 
 Open http://127.0.0.1:8765/ locally. The original P6 application merge passed **9 actual Chromium browser journeys** and 172 Python tests. See the [current checkpoint](../docs/CHECKPOINT.md) for newer exact-SHA verification; documentation changes do not add functionality.
 
-## Not yet implemented or approved
+## Current boundaries
 
-**Not implemented or approved:** licensed real address-to-parcel/building resolution; production-grade multi-user durable persistence, accounts/permissions or privacy; final accessibility/responsive owner acceptance; a verified geographic map contract or map renderer/tile service; approved publisher-field display; current prices/valuations; live listings; public deployment; and final UI visual identity. The original legacy fixture had overlapping dummy coordinates; the later integrated fictional MapLibre display is documented in the [synthetic map contract](../docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). Real geography and tile/data rights remain unapproved. See the [mapping research and grey-area review](../docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) and the [P6 synthetic shortlist contract](../docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md).
+React/TypeScript workspace and Atlas visual direction are integrated and approved for the fictional application; PostgreSQL split-role persistence, actual Auth0/Neon invented buyer integration, fictional geographic and generated contextual PMTiles renderer are verified. Still open: licensed real address-to-parcel/building resolution, protected real-data storage and permitted fields, actual combined lifecycle gaps, final manual accessibility/real-device and buyer acceptance, actual regional map, public deployment and production security. Valuations and live listings are outside the accepted MVP. The original legacy fixture had overlapping dummy coordinates; the later integrated fictional MapLibre display is documented in the [synthetic map contract](../docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). Real geography and tile/data rights remain unapproved. See the [mapping research and grey-area review](../docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) and the [P6 synthetic shortlist contract](../docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md).
 
 For the provisional source/API/schema meaning see the [P3 contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md). For deliverables and stage gates see the [80-package roadmap](../docs/P_PHASE_ROADMAP.md).
