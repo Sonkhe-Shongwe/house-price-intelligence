@@ -172,3 +172,7 @@ B.1-B.5 satisfy the directive's bounded research stopping conditions. No new own
 ## Owner clarification after B.5 (26 November 2026)
 
 South African-first research preference supersedes the earlier parked-SA priority. Preserve B.1-B.5 as dated evidence, not a final market decision. The Cape Town official GV2025 sales guide is a material local lead; see [P0-C local feasibility](../research/DATA_FEASIBILITY.md#26-november-2026--south-african-first-research-direction). Assess local source feasibility and competitor/buyer relevance before adopting an overseas market. Cook remains measured reference, NYC international challenger, England/Wales secondary. No final market, expanded scope, local coverage, data permission or migration asserted. P0-C remains the sole active workstream.
+
+## HPI-SA SA1 extension (26 November 2026)
+
+See [South African ecosystem and buyer research](SOUTH_AFRICAN_ECOSYSTEM_AND_BUYER_RESEARCH_2026-11-26.md) for the local nine-alternative JT1-JT6 benchmark and four falsifiable hypotheses. Property24 favourites/notes and trends, Lightstone and WinDeed sales reports, ErfCheck and free bank property guides materially overlap with the proposed workflow. No uniqueness or superiority established. Ordinary P0-C paused; SA2 source feasibility next. No product/source licence, local coverage or expanded scope accepted.
