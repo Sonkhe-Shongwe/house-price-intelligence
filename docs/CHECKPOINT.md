@@ -10,11 +10,11 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-AE0-WIKIDATA-LOCAL-PILOT",
+    "id": "P0-AE0-SPATIAL-STOP-REVIEW",
     "status": "blocked",
-    "objective": "Verify spatial pilot safeguards and observe owner-local outcome.",
-    "scope": "Exact approved one-query local pilot after CI; no other intake.",
-    "acceptance": "Focused CI and validated spatial bundle or documented STOP.",
+    "objective": "Review consumed spatial failure and select diagnostic or alternative route.",
+    "scope": "Metadata and offline review only; Wikidata authority consumed.",
+    "acceptance": "Explicit route decision and separate authority before any live acquisition.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await exact CI and owner Windows run; no replay or P1.",
+    "stop": "No replay; await owner route decision.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -69,7 +69,8 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [69,82,"## 26 November 2026 | Approved World Bank pilot","The authorised workspace is inaccessible"],
         [84,90,"## 26 November 2026 | AE0 World Bank actual local pilot outcome","Next proposed research task:"],
         [92,117,"## 26 November 2026 | AE0 second interface qualification","Acceptance proposal:"],
-        [119,130,"## 26 November 2026 | Approved spatial pilot","Run once only;"]
+        [119,130,"## 26 November 2026 | Approved spatial pilot","Run once only;"],
+        [132,140,"## 26 November 2026 | AE0 Wikidata actual local STOP","Next: owner decision"]
       ]
     }
   },
@@ -113,7 +114,7 @@ Reviewed 26 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and stable `main` heads and exact CI at restoration. e35eb01 7/7 passed; requery after spatial implementation. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and stable `main` heads and exact CI at restoration. 2e7a966 7/7 passed; requery after spatial STOP record. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -133,7 +134,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B research complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; Cape Town profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS 2/2 records, 654 bytes, consumed. Wikidata one-query pilot approved; exact CI and local outcome pending. WCED rights unresolved. No other intake, joins, contact, spend, release or phase acceptance.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): World Bank PASS, consumed. Wikidata STOP outer schema; one request consumed, no spatial result. WCED rights unresolved. Await route decision; no new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
