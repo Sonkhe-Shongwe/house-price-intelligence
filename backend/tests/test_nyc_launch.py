@@ -1,5 +1,7 @@
 """Offline launcher contract tests. No HTTP, credentials, real workspace or records."""
 from datetime import date
+from dataclasses import replace
+import sys
 import os
 from pathlib import Path
 import tempfile
@@ -9,6 +11,8 @@ from unittest.mock import patch
 
 from tools.nyc_launch import (
     validate_manifest, private_directory, consume, supervised, MARKER, main,
+    reviewed_plan, enforce_fixed_plan, execute_reviewed, disposable_preflight,
+    non_dumpable_worker, fixed_sources,
 )
 from tools.nyc_qualification import FIELDS, projection, QualificationError
 
@@ -69,6 +73,68 @@ class LauncherTests(unittest.TestCase):
                          {"status":"blocked", "reason":"worker_failure"})
         with self.assertRaisesRegex(QualificationError, "hard_deadline"):
             supervised(lambda: time.sleep(5), .1)
+
+    def test_fixed_plan_refuses_scope_and_revision_changes(self):
+        today = date(2026, 11, 27)
+        plan, sources = reviewed_plan(today)
+        enforce_fixed_plan(plan, sources, today)
+        self.assertEqual(plan.version, "26v3")
+        self.assertEqual(plan.covered_from, date(2025, 11, 1))
+        self.assertEqual(plan.covered_through, date(2026, 10, 31))
+        for modified in (replace(plan, version="26v4"),
+                         replace(plan, covered_from=date(2025, 10, 1)),
+                         replace(plan, historical_area_verified=True)):
+            with self.assertRaisesRegex(QualificationError, "reviewed_plan_conflict"):
+                enforce_fixed_plan(modified, sources, today)
+        changed = fixed_sources()
+        changed["usep-8jbt"]["revision"] = "1:2"
+        with self.assertRaisesRegex(QualificationError, "reviewed_plan_conflict"):
+            enforce_fixed_plan(plan, changed, today)
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux worker controls")
+    def test_worker_process_controls(self):
+        self.assertEqual(supervised(non_dumpable_worker, 2),
+                         {"status": "completed", "result": {
+                             "core_dumps_disabled": True, "process_dumpable": False}})
+
+    def test_execution_wiring_and_marker_order(self):
+        today = date(2026, 11, 27)
+        plan, sources = reviewed_plan(today)
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp)
+            calls = []
+            def fake_supervisor(task):
+                if task is non_dumpable_worker:
+                    return {"status": "completed", "result": {
+                        "core_dumps_disabled": True, "process_dumpable": False}}
+                self.assertTrue((workspace / MARKER).is_file())
+                return {"status": "completed", "result": task()}
+            def fake_live(p, s):
+                calls.append((p, s))
+                return {"subject_count": 30}
+            with patch("tools.nyc_launch.canonical_workspace", return_value=workspace), \
+                 patch("tools.nyc_launch.supervised", side_effect=fake_supervisor), \
+                 patch("tools.nyc_launch.live_report", side_effect=fake_live):
+                self.assertEqual(execute_reviewed(workspace, plan, sources, "a"*40, today),
+                                 {"status":"completed", "result":{"subject_count":30}})
+                with self.assertRaisesRegex(QualificationError, "attempt_already_consumed"):
+                    execute_reviewed(workspace, plan, sources, "a"*40, today)
+                self.assertEqual(len(calls), 1)
+
+    def test_plan_preflight_never_consumes_or_dispatches_records(self):
+        today = date(2026, 11, 27)
+        plan, sources = reviewed_plan(today)
+        workspace = Path("/invented")
+        with patch("tools.nyc_launch.canonical_workspace", return_value=workspace), \
+             patch("tools.nyc_launch.supervised", return_value={"status":"completed"}) as runner, \
+             patch("tools.nyc_launch.consume") as marker, \
+             patch("tools.nyc_launch.live_report") as live:
+            disposable_preflight(workspace, plan, sources, today)
+            runner.assert_called_once()
+            marker.assert_not_called()
+            live.assert_not_called()
+            with self.assertRaisesRegex(QualificationError, "noncanonical_workspace"):
+                disposable_preflight(Path("/other"), plan, sources, today)
 
     def test_no_live_activation_even_with_structural_plan(self):
         with patch("tools.nyc_launch.private_directory", return_value=Path("/invented")), \

@@ -19,13 +19,94 @@ import sys
 
 from tools.nyc_collector import Collector, FixturePlan, https_response, strict_pairs
 from tools.nyc_qualification import (
-    FIELDS, MAX_SECONDS, CURRENT_SNAPSHOT, QualificationError, projection, require,
+    FIELDS, EXPECTED_TYPES, MAX_SECONDS, CURRENT_SNAPSHOT, QualificationError, projection, require,
 )
 
 REPO = Path(__file__).resolve().parents[1]
 MARKER = "nyc-qualification-2026-11-27.consumed"
 MAX_MANIFEST = 16384
 MAX_REPORT = 16384
+
+# Observed public metadata and release dates, not property records.
+REVIEWED_REVISIONS = {
+    "usep-8jbt": "1795635328:1795635300",
+    "64uk-42ks": "1795476446:1795465895",
+    "bnx9-e6tj": "1794332294:1740778366",
+    "8h5j-fqxa": "1794332093:1740778244",
+}
+REVIEWED_RELEASE = "26v3"
+REVIEWED_START = date(2025, 11, 1)
+REVIEWED_END = date(2026, 10, 31)
+REVIEWED_PUBLICATION = date(2026, 11, 23)
+
+
+def canonical_workspace():
+    # Only one durable, non-record attempt marker per owner workspace.
+    return Path.home() / ".hpi-nyc-qualification"
+
+
+def fixed_sources():
+    return {d: {"revision": token, "types": dict(EXPECTED_TYPES[d])}
+            for d, token in REVIEWED_REVISIONS.items()}
+
+
+def reviewed_plan(today):
+    require(type(today) is date and today >= REVIEWED_PUBLICATION, "invalid_manifest_dates")
+    return FixturePlan(today, REVIEWED_START, REVIEWED_END, REVIEWED_PUBLICATION,
+                       REVIEWED_RELEASE, False, CURRENT_SNAPSHOT), fixed_sources()
+
+
+def enforce_fixed_plan(plan, sources, today):
+    expected_plan, expected_sources = reviewed_plan(today)
+    require(plan == expected_plan and sources == expected_sources,
+            "reviewed_plan_conflict")
+
+
+def non_dumpable_worker():
+    """Verify Linux process-local controls, not host encryption or swap."""
+    import ctypes
+    import resource
+    require(sys.platform.startswith("linux"), "linux_required")
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    libc = ctypes.CDLL(None, use_errno=True)
+    # PR_SET_DUMPABLE=4, PR_GET_DUMPABLE=3; no system-wide changes.
+    require(libc.prctl(4, 0, 0, 0, 0) == 0 and libc.prctl(3, 0, 0, 0, 0) == 0,
+            "worker_privacy_unverified")
+    require(resource.getrlimit(resource.RLIMIT_CORE) == (0, 0),
+            "worker_privacy_unverified")
+    return {"core_dumps_disabled": True, "process_dumpable": False}
+
+
+def disposable_preflight(workspace, plan, sources, today):
+    require(workspace == canonical_workspace(), "noncanonical_workspace")
+    enforce_fixed_plan(plan, sources, today)
+    # Separate metadata-only check; no acquisition marker, no property rows.
+    def task():
+        protection = non_dumpable_worker()
+        require(Collector(https_response).metadata_summary() == sources,
+                "reviewed_source_changed")
+        return {"workspace_owner_only": True, "source_pins_match": True,
+                "worker_controls": protection, "record_attempt_started": False,
+                "host_protection_independently_verified": False}
+    return supervised(task)
+
+
+def execute_reviewed(workspace, plan, sources, commit, today):
+    """Wired acquisition path. CLI activation remains held for acceptance.
+
+    Caller must have performed exact clean-checkout and private workspace checks.
+    An operational marker, not a protection against deliberate owner bypass.
+    """
+    require(workspace == canonical_workspace(), "noncanonical_workspace")
+    enforce_fixed_plan(plan, sources, today)
+    # Confirm process controls in a separate invented-only probe before marker.
+    probe = supervised(non_dumpable_worker)
+    require(probe == {"status": "completed", "result": {
+        "core_dumps_disabled": True, "process_dumpable": False}},
+        "worker_privacy_unverified")
+    consume(workspace, commit)
+    # Marker remains even on transport errors, deadline or source drift.
+    return supervised(lambda: live_report(plan, sources))
 
 
 def private_directory(path, repo=REPO):
@@ -176,12 +257,14 @@ def supervised(task, seconds=MAX_SECONDS):
 
 def live_report(plan, sources):
     # Only the fixed collector path; no arbitrary transport, URL or predicate.
+    non_dumpable_worker()
     return Collector(https_response)._run(plan, reviewed_sources=sources)
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", required=True)
+    parser.add_argument("--reviewed-commit", help="Exact reviewed commit for metadata-only plan check")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--metadata-only", action="store_true")
     mode.add_argument("--check-plan", action="store_true")
@@ -191,19 +274,25 @@ def main(argv=None):
         workspace = private_directory(args.workspace)
         if args.metadata_only:
             result = supervised(lambda: Collector(https_response).metadata_summary())
+        elif args.check_plan and args.reviewed_commit:
+            require(re.fullmatch(r"[0-9a-f]{40}", args.reviewed_commit), "invalid_commit")
+            git_clean_exact(args.reviewed_commit)
+            require(not (workspace / MARKER).exists(), "attempt_already_consumed")
+            today = datetime.now(timezone.utc).date()
+            plan, sources = reviewed_plan(today)
+            result = disposable_preflight(workspace, plan, sources, today)
         else:
             raw = read_manifest(workspace)
-            plan, sources = validate_manifest(raw, datetime.now(timezone.utc).date())
+            today = datetime.now(timezone.utc).date()
+            plan, sources = validate_manifest(raw, today)
             git_clean_exact(raw["reviewed_commit"])
             require(not (workspace / MARKER).exists(), "attempt_already_consumed")
             if args.check_plan:
-                result = {"status": "plan_structure_checked",
-                          "protection_independently_verified_by_tool": False,
-                          "acquisition_started": False}
+                result = disposable_preflight(workspace, plan, sources, today)
             else:
-                # Operational hold: no live activation until reviewed source
-                # revisions and actual local protection evidence are accepted
-                # in the authoritative checkpoint, then reviewed code enables it.
+                # The reviewed execution path exists, but actual private
+                # workspace/preflight evidence and exact-head CI must precede
+                # removal of this operational hold.
                 raise QualificationError("live_activation_not_accepted")
         print(json.dumps(result, sort_keys=True))
         return 0 if result["status"] in ("completed", "plan_structure_checked") else 1
