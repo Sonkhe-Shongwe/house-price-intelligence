@@ -2,6 +2,7 @@ import {useState,useRef,useEffect,type FormEvent} from 'react';
 import {ActionButton,Field,PageHeading,StatusMessage,LoadingState,EmptyState,ScrollRegion} from './UI';
 import {decode,decodeSaved,decodeHistory,formatZar,VERSION,PATH,SAVED_PATH,NAMESPACE,type Request,type Result,type Mode,type Saved} from './saInvestigationContract';
 import './saInvestigation.css';
+import SouthAfricanShortlist from './SouthAfricanShortlist';
 
 const reasons:Record<string,string>={subject_identity_unresolved:'The selected fictional parcel cannot be resolved exactly.',
   subject_attributes_or_location_unqualified:'Dated extent or location evidence is insufficient.',
@@ -108,6 +109,7 @@ export default function SouthAfricanInvestigation(){
       <p className="za-muted">Fictional workspace only. Not saved after server restart. {truncated?'History limited to 30 records.':''}</p>
       {saved.length===0?<EmptyState>No saved investigations.</EmptyState>:<div className="za-history">{saved.map(row=><div key={row.investigation_id} className="za-history-item"><div><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><p>{row.request.analysis_date} · {row.evidence.selected_count} fictional comparables</p><p>{row.evidence.subject.asking_price?formatZar(row.evidence.subject.asking_price):'No asking price'}</p></div><ActionButton icon="open" disabled={pending} onClick={()=>reopen(row.investigation_id)} data-testid="za-reopen" aria-label={'Reopen '+row.investigation_id}>Reopen</ActionButton></div>)}</div>}
     </section>}
+    {savingEnabled&&<SouthAfricanShortlist saved={saved} disabled={pending}/>}
     <section className="za-panel za-method"><h2>How evidence is selected</h2><p>Exact fictional parcel identity; both dwelling and land extents within 25%; invented grid radius of 2 km; earlier 365-day window, extended to 730 days if fewer than three qualify. Up to five distinct properties, ranked without prices. No real map is displayed.</p></section>
   </main>;
 }

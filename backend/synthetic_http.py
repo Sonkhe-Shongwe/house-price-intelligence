@@ -16,6 +16,7 @@ from typing import Any
 from backend.investigation_contract import ContractError
 from backend import sa_investigation_v2
 from backend.sa_fixture_persistence import sqlite_store, PersistenceError, SaveConflict
+from backend.sa_fixture_shortlist import FictionalShortlist, ShortlistConflict
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
@@ -27,6 +28,7 @@ from backend.context_archive_fixture import ATLAS_FIXTURE_PATH
 MAX_BODY_BYTES = 16 * 1024
 SA_INVESTIGATION_PATH = "/v2/fictional/za/investigate"
 SA_SAVED_PATH = "/v2/fictional/za/saved"
+SA_SHORTLIST_PATH = "/v2/fictional/za/shortlist"
 SA_SAVED_ID = re.compile(r"^" + SA_SAVED_PATH + r"/([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$")
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
 # The entire UI is a disposable, synthetic-only development preview.
@@ -122,6 +124,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
     # Never select owner from a browser field/header. This is a single fixed
     # fictional workspace on a disposable single-threaded loopback server.
     sa_saved = sqlite_store(store.connection, "fictional-alice") if sa_saved_fixture else None
+    sa_shortlist = FictionalShortlist(sa_saved) if sa_saved is not None else None
     shortlists = SyntheticShortlistService(store)
     if synthetic_map and react_assets is None:
         raise ValueError("Synthetic map requires the React frontend")
@@ -205,6 +208,15 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
         if sa_saved is not None and path == SA_SAVED_PATH and method != "POST":
             return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
 
+        if sa_shortlist is not None and path == SA_SHORTLIST_PATH:
+            if method == "GET":
+                try:
+                    return _response(start_response, 200, sa_shortlist.get())
+                except (PersistenceError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
+            if method != "POST":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
+
         shortlist_match = SHORTLIST_ROUTE.fullmatch(path)
         members_match = SHORTLIST_MEMBERS_ROUTE.fullmatch(path)
         entry_match = SHORTLIST_ENTRY_ROUTE.fullmatch(path)
@@ -237,7 +249,8 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                            or entry_match is not None)
         sa_request = path == SA_INVESTIGATION_PATH and sa_fixture
         sa_save = path == SA_SAVED_PATH and sa_saved is not None
-        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request or sa_save:
+        sa_shortlist_write = path == SA_SHORTLIST_PATH and sa_shortlist is not None
+        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request or sa_save or sa_shortlist_write:
             if not shortlist_write and method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
@@ -265,6 +278,15 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if sa_shortlist_write:
+                try:
+                    return _response(start_response, 200, sa_shortlist.mutate(payload))
+                except ValueError:
+                    return _response(start_response, 422, {"error": "invalid_sa_shortlist_request"})
+                except ShortlistConflict:
+                    return _response(start_response, 409, {"error": "sa_shortlist_conflict"})
+                except (PersistenceError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
             if sa_save:
                 try:
                     if not isinstance(payload, dict) or set(payload) != {"retry_id", "request"}:

@@ -139,6 +139,47 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         expect(self.page.get_by_test_id("za-result")).to_be_visible()
         expect(self.page.get_by_label("Fictional asking price (ZAR)")).to_have_value("1.01")
 
+    def test_shortlist_frozen_comparison_limits_and_reload(self):
+        import uuid
+        path=self.base+"/v2/fictional/za/shortlist"
+        for row in self.page.request.get(path).json()["investigations"]:
+            self.page.request.post(path,data={"action":"remove","investigation_id":row["investigation_id"]})
+        ids=[]
+        for token,price in [("000001","2500000.01"),("000010","1.02"),("000015",None),("000002","3.04"),("000001","4.05")]:
+            iid=str(uuid.uuid4());ids.append(iid)
+            req={"contract_version":"hpi-investigation-v2-fictional","market":"ZA","currency":"ZAR","area_unit":"m2",
+                 "subject_key":{"namespace":"za-fictional-erf","value":"fictional-erf-"+token},
+                 "analysis_date":"2025-07-01","mode":"as_of","asking_price":price}
+            self.assertEqual(self.page.request.post(self.base+"/v2/fictional/za/saved",data={"retry_id":iid,"request":req}).status,200)
+        self.page.reload()
+        select=self.page.get_by_label("Saved investigation to shortlist")
+        add=self.page.get_by_test_id("za-shortlist-add")
+        count=self.page.get_by_test_id("za-shortlist-count")
+        expect(count).to_have_text("0 of 3 properties")
+        def choose(i,n):
+            select.select_option(ids[i]);add.click();expect(count).to_have_text(f"{n} of 3 properties")
+        choose(0,1)
+        expect(self.page.get_by_test_id("za-comparison")).to_have_count(0)
+        select.select_option(ids[4]);expect(add).to_be_disabled()
+        choose(1,2)
+        comparison=self.page.get_by_test_id("za-comparison")
+        expect(comparison).to_contain_text("R 2 500 000.01")
+        expect(comparison).to_contain_text("R 1.02")
+        expect(comparison).to_contain_text("No comparable sale amounts")
+        choose(2,3)
+        select.select_option(ids[3]);expect(add).to_be_disabled()
+        self.page.reload()
+        expect(count).to_have_text("3 of 3 properties")
+        expect(comparison).to_contain_text("R 2 500 000.01")
+        self.page.get_by_role("button",name="Remove "+ids[1]).click()
+        expect(count).to_have_text("2 of 3 properties")
+        self.page.set_viewport_size({"width":320,"height":850})
+        self.assertTrue(self.page.evaluate("document.documentElement.scrollWidth <= innerWidth+1"))
+        self.assertEqual(self.page.request.get(self.base+"/v1/investigations/history").json()["investigations"],[])
+        for iid in (ids[0],ids[2]):
+            self.page.get_by_role("button",name="Remove "+iid).click()
+            expect(self.page.get_by_role("button",name="Remove "+iid)).to_have_count(0)
+
     def test_mobile_reflow(self):
         for width in (768,375,320):
             self.page.set_viewport_size({"width":width,"height":850})

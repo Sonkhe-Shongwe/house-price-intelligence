@@ -90,3 +90,13 @@ export function decodeHistory(x:unknown):{investigations:Saved[];truncated:boole
   if(new Set(investigations.map(x=>x.investigation_id)).size!==investigations.length)return fail();
   return {investigations,truncated:r.truncated};
 }
+
+export const SHORTLIST_PATH='/v2/fictional/za/shortlist';
+export function decodeShortlist(x:unknown):Saved[]{
+  const r=record(x);
+  if(Object.keys(r).sort().join(' ')!=='comparison_ready investigations market source_kind'||r.market!=='ZA'||r.source_kind!=='synthetic_fixture'
+    ||!Array.isArray(r.investigations)||r.investigations.length>3||r.comparison_ready!==(r.investigations.length>=2))return fail();
+  const rows=r.investigations.map(decodeSaved);
+  if(new Set(rows.map(row=>row.investigation_id)).size!==rows.length||new Set(rows.map(row=>row.request.subject_key.value)).size!==rows.length)return fail();
+  return rows;
+}

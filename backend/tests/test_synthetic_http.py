@@ -91,6 +91,49 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertEqual(self.invoke(path=SA_SAVED_PATH+"/"+retry)["status"],404)
         self.assertEqual(self.invoke(path=SA_SAVED_PATH)["status"],503)
 
+    def test_sa_shortlist_frozen_distinct_and_isolated(self):
+        import uuid
+        path = "/v2/fictional/za/shortlist"
+        self.assertEqual(self.invoke(path=path)["status"],404)
+        self.enable_sa()
+        self.assertEqual(self.invoke(path=path)["status"],404)
+        self.db.close()
+        self.db, store = in_memory_demo()
+        self.app = create_app(store,today=TODAY,sa_fixture=True,sa_saved_fixture=True)
+        def save(token, price):
+            iid = str(uuid.uuid4())
+            req = self.sa_request() | {"subject_key": sa.wire_key(token), "asking_price": price}
+            result = self.invoke("POST",SA_SAVED_PATH,payload={"retry_id":iid,"request":req})
+            self.assertEqual(result["status"],200)
+            return result["body"]
+        a,b,c,d,duplicate = [save(token,price) for token,price in [
+            ("fictional-erf-000001","2500000.01"),("fictional-erf-000010","1.02"),
+            ("fictional-erf-000015",None),("fictional-erf-000002","3.04"),
+            ("fictional-erf-000001","4.05")]]
+        def command(row, action="add", **extra):
+            return self.invoke("POST",path,payload={"action":action,"investigation_id":row["investigation_id"]},**extra)
+        self.assertFalse(self.invoke(path=path)["body"]["comparison_ready"])
+        with patch.object(sa,"investigate",side_effect=RuntimeError("no recomputation")):
+            self.assertEqual(command(a)["body"]["investigations"],[a])
+            self.assertEqual(command(a)["body"]["investigations"],[a])
+            self.assertEqual(command(duplicate)["status"],409)
+            self.assertTrue(command(b)["body"]["comparison_ready"])
+            self.assertEqual(command(c)["body"]["investigations"],[a,b,c])
+            self.assertEqual(command(d)["status"],409)
+            self.assertEqual(self.invoke(path=path)["body"]["investigations"],[a,b,c])
+            self.assertEqual(command(b,"remove")["body"]["investigations"],[a,c])
+            self.assertEqual(command(b,"remove")["body"]["investigations"],[a,c])
+            self.assertEqual(command(d)["body"]["investigations"],[a,c,d])
+        self.assertEqual(command(b,origin="https://evil.invalid")["status"],403)
+        self.assertEqual(self.invoke("POST",path,payload={"action":"add","investigation_id":a["investigation_id"],"owner":"fictional-bob"})["status"],422)
+        self.assertEqual(self.invoke(path="/v1/investigations/history")["body"]["investigations"],[])
+        self.assertEqual(self.invoke(path="/v1/shortlists")["body"]["shortlists"],[])
+        self.db.execute("UPDATE sa_fixture_investigations SET asking_cents=1 WHERE investigation_id=?",(a["investigation_id"],))
+        self.db.commit()
+        self.assertEqual(self.invoke(path=path)["status"],503)
+        self.assertEqual(command(c,"remove")["status"],503)
+        self.assertEqual(command(a,"remove")["body"]["investigations"],[c,d])
+
     def test_sa_default_disabled_and_opt_in_no_writes(self):
         self.assertEqual(self.invoke("POST", SA_INVESTIGATION_PATH, payload=self.sa_request())["status"], 404)
         self.enable_sa()
