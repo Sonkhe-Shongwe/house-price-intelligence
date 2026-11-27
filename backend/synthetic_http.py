@@ -21,6 +21,8 @@ from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticI
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
 from backend.buyer_evidence_preview import buyer_evidence_preview
+from backend.nyc_fixture_http import NYC_PATH, investigate as investigate_nyc_fixture
+from tools.nyc_qualification import QualificationError
 from backend.centroid_preview import centroid_preview
 from backend.context_archive_http import CONTEXT_PATH, transport_fixture, atlas_fixture
 from backend.context_archive_fixture import ATLAS_FIXTURE_PATH
@@ -109,17 +111,19 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
 def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
                context_transport_fixture: bool = False, sa_fixture: bool = False,
-               sa_saved_fixture: bool = False):
+               sa_saved_fixture: bool = False, nyc_fixture: bool = False):
     """Normal launcher: no caller-injected restart storage."""
     return _create_app(store, today=today, react_assets=react_assets,
                        synthetic_map=synthetic_map, context_transport_fixture=context_transport_fixture,
-                       sa_fixture=sa_fixture, sa_saved_fixture=sa_saved_fixture)
+                       sa_fixture=sa_fixture, sa_saved_fixture=sa_saved_fixture,
+                       nyc_fixture=nyc_fixture)
 
 
 def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                 react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
                 context_transport_fixture: bool = False, sa_fixture: bool = False,
-                sa_saved_fixture: bool = False, restart_shortlist=None):
+                sa_saved_fixture: bool = False, restart_shortlist=None,
+                nyc_fixture: bool = False):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -127,6 +131,11 @@ def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None
     """
     if not isinstance(store, SyntheticInvestigationStore):
         raise TypeError("Only the fixture-backed investigation store may be served")
+    if type(nyc_fixture) is not bool:
+        raise ValueError("NYC fixture opt-in must be boolean")
+    if nyc_fixture and (not isinstance(store.connection, sqlite3.Connection)
+                        or any(row[2] for row in store.connection.execute("PRAGMA database_list"))):
+        raise ValueError("NYC fixture requires disposable in-memory SQLite")
     if type(sa_fixture) is not bool:
         raise ValueError("SA fixture opt-in must be boolean")
     if type(sa_saved_fixture) is not bool or (sa_saved_fixture and not sa_fixture):
@@ -266,10 +275,11 @@ def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None
 
         shortlist_write = (path == "/v1/shortlists" or members_match is not None
                            or entry_match is not None)
+        nyc_request = path == NYC_PATH and nyc_fixture
         sa_request = path == SA_INVESTIGATION_PATH and sa_fixture
         sa_save = path == SA_SAVED_PATH and sa_saved is not None
         sa_shortlist_write = path == SA_SHORTLIST_PATH and sa_shortlist is not None
-        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request or sa_save or sa_shortlist_write:
+        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request or sa_save or sa_shortlist_write or nyc_request:
             if not shortlist_write and method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
@@ -297,6 +307,13 @@ def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if nyc_request:
+                try:
+                    return _response(start_response, 200, investigate_nyc_fixture(payload))
+                except QualificationError:
+                    return _response(start_response, 422, {"error": "invalid_nyc_fixture_request"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
             if sa_shortlist_write:
                 try:
                     return _response(start_response, 200, sa_shortlist.mutate(payload))
