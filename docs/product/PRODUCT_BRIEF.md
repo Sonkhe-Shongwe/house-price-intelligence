@@ -181,3 +181,7 @@ The contextual-only pivot was not adopted and is no longer an active product opt
 ### 27 November 2026 | Core comparable-sales feasibility update
 
 [Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/product/PRODUCT_BRIEF.md#27-november-2026--core-comparable-sales-feasibility-update). Not active instructions.
+
+## 27 November 2026 | NYC conditional market proposal (owner decision pending)
+
+[Measured result](../research/DATA_FEASIBILITY.md#27-november-2026--nyc-actual-bounded-qualification-outcome): 19/30 subjects supported, six qualified sales, 11 insufficient. [Proposed market/entry and operating boundary](../research/DATA_FEASIBILITY.md#27-november-2026--conditional-nyc-market-recommendation-and-closure-decision) and [field-use matrix](../research/SOURCE_REGISTER.md#27-november-2026--nyc-intended-application-use-review) recommend Queens ZIP 11361 A2 subject frame, DOF BAYSIDE ZIP 11361 A2 sales, common current PLUTO AreaSource 2 snapshot, earlier-only verified sales, 3–5 distinct other properties, explicit abstention and coverage/measurement limitations. Not all Bayside/NYC homes or a valuation. Proposed subject entry not sale-dependent; exact unique address resolution required, no unsold status assertion. Investigate / Compare / Decide and existing two-to-three shortlist remain unchanged. Owner approval sought for narrow development market only; no final P0, durable intake, buyer display, production or release approval implied. Historical Cook reference retained.
