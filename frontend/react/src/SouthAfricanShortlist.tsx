@@ -44,14 +44,14 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
       <option value="">Choose a saved investigation</option>
       {saved.map(r=><option key={r.investigation_id} value={r.investigation_id}>Erf {r.request.subject_key.value.slice(-6)} · {r.request.analysis_date} · {r.evidence.subject.asking_price?formatZar(r.evidence.subject.asking_price):'No asking price'}</option>)}
     </select>
-    <ActionButton variant="primary" disabled={locked||!picked||duplicate||(rows?.length??0)>=3} onClick={()=>void mutate('add',selected)} data-testid="za-shortlist-add">Add to shortlist</ActionButton>{' '}
-    <ActionButton disabled={busy||disabled} onClick={()=>void refresh()}>Refresh shortlist</ActionButton>
+    <ActionButton icon="plus" variant="primary" disabled={locked||!picked||duplicate||(rows?.length??0)>=3} onClick={()=>void mutate('add',selected)} data-testid="za-shortlist-add">Add to shortlist</ActionButton>{' '}
+    <ActionButton icon="refresh" disabled={busy||disabled} onClick={()=>void refresh()}>Refresh shortlist</ActionButton>
     {duplicate&&<p className="za-muted">This fictional parcel is already shortlisted.</p>}
     {rows?.length===3&&<p className="za-muted">Three-property limit reached. Remove a property before adding another.</p>}
     {notice&&<StatusMessage>{notice}</StatusMessage>}
     {rows===null?<EmptyState>Shortlist not available.</EmptyState>:<>
       <p data-testid="za-shortlist-count">{rows.length} of 3 properties</p>
-      {rows.map(row=><div key={row.investigation_id} className="za-history-item" data-testid="za-shortlist-member"><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><ActionButton disabled={locked} aria-label={'Remove '+row.investigation_id} onClick={()=>void mutate('remove',row.investigation_id)}>Remove</ActionButton></div>)}
+      {rows.map(row=><div key={row.investigation_id} className="za-history-item" data-testid="za-shortlist-member"><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><ActionButton icon="remove" disabled={locked} aria-label={'Remove '+row.investigation_id} onClick={()=>void mutate('remove',row.investigation_id)}>Remove</ActionButton></div>)}
       {rows.length<2?<EmptyState>Add at least two distinct properties to compare frozen evidence.</EmptyState>:
       <ScrollRegion label="Fictional property comparison" className="za-table-scroll"><table data-testid="za-comparison"><caption>Frozen fictional property comparison · no estimated value</caption>
         <thead><tr><th scope="col">Evidence</th>{rows.map(r=><th scope="col" key={r.investigation_id}>Erf {r.request.subject_key.value.slice(-6)}</th>)}</tr></thead>
