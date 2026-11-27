@@ -92,11 +92,17 @@ export function decodeHistory(x:unknown):{investigations:Saved[];truncated:boole
 }
 
 export const SHORTLIST_PATH='/v2/fictional/za/shortlist';
-export function decodeShortlist(x:unknown):Saved[]{
+export type ShortlistMember=Saved&{note_text:string};
+export function validDecisionNote(value:unknown):value is string{
+  return typeof value==='string'&&Array.from(value).length<=800&&!/[\x00-\x08\x0b-\x1f\x7f-\x9f\uD800-\uDFFF]/u.test(value);
+}
+export function decodeShortlist(x:unknown):ShortlistMember[]{
   const r=record(x);
-  if(Object.keys(r).sort().join(' ')!=='comparison_ready investigations market source_kind'||r.market!=='ZA'||r.source_kind!=='synthetic_fixture'
+  if(Object.keys(r).sort().join(' ')!=='comparison_ready investigations market notes source_kind'||r.market!=='ZA'||r.source_kind!=='synthetic_fixture'
     ||!Array.isArray(r.investigations)||r.investigations.length>3||r.comparison_ready!==(r.investigations.length>=2))return fail();
   const rows=r.investigations.map(decodeSaved);
   if(new Set(rows.map(row=>row.investigation_id)).size!==rows.length||new Set(rows.map(row=>row.request.subject_key.value)).size!==rows.length)return fail();
-  return rows;
+  const notes=record(r.notes);
+  if(Object.keys(notes).length!==rows.length)return fail();
+  return rows.map(row=>{const note=notes[row.investigation_id];if(!Object.prototype.hasOwnProperty.call(notes,row.investigation_id)||!validDecisionNote(note))return fail();return {...row,note_text:note};});
 }

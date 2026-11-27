@@ -128,6 +128,28 @@ class SyntheticHttpTests(unittest.TestCase):
         self.assertEqual(self.invoke("POST",path,payload={"action":"add","investigation_id":a["investigation_id"],"owner":"fictional-bob"})["status"],422)
         self.assertEqual(self.invoke(path="/v1/investigations/history")["body"]["investigations"],[])
         self.assertEqual(self.invoke(path="/v1/shortlists")["body"]["shortlists"],[])
+        def note(row, value, **extra):
+            return self.invoke("POST",path,payload={"action":"note","investigation_id":row["investigation_id"],"note_text":value},**extra)
+        aid,cid,did = (row["investigation_id"] for row in (a,c,d))
+        self.assertEqual(self.invoke(path=path)["body"]["notes"],{aid:"",cid:"",did:""})
+        original = self.db.total_changes
+        with patch.object(sa,"investigate",side_effect=RuntimeError("no recomputation")):
+            self.assertEqual(note(a,"Fictional <b>question</b>\nCheck extent")["status"],200)
+            self.assertEqual(note(c,"x"*800)["status"],200)
+            self.assertEqual(note(a,"Fictional <b>question</b>\nCheck extent")["status"],200)
+            self.assertEqual(command(a)["body"]["notes"][aid],"Fictional <b>question</b>\nCheck extent")
+            self.assertEqual(note(d,"\U0001f3e0"*800)["status"],200)
+            for bad in ("x"*801, "bad\x00", "bad\x7f", "bad\ud800", 42, None):
+                self.assertEqual(note(a,bad)["status"],422)
+            self.assertEqual(note(b,"not a member")["status"],409)
+            self.assertEqual(note(a,"forbidden",origin="https://evil.invalid")["status"],403)
+            self.assertEqual(self.invoke("POST",path,payload={"action":"note","investigation_id":aid,"note_text":"x","owner":"fictional-bob"})["status"],422)
+            self.assertEqual(self.invoke(path=path)["body"]["investigations"],[a,c,d])
+            self.assertEqual(note(c,"")["body"]["notes"][cid],"")
+            self.assertEqual(command(d,"remove")["body"]["notes"],{aid:"Fictional <b>question</b>\nCheck extent",cid:""})
+            self.assertEqual(command(d)["body"]["notes"][did],"")
+        self.assertEqual(self.db.total_changes,original)
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH+"/"+aid)["body"],a)
         self.db.execute("UPDATE sa_fixture_investigations SET asking_cents=1 WHERE investigation_id=?",(a["investigation_id"],))
         self.db.commit()
         self.assertEqual(self.invoke(path=path)["status"],503)

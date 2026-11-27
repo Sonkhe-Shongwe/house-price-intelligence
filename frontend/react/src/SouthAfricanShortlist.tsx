@@ -1,9 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
 import {ActionButton,EmptyState,ScrollRegion,StatusMessage} from './UI';
-import {decodeShortlist,formatZar,SHORTLIST_PATH,type Saved} from './saInvestigationContract';
+import {decodeShortlist,formatZar,SHORTLIST_PATH,validDecisionNote,type Saved,type ShortlistMember} from './saInvestigationContract';
 
 export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];disabled:boolean}){
-  const [rows,setRows]=useState<Saved[]|null>(null),[selected,setSelected]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState('');
+  const [rows,setRows]=useState<ShortlistMember[]|null>(null),[selected,setSelected]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState('');
   const flight=useRef<AbortController|null>(null);
   async function read(signal:AbortSignal){
     const response=await fetch(SHORTLIST_PATH,{credentials:'same-origin',cache:'no-store',redirect:'error',signal});
@@ -17,18 +17,18 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
     finally{if(flight.current===controller){flight.current=null;if(!controller.signal.aborted)setBusy(false);}}
   }
   useEffect(()=>{void refresh();return()=>{flight.current?.abort();flight.current=null;};},[]);
-  async function mutate(action:'add'|'remove',id:string){
-    if(flight.current||rows===null||disabled||!id)return;
+  async function mutate(action:'add'|'remove'|'note',id:string,note?:string){
+    if(flight.current||rows===null||disabled||!id||(action==='note'&&!validDecisionNote(note)))return;
     const controller=new AbortController();flight.current=controller;setBusy(true);setNotice('');
     try{
-      const res=await fetch(SHORTLIST_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,investigation_id:id}),credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});
+      const res=await fetch(SHORTLIST_PATH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='note'?{action,investigation_id:id,note_text:note}:{action,investigation_id:id}),credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});
       if(!res.ok||res.headers.get('X-Synthetic-Only')!=='true')throw Error('Not confirmed');
       const next=decodeShortlist(await res.json());
-      if(next.some(r=>r.investigation_id===id)!==(action==='add'))throw Error('Membership mismatch');
-      setRows(next);setNotice(action==='add'?'Property shortlisted.':'Property removed.');
+      if(next.some(r=>r.investigation_id===id)!==(action!=='remove')||(action==='note'&&next.find(r=>r.investigation_id===id)?.note_text!==note))throw Error('Membership or note mismatch');
+      setRows(next);setNotice(action==='add'?'Property shortlisted.':action==='remove'?'Property removed.':'Decision note saved.');
     }catch{
       if(!controller.signal.aborted){
-        try{setRows(await read(controller.signal));setNotice('Change response not confirmed. Current server shortlist refreshed; check membership before retrying.');}
+        try{setRows(await read(controller.signal));setNotice('Change response not confirmed. Current server shortlist refreshed; check membership and saved notes before retrying.');}
         catch{if(!controller.signal.aborted){setRows(null);setNotice('Shortlist unavailable. Refresh before retrying.');}}
       }
     }finally{if(flight.current===controller){flight.current=null;if(!controller.signal.aborted)setBusy(false);}}
@@ -38,7 +38,7 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
   const locked=disabled||busy||rows===null;
   return <section className="za-panel za-method" aria-labelledby="za-shortlist-heading" aria-busy={busy} data-testid="za-shortlist">
     <h2 id="za-shortlist-heading">Shortlist and compare</h2>
-    <p className="za-muted">Choose two or three distinct saved fictional properties. Membership lasts only for this local server session. Evidence is frozen, not recalculated. No valuation or recommendation.</p>
+    <p className="za-muted">Choose two or three distinct saved fictional properties. Membership and notes last only for this local server session. Use invented notes only; do not enter personal or real property information. Evidence is frozen, not recalculated. No valuation or recommendation.</p>
     <label htmlFor="za-shortlist-select">Saved investigation to shortlist</label>
     <select id="za-shortlist-select" className="hpi-field" value={picked?selected:''} disabled={locked} onChange={e=>setSelected(e.target.value)}>
       <option value="">Choose a saved investigation</option>
@@ -51,7 +51,7 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
     {notice&&<StatusMessage>{notice}</StatusMessage>}
     {rows===null?<EmptyState>Shortlist not available.</EmptyState>:<>
       <p data-testid="za-shortlist-count">{rows.length} of 3 properties</p>
-      {rows.map(row=><div key={row.investigation_id} className="za-history-item" data-testid="za-shortlist-member"><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><ActionButton icon="remove" disabled={locked} aria-label={'Remove '+row.investigation_id} onClick={()=>void mutate('remove',row.investigation_id)}>Remove</ActionButton></div>)}
+      {rows.map(row=><div key={row.investigation_id} className="za-history-item" data-testid="za-shortlist-member"><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><ActionButton icon="remove" disabled={locked} aria-label={'Remove '+row.investigation_id} onClick={()=>void mutate('remove',row.investigation_id)}>Remove</ActionButton><NoteEditor row={row} locked={locked} onSave={note=>void mutate('note',row.investigation_id,note)}/></div>)}
       {rows.length<2?<EmptyState>Add at least two distinct properties to compare frozen evidence.</EmptyState>:
       <ScrollRegion label="Fictional property comparison" className="za-table-scroll"><table data-testid="za-comparison"><caption>Frozen fictional property comparison · no estimated value</caption>
         <thead><tr><th scope="col">Evidence</th>{rows.map(r=><th scope="col" key={r.investigation_id}>Erf {r.request.subject_key.value.slice(-6)}</th>)}</tr></thead>
@@ -61,7 +61,21 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
           <tr><th scope="row">Dwelling / land (m²)</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.subject.dwelling_extent??'Unknown'} / {r.evidence.subject.land_extent??'Unknown'}</td>)}</tr>
           <tr><th scope="row">Comparable evidence</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.status==='fictional_supported'?r.evidence.selected_count+' fictional sales · '+r.evidence.window_days+' days':'Insufficient or unsupported evidence'}</td>)}</tr>
           <tr><th scope="row">Invented registered-sale consideration</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.comparables.length?r.evidence.comparables.map(s=><div key={s.event_id}>{s.reported_sale_date} · {formatZar(s.sale_consideration)}</div>):'No comparable sale amounts'}</td>)}</tr>
+          <tr><th scope="row">Saved decision notes</th>{rows.map(r=><td className="za-note-cell" key={r.investigation_id}>{r.note_text||'No note'}</td>)}</tr>
         </tbody></table></ScrollRegion>}
     </>}
   </section>;
+}
+
+function NoteEditor({row,locked,onSave}:{row:ShortlistMember;locked:boolean;onSave:(note:string)=>void}){
+  const [draft,setDraft]=useState(row.note_text);
+  useEffect(()=>{setDraft(row.note_text);},[row.note_text]);
+  const id='za-note-'+row.investigation_id,valid=validDecisionNote(draft),dirty=draft!==row.note_text;
+  return <div className="za-note-editor">
+    <label htmlFor={id}>Decision note for Erf {row.request.subject_key.value.slice(-6)}</label>
+    <textarea id={id} className="hpi-field" rows={3} value={draft} disabled={locked} aria-invalid={!valid} aria-describedby={id+'-hint'} onChange={e=>setDraft(e.target.value)}/>
+    <p id={id+'-hint'} className="za-muted">{Array.from(draft).length}/800 characters · {valid?(dirty?'Unsaved draft':'Saved note (or empty)'):'Use at most 800 characters; no control characters except tabs and newlines.'}</p>
+    <ActionButton icon="save" disabled={locked||!dirty||!valid} onClick={()=>onSave(draft)} aria-label={'Save note '+row.investigation_id}>Save note</ActionButton>{' '}
+    <ActionButton icon="refresh" disabled={locked||!dirty} onClick={()=>setDraft(row.note_text)}>Discard draft</ActionButton>
+  </div>;
 }
