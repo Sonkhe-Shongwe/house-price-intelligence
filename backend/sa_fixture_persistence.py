@@ -1,6 +1,6 @@
 """Optional additive persistence rehearsal, ONLY disposable fictional fixtures.
 
-No HTTP wiring, live provider, arbitrary import, production auth or RLS.
+No live provider, arbitrary import, production auth or RLS.
 Use the existing v3 fixture plus a separate checksummed extension ledger.
 """
 from datetime import date
@@ -20,6 +20,10 @@ OWNERS = {"fictional-alice", "fictional-bob"}
 
 
 class PersistenceError(RuntimeError):
+    pass
+
+
+class SaveConflict(PersistenceError):
     pass
 
 
@@ -105,10 +109,21 @@ class FictionalStore:
         self._owner=_owner(owner)
         _verify(db)
 
-    def save(self, request, *, today=None):
-        # Generate the response server-side; never accept client evidence.
+    def save(self, request, *, today=None, retry_id=None):
+        # A caller may retry a UUID for the same owner and exact request only.
+        # The opt-in HTTP runtime is single-threaded SQLite; PG concurrency
+        # is not enabled by this slice.
+        iid=str(uuid.uuid4()) if retry_id is None else _id(retry_id)
+        sa.validate_request(request,today or date.today())
+        _verify(self._db)
+        existing=self._db.execute(
+            "SELECT owner_key,request_json FROM sa_fixture_investigations WHERE investigation_id=?",(iid,)).fetchone()
+        if existing is not None:
+            if existing != (self._owner,canonical(request)):
+                raise SaveConflict("Save identifier unavailable")
+            return self.reopen(iid)
+        # Generate response server-side; never accept client evidence.
         response=sa.investigate(request,today=today or date.today())
-        iid=str(uuid.uuid4())
         token=response["subject"]["property_key"]["value"]
         asking=response["subject"]["asking_price"]
         cents=None if asking is None else asking["minor_units"]
@@ -121,7 +136,7 @@ class FictionalStore:
                 (self._owner,iid,sa.MARKET,"ZAR","m2",sa.NAMESPACE,token,sa.BUILD,sa.POLICY,
                  response["analysis_date"],cents,canonical(request),canonical(response),
                  _seal(self._owner,iid,request,response)))
-        return {"investigation_id":iid,"evidence":response}
+        return {"investigation_id":iid,"request":request,"evidence":response}
 
     def reopen(self,iid):
         _id(iid)
@@ -142,10 +157,12 @@ class FictionalStore:
                 or res["contract_version"]!=sa.VERSION or res["source_kind"]!="synthetic_fixture"
                 or res["real_data_approved"] is not False or res["valuation"] is not None):
                 raise ValueError("Invalid frozen evidence")
-            sa.validate_request(req,date.fromisoformat(res["analysis_date"]))
+            token,cutoff,mode,cents=sa.validate_request(req,date.fromisoformat(res["analysis_date"]))
+            if (token,cutoff.isoformat(),mode,cents)!=(row[4],row[7],res["mode"],row[8]):
+                raise ValueError("Frozen request mismatch")
         except (ValueError,TypeError,KeyError,IndexError) as exc:
             raise PersistenceError("Frozen fictional evidence rejected") from exc
-        return {"investigation_id":iid,"evidence":res}
+        return {"investigation_id":iid,"request":req,"evidence":res}
 
     def history(self):
         _verify(self._db)

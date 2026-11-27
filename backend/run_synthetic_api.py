@@ -31,7 +31,11 @@ def main():
                         help="Serve generated non-map bytes for local HTTP range qualification only")
     parser.add_argument("--sa-fixture", action="store_true",
                         help="Enable the stateless fictional ZA v2 investigation endpoint")
+    parser.add_argument("--sa-saved-fixture", action="store_true",
+                        help="Enable disposable in-memory fictional ZA saving")
     args = parser.parse_args()
+    if args.sa_saved_fixture and not args.sa_fixture:
+        parser.error("--sa-saved-fixture requires --sa-fixture")
     if args.sa_fixture and args.fixture_db is not None:
         parser.error("--sa-fixture requires the disposable in-memory demo")
     if args.context_transport_fixture and args.frontend != "react":
@@ -51,7 +55,7 @@ def main():
     try:
         # Deliberately no option to bind to 0.0.0.0 or a remote interface.
         with make_server("127.0.0.1", args.port, create_app(store, react_assets=assets, synthetic_map=args.synthetic_map,
-                        context_transport_fixture=args.context_transport_fixture, sa_fixture=args.sa_fixture)) as server:
+                        context_transport_fixture=args.context_transport_fixture, sa_fixture=args.sa_fixture, sa_saved_fixture=args.sa_saved_fixture)) as server:
             print(f"Fixture-only API at http://127.0.0.1:{args.port}/health")
             print("WARNING: invented records, no auth, no CORS, NOT FOR DEPLOYMENT")
             if args.fixture_db is not None:

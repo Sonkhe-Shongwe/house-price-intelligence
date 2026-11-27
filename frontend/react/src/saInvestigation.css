@@ -22,3 +22,5 @@
 .za-method{margin-top:20px;line-height:1.6}
 @media(max-width:760px){.za-layout{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:380px){.za-metrics{grid-template-columns:minmax(0,1fr)}}
+
+.za-history{display:grid;gap:12px}.za-history-item{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--hpi-atlas-rule);border-radius:8px;min-width:0}.za-history-item p{margin:4px 0;font-size:13px}.za-history-item button{margin:0}

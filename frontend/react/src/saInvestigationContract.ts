@@ -67,3 +67,25 @@ export function decode(x:unknown,request:Request):Result{
   }
   return r as unknown as Result;
 }
+
+export const SAVED_PATH='/v2/fictional/za/saved';
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+export type Saved={investigation_id:string;request:Request;evidence:Result};
+export function decodeSaved(x:unknown):Saved{
+  const r=record(x),q=record(r.request);
+  if(Object.keys(r).sort().join(' ')!=='evidence investigation_id request'||typeof r.investigation_id!=='string'||!UUID.test(r.investigation_id)
+    ||Object.keys(q).sort().join(' ')!=='analysis_date area_unit asking_price contract_version currency market mode subject_key'
+    ||q.contract_version!==VERSION||q.market!=='ZA'||q.currency!=='ZAR'||q.area_unit!=='m2'
+    ||!day(q.analysis_date)||!['as_of','retrospective'].includes(String(q.mode))
+    ||!['fictional-erf-000001','fictional-erf-000010','fictional-erf-000015'].includes(parcel(q.subject_key))
+    ||(q.asking_price!==null&&(typeof q.asking_price!=='string'||!/^[0-9]{1,10}(?:\.[0-9]{1,2})?$/.test(q.asking_price))))return fail();
+  const request=q as unknown as Request;
+  return {investigation_id:r.investigation_id,request,evidence:decode(r.evidence,request)};
+}
+export function decodeHistory(x:unknown):{investigations:Saved[];truncated:boolean}{
+  const r=record(x);
+  if(r.market!=='ZA'||r.source_kind!=='synthetic_fixture'||typeof r.truncated!=='boolean'||!Array.isArray(r.investigations)||r.investigations.length>30)return fail();
+  const investigations=r.investigations.map(decodeSaved);
+  if(new Set(investigations.map(x=>x.investigation_id)).size!==investigations.length)return fail();
+  return {investigations,truncated:r.truncated};
+}

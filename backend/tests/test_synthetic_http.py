@@ -10,7 +10,7 @@ from wsgiref.simple_server import make_server
 from wsgiref.util import setup_testing_defaults
 
 from backend.synthetic_demo import SUBJECT_PIN, example_request, in_memory_demo
-from backend.synthetic_http import MAX_BODY_BYTES, SA_INVESTIGATION_PATH, create_app
+from backend.synthetic_http import MAX_BODY_BYTES, SA_INVESTIGATION_PATH, SA_SAVED_PATH, create_app
 from backend import sa_investigation_v2 as sa
 from unittest.mock import patch
 
@@ -59,6 +59,37 @@ class SyntheticHttpTests(unittest.TestCase):
         self.db.close()
         self.db, store = in_memory_demo()
         self.app = create_app(store, today=TODAY, sa_fixture=True)
+
+    def test_sa_saved_opt_in_idempotence_and_frozen_reopen(self):
+        self.enable_sa()
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH)["status"],404)
+        self.db.close()
+        self.db, store = in_memory_demo()
+        self.app = create_app(store,today=TODAY,sa_fixture=True,sa_saved_fixture=True)
+        req=self.sa_request()
+        retry="12345678-1234-4123-8123-123456789abc"
+        envelope={"retry_id":retry,"request":req}
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH)["body"]["investigations"],[])
+        first=self.invoke("POST",SA_SAVED_PATH,payload=envelope)
+        self.assertEqual(first["status"],200)
+        self.assertEqual(first["body"]["investigation_id"],retry)
+        self.assertEqual(first["body"]["request"],req)
+        self.assertEqual(first["body"]["evidence"],sa.investigate(req,today=TODAY))
+        with patch.object(sa,"investigate",side_effect=RuntimeError("no recomputation")):
+            self.assertEqual(self.invoke("POST",SA_SAVED_PATH,payload=envelope)["body"],first["body"])
+            self.assertEqual(self.invoke(path=SA_SAVED_PATH+"/"+retry)["body"],first["body"])
+        self.assertEqual(len(self.invoke(path=SA_SAVED_PATH)["body"]["investigations"]),1)
+        self.assertEqual(self.invoke("POST",SA_SAVED_PATH,payload=envelope|{"request":req|{"asking_price":"1"}})["status"],409)
+        self.assertEqual(self.invoke("POST",SA_SAVED_PATH,payload=envelope|{"owner_key":"fictional-bob"})["status"],422)
+        self.assertEqual(self.invoke("POST",SA_SAVED_PATH,payload=envelope|{"evidence":first["body"]["evidence"]})["status"],422)
+        self.assertEqual(self.invoke("POST",SA_SAVED_PATH,payload=envelope,origin="https://evil.invalid")["status"],403)
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH,query="owner=fictional-bob")["status"],400)
+        self.assertEqual(self.invoke(path="/v1/investigations/history")["body"]["investigations"],[])
+        self.assertEqual(self.invoke(path="/v1/investigations/"+retry)["status"],404)
+        self.db.execute("UPDATE sa_fixture_investigations SET asking_cents=1")
+        self.db.commit()
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH+"/"+retry)["status"],404)
+        self.assertEqual(self.invoke(path=SA_SAVED_PATH)["status"],503)
 
     def test_sa_default_disabled_and_opt_in_no_writes(self):
         self.assertEqual(self.invoke("POST", SA_INVESTIGATION_PATH, payload=self.sa_request())["status"], 404)

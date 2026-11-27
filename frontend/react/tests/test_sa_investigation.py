@@ -21,7 +21,7 @@ class SouthAfricanBrowserTests(unittest.TestCase):
             sk.bind(("127.0.0.1",0))
             cls.base=f"http://127.0.0.1:{sk.getsockname()[1]}"
         cls.server=subprocess.Popen([sys.executable,"-m","backend.run_synthetic_api","--fixture-only",
-                                     "--frontend","react","--sa-fixture","--port",cls.base.rsplit(":",1)[1]],
+                                     "--frontend","react","--sa-fixture","--sa-saved-fixture","--port",cls.base.rsplit(":",1)[1]],
                                     cwd=ROOT,stdout=cls.log,stderr=subprocess.STDOUT)
         try:
             for _ in range(100):
@@ -99,6 +99,31 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         self.page.unroute(path,corrupt)
         self.submit()
         expect(self.page.get_by_test_id("za-comparable")).to_have_count(5)
+
+    def test_save_reload_reopen_and_retry(self):
+        self.submit()
+        before=len(self.page.request.get(self.base+"/v2/fictional/za/saved").json()["investigations"])
+        path="**/v2/fictional/za/saved"
+        def lost_reply(route):
+            if route.request.method=="POST":
+                route.fetch()
+                route.abort()
+            else: route.continue_()
+        self.page.route(path,lost_reply)
+        self.page.get_by_test_id("za-save").click()
+        expect(self.page.get_by_text("Save not confirmed.",exact=False)).to_be_visible()
+        self.page.unroute(path,lost_reply)
+        self.page.get_by_test_id("za-save").click()
+        expect(self.page.get_by_test_id("za-saved-id")).to_be_visible()
+        saved_id=self.page.get_by_test_id("za-saved-id").inner_text().split(": ",1)[1]
+        self.assertEqual(len(self.page.request.get(self.base+"/v2/fictional/za/saved").json()["investigations"]),before+1)
+        expect(self.page.get_by_test_id("za-save")).to_be_disabled()
+        self.page.reload()
+        self.page.get_by_role("button",name="Reopen "+saved_id).click()
+        expect(self.page.get_by_test_id("za-comparable")).to_have_count(5)
+        expect(self.page.get_by_text("Reopened frozen evidence; not recalculated.")).to_be_visible()
+        expect(self.page.get_by_test_id("za-result")).to_contain_text("R 2 500 000.01")
+        self.assertEqual(self.page.request.get(self.base+"/v1/investigations/history").json()["investigations"],[])
 
     def test_mobile_reflow(self):
         for width in (768,375,320):
