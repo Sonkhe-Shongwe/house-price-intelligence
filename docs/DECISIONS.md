@@ -184,3 +184,7 @@ Owner explicitly approves the exact [D02-P1 bounded Cape Town cadastral pilot](r
 ## D02-P2 corrected one-request authority (27 November 2026)
 
 Owner explicitly approves D02-P2, one corrected acquisition attempt under the identical [D02-P1 scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d02-proportionate-review-and-proposed-parcel-pilot), R0, private Windows after exact implementation CI. Preserve consumed P1 ledger, use separate P2 ledger, no raw retention, joins, registration, application use or release. No further replay or automatic retry; park on another refusal. No phase or score change.
+
+## D02-F1 filtered file authority (27 November 2026)
+
+Owner explicitly approves the exact [D02-F1 filtered Cape Town Land Parcels GeoJSON acquisition and private profiling scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d02-f1-standard-filtered-file-proposal), R0, Pinelands official suburb only, one ordinary portal export, maximum 10,000 features and 25 MiB, up to 30 days initial private retention or shorter terms. Preserve original in sibling Windows workspace; no whole-city export, personal fields advertised, bypass, paid access, Git/chat/cloud uploads, material joins, app use, registration or publication. If bounded export unavailable stop; no replay of P1/P2. Profile actual file only after metadata evidence; ongoing retention/disposal separate. No phase or score change.
