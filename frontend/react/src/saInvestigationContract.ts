@@ -77,8 +77,9 @@ export function decodeSaved(x:unknown):Saved{
     ||Object.keys(q).sort().join(' ')!=='analysis_date area_unit asking_price contract_version currency market mode subject_key'
     ||q.contract_version!==VERSION||q.market!=='ZA'||q.currency!=='ZAR'||q.area_unit!=='m2'
     ||!day(q.analysis_date)||!['as_of','retrospective'].includes(String(q.mode))
-    ||!['fictional-erf-000001','fictional-erf-000010','fictional-erf-000015'].includes(parcel(q.subject_key))
+    
     ||(q.asking_price!==null&&(typeof q.asking_price!=='string'||!/^[0-9]{1,10}(?:\.[0-9]{1,2})?$/.test(q.asking_price))))return fail();
+  parcel(q.subject_key);
   const request=q as unknown as Request;
   return {investigation_id:r.investigation_id,request,evidence:decode(r.evidence,request)};
 }

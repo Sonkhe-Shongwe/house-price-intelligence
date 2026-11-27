@@ -125,6 +125,20 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         expect(self.page.get_by_test_id("za-result")).to_contain_text("R 2 500 000.01")
         self.assertEqual(self.page.request.get(self.base+"/v1/investigations/history").json()["investigations"],[])
 
+    def test_saved_api_parcel_outside_initial_choices(self):
+        import uuid
+        iid=str(uuid.uuid4())
+        req={"contract_version":"hpi-investigation-v2-fictional","market":"ZA","currency":"ZAR",
+             "area_unit":"m2","subject_key":{"namespace":"za-fictional-erf","value":"fictional-erf-000002"},
+             "analysis_date":"2025-07-01","mode":"as_of","asking_price":"1.01"}
+        saved=self.page.request.post(self.base+"/v2/fictional/za/saved",data={"retry_id":iid,"request":req})
+        self.assertEqual(saved.status,200)
+        self.page.reload()
+        self.page.get_by_role("button",name="Reopen "+iid).click()
+        expect(self.page.get_by_label("Fictional erf")).to_have_value("fictional-erf-000002")
+        expect(self.page.get_by_test_id("za-result")).to_be_visible()
+        expect(self.page.get_by_label("Fictional asking price (ZAR)")).to_have_value("1.01")
+
     def test_mobile_reflow(self):
         for width in (768,375,320):
             self.page.set_viewport_size({"width":width,"height":850})

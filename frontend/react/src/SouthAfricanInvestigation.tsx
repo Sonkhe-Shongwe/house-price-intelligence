@@ -75,6 +75,7 @@ export default function SouthAfricanInvestigation(){
             <option value="fictional-erf-000001">Erf 000001 · study subject</option>
             <option value="fictional-erf-000010">Erf 000010 · ambiguous identity</option>
             <option value="fictional-erf-000015">Erf 000015 · unsupported class</option>
+            {!["fictional-erf-000001","fictional-erf-000010","fictional-erf-000015"].includes(subject)&&<option value={subject}>Erf {subject.slice(-6)} · saved fictional enquiry</option>}
           </select>
           <Field id="za-date" type="date" label="Analysis date" value={day} required onChange={e=>{setDay(e.target.value);clear();}}/>
           <label htmlFor="za-mode">Evidence mode</label>
