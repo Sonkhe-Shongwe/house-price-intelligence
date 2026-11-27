@@ -172,8 +172,8 @@ class NYCQualificationTests(unittest.TestCase):
         with self.assertRaisesRegex(QualificationError, "snapshot_frame_conflict"):
             self.q(subjects=[replace(subjects[0], area_source="5"), *subjects[1:]],
                    sales=sales, mode=CURRENT_SNAPSHOT)
-        self.assertIn("areasource = '2'", subject_query(CURRENT_SNAPSHOT).where)
-        self.assertNotIn("areasource = '2'", subject_query().where)
+        self.assertIn("areasource = 2", subject_query(CURRENT_SNAPSHOT).where)
+        self.assertNotIn("areasource = 2", subject_query().where)
 
     def test_budget(self):
         budget = Budget()

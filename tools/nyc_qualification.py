@@ -25,7 +25,7 @@ AREA_METHOD = "2"
 # Candidate projections; exact API schema and type preflight still required.
 FIELDS = {
     "usep-8jbt": ("borough", "block", "lot", "neighborhood", "zip_code",
-                  "building_class_at_time_of_sale", "gross_square_feet",
+                  "building_class_at_time_of", "gross_square_feet",
                   "residential_units", "commercial_units", "total_units",
                   "sale_date", "sale_price"),
     "64uk-42ks": ("bbl", "borough", "zipcode", "bldgclass", "numbldgs",
@@ -37,6 +37,35 @@ FIELDS = {
                   "good_through_date"),
 }
 SUBJECT_FIELDS = FIELDS["64uk-42ks"] + ("address",)
+
+# Owner-observed API metadata, 27 November 2026. Publisher field names and
+# types, not the display labels or an inferred historical release.
+EXPECTED_TYPES = {
+    "usep-8jbt": {
+        "borough": "text", "block": "text", "lot": "number",
+        "neighborhood": "text", "zip_code": "text",
+        "building_class_at_time_of": "text", "gross_square_feet": "number",
+        "residential_units": "number", "commercial_units": "number",
+        "total_units": "number", "sale_date": "calendar_date", "sale_price": "number",
+    },
+    "64uk-42ks": {
+        "bbl": "number", "borough": "text", "zipcode": "number",
+        "bldgclass": "text", "numbldgs": "number", "unitsres": "number",
+        "unitstotal": "number", "bldgarea": "number", "version": "text",
+        "areasource": "number", "address": "text",
+    },
+    "bnx9-e6tj": {
+        "document_id": "text", "doc_type": "text", "document_date": "calendar_date",
+        "document_amt": "number", "recorded_datetime": "calendar_date",
+        "percent_trans": "number", "good_through_date": "calendar_date",
+    },
+    "8h5j-fqxa": {
+        "document_id": "text", "borough": "number", "block": "number",
+        "lot": "number", "partial_lot": "text", "easement": "text",
+        "air_rights": "text", "subterranean_rights": "text",
+        "property_type": "text", "good_through_date": "calendar_date",
+    },
+}
 
 class QualificationError(ValueError):
     """Safe categorical error, never includes source values."""
@@ -353,7 +382,7 @@ class Query:
 def subject_query(mode=HISTORICAL):
     """First 30 candidates; uniqueness and independent frame proof still required."""
     require(mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
-    method = " AND areasource = '2'" if mode == CURRENT_SNAPSHOT else ""
+    method = " AND areasource = 2" if mode == CURRENT_SNAPSHOT else ""
     return Query("64uk-42ks", SUBJECT_FIELDS,
                  "borough = 'QN' AND zipcode = 11361 AND bldgclass = 'A2' "
                  "AND numbldgs = 1 AND unitsres = 1 AND unitstotal = 1 "
@@ -369,7 +398,7 @@ def sales_query(covered_from, covered_through, cutoff):
     require(lo < hi, "empty_earlier_window")
     return Query("usep-8jbt", FIELDS["usep-8jbt"],
                  "borough in ('4','QUEENS') AND neighborhood = 'BAYSIDE' "
-                 "AND zip_code = '11361' AND building_class_at_time_of_sale = 'A2' "
+                 "AND zip_code = '11361' AND building_class_at_time_of = 'A2' "
                  f"AND sale_date >= '{lo.isoformat()}T00:00:00' "
                  f"AND sale_date < '{hi.isoformat()}T00:00:00'",
                  MAX_SALES)

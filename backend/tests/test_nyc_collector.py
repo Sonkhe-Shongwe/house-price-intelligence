@@ -8,8 +8,8 @@ import json
 import unittest
 from urllib.parse import urlsplit, parse_qs
 
-from tools.nyc_collector import Collector, FixturePlan
-from tools.nyc_qualification import FIELDS, projection, bbl, QualificationError, CURRENT_SNAPSHOT
+from tools.nyc_collector import Collector, FixturePlan, area_method
+from tools.nyc_qualification import FIELDS, projection, bbl, QualificationError, CURRENT_SNAPSHOT, EXPECTED_TYPES
 
 
 class Response:
@@ -36,10 +36,10 @@ class SourceFixture:
         self.subjects = [
             dict(bbl=bbl(4, 1, i), borough="QN", zipcode="11361", bldgclass="A2",
                  numbldgs="1", unitsres="1", unitstotal="1", bldgarea="1000",
-                 version="fixture", areasource="2", address=f"INVENTED SUBJECT {i}") for i in range(1, 31)]
+                 version="fixture", areasource=2, address=f"INVENTED SUBJECT {i}") for i in range(1, 31)]
         self.sales = [
             dict(borough="4", block="2", lot=str(i), neighborhood="BAYSIDE",
-                 zip_code="11361", building_class_at_time_of_sale="A2",
+                 zip_code="11361", building_class_at_time_of="A2",
                  gross_square_feet="1000", residential_units="1", commercial_units="0",
                  total_units="1", sale_date="2026-09-01T00:00:00.000", sale_price="123456")
             for i in range(1, 5)]
@@ -64,9 +64,12 @@ class SourceFixture:
         if url.path.startswith("/api/views/"):
             self.metadata_reads[dataset] = self.metadata_reads.get(dataset, 0)+1
             value = dict(id=dataset, rowsUpdatedAt=1, viewLastModified=1,
-                         columns=[dict(fieldName=f, dataTypeName=(
-                             "number" if f in ("bbl", "zipcode") else "text"))
+                         columns=[dict(fieldName=f, dataTypeName=EXPECTED_TYPES[dataset][f])
                              for f in projection(dataset, subject=dataset == "64uk-42ks")])
+            if self.change == "type_drift" and dataset == "64uk-42ks":
+                for col in value["columns"]:
+                    if col["fieldName"] == "areasource":
+                        col["dataTypeName"] = "text"
             if self.change == "drift" and self.metadata_reads[dataset] > 1:
                 value["rowsUpdatedAt"] = 2
         else:
@@ -225,6 +228,21 @@ class CollectorTests(unittest.TestCase):
             read(closing+b'{"n":1}', params={"$select":"count(*) as n"})
         with self.assertRaises(QualificationError):
             read(closing+b'{"n":')
+
+    def test_numeric_area_method_and_metadata_types(self):
+        from decimal import Decimal
+        for value in (2, "2", "2.0", Decimal("2.00")):
+            self.assertEqual(area_method(value), "2")
+        for value in (True, 2.0, "7", None, "2e0", " 2"):
+            self.assertIsNone(area_method(value))
+        pins = Collector(self.src.transport).metadata_summary()
+        self.assertEqual(pins["usep-8jbt"]["types"]["building_class_at_time_of"], "text")
+        self.assertEqual(pins["64uk-42ks"]["types"]["areasource"], "number")
+        self.src.change = "type_drift"
+        self.src.calls.clear()
+        with self.assertRaisesRegex(QualificationError, "source_type_unverified"):
+            self.run_collect()
+        self.assertTrue(all("/api/views/" in p for p in self.src.calls))
 
     def test_one_attempt(self):
         c = Collector(self.src.transport)

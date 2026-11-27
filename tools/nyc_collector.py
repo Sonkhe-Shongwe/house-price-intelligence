@@ -22,7 +22,7 @@ from tools.nyc_qualification import (
     bbl, valid_key, batches, require, complete_rows, projection,
     validate_projection, subject_query, sales_query, master_query, legal_query,
     comparable_attribute_query, verify_metadata, qualify, doc_value,
-    HISTORICAL, CURRENT_SNAPSHOT, AREA_METHOD,
+    HISTORICAL, CURRENT_SNAPSHOT, AREA_METHOD, EXPECTED_TYPES,
 )
 
 HOST = "data.cityofnewyork.us"
@@ -59,6 +59,14 @@ def uint(value):
     require(type(value) in (int, str) and re.fullmatch(r"[0-9]+", str(value)),
             "invalid_integer")
     return int(value)
+
+
+def area_method(value):
+    # Socrata numeric fields may arrive as JSON integers or decimal strings.
+    # Preserve the existing normalized domain code; never coerce a float/bool.
+    if type(value) in (int, str, Decimal) and re.fullmatch(r"2(?:\.0+)?", str(value)):
+        return AREA_METHOD
+    return None
 
 
 def exact_cents(value):
@@ -207,6 +215,8 @@ class Collector:
         result = {"id": dataset, "revision": ":".join(map(str, revisions)),
                   "fields": list(types)}
         verify_metadata(dataset, result, result, subject=dataset == "64uk-42ks")
+        require(all(types.get(name) == kind for name, kind in EXPECTED_TYPES[dataset].items()),
+                "source_type_unverified")
         return result, types
 
     def _count(self, query, select="count(*) as n", names=("n",)):
@@ -274,14 +284,7 @@ class Collector:
                             "types": {name: types[name] for name in projection(
                                 d, subject=d == "64uk-42ks")}}
                 require(reviewed_sources[d] == expected, "reviewed_source_changed")
-        # Published PLUTO ZIP and BBL are Number; rolling borough is Text.
-        require(before["64uk-42ks"][1].get("zipcode") == "number"
-                and before["64uk-42ks"][1].get("bbl") == "number"
-                and before["usep-8jbt"][1].get("borough") == "text",
-                "source_type_unverified")
-        if plan.mode == CURRENT_SNAPSHOT:
-            require(before["64uk-42ks"][1].get("areasource") == "text",
-                    "source_type_unverified")
+        # Every projected field type was validated by _metadata before rows.
         sq = subject_query(plan.mode)
         n, keys, addresses = self._count(sq,
             "count(*) as n,count(distinct bbl) as keys,count(distinct address) as addresses",
@@ -300,10 +303,10 @@ class Collector:
                     and uint(row["bldgarea"]) > 0 and row["version"] == plan.version,
                     "subject_scope_conflict")
             if plan.mode == CURRENT_SNAPSHOT:
-                require(row.get("areasource") == AREA_METHOD, "subject_area_method_conflict")
+                require(area_method(row.get("areasource")) == AREA_METHOD, "subject_area_method_conflict")
             labels.append(" ".join(label.upper().split()))
             subjects.append(Subject(key, uint(row["bldgarea"]), plan.snapshot,
-                                    plan.version, True, True, row.get("areasource")))
+                                    plan.version, True, True, area_method(row.get("areasource"))))
         require(len(set(labels)) == MAX_SUBJECTS
                 and [s.key for s in subjects] == sorted({s.key for s in subjects}),
                 "ambiguous_subject_frame")
@@ -315,7 +318,7 @@ class Collector:
         for row in raw_sales:
             require(row["borough"] in ("4", "QUEENS") and row["neighborhood"] == "BAYSIDE"
                     and uint(row["zip_code"]) == 11361
-                    and row["building_class_at_time_of_sale"] == "A2", "sale_scope_conflict")
+                    and row["building_class_at_time_of"] == "A2", "sale_scope_conflict")
             key = bbl(4, row["block"], row["lot"])
             sold = day(row["sale_date"])
             require(plan.covered_from <= sold <= plan.covered_through
@@ -357,7 +360,7 @@ class Collector:
                                        snapshot_area=uint(a["bldgarea"]),
                                        snapshot_date=plan.snapshot,
                                        snapshot_version=plan.version,
-                                       area_source=a.get("areasource")))
+                                       area_source=area_method(a.get("areasource"))))
             else:
                 checked.append(replace(s, eligible=s.eligible and current_shape))
         sales = checked
