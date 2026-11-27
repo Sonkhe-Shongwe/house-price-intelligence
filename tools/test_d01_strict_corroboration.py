@@ -28,11 +28,11 @@ def inputs():
     return raw, rows
 
 
-def assess(raw, original, diagnose=False, alias_feasibility=False, transaction_availability=False):
+def assess(raw, original, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False):
     with patch.object(sf, "EXPECTED", len(original)):
         rows, _ = s.derive(csv_bytes(original))
     derived, _ = p.derive(dm.json_bytes(raw))
-    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability)
+    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability, extent_similarity=extent_similarity)
 
 
 def alias_test(raw, rows):
@@ -51,6 +51,55 @@ def alias_test(raw, rows):
 
 
 class StrictTests(unittest.TestCase):
+    def test_extent_exact_boundaries_and_invalid(self):
+        extent = c.extent
+        a = extent.positive_extent("100.00000000000000000000000000001")
+        for ratio in ("0.75", "1.25"):
+            self.assertTrue(extent.within25(a, a * extent.positive_extent(ratio)))
+        self.assertFalse(extent.within25(a, a * extent.positive_extent("0.74999999999999999999999999999")))
+        self.assertFalse(extent.within25(a, a * extent.positive_extent("1.25000000000000000000000000001")))
+        for invalid in (None, "", "NaN", "Infinity", "0", "-5", "unknown"):
+            with self.assertRaisesRegex(ValueError, "EXTENT_UNSUPPORTED"):
+                extent.positive_extent(invalid)
+
+    def test_extent_latest_qualifying_and_leakage(self):
+        d = date(2025, 1, 1)
+        subject = (1, d, "exact")
+        pool = [(1, d-timedelta(days=1), "exact"), (2, d-timedelta(days=10), "exact"),
+                (2, d-timedelta(days=20), "exact"), (3, d-timedelta(days=365), "alias_only"),
+                (4, d-timedelta(days=366), "alias_only"), (5, d, "exact"),
+                (6, d+timedelta(days=1), "exact")]
+        values = [(100,100), (150,100), (75,125), (125,150), (100,100), (100,100), (100,100)]
+        extents = dict(zip(pool, values))
+        extents[subject] = (100,100)
+        q = c.extent.coverage([subject], pool, extents, 365)
+        self.assertEqual(q["earlier_only"]["at_least_one"], 1)
+        self.assertEqual(q["dwelling_25pct"]["subjects_with_older_qualifying_event"], 1)
+        self.assertEqual(q["dwelling_and_erf_25pct"]["subject_candidate_pairs_with_older_qualifying_event"], 1)
+        maps = c.extent.latest_maps(subject, pool, extents, 365)
+        self.assertEqual([len(m) for m in maps], [2,2,1])
+        self.assertEqual(maps[2][2], d-timedelta(days=20))
+        self.assertEqual([len(m) for m in c.extent.latest_maps(subject, pool, extents, 730)], [3,3,2])
+
+    def test_extent_cross_strata_conflicts_and_baseline(self):
+        d = date(2025, 1, 1)
+        events = [(1,d,"exact"), (2,d-timedelta(days=1),"alias_only"),
+                  (3,d-timedelta(days=1),"exact"), (3,d-timedelta(days=1),"alias_only")]
+        strict = [e[:2] for e in events]
+        prior = c.transaction.assess_availability(events, strict, [])
+        sizes = {e: ("100","100") for e in events}
+        with self.assertRaisesRegex(ValueError, "EXTENT_AVAILABILITY_BASELINE_MISMATCH"):
+            c.extent.assess_similarity(events, strict, sizes, prior)
+        with patch.object(c.extent, "AVAILABILITY_BASELINE", prior):
+            result = c.extent.assess_similarity(events, strict, sizes, prior)
+            self.assertEqual(result["strata"]["exact"]["earlier_exact_pool"]["365"]["dwelling_25pct"]["at_least_one"], 0)
+            self.assertEqual(result["strata"]["exact"]["earlier_combined_sensitivity_pool"]["365"]["dwelling_and_erf_25pct"]["at_least_one"], 1)
+            sizes[events[0]] = ("0","100")
+            with self.assertRaisesRegex(ValueError, "EXTENT_UNSUPPORTED"):
+                c.extent.assess_similarity(events, strict, sizes, prior)
+        self.assertNotIn('"100"', json.dumps(result))
+
+
     def test_transaction_windows_self_future_repeat_and_boundary(self):
         day = date(2025, 1, 1)
         subject = (1, day, "exact")
@@ -293,14 +342,20 @@ class StrictTests(unittest.TestCase):
             }), patch.object(c, "TRANSACTION_ALIAS_BASELINE", alias["alias_feasibility"]):
                 availability = c.run(root, today=day, expected=(2, 2, 0, 0), transaction_availability=True)
             self.assertEqual(availability["transaction_availability"]["strata"]["exact"]["reported_sale_rows"], 2)
+            with patch.object(c, "DIAGNOSTIC_BASELINE", {k: v for k, v in q.items() if k != "registered_audits"}), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+                k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
+            }), patch.object(c, "TRANSACTION_ALIAS_BASELINE", alias["alias_feasibility"]), patch.object(c.extent, "AVAILABILITY_BASELINE", availability["transaction_availability"]):
+                similarity = c.run(root, today=day, expected=(2, 2, 0, 0), extent_similarity=True)
+            self.assertTrue(similarity.pop("extent_similarity")["baseline_reproduced"])
+            self.assertEqual(similarity, availability)
             self.assertEqual(snapshot, {f.relative_to(root): f.read_bytes() for f in root.rglob("*") if f.is_file()})
             with self.assertRaisesRegex(ValueError, "LEGACY_BASELINE_MISMATCH"):
                 c.run(root, today=day)
             with self.assertRaisesRegex(ValueError, "RETENTION_WINDOW"):
-                c.run(root, today=sf.REVIEW, expected=None, transaction_availability=True)
+                c.run(root, today=sf.REVIEW, expected=None, extent_similarity=True)
             (root / dm.SALE_RAW).write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "checksum"):
-                c.run(root, today=day, expected=None, transaction_availability=True)
+                c.run(root, today=day, expected=None, extent_similarity=True)
 
 
 if __name__ == "__main__":

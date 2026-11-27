@@ -216,3 +216,7 @@ Owner explicitly approves the [bounded alias feasibility assessment](engineering
 ## HPI-DATA-010/011 transaction availability authority (27 November 2026)
 
 Owner explicitly approves the [bounded transaction and earlier-sale candidate availability assessment](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d01-transaction-semantics-and-comparable-feasibility), pinned existing 010/011 only, separate 266 exact and 74 alias candidate cohorts, full baseline, distinct parcels and repeat-sale assessment, 365/730-day earlier-only counts, aggregates, R0, unchanged retention. Implementation, tests and checkpoint delegated. No persistent joins, new acquisition, identity promotion, valuation, model training or application activation. Both audits and exact implementation CI before Windows execution.
+
+## HPI-DATA-010/011 reported-extent similarity authority (27 November 2026)
+
+Owner explicitly approves the [bounded reported-extent similarity assessment](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-retrospective-availability-milestone-27-november-2026), pinned existing 010/011 only, full baseline, exact/alias separation, 365/730-day earlier-only windows, +/-25% dwelling and combined dwelling/erf filters, aggregate results, R0 and unchanged retention. Implementation, testing and checkpoint delegated. No persistent joins, new acquisition, identity promotion, valuation, model training or application activation. Both audits and exact CI before Windows execution.

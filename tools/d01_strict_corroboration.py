@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 
+from tools import d01_extent_similarity as extent
 from tools import d01_transaction_availability as transaction
 from tools import d01_register as sales
 from tools import d01_file_profile as sf
@@ -188,7 +189,8 @@ def parcel_address(p, schema, fields):
     return simple_address(f"{number} {street} {kind} {suburb}")
 
 
-def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False):
+def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False):
+    transaction_availability = transaction_availability or extent_similarity
     alias_feasibility = alias_feasibility or transaction_availability
     diagnose = diagnose or alias_feasibility
     cohort = [row for row in rows if row["quality_flags"]["screened_candidate"]]
@@ -280,6 +282,7 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
     unsupported_counts = Counter(dict.fromkeys(UNSUPPORTED_REASONS, 0))
     spatial = agreed_spatial = exact_conflicts = legacy_conflicts = 0
     transaction_events, strict_events = [], []
+    reported_extents = {}
     for row in cohort:
         e = sales.ERF.fullmatch(row["registered_description"].strip())
         erf = int(e.group(1)) if e and row["quality_flags"]["pinelands_address_suffix"] else None
@@ -328,12 +331,16 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
             additional_spatial += reason == "additional_candidate" and is_spatial
             if transaction_availability and reason == "additional_candidate":
                 transaction_events.append((oid, day, "alias_only"))
+                if extent_similarity:
+                    reported_extents[(oid, day, "alias_only")] = (row["dwelling_extent_reported"], row["erf_extent_reported"])
         elif alias_feasibility and outcome == "agree":
             reason = collision_reason(canonical_address(lk), oid, erf,
                                       canonical_parcels, canonical_sales)
             exact_recheck["collision_free" if reason == "additional_candidate" else reason] += 1
             if transaction_availability and reason == "additional_candidate":
                 transaction_events.append((oid, day, "exact"))
+                if extent_similarity:
+                    reported_extents[(oid, day, "exact")] = (row["dwelling_extent_reported"], row["erf_extent_reported"])
         agreed_spatial += outcome == "agree" and is_spatial
     if any(sum(transitions[k].values()) != baseline["candidate_" + k] for k in STATES):
         raise ValueError("LEGACY_ACCOUNTING")
@@ -401,10 +408,13 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
             raise ValueError("TRANSACTION_STRATUM_ACCOUNTING")
         result["transaction_availability"] = transaction.assess_availability(
             transaction_events, strict_events, rows)
+    if extent_similarity:
+        result["extent_similarity"] = extent.assess_similarity(
+            transaction_events, strict_events, reported_extents, result["transaction_availability"])
     return result
 
 
-def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False):
+def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False):
     root = dm.workspace(root)
     today = today or date.today()
     if not sf.INTAKE <= today < sf.REVIEW:
@@ -428,7 +438,7 @@ def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=F
     reader = csv.reader(io.StringIO(s_raw.decode("utf-8-sig"), newline=""), strict=True)
     if tuple(next(reader)) != sf.HEADERS:
         raise ValueError("HEADER_MISMATCH")
-    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability)
+    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability, extent_similarity=extent_similarity)
     result["registered_audits"] = {"HPI-DATA-010": "passed", "HPI-DATA-011": "passed"}
     return result
 
@@ -439,12 +449,13 @@ def main():
     parser.add_argument("--diagnose-mismatches", action="store_true", help="Approved bounded aggregate lexical diagnosis only")
     parser.add_argument("--alias-feasibility", action="store_true", help="Approved bounded documented street-type candidate assessment")
     parser.add_argument("--transaction-availability", action="store_true", help="Approved bounded retrospective reported-date availability assessment")
+    parser.add_argument("--extent-similarity", action="store_true", help="Approved bounded reported-extent sensitivity assessment")
     args = parser.parse_args()
     if os.name != "nt" or os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
         print("STOP: owner-local Windows only.")
         return 1
     try:
-        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches, alias_feasibility=args.alias_feasibility, transaction_availability=args.transaction_availability), indent=2))
+        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches, alias_feasibility=args.alias_feasibility, transaction_availability=args.transaction_availability, extent_similarity=args.extent_similarity), indent=2))
         return 0
     except Exception:
         print("STOP: local audit, retention, snapshot, projection or cohort precondition failed; no private values emitted.")
