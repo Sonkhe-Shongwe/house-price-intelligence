@@ -142,7 +142,7 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],snapshots)
         self.page.reload()
         expect(count).to_have_text("2 of 3 properties")
-        expect(comparison).to_have_text(frozen_text)
+        expect(comparison).to_have_text(frozen_text,use_inner_text=True)
         for i,iid in enumerate(ids):
             self.page.get_by_role("button",name="Reopen "+iid).click()
             expect(self.page.get_by_text("Reopened frozen evidence; not recalculated.")).to_be_visible()
