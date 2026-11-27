@@ -221,7 +221,7 @@ class StrictTests(unittest.TestCase):
                 diag = c.run(root, today=day, expected=(2, 2, 0, 0), diagnose=True)
             self.assertEqual(diag["mismatch_diagnosis"]["new_matches"], 0)
             self.assertTrue(diag["mismatch_diagnosis"]["baseline_reproduced"])
-            with patch.object(c, "DIAGNOSTIC_BASELINE", q), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+            with patch.object(c, "DIAGNOSTIC_BASELINE", {k: v for k, v in q.items() if k != "registered_audits"}), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
                 k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
             }):
                 alias = c.run(root, today=day, expected=(2, 2, 0, 0), alias_feasibility=True)
