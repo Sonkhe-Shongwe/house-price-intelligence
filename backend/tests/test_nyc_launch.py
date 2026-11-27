@@ -136,6 +136,38 @@ class LauncherTests(unittest.TestCase):
             with self.assertRaisesRegex(QualificationError, "noncanonical_workspace"):
                 disposable_preflight(Path("/other"), plan, sources, today)
 
+    def test_fixed_cli_activation_requires_acknowledgement_and_preflight(self):
+        workspace = Path("/invented")
+        commit = "a"*40
+        args = ["--workspace", str(workspace), "--execute", "--reviewed-commit", commit]
+        evidence = {"status":"completed","result":{
+            "workspace_owner_only":True, "source_pins_match":True,
+            "worker_controls":{"core_dumps_disabled":True,"process_dumpable":False},
+            "record_attempt_started":False, "host_protection_independently_verified":False}}
+        with patch("tools.nyc_launch.private_directory", return_value=workspace), \
+             patch("tools.nyc_launch.git_clean_exact") as clean, \
+             patch("tools.nyc_launch.disposable_preflight") as preflight, \
+             patch("tools.nyc_launch.execute_reviewed") as execute, \
+             patch("builtins.print") as output:
+            self.assertEqual(main(args), 1)
+            self.assertIn("disposable_host_risk_not_accepted", output.call_args.args[0])
+            preflight.assert_not_called()
+            execute.assert_not_called()
+            args.append("--accept-disposable-host-risk")
+            preflight.return_value = {"status":"blocked","reason":"reviewed_source_changed"}
+            self.assertEqual(main(args), 1)
+            execute.assert_not_called()
+            preflight.return_value = {"status":"completed","result":{}}
+            self.assertEqual(main(args), 1)
+            execute.assert_not_called()
+            preflight.return_value = evidence
+            execute.return_value = {"status":"completed","result":{"subject_count":30}}
+            self.assertEqual(main(args), 0)
+            execute.assert_called_once()
+            self.assertEqual(execute.call_args.args[0], workspace)
+            self.assertEqual(execute.call_args.args[3], commit)
+            self.assertGreaterEqual(clean.call_count, 2)
+
     def test_no_live_activation_even_with_structural_plan(self):
         with patch("tools.nyc_launch.private_directory", return_value=Path("/invented")), \
              patch("tools.nyc_launch.read_manifest", return_value=self.manifest()), \

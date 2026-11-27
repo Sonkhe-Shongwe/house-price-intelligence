@@ -1,9 +1,10 @@
 """Local-only NYC research supervisor; never run real records in public CI.
 
 Metadata-only mode is distinct from the single approved record attempt.
-No activation manifest is provided: reviewed current source metadata, terms,
-temporal coverage, exact-head CI and actual local protection must be established
-first. A manifest is a record of those reviews, not proof that they occurred.
+The fixed-plan CLI requires a clean reviewed commit, fresh metadata-only
+preflight, explicit operator acceptance of residual host risk for this public
+research slice, and a durable one-attempt marker. Exact-head CI must be
+reviewed by the operator before executing. No durable property-data acceptance.
 No raw files, cache, credentials or property-level output are written.
 """
 import argparse
@@ -92,7 +93,7 @@ def disposable_preflight(workspace, plan, sources, today):
 
 
 def execute_reviewed(workspace, plan, sources, commit, today):
-    """Wired acquisition path. CLI activation remains held for acceptance.
+    """Wired acquisition path for the fixed, disposable research slice.
 
     Caller must have performed exact clean-checkout and private workspace checks.
     An operational marker, not a protection against deliberate owner bypass.
@@ -264,7 +265,9 @@ def live_report(plan, sources):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", required=True)
-    parser.add_argument("--reviewed-commit", help="Exact reviewed commit for metadata-only plan check")
+    parser.add_argument("--reviewed-commit", help="Exact reviewed clean commit for the fixed plan")
+    parser.add_argument("--accept-disposable-host-risk", action="store_true",
+                        help="Operator accepts residual host/swap risk for this public-data study only")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--metadata-only", action="store_true")
     mode.add_argument("--check-plan", action="store_true")
@@ -272,8 +275,31 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         workspace = private_directory(args.workspace)
+        require(not args.accept_disposable_host_risk or
+                (args.execute and args.reviewed_commit), "invalid_host_risk_acknowledgement")
         if args.metadata_only:
             result = supervised(lambda: Collector(https_response).metadata_summary())
+        elif args.execute and args.reviewed_commit:
+            require(args.accept_disposable_host_risk, "disposable_host_risk_not_accepted")
+            require(re.fullmatch(r"[0-9a-f]{40}", args.reviewed_commit), "invalid_commit")
+            git_clean_exact(args.reviewed_commit)
+            require(not (workspace / MARKER).exists(), "attempt_already_consumed")
+            today = datetime.now(timezone.utc).date()
+            plan, sources = reviewed_plan(today)
+            preflight = disposable_preflight(workspace, plan, sources, today)
+            if preflight.get("status") != "completed":
+                result = preflight
+            else:
+                require(preflight == {"status": "completed", "result": {
+                    "workspace_owner_only": True, "source_pins_match": True,
+                    "worker_controls": {"core_dumps_disabled": True,
+                                        "process_dumpable": False},
+                    "record_attempt_started": False,
+                    "host_protection_independently_verified": False}},
+                    "preflight_evidence_invalid")
+                require(datetime.now(timezone.utc).date() == today, "evaluation_date_changed")
+                git_clean_exact(args.reviewed_commit)
+                result = execute_reviewed(workspace, plan, sources, args.reviewed_commit, today)
         elif args.check_plan and args.reviewed_commit:
             require(re.fullmatch(r"[0-9a-f]{40}", args.reviewed_commit), "invalid_commit")
             git_clean_exact(args.reviewed_commit)
@@ -290,9 +316,8 @@ def main(argv=None):
             if args.check_plan:
                 result = disposable_preflight(workspace, plan, sources, today)
             else:
-                # The reviewed execution path exists, but actual private
-                # workspace/preflight evidence and exact-head CI must precede
-                # removal of this operational hold.
+                # A free-form manifest is not activation authority. Use only
+                # the fixed plan with explicit risk acknowledgement.
                 raise QualificationError("live_activation_not_accepted")
         print(json.dumps(result, sort_keys=True))
         return 0 if result["status"] in ("completed", "plan_structure_checked") else 1
