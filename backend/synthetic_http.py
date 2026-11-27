@@ -21,7 +21,7 @@ from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticI
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
 from backend.buyer_evidence_preview import buyer_evidence_preview
-from backend.nyc_fixture_http import NYC_PATH, investigate as investigate_nyc_fixture
+from backend.nyc_fixture_http import NYC_PATH, LifecycleUnavailable, investigate as investigate_nyc_fixture
 from tools.nyc_qualification import QualificationError
 from backend.centroid_preview import centroid_preview
 from backend.context_archive_http import CONTEXT_PATH, transport_fixture, atlas_fixture
@@ -315,6 +315,8 @@ def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None
             if nyc_request:
                 try:
                     return _response(start_response, 200, investigate_nyc_fixture(payload))
+                except LifecycleUnavailable:
+                    return _response(start_response, 503, {"error": "nyc_evidence_unavailable"})
                 except QualificationError:
                     return _response(start_response, 422, {"error": "invalid_nyc_fixture_request"})
                 except Exception:

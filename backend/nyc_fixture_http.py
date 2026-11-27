@@ -1,13 +1,56 @@
 """Fixed invented NYC request adapter; no network source, storage or live entry."""
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 import re
 
 from backend.nyc_buyer_fixture import FixtureAddress, FixtureSnapshot, investigate_fixture
 from tools.nyc_qualification import FIELDS, Sale, Master, Legal, bbl, require
+from backend.nyc_lifecycle_guard import IntakeSeal, SourceAuthority, Evidence, AuthoritySnapshot, evaluate
 
 NYC_PATH = "/v2/fictional/nyc/investigate"
 CONTRACT = "nyc-buyer-fixture-v1"
+
+
+# Fixed simulated timeline for the disposable public demo, not wall-clock
+# authority. No request, environment flag or restored record can set it.
+_OWNER = "fixture-nyc-http-owner"
+_INTAKE = datetime(2026, 11, 24, tzinfo=timezone.utc)
+_BUILD = datetime(2026, 11, 27, tzinfo=timezone.utc)
+_REHEARSAL_NOW = datetime(2026, 11, 28, tzinfo=timezone.utc)
+_REVISION = "fixture-http-one"
+_VERSION = "fixture-nyc-http-one"
+_POLICY = "fixture-nyc-http-policy-v1"
+_SOURCES = ("usep-8jbt", "64uk-42ks", "bnx9-e6tj", "8h5j-fqxa")
+_ORIGINALS = tuple(IntakeSeal(source, _REVISION, f"fixture-http-intake-{source}",
+                             _POLICY, _INTAKE, _INTAKE+timedelta(days=30))
+                   for source in _SOURCES)
+
+
+class LifecycleUnavailable(RuntimeError):
+    """Categorical refusal, never a property or authority payload."""
+
+
+def _authority(now):
+    """Separate fixed invented authority, not derived from the fixture plan."""
+    return AuthoritySnapshot(_OWNER, tuple(
+        SourceAuthority(seal, seal.original_deadline, "reviewed", "clear",
+                        "verified", frozenset({"read"})) for seal in _ORIGINALS), now)
+
+
+def _require_read(plan):
+    # Bind the source plan to the original frozen manifest before matching.
+    if (type(plan) is not FixtureSnapshot or plan.source_kind != "synthetic_fixture"
+            or plan.version != _VERSION or type(plan.revisions) is not tuple
+            or len(plan.revisions) != len(_ORIGINALS)
+            or not all(type(pair) is tuple and len(pair) == 2
+                       and all(type(v) is str for v in pair) for pair in plan.revisions)
+            or set(plan.revisions) != {(s.source, s.revision) for s in _ORIGINALS}):
+        raise LifecycleUnavailable("fixture_evidence_unavailable")
+    now = _REHEARSAL_NOW
+    decision = evaluate(Evidence(_OWNER, _ORIGINALS, _BUILD),
+                        _authority(now), owner=_OWNER, operation="read", now=now)
+    if decision.allowed is not True:
+        raise LifecycleUnavailable("fixture_evidence_unavailable")
 
 
 def fixture():
@@ -56,4 +99,7 @@ def investigate(payload):
                 is not None, "invalid_asking_price")
         whole, _, fraction = price.partition(".")
         price = int(whole)*100 + int(fraction.ljust(2, "0"))
-    return investigate_fixture(address, price, *fixture())
+    require(price is None or 0 < price <= 99999999999999, "invalid_asking_price")
+    plan, *rows = fixture()
+    _require_read(plan)
+    return investigate_fixture(address, price, plan, *rows)

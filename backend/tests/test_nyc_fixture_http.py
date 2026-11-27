@@ -105,6 +105,84 @@ class NYCFixHttpTests(unittest.TestCase):
             self.assertEqual(result["status"],500)
             self.assertEqual(result["body"],{"error":"internal_error"})
 
+    def test_lifecycle_refusals_precede_matching_and_no_persistence(self):
+        from backend.nyc_fixture_http import _authority, _REHEARSAL_NOW
+        from datetime import timedelta
+        from dataclasses import replace
+        current = _authority(_REHEARSAL_NOW)
+        first = current.sources[0]
+        states = [
+            replace(current, sources=(replace(first, permission="revoked"), *current.sources[1:])),
+            replace(current, sources=(replace(first, accuracy="disputed"), *current.sources[1:])),
+            replace(current, sources=(replace(first, protection="lost"), *current.sources[1:])),
+            replace(current, sources=(replace(first, deadline=_REHEARSAL_NOW), *current.sources[1:])),
+            replace(current, sources=(replace(first, operations=frozenset()), *current.sources[1:])),
+            replace(current, sources=current.sources[:-1]),
+            replace(current, observed_at=_REHEARSAL_NOW-timedelta(seconds=1)),
+            replace(current, owner="fixture-other-owner"),
+        ]
+        before = self.db.total_changes
+        for state in states:
+            with self.subTest(state=state), patch("backend.nyc_fixture_http._authority", return_value=state), patch(
+                    "backend.nyc_fixture_http.investigate_fixture") as matcher:
+                result = self.invoke()
+                self.assertEqual(result["status"], 503)
+                self.assertEqual(result["body"], {"error":"nyc_evidence_unavailable"})
+                self.assertEqual(result["headers"]["Cache-Control"], "no-store")
+                matcher.assert_not_called()
+        self.assertEqual(self.db.total_changes, before)
+        self.assertEqual(self.invoke()["body"]["status"], "supported")
+
+    def test_lifecycle_seal_mismatch_and_guard_failure(self):
+        from dataclasses import replace
+        plan, *rows = fixture()
+        for bad in (replace(plan, version="fixture-nyc-other"),
+                    replace(plan, revisions=tuple((d,"fixture-other") for d,_ in plan.revisions)),
+                    replace(plan, revisions=plan.revisions[:-1]),
+                    replace(plan, source_kind="real")):
+            with self.subTest(plan=bad), patch("backend.nyc_fixture_http.fixture", return_value=(bad,*rows)), patch(
+                    "backend.nyc_fixture_http.investigate_fixture") as matcher:
+                result = self.invoke()
+                self.assertEqual(result["status"], 503)
+                self.assertEqual(result["body"], {"error":"nyc_evidence_unavailable"})
+                matcher.assert_not_called()
+        with patch("backend.nyc_fixture_http._authority", side_effect=RuntimeError("invented private seal")), patch(
+                "backend.nyc_fixture_http.investigate_fixture") as matcher:
+            result = self.invoke()
+            self.assertEqual(result["status"], 500)
+            self.assertEqual(result["body"], {"error":"internal_error"})
+            matcher.assert_not_called()
+
+    def test_request_cannot_choose_lifecycle_authority(self):
+        for field, value in (("authority", {}), ("now", "2026-11-28"), ("operation", "read"),
+                             ("permission", "reviewed"), ("source_revision", "fixture-http-one")):
+            with self.subTest(field=field), patch("backend.nyc_fixture_http._authority") as authority:
+                self.assertEqual(self.invoke(payload=self.req | {field:value})["status"], 422)
+                authority.assert_not_called()
+
+    def test_actual_loopback_lifecycle_refusal(self):
+        from backend.nyc_fixture_http import _authority, _REHEARSAL_NOW
+        from dataclasses import replace
+        authority = _authority(_REHEARSAL_NOW)
+        first = replace(authority.sources[0], permission="revoked")
+        refused = replace(authority, sources=(first,*authority.sources[1:]))
+        with patch("backend.nyc_fixture_http._authority", return_value=refused), make_server(
+                "127.0.0.1", 0, self.app) as server:
+            thread = threading.Thread(target=server.handle_request)
+            thread.start()
+            conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            try:
+                conn.request("POST", NYC_PATH, json.dumps(self.req),
+                             {"Content-Type":"application/json"})
+                response = conn.getresponse()
+                self.assertEqual(response.status,503)
+                self.assertEqual(json.loads(response.read()),{"error":"nyc_evidence_unavailable"})
+                self.assertEqual(response.getheader("Cache-Control"),"no-store")
+            finally:
+                conn.close()
+                thread.join(5)
+            self.assertFalse(thread.is_alive())
+
     def test_actual_loopback_http(self):
         with make_server("127.0.0.1", 0, self.app) as server:
             thread = threading.Thread(target=server.handle_request)
