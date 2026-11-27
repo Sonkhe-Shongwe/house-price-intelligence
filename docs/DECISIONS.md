@@ -180,3 +180,7 @@ Owner direction: do not be excessively strict about licences and rights for publ
 ## D02-P1 one-request pilot authority (27 November 2026)
 
 Owner explicitly approves the exact [D02-P1 bounded Cape Town cadastral pilot](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d02-proportionate-review-and-proposed-parcel-pilot), R0, one HTTPS GET, 5 MiB, 100 features, 100,000 coordinate pairs, 60 seconds, fixed fields/envelope, private owner Windows only, aggregate output and no raw retention. Conditional on offline verification; no replay, new source, registration, joins, application use, release, phase or score change.
+
+## D02-P2 corrected one-request authority (27 November 2026)
+
+Owner explicitly approves D02-P2, one corrected acquisition attempt under the identical [D02-P1 scope](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d02-proportionate-review-and-proposed-parcel-pilot), R0, private Windows after exact implementation CI. Preserve consumed P1 ledger, use separate P2 ledger, no raw retention, joins, registration, application use or release. No further replay or automatic retry; park on another refusal. No phase or score change.

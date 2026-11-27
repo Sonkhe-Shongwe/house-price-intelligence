@@ -2903,7 +2903,8 @@ def main():
     p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
-    p.add_argument("--d02-pilot",action="store_true",help="Approved one-request Cape Town parcel pilot; owner Windows only")
+    p.add_argument("--d02-pilot",action="store_true",help="Consumed D02-P1; no replay")
+    p.add_argument("--d02-p2",action="store_true",help="Separately approved one-request Cape Town parcel recovery; owner Windows only")
     p.add_argument("--dbe-preflight",action="store_true",help="Private read-only 009 aggregate text-gate diagnosis")
     p.add_argument("--context-proof",action="store_true",help="Private read-only independent 006/008 contextual reports")
     p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
@@ -2919,14 +2920,16 @@ def main():
     args = p.parse_args()
     try:
         if args.d02_pilot:
+            raise ValueError("D02-P1 authority consumed; no replay.")
+        if args.d02_p2:
             if (args.dataset!="HPI-DATA-002" or args.self_test or args.dbe_preflight or
                     args.context_proof or args.acquire_treasury or args.recover_treasury or
                     args.status or args.audit_workspace or args.geo_crosswalk or args.geo_alias or
                     args.remove_internal_deadlines or args.init_only or args.intake_date is not None or
                     args.retain_until is not None or args.terms_reviewed):
-                raise ValueError("D02-P1 must be a standalone explicit pilot.")
+                raise ValueError("D02-P2 must be a standalone explicit pilot.")
             if not __package__:
-                raise ValueError("Use python -m tools.hpi_data_manager --d02-pilot.")
+                raise ValueError("Use python -m tools.hpi_data_manager --d02-p2.")
             from tools.d02_parcel_pilot import owner_execute
             return owner_execute(args.root)
         if args.dbe_preflight:

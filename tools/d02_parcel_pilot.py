@@ -1,4 +1,4 @@
-"""D02-P1 approved Cape Town parcel feasibility; aggregate-only, one attempt."""
+"""D02-P2 approved Cape Town parcel recovery; preserve consumed D02-P1."""
 from collections import Counter
 from datetime import datetime, timezone
 import hashlib
@@ -9,7 +9,7 @@ import re
 import time
 from urllib.parse import urlencode
 
-from tools.hpi_data_manager import check_path, workspace
+from tools.hpi_data_manager import check_path, workspace, read_bounded
 from tools.world_bank_pilot import (PinnedHTTPS, Refused, bounded_body,
     deadline_fetch, exclusive_json, remaining, unique, reject_constant)
 
@@ -27,7 +27,10 @@ CAP = 5 * 1024**2
 SECONDS = 60
 MAX_ROWS = 100
 MAX_PAIRS = 100000
-ATTEMPT = "D02-P1-cape-town-parcels-once"
+PRIOR_ATTEMPT = "D02-P1-cape-town-parcels-once"
+ATTEMPT = "D02-P2-cape-town-parcels-once"
+PRIOR_SHA = "a21816f1c95f90ec32a7351ac35fcf42c5fd4961d81cc22e71aaf8bf3322192f"
+PRIOR_BYTES = 90232
 MEDIA = ("application/json", "application/geo+json")
 REASONS = {"BODY", "SCHEMA", "JSON", "API_ERROR", "COLLECTION", "COLLECTION_METADATA", "FEATURE_SCHEMA", "FIELDS", "GEOMETRY", "CAP", "EMPTY", "DEADLINE", "TRANSPORT"}
 
@@ -184,6 +187,34 @@ def profile(raw, deadline):
             "sample_cap_reached":len(rows)==MAX_ROWS}
 
 
+def verify_prior(reports):
+    """Require the actual consumed P1 aggregate ledger, never modify it."""
+    prior = reports/PRIOR_ATTEMPT
+    check_path(prior)
+    try:
+        attempt = json.loads(read_bounded(prior/"attempt.json", 16384),
+                             object_pairs_hook=unique)
+        result = json.loads(read_bounded(prior/"result.json", 16384),
+                            object_pairs_hook=unique)
+        expected = {"approval":"2026-11-27 D02-P1", "source":"City of Cape Town",
+                    "endpoint":"https://"+HOST+REQUEST, "max_requests":1,
+                    "max_body_bytes":CAP, "deadline_seconds":SECONDS,
+                    "max_features":MAX_ROWS,"max_coordinate_pairs":MAX_PAIRS,
+                    "raw_retained":False,"registered":False}
+        if (not isinstance(attempt,dict) or not isinstance(result,dict)
+                or any(k not in attempt or k not in result or
+                       type(attempt[k]) is not type(v) or type(result[k]) is not type(v)
+                       or attempt[k]!=v or result[k]!=v for k,v in expected.items())
+                or attempt.get("started_utc")!="2026-11-27T04:30:29.640838+00:00"
+                or result.get("started_utc")!=attempt["started_utc"]
+                or result.get("status")!="STOP" or result.get("reason")!="SCHEMA"
+                or result.get("sha256")!=PRIOR_SHA or result.get("bytes")!=PRIOR_BYTES
+                or result.get("requests_dispatched_max")!=1):
+            raise ValueError
+    except (ValueError, OSError, KeyError, TypeError, RecursionError):
+        raise Refused("Original D02-P1 STOP ledger missing or inconsistent; no dispatch") from None
+
+
 def execute(root, fetch=fetch_once):
     # Import before consuming an attempt; existing district adapter uses Shapely.
     from shapely.geometry import shape
@@ -193,14 +224,16 @@ def execute(root, fetch=fetch_once):
         check_path(target)
         if not target.is_dir():
             raise Refused("existing private workspace required")
+    verify_prior(reports)
     attempt = reports/ATTEMPT
     check_path(attempt)
     try:
         attempt.mkdir(mode=0o700)
     except FileExistsError:
-        raise Refused("D02-P1 attempt already consumed; do not replay") from None
+        raise Refused("D02-P2 attempt already consumed; do not replay") from None
     start = datetime.now(timezone.utc).isoformat()
-    metadata = {"approval":"2026-11-27 D02-P1", "source":"City of Cape Town",
+    metadata = {"approval":"2026-11-27 D02-P2", "source":"City of Cape Town",
+                "prior_attempt":PRIOR_ATTEMPT, "prior_response_sha256":PRIOR_SHA,
                 "endpoint":"https://"+HOST+REQUEST, "started_utc":start,
                 "max_requests":1,"max_body_bytes":CAP,"deadline_seconds":SECONDS,
                 "max_features":MAX_ROWS,"max_coordinate_pairs":MAX_PAIRS,
@@ -226,7 +259,7 @@ def execute(root, fetch=fetch_once):
 
 def owner_execute(root):
     if os.name!="nt" or os.environ.get("GITHUB_ACTIONS") or os.environ.get("CI"):
-        raise Refused("D02-P1 requires owner-local Windows outside CI")
+        raise Refused("D02-P2 requires owner-local Windows outside CI")
     try:
         result = execute(root)
     except Exception:
