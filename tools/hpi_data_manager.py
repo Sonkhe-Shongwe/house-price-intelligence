@@ -2580,7 +2580,7 @@ DBE_MEMBERS = {"masterlist-2023-q"+str(q)+"-anon-v1."+ext for q in (2,3) for ext
 DBE_MISSING = {"", ".", "NA", "N/A", "NULL", "NAN", "-999", "-9999"}
 DBE_LIMIT = 10*MIB
 
-def dbe_profile(raw, expected=DBE_SHA):
+def dbe_profile(raw, expected=DBE_SHA, *, preflight=False):
     import re
     if len(raw)>DBE_LIMIT or sha(raw)!=expected:
         raise ValueError("DBE_ARCHIVE_HASH_OR_CAP")
@@ -2682,6 +2682,8 @@ def dbe_profile(raw, expected=DBE_SHA):
     writer=csv.writer(out,lineterminator="\n")
     writer.writerow(DBE_FIELDS)
     mapped=0
+    unsafe_fields={}
+    unsafe_rows=0
     for valid,r in records:
         duplicate=valid and seen[r["NatEmis"]]>1
         if duplicate:
@@ -2693,18 +2695,53 @@ def dbe_profile(raw, expected=DBE_SHA):
             mapped+=1
         # Prevent formula interpretation if an institutional text field is opened
         # in a spreadsheet. Refuse instead of silently changing the source text.
-        if any(r[k].startswith(("=","+","-","@")) for k in DBE_FIELDS
-               if k not in ("GIS_Long","GIS_Lat")):
-            raise ValueError("DBE_UNSAFE_TEXT")
-        writer.writerow([r[k] for k in DBE_FIELDS])
+        flagged=False
+        for k in DBE_FIELDS:
+            v=r[k]
+            if k in ("GIS_Long","GIS_Lat") or not v.startswith(("=","+","-","@")):
+                continue
+            flagged=True
+            counts=unsafe_fields.setdefault(k,{"equals":0,"plus":0,"minus":0,"at":0,
+                                               "single_hyphen":0,"hyphens_only":0})
+            counts[{"=":"equals","+":"plus","-":"minus","@":"at"}[v[0]]]+=1
+            if v=="-":
+                counts["single_hyphen"]+=1
+            if v and all(c=="-" for c in v):
+                counts["hyphens_only"]+=1
+        if flagged:
+            unsafe_rows+=1
+        elif not preflight:
+            writer.writerow([r[k] for k in DBE_FIELDS])
     quality["retained_institutions"]=quality["rows"]-quality["excluded_identity_rows"]
     quality["retained_mapped_candidates"]=mapped
     quality["retained_unmapped_candidates"]=quality["retained_institutions"]-mapped
     quality["missing_fields"]=missing
     quality["limitations"]="Historical institutional rows; coordinate envelope only, missing/invalid pairs blanked, ambiguous identities excluded, no current status, admissions, quality, true nearest school or price claim."
+    if preflight:
+        return None,{"status":"STOP" if unsafe_rows or not mapped else "PASS",
+                     "reason_codes":(["DBE_UNSAFE_TEXT"] if unsafe_rows else [])+
+                                    (["DBE_NO_MAPPED_CANDIDATES"] if not mapped else []),
+                     "rows":quality["rows"],"identity_eligible":quality["retained_institutions"],
+                     "mapped_candidates_before_text_gate":mapped,
+                     "unmapped_candidates_before_text_gate":quality["retained_unmapped_candidates"],
+                     "invalid_emis":quality["invalid_emis"],
+                     "duplicate_emis_rows":quality["duplicate_emis_rows"],
+                     "missing_name":quality["missing_name"],
+                     "missing_coordinate_pairs":quality["missing_coordinate_pairs"],
+                     "invalid_coordinate_pairs":quality["invalid_coordinate_pairs"],
+                     "unsafe_rows":unsafe_rows,"unsafe_fields":unsafe_fields,
+                     "registered":False,"workspace_writes":0,"network_requests":0}
+    if unsafe_rows:
+        raise ValueError("DBE_UNSAFE_TEXT")
     if not mapped:
         raise ValueError("DBE_NO_MAPPED_CANDIDATES")
     return out.getvalue().encode("utf-8"),quality
+
+def dbe_preflight(root, expected=DBE_SHA):
+    root=workspace(root)
+    raw=read_bounded(root/DBE_RAW,DBE_LIMIT)
+    _,report=dbe_profile(raw,expected,preflight=True)
+    return report
 
 def dbe_spec():
     return ("HPI-DATA-009",DBE_MANIFEST,DBE_RAW,DBE_OUTPUT,DBE_REPORT,DBE_LIMIT,DBE_SHA)
@@ -2801,12 +2838,26 @@ def dbe_self_test():
     for changes,code in (({"Quarter":"2"},"VINTAGE"),({"Institution_Name":"=1+1"},"UNSAFE_TEXT")):
         bad=fixture(changes)
         reject(lambda:dbe_profile(bad,sha(bad)),code)
+    unsafe=fixture({"Institution_Name":"=PRIVATE_FIXTURE","Suburb":"-","Town_City":"--","Ward_ID":"@PRIVATE_FIXTURE"})
+    empty,report=dbe_profile(unsafe,sha(unsafe),preflight=True)
+    assert empty is None and report["status"]=="STOP" and report["unsafe_rows"]==1
+    assert report["unsafe_fields"]["Institution_Name"]["equals"]==1
+    assert report["unsafe_fields"]["Suburb"]["single_hyphen"]==1
+    assert report["unsafe_fields"]["Town_City"]["hyphens_only"]==1
+    assert report["unsafe_fields"]["Ward_ID"]["at"]==1
+    assert "PRIVATE_FIXTURE" not in json.dumps(report)
+    assert report["mapped_candidates_before_text_gate"]==1
+    reject(lambda:dbe_profile(unsafe,sha(unsafe)),"UNSAFE_TEXT")
+    assert dbe_profile(raw2,sha(raw2),preflight=True)[1]["status"]=="PASS"
     bad=fixture(extra=True)
     reject(lambda:dbe_profile(bad,sha(bad)),"MEMBERS")
     with tempfile.TemporaryDirectory() as tmp:
         root=workspace(Path(tmp)/"private")
         initialise(root)
         publish(root/DBE_RAW,raw2)
+        before={str(p.relative_to(root)):sha(p.read_bytes()) for p in root.rglob("*") if p.is_file()}
+        assert dbe_preflight(root,sha(raw2))["status"]=="PASS"
+        assert before=={str(p.relative_to(root)):sha(p.read_bytes()) for p in root.rglob("*") if p.is_file()}
         day=date(2026,11,27)
         reject(lambda:import_dbe(root,day,False,today=day,expected=sha(raw2)),"TERMS")
         first=import_dbe(root,day,True,today=day,expected=sha(raw2))
@@ -2826,6 +2877,7 @@ def main():
     p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
+    p.add_argument("--dbe-preflight",action="store_true",help="Private read-only 009 aggregate text-gate diagnosis")
     p.add_argument("--context-proof",action="store_true",help="Private read-only independent 006/008 contextual reports")
     p.add_argument("--acquire-treasury",action="store_true",help="One approved 007 intake; three fixed requests at most")
     p.add_argument("--recover-treasury",action="store_true",help="One separately approved 007 recovery; preserve original attempt")
@@ -2839,6 +2891,15 @@ def main():
     p.add_argument("--terms-reviewed",action="store_true")
     args = p.parse_args()
     try:
+        if args.dbe_preflight:
+            if (args.dataset!="HPI-DATA-009" or args.context_proof or args.acquire_treasury or
+                    args.recover_treasury or args.self_test or args.status or args.audit_workspace or
+                    args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or args.init_only or
+                    args.intake_date is not None or args.retain_until is not None or args.terms_reviewed):
+                raise ValueError("DBE preflight must be a standalone read-only 009 action.")
+            report=dbe_preflight(args.root)
+            print(json.dumps(report,indent=2))
+            return 0 if report["status"]=="PASS" else 1
         if args.context_proof:
             if (args.acquire_treasury or args.recover_treasury or args.self_test or args.status or
                     args.audit_workspace or args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or

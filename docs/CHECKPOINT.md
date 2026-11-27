@@ -12,9 +12,9 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "task": {
     "id": "P0-D11-DBE-LOCAL-IMPORT",
     "status": "blocked",
-    "objective": "Verify DBE vintage fix and observe local import.",
+    "objective": "Obtain aggregate DBE text-gate diagnosis before import correction.",
     "scope": "Exact approved Q3 offline import in Windows.",
-    "acceptance": "CI safeguards and local registration or STOP.",
+    "acceptance": "Verified preflight and owner aggregate report; no raw values.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await focused CI and corrected offline run; no joins or P1.",
+    "stop": "Await focused CI and local preflight; no registration or joins.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -71,7 +71,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
         [270,274,"## 27 November 2026 | D11 approved","After focused CI succeeds"],
-        [276,280,"## 27 November 2026 | D11 actual vintage refusal","Scoped correction:"]
+        [282,286,"## 27 November 2026 | D11 text-gate refusal","Add standalone"]
       ]
     }
   },
@@ -117,7 +117,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 545c9b5 7/7 passed; requery vintage fix CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. f5221d6 7/7 passed; requery preflight CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -137,7 +137,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 STOP vintage; 25,505 Q3 rows diagnosed; exact label fix pending CI/local run. No new intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 vintage fixed; STOP unsafe text; aggregate preflight pending. No new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
