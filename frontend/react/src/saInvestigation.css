@@ -1,0 +1,24 @@
+@import './designTokens.css';
+.za-study{max-width:1320px;margin:auto;padding:clamp(16px,4vw,48px);color:var(--hpi-atlas-ink);min-height:100vh}
+.za-study nav{display:flex;flex-wrap:wrap;gap:16px;align-items:center;border-bottom:1px solid var(--hpi-atlas-rule);padding-bottom:16px;margin-bottom:24px;font-size:14px}
+.za-study nav a{color:var(--hpi-atlas-action);text-decoration:underline}.za-study nav span{font-weight:700}
+.za-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2.5fr);gap:20px;align-items:start}
+.za-panel{min-width:0;background:var(--hpi-atlas-surface);border:1px solid var(--hpi-atlas-rule);border-radius:12px;padding:clamp(14px,2vw,24px)}
+.za-panel h2{font-family:var(--hpi-atlas-display);font-size:22px;margin:0 0 18px}
+.za-panel fieldset{padding:0;margin:0;border:0;min-width:0;display:grid;gap:10px}
+.za-panel label{font-size:14px;font-weight:650;margin-top:6px}
+.za-panel input,.za-panel select{min-width:0;width:100%;min-height:44px;color:var(--hpi-atlas-ink);font:inherit}
+.za-panel button{min-height:44px;margin-top:8px}
+.za-panel :focus-visible,.za-study a:focus-visible{outline:3px solid var(--hpi-atlas-accent);outline-offset:3px}
+.za-muted{font-size:13px;color:var(--hpi-atlas-muted);line-height:1.6}
+.za-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.za-metrics div{padding:12px;border:1px solid var(--hpi-atlas-rule);border-radius:8px;overflow-wrap:anywhere}
+.za-metrics dt{font-size:13px;color:var(--hpi-atlas-muted)}.za-metrics dd{margin:6px 0 0;font-weight:650;font-variant-numeric:tabular-nums}
+.za-table-scroll{overflow-x:auto;max-width:100%;min-width:0}
+.za-table-scroll table{border-collapse:collapse;width:100%;min-width:650px;font-size:13px;font-variant-numeric:tabular-nums}
+.za-table-scroll caption{text-align:left;font-weight:650;padding:8px 0}
+.za-table-scroll th,.za-table-scroll td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--hpi-atlas-rule);white-space:nowrap}
+.za-table-scroll th{background:var(--hpi-atlas-table-head)}
+.za-method{margin-top:20px;line-height:1.6}
+@media(max-width:760px){.za-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:380px){.za-metrics{grid-template-columns:minmax(0,1fr)}}

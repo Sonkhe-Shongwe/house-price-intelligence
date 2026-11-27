@@ -150,6 +150,11 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
         if path == "/context-preview" and context_atlas is not None:
             path = "/"  # existing React entry, explicitly enabled only
 
+        if path == "/za-fictional":
+            if not sa_fixture or react_assets is None:
+                return _response(start_response, 404, {"error": "not_found"})
+            path = "/"  # same compiled entry, only on explicit local opt-in
+
         if react_assets is not None and path in react_assets:
             if method != "GET":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
