@@ -110,6 +110,16 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
                context_transport_fixture: bool = False, sa_fixture: bool = False,
                sa_saved_fixture: bool = False):
+    """Normal launcher: no caller-injected restart storage."""
+    return _create_app(store, today=today, react_assets=react_assets,
+                       synthetic_map=synthetic_map, context_transport_fixture=context_transport_fixture,
+                       sa_fixture=sa_fixture, sa_saved_fixture=sa_saved_fixture)
+
+
+def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
+                react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
+                context_transport_fixture: bool = False, sa_fixture: bool = False,
+                sa_saved_fixture: bool = False, restart_shortlist=None):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -123,8 +133,17 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
         raise ValueError("ZA saved fixture requires explicit ZA fixture opt-in")
     # Never select owner from a browser field/header. This is a single fixed
     # fictional workspace on a disposable single-threaded loopback server.
-    sa_saved = sqlite_store(store.connection, "fictional-alice") if sa_saved_fixture else None
-    sa_shortlist = FictionalShortlist(sa_saved) if sa_saved is not None else None
+    if restart_shortlist is not None:
+        from backend.sa_fixture_restart import RestartShortlist
+        if (not sa_saved_fixture or not isinstance(restart_shortlist, RestartShortlist)
+                or restart_shortlist._store._db is not store.connection
+                or restart_shortlist._store._owner != "fictional-alice"):
+            raise ValueError("Invalid managed fictional restart workspace")
+        sa_shortlist = restart_shortlist
+        sa_saved = restart_shortlist._store
+    else:
+        sa_saved = sqlite_store(store.connection, "fictional-alice") if sa_saved_fixture else None
+        sa_shortlist = FictionalShortlist(sa_saved) if sa_saved is not None else None
     shortlists = SyntheticShortlistService(store)
     if synthetic_map and react_assets is None:
         raise ValueError("Synthetic map requires the React frontend")

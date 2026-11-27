@@ -38,7 +38,7 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
   const locked=disabled||busy||rows===null;
   return <section className="za-panel za-method" aria-labelledby="za-shortlist-heading" aria-busy={busy} data-testid="za-shortlist">
     <h2 id="za-shortlist-heading">Shortlist and compare</h2>
-    <p className="za-muted">Choose two or three distinct saved fictional properties. Membership and notes last only for this local server session. Use invented notes only; do not enter personal or real property information. Evidence is frozen, not recalculated. No valuation or recommendation.</p>
+    <p className="za-muted">Choose two or three distinct saved fictional properties. Membership and notes are temporary; do not rely on recovery after ending the rehearsal. Use invented notes only; do not enter personal or real property information. Evidence is frozen, not recalculated. No valuation or recommendation.</p>
     <label htmlFor="za-shortlist-select">Saved investigation to shortlist</label>
     <select id="za-shortlist-select" className="hpi-field" value={picked?selected:''} disabled={locked} onChange={e=>setSelected(e.target.value)}>
       <option value="">Choose a saved investigation</option>

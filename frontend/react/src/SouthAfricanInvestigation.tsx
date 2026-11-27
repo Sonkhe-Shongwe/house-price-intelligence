@@ -34,7 +34,7 @@ export default function SouthAfricanInvestigation(){
       if(!res.ok||res.headers.get('X-Synthetic-Only')!=='true')throw Error('save unavailable');
       const row=decodeSaved(await res.json());
       if(row.investigation_id!==id||JSON.stringify(row.request.subject_key)!==JSON.stringify(request.subject_key)||row.request.analysis_date!==request.analysis_date||row.request.mode!==request.mode||row.request.asking_price!==request.asking_price)throw Error('save mismatch');
-      setResult(row.evidence);setSavedId(id);setSaved(old=>[row,...old.filter(x=>x.investigation_id!==id)].slice(0,30));setSavedNotice('Saved in this local server session.');
+      setResult(row.evidence);setSavedId(id);setSaved(old=>[row,...old.filter(x=>x.investigation_id!==id)].slice(0,30));setSavedNotice('Saved in this temporary fictional workspace.');
       try{await refresh(controller.signal);}catch{if(!controller.signal.aborted)setSavedNotice('Saved. History refresh unavailable.');}
     }catch{if(!controller.signal.aborted)setSavedNotice('Save not confirmed. Retry uses the same identifier; no duplicate save is requested.');}
     finally{if(flight.current===controller){flight.current=null;if(!controller.signal.aborted)setPending(false);}}
@@ -86,7 +86,7 @@ export default function SouthAfricanInvestigation(){
           <Field id="za-price" inputMode="decimal" label="Fictional asking price (ZAR)" value={price} maxLength={13} hint="Optional. Separate from sale consideration; not a ranking input." onChange={e=>{setPrice(e.target.value);clear();}}/>
           <ActionButton icon="search" variant="primary" type="submit" data-testid="za-submit">Investigate</ActionButton>
         </fieldset></form>
-        <p className="za-muted">{savingEnabled?'Investigate first, then save explicitly. Saved evidence lasts only for this local server session.':'Stateless preview. No investigation or shortlist is saved.'}</p>
+        <p className="za-muted">{savingEnabled?'Investigate first, then save explicitly. Saved evidence is temporary; do not rely on recovery after ending the rehearsal.':'Stateless preview. No investigation or shortlist is saved.'}</p>
         {savingEnabled&&<ActionButton icon="save" disabled={!result||pending||savedId!==null} onClick={save} data-testid="za-save">Save investigation</ActionButton>}
         {savedNotice&&<StatusMessage>{savedNotice}</StatusMessage>}
         {savedId&&<p className="za-muted" data-testid="za-saved-id">Saved ID: {savedId}</p>}

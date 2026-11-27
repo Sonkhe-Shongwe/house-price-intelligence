@@ -1,4 +1,4 @@
-"""Disposable ZA storage rehearsal, with no path-taking API or HTTP activation.
+"""Disposable ZA storage rehearsal, with no path-taking API or normal launcher activation.
 
 Only an internally generated private temporary directory is used. The existing
 in-memory guard and ordinary US file launcher remain unchanged. Single local
@@ -196,3 +196,17 @@ class DisposableRestartRehearsal:
         finally:
             conn.close()
             self._active = False
+
+    @contextmanager
+    def http_app(self):
+        """Managed loopback test app; open and serve on the same thread.
+
+        Never accept owner, file or source from an HTTP request. The temporary
+        file remains owned by the outer rehearsal, not the server instance.
+        """
+        from backend.react_assets import load_react_assets
+        from backend.synthetic_http import _create_app
+        with self.open("fictional-alice") as (_, us, _, shortlist):
+            yield _create_app(us, react_assets=load_react_assets(),
+                              sa_fixture=True, sa_saved_fixture=True,
+                              restart_shortlist=shortlist)
