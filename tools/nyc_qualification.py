@@ -213,44 +213,20 @@ def doc_value(value):
     return isinstance(value, str) and bool(re.fullmatch(r"[A-Za-z0-9]{1,32}", value))
 
 
-def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
-            covered_through, frame_complete=False, source_complete=False,
-            source_versions_stable=False, mode=HISTORICAL):
-    """Aggregate-only proof core; normalised inputs, no I/O or public display.
-
-    subjects must be the first 30 eligible unique candidates in stable BBL
-    order, selected independently before looking at sales. Frame and source
-    completeness flags are evidence prerequisites, not inferred from row count.
-    A future collector must establish them, including all legal rows for each
-    candidate document (not only the matching lot). A DEED match is not
-    independent arm's-length certification.
-    """
+def _screen_sales(subject_keys, sales, masters, legals, *, cutoff, covered_from,
+                  covered_through, mode, snapshot, version):
+    """Shared internal transaction screen. Never serialize the returned rows."""
     require(mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
-    subjects, sales, masters, legals = map(tuple, (subjects, sales, masters, legals))
-    require(frame_complete is True and source_complete is True
-            and source_versions_stable is True, "incomplete_source_evidence")
     require(all(day_value(x) for x in (cutoff, covered_from, covered_through))
             and covered_from <= covered_through <= cutoff, "invalid_coverage")
-    require(len(subjects) == MAX_SUBJECTS and len(sales) <= MAX_SALES
-            and len(masters) + len(legals) + len(subjects) <= MAX_AUX_ROWS,
+    require(len(sales) <= MAX_SALES
+            and len(masters) + len(legals) + len(subject_keys) <= MAX_AUX_ROWS,
             "scope_limit")
-    require(all(isinstance(x, Subject) for x in subjects)
-            and all(isinstance(x, Sale) for x in sales)
+    require(all(isinstance(x, Sale) for x in sales)
             and all(isinstance(x, Master) for x in masters)
             and all(isinstance(x, Legal) for x in legals), "invalid_input_type")
-    snapshot = version = None
-    if mode == CURRENT_SNAPSHOT:
-        snapshot, version = subjects[0].snapshot, subjects[0].version
-        require(day_value(snapshot) and snapshot <= cutoff
-                and isinstance(version, str) and bool(version.strip())
-                and all(x.snapshot == snapshot and x.version == version
-                        and x.area_source == AREA_METHOD for x in subjects),
-                "snapshot_frame_conflict")
-    keys = [x.key for x in subjects]
-    require(all(valid_key(x) for x in keys) and keys == sorted(set(keys)),
-            "subject_frame_identity")
     require(all(valid_key(x.key) for x in sales), "sale_identity")
-    require(len(set(keys) | {x.key for x in sales}) <= MAX_KEYS, "key_limit")
+    require(len(set(subject_keys) | {x.key for x in sales}) <= MAX_KEYS, "key_limit")
     require(all(doc_value(x.doc) for x in (*masters, *legals)), "document_identity")
     # Legals for other boroughs must be kept to identify multi-lot transfers;
     # never discard them before grouping.
@@ -318,6 +294,64 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
         else:
             qualified.append(s)
 
+    return qualified, rejected
+
+
+def _select_comparables(subject, qualified, mode):
+    """Same price-free ranking and distinct other-lot rule as qualification."""
+    area = (lambda s: s.snapshot_area) if mode == CURRENT_SNAPSHOT else (lambda s: s.area)
+    ordered = sorted((s for s in qualified if s.key != subject.key
+                      and 4*abs(area(s)-subject.area) <= subject.area),
+                     key=lambda s: (abs(area(s)-subject.area), -s.day.toordinal(), s.key))
+    distinct = {}
+    for sale in ordered:
+        if sale.key not in distinct:
+            distinct[sale.key] = sale
+        if len(distinct) == 5:
+            break
+    return tuple(distinct.values())
+
+
+def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
+            covered_through, frame_complete=False, source_complete=False,
+            source_versions_stable=False, mode=HISTORICAL):
+    """Aggregate-only proof core; normalised inputs, no I/O or public display.
+
+    subjects must be the first 30 eligible unique candidates in stable BBL
+    order, selected independently before looking at sales. Frame and source
+    completeness flags are evidence prerequisites, not inferred from row count.
+    A future collector must establish them, including all legal rows for each
+    candidate document (not only the matching lot). A DEED match is not
+    independent arm's-length certification.
+    """
+    require(mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
+    subjects, sales, masters, legals = map(tuple, (subjects, sales, masters, legals))
+    require(frame_complete is True and source_complete is True
+            and source_versions_stable is True, "incomplete_source_evidence")
+    require(all(day_value(x) for x in (cutoff, covered_from, covered_through))
+            and covered_from <= covered_through <= cutoff, "invalid_coverage")
+    require(len(subjects) == MAX_SUBJECTS and len(sales) <= MAX_SALES
+            and len(masters) + len(legals) + len(subjects) <= MAX_AUX_ROWS,
+            "scope_limit")
+    require(all(isinstance(x, Subject) for x in subjects)
+            and all(isinstance(x, Sale) for x in sales)
+            and all(isinstance(x, Master) for x in masters)
+            and all(isinstance(x, Legal) for x in legals), "invalid_input_type")
+    snapshot = version = None
+    if mode == CURRENT_SNAPSHOT:
+        snapshot, version = subjects[0].snapshot, subjects[0].version
+        require(day_value(snapshot) and snapshot <= cutoff
+                and isinstance(version, str) and bool(version.strip())
+                and all(x.snapshot == snapshot and x.version == version
+                        and x.area_source == AREA_METHOD for x in subjects),
+                "snapshot_frame_conflict")
+    keys = [x.key for x in subjects]
+    require(all(valid_key(x) for x in keys) and keys == sorted(set(keys)),
+            "subject_frame_identity")
+    qualified, rejected = _screen_sales(keys, sales, masters, legals,
+        cutoff=cutoff, covered_from=covered_from, covered_through=covered_through,
+        mode=mode, snapshot=snapshot, version=version)
+
     statuses = Counter()
     for subject in subjects:
         if not (subject.eligible is True and subject.unique_address is True
@@ -326,17 +360,8 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
                 and bool(subject.version.strip())):
             statuses["unresolved_subject"] += 1
             continue
-        # Use current PLUTO area for both sides in snapshot mode.
-        area = (lambda s: s.snapshot_area) if mode == CURRENT_SNAPSHOT else (lambda s: s.area)
-        ordered = sorted((s for s in qualified if s.key != subject.key
-                          and 4*abs(area(s)-subject.area) <= subject.area),
-                         key=lambda s: (abs(area(s)-subject.area), -s.day.toordinal(), s.key))
-        distinct = set()
-        for s in ordered:
-            distinct.add(s.key)
-            if len(distinct) == 5:
-                break
-        statuses["supported" if len(distinct) >= 3 else "insufficient"] += 1
+        selected = _select_comparables(subject, qualified, mode)
+        statuses["supported" if len(selected) >= 3 else "insufficient"] += 1
     return {
         "subject_count": len(subjects), "sale_count": len(sales),
         "qualified_sales": len(qualified), "sale_exclusions": dict(rejected),
