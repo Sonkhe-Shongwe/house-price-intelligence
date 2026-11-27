@@ -4,7 +4,7 @@
 
 ## Working conclusion
 
-**Historical measured benchmark:** Cook County township 17 (Evanston), Class 203, retains the verified retrospective pilot; not an approved public geography/class. NYC and UK Land Registry remain alternative leads. The South African-first mission was terminated on 27 November 2026; historical evidence retained: [27 November Pinelands feasibility](#27-november-2026--pinelands-candidate-feasibility) now demonstrates a bounded R0 sales/cadastre candidate path, not verified completed-market transactions or legal identity. Do not substitute municipal valuations, asking prices or aggregate indices for individual sale records. See [checkpoint](../CHECKPOINT.md) and [owner decision](../DECISIONS.md#owner-decision-end-south-african-first-mission-27-november-2026) for current geography-flexible P0-C routing. NYC and England/Wales remain challengers, not selected markets.
+**Historical measured benchmark:** Cook County township 17 (Evanston), Class 203, retains the verified retrospective pilot, not an approved public geography/class. NYC and England/Wales are documentary challengers. Do not substitute municipal valuations, asking prices or aggregate indices for individual sale records. See [checkpoint](../CHECKPOINT.md) for current routing.
 
 ## Primary sources
 
@@ -17,9 +17,6 @@
 - HM Land Registry price paid data: https://www.gov.uk/guidance/about-the-price-paid-data
 - England/Wales EPC download service: https://get-energy-performance-data.communities.gov.uk/
 - King County assessments: https://info.kingcounty.gov/assessor/datadownload/
-- SA DeedsWeb: https://www.gov.za/services/services-residents/place-live/subscribe-deedsweb
-- Stats SA Residential Property Price Index: https://www.statssa.gov.za/?PPN=P0160&SCH=74476&page_id=1854
-- Lightstone comparable valuation description: https://www.lightstone.co.za/AVM/content/help/default.aspx
 
 ## Data-grain risks
 
@@ -212,47 +209,35 @@ Use retained official PPD/EPC/UPRN documentation; first establish whether the pu
 
 ## 26 November 2026 | South African-first research direction
 
-**Owner clarification:** "unless its impossible we really need to intergrate (or hell even make it the main course) south african context mabye you can chagne location. but really the project would reach such a pinacle if we will south africanize it". Interpret as explicit priority to pursue a genuinely South African product and investigate local data routes before deciding on an international fallback, not unconditional approval of a final market or a particular source, migration, expenditure or scope change. Preserve the existing Cook County measured historical reference and NYC/England-Wales research. No source rights or protected-storage requirement waived.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#26-november-2026--south-african-first-research-direction). Not active instructions.
 
 ### New local lead: Cape Town
 
-The [City of Cape Town GV2025 property sales search guide](https://www.capetown.gov.za/media/qujmn5mx/propertysalessearchguidegv2025.pdf), pp. 2–3, describes selected valuation attributes available for public inspection and a View Sales function covering nearby sales over three years, with valuation reference, physical address, registered description, erf extent, dwelling extent, sale date and sale price. This materially changes the prior conclusion that only a fee-based registry route is known. It is a documented municipal display, **not** verified bulk data, a machine-readable API, a licence to copy or reuse, a proven closed-sale source, a current completeness guarantee, or evidence that all rows have reliable dwelling area. The guide serves valuation/objection use; a displayed zero consideration, missing attributes, repeat records and selection/screening rules need scrutiny. Do not collect examples or reproduce property records from the guide. PDF text was accessible; page screenshot retrieval failed. This is sufficient to identify a lead, not validate the live interface.
-
-Other source leads reviewed as public documentation/search excerpts only:
-- [Chief Surveyor-General data](https://csg.dlrrd.gov.za/data.htm) describes national parcel/administrative geometry and provincial download routes. [CSG disclaimer](https://csg.dlrrd.gov.za/disclaimer.htm) warns of omissions/errors. No geometric join, licence, current download fee or building identity verified; full data-page fetch timed out.
-- [Official DeedsWeb](https://www.gov.za/services/services-residents/place-live/subscribe-deedsweb) and [registry information](https://www.gov.za/services/services-residents/place-live/get-deeds-registry-information) describe purchase price/transfer information with prescribed fees. Fee-based conventional route is not a verified R0 bulk solution. DeedsWeb full fetch timed out; official search extracts support this limited conclusion.
-- [Cape Town open data portal](https://www.capetown.gov.za/city-connect/all-city-online-services/open-data-portal/) and [Valuer-General municipal roll directory](https://ovg.org.za/municipal-valuation-rolls/) are discovery leads. Municipal assessed values are not recorded completed-sale prices. No claim that any specific roll is machine-readable or licensed for this product.
-- [DataFirst RPPI catalogue](https://www.datafirst.uct.ac.za/Dataportal/index.php/catalog/951) and [Citymark](https://housingfinanceafrica.org/library/citymark-south-africa-overview-of-housing-stock-and-transactions-by-metro-2012-2021/) offer research/aggregate context; no property-level microdata right or access demonstrated. DataFirst full page unavailable; catalogue search excerpt only. Stats SA indices cannot substitute for individual transactions.
-- [Lightstone property reports](https://www.lightstone.co.za/AVM/content/help/default.aspx), [WinDeed transfers](https://www.windeed.co.za/transfers/) and [AfriGIS property analysis](https://developers.afrigis.co.za/portfolio/property-analysis/) establish documented commercial/controlled data alternatives, not free bulk reuse. [ErfCheck](https://erfcheck.co.za/) is a local competitor lead; its claimed public-record aggregation is not source permission or proof of a reusable API. No subscription, trial, contact or acquisition.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#new-local-lead-cape-town). Not active instructions.
 
 ### Next bounded P0-C task (supersedes immediately closing C)
 
-Investigate the official Cape Town municipal route first and compare credible documented routes in Johannesburg/Tshwane, eThekwini, Mbombela and other municipalities only where source leads justify it. Choose one local pilot locality/class **provisionally** on data feasibility, not personal preference or population alone. Map transaction date vs registration date, recorded price in exact ZAR cents, transaction/erf/portion/township/sectional title identity, cadastral links, dwelling vs land square metres, municipal assessment date, locality, source publication/lag and eligibility. Determine whether the essential single-property/transaction grain, historical characteristics, reliable entry and earlier comparable support can be obtained lawfully at R0, including an expressly permitted alternative to automated access if necessary. Distinguish public inspection from acquisition, permitted processing and redistribution. P0-D owns POPIA/source-specific rights and P0-E R0/protection; do not query live property rows, scrape interfaces, bypass access restrictions, copy samples, contact providers, create accounts or pay fees. If no documented legitimate route emerges, record the precise blockers and a proposed smallest approved next experiment/permission route; no claim of impossibility solely from one inaccessible website or fee-based source. Reuse local competitor evidence and buyer context in P0-F, without reopening unrelated workstreams or expanding flagship features unilaterally.
-
-Local design implications to assess, not implement: ZAR, square metres, South African suburb/municipality/province and cadastral identifiers, freehold/sectional-title distinctions, registered sale vs asking vs municipal valuation, transaction dates, ownership/transfer and buyer context. Transfer costs, rates, levies, bond/affordability and other local features may be evaluated against JT1-JT6 and M1-M8; no automatic new must-haves, legal or financial advice, or valuation model. Keep Investigate / Compare / Decide and the two-to-three-property shortlist. Avoid merely reskinning fictional or overseas data as South African. If lawful useful local data cannot be established, retain honest international fallback and propose explicitly labelled local contextual functionality only if justified and separately accepted.
-
-**Research order:** South Africa is the preferred target to qualify; Cape Town is first documented local lead; Cook County remains the empirical benchmark, NYC the priority international challenger, England/Wales the secondary international lead. No final market chosen, no empirical local coverage measured, no new acquisition or phase credit. All prior technical results remain valid for their tested scope; P0 94%, weighted MVP 87.1%, R0. After bounded SA research, complete P0-C conditional boundary and feasibility review; then P0-D.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#next-bounded-p0-c-task-supersedes-immediately-closing-c). Not active instructions.
 
 ## 26 November | HPI-SA mission overlay
 
-Owner requested comprehensive dedicated South African mission and return to P0-C if it fails. [Mission directive](../engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md) governs SA0-SA9. Ordinary P0-C paused at supported-boundary review, prior evidence preserved. SA0 documented official Cape Town independent research request and open-data suggestion routes, no approval/availability/cost guarantee or contact. SA1 national ecosystem and customer research next, SA2 source-family assessment and SA3 permissions follow. No property acquisition, architecture migration or final market change. All previous empirical results, R0 and rights/protection gates retained.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#26-november--hpi-sa-mission-overlay). Not active instructions.
 
 ## HPI-SA SA2.1 national assessment (26 November 2026)
 
-See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): published conventional Deeds fees conflict with R0, eDRS digital access not bulk rights, CSG/SG21 potentially supports identity, Stats SA context only. Municipal valuation sales-file schema materially strengthens local research route. No empirical data or rights. SA2.2 municipal assessment next; original P0-C remains paused.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#hpi-sa-sa21-national-assessment-26-november-2026). Not active instructions.
 
 ## HPI-SA SA2.2 municipal assessment (26 November 2026)
 
-See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): national professional Template D and multiple procurement specs substantiate possible sales-file route, not actual data. Cape Town first proposed permission route, Ekurhuleni second (restrictive terms), Joburg research precedent third. All named municipalities assessed; minimised request proposal unsent. No property-level rights/coverage, final city or R0 acquisition. SA2.3 alternative acquisition research next; original P0-C paused.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#hpi-sa-sa22-municipal-assessment-26-november-2026). Not active instructions.
 
 ## HPI-SA SA2.3 alternative source assessment (26 November 2026)
 
-See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): academic RPPI index vs raw deeds distinguished; CAHF historic municipal file use, Stats SA purchased input and registration lag, paid commercial and conditional contextual/manual routes. No lawful R0 sale-level source or local empirical evidence. SA2.4 synthesis next; original P0-C paused.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#hpi-sa-sa23-alternative-source-assessment-26-november-2026). Not active instructions.
 
 ## HPI-SA SA2.4 acquisition synthesis (26 November 2026)
 
-[South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md): source families compared without numerical scoring or new access. Cape Town proposed permission route, Ekurhuleni/Joburg fallback; no qualified R0 sale-level source, local cohort or final geography. SA2 complete as desk research, GO SA3 desk qualification, real acquisition/release BLOCKED. Ordinary P0-C paused; all original gates retained.
-
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#hpi-sa-sa24-acquisition-synthesis-26-november-2026). Not active instructions.
 
 ## 26 November 2026 | P0-C supported-property boundary and conditional feasibility review
 
@@ -274,7 +259,7 @@ See [South African acquisition record](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26
 - Original 2022–24 audit: 3,539 sales, 2,583 screened, 1,285 prior-year joins, 273 eligible Class 203, 262 selected parcel-year keys; later distinct qualification: 2,107 sale rows, 26,296 building rows, 1,511 screened diagnostic and corrected 142 eligible (83/59), 137 keys. Exact-integer year correction recovered 59 later subjects; final all-class corrected join count not retained, do not invent it. 142/2,107 and 273/3,539 not buyer coverage. 2024 evaluation 83 subjects uses original lookback, not necessarily full lookback in later extract. [FR fixed holdout](../engineering/FULL_RELEASE_QUALIFICATION_V1.md), [private rehearsal](../engineering/PRIVATE_REAL_REHEARSAL_V1.md).
 - Later all-subject paired retrospective MAE 152,615.81 USD vs 183,415.81 township (16.8% lower), MdAPE 22.53% vs 24.45%; narrower 1 km not better on paired 57. This is a method diagnostic only; no valuation adopted or accuracy claim. Do not tune thresholds on these outcomes.
 - **P0.3:** bounded candidate research complete as evidence, not market selection. **P0.4:** partial historical entry/joins and exact replay only; independently defined current unsold frame, freshness, historical availability and physical identity unresolved. **P0.5:** four licenceId values unspecified, operation-specific rights and protection unresolved. **P0.6/7:** no final class/market approval or real buyer release; GO for existing fictional engineering and desk analysis only; technical historical research feasibility conditional, real intake/activation/display NO-GO until noncompensatory gates. No automatic phase acceptance.
-- South Africa preferred target remains pending actual permission, source dictionary, complete events and dated area/entry; [IR3 and IR1](../engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md) and [application packet](SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md). NYC priority international challenger, England/Wales secondary documentation leads; no empirical qualification and no migration case. Other leads parked. No automatic fallback choice based on sunk cost.
+- NYC remains the priority documentary challenger and England/Wales secondary; no empirical qualification or migration case. No automatic fallback based on sunk cost.
 
 ### P0-D handoff (next bounded task)
 
@@ -282,4 +267,4 @@ P0-C desk consolidation **complete conditionally**, not P0.4/5 acceptance. Next 
 
 ## 27 November 2026 | Pinelands candidate feasibility
 
-[Actual local evidence](../engineering/DATA_MANAGER_V1.md#hpi-data-011-actual-identity-feasibility-milestone-27-november-2026): 3,442 cadastral features, 839 reported sales, 420 screened erf-style sale rows; 409 unique candidates (97.38%), one ambiguous, ten unmatched; zero direct key matches or independently verified identities. Candidate count is sale rows, not distinct properties or validated comparables. Existing evidence supports further identity corroboration, not market/class selection, earlier-only comparable evaluation, as-of semantics, arm's-length qualification or application integration. Documentary review first; any new private corroboration beyond approved matching needs exact scope. No need to repeat acquisition or wait exclusively for the formal enquiry. P0.4 and P0.6 partial, P0.5 and P0.7 blocked; R0, scores unchanged.
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/research/DATA_FEASIBILITY.md#27-november-2026--pinelands-candidate-feasibility). Not active instructions.

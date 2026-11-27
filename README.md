@@ -4,9 +4,9 @@ A buyer-facing historical comparable-sales investigation and shortlist workspace
 
 **Development preview:** Integrated fictional buyer workspace (original PRs #5 and #6), with React/TypeScript, SQLite and split-role PostgreSQL qualification. This is not a public real-property service or a valuation model. See [current checkpoint](docs/CHECKPOINT.md) for actual evidence and unresolved protected-storage/rights gates and [roadmap](docs/P_PHASE_ROADMAP.md) for the approved planning estimate and acceptance criteria. No public property display, valuation or deployment approved.
 
-## Historical South African data foundation
+## Data and market qualification
 
-The South African-first mission ended on 27 November 2026; market selection is geography-flexible and data-first. Cook County is a measured historical reference, not an approved market. Private local contextual repertoire and its limitations are maintained in the [current checkpoint](docs/CHECKPOINT.md), [acquisition register](docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md) and [Data Manager](docs/engineering/DATA_MANAGER_V1.md). It is not a national property database or validated valuation. Open source terms and restricted-data safeguards apply; keep the private workspace separate from the public Git checkout.
+Market selection is data-first and geography-flexible. No final first market or real-data release is approved. Keep all private source data outside Git; see [current checkpoint](docs/CHECKPOINT.md), [source register](docs/research/SOURCE_REGISTER.md) and [Data Manager](docs/engineering/DATA_MANAGER_V1.md) for source rights, storage and lifecycle controls.
 
 ## Historical research evidence, not product claims
 
