@@ -27,6 +27,26 @@ class PostgresCandidateTests(unittest.TestCase):
         migrate(self.conn)
         seed(self.conn)
         return PostgresFixtureStore(self.conn)
+    def test_sa_additive_extension_and_reconnect(self):
+        from backend.sa_fixture_persistence import postgres_store, PersistenceError
+        from backend.tests.test_sa_fixture_persistence import request
+        us=self.setup_seed()
+        original=us.create(example_request(),investigation_id=I1,recorded_at=NOW)
+        a=postgres_store(self.conn,"fictional-alice")
+        saved=a.save(request(),today=date(2026,1,1))
+        self.assertEqual(saved["evidence"]["selected_count"],5)
+        self.assertEqual(saved["evidence"]["subject"]["asking_price"]["minor_units"],250000001)
+        b=postgres_store(self.conn,"fictional-bob")
+        self.assertEqual(b.history()["investigations"],[])
+        with self.assertRaises(PersistenceError):b.reopen(saved["investigation_id"])
+        self.conn.close()
+        self.conn=psycopg.connect(DSN,autocommit=True)
+        self.assertEqual(postgres_store(self.conn,"fictional-alice").reopen(saved["investigation_id"]),saved)
+        self.assertEqual(PostgresFixtureStore(self.conn).reopen(I1),original)
+        self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0],3)
+        self.conn.execute("UPDATE sa_fixture_investigations SET frozen_sha256=%s",("0"*64,))
+        with self.assertRaises(PersistenceError):postgres_store(self.conn,"fictional-alice").reopen(saved["investigation_id"])
+
     def test_upgrade_and_history_checksum_refusal(self):
         migrate(self.conn,1)
         self.conn.execute("SET search_path TO hpi_candidate, pg_catalog")
