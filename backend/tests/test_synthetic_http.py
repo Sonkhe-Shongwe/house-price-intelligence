@@ -10,7 +10,9 @@ from wsgiref.simple_server import make_server
 from wsgiref.util import setup_testing_defaults
 
 from backend.synthetic_demo import SUBJECT_PIN, example_request, in_memory_demo
-from backend.synthetic_http import MAX_BODY_BYTES, create_app
+from backend.synthetic_http import MAX_BODY_BYTES, SA_INVESTIGATION_PATH, create_app
+from backend import sa_investigation_v2 as sa
+from unittest.mock import patch
 
 TODAY = date(2026, 11, 22)
 
@@ -47,6 +49,107 @@ class SyntheticHttpTests(unittest.TestCase):
         observed["body"] = json.loads(data)
         observed["raw"] = data
         return observed
+
+    def sa_request(self):
+        return {"contract_version": sa.VERSION, "market": "ZA", "currency": "ZAR",
+                "area_unit": "m2", "subject_key": sa.wire_key("fictional-erf-000001"),
+                "analysis_date": "2025-07-01", "mode": "as_of", "asking_price": "2500000.01"}
+
+    def enable_sa(self):
+        self.db.close()
+        self.db, store = in_memory_demo()
+        self.app = create_app(store, today=TODAY, sa_fixture=True)
+
+    def test_sa_default_disabled_and_opt_in_no_writes(self):
+        self.assertEqual(self.invoke("POST", SA_INVESTIGATION_PATH, payload=self.sa_request())["status"], 404)
+        self.enable_sa()
+        before = self.db.total_changes
+        q = self.invoke("POST", SA_INVESTIGATION_PATH, payload=self.sa_request(),
+                        origin="http://127.0.0.1:8765")
+        self.assertEqual(q["status"], 200)
+        self.assertEqual(q["body"], sa.investigate(self.sa_request(), today=TODAY))
+        self.assertEqual(q["body"]["selected_count"], 5)
+        self.assertEqual(q["body"]["subject"]["asking_price"]["minor_units"], 250000001)
+        self.assertFalse(q["body"]["real_data_approved"])
+        self.assertIsNone(q["body"]["valuation"])
+        self.assertNotIn("Location", q["headers"])
+        self.assertEqual(q["headers"]["Cache-Control"], "no-store")
+        self.assertEqual(q["headers"]["X-Synthetic-Only"], "true")
+        self.assertNotIn("Access-Control-Allow-Origin", q["headers"])
+        self.assertEqual(self.invoke("POST", SA_INVESTIGATION_PATH, payload=self.sa_request())["body"], q["body"])
+        self.assertEqual(self.db.total_changes, before)
+        self.assertEqual(self.invoke(path="/v1/investigations/history")["body"]["investigations"], [])
+        us = self.invoke("POST", "/v1/investigations", payload=example_request())
+        self.assertEqual(us["status"], 201)
+        self.assertEqual(us["body"]["selected_count"], 3)
+        self.assertEqual(self.invoke(path=us["headers"]["Location"])["body"], us["body"])
+        self.assertEqual(len(self.invoke(path="/v1/investigations/history")["body"]["investigations"]), 1)
+
+    def test_sa_abstention_and_strict_contract_errors(self):
+        self.enable_sa()
+        req = self.sa_request()
+        before = self.db.total_changes
+        q = self.invoke("POST", SA_INVESTIGATION_PATH,
+                        payload=req | {"subject_key": sa.wire_key("fictional-erf-000010")})
+        self.assertEqual(q["status"], 200)
+        self.assertEqual(q["body"]["status"], "insufficient_data")
+        self.assertEqual(q["body"]["comparables"], [])
+        for update in ({"currency": "USD"}, {"market": "US"}, {"area_unit": "sqft"},
+                       {"data_build": "real"}, {"asking_price": 1.01}, {"coordinates": [0,0]},
+                       {"subject_key": {"namespace":"sg26","value":"actual"}},
+                       {"mode":"production"}, {"real_data_approved": True}):
+            with self.subTest(update=update):
+                q = self.invoke("POST", SA_INVESTIGATION_PATH, payload=req | update)
+                self.assertEqual(q["status"], 422)
+                self.assertEqual(q["body"], {"error": "invalid_sa_fixture_request"})
+        with patch.object(sa, "investigate", side_effect=RuntimeError("private-path")):
+            q = self.invoke("POST", SA_INVESTIGATION_PATH, payload=req)
+        self.assertEqual(q["status"], 500)
+        self.assertEqual(q["body"], {"error": "internal_error"})
+        self.assertEqual(self.db.total_changes, before)
+
+    def test_sa_reuses_http_boundary(self):
+        self.enable_sa()
+        req = self.sa_request()
+        for args in ({"remote":"10.0.0.1"}, {"host":"evil.invalid"},
+                     {"origin":"https://evil.invalid"}, {"extra":{"HTTP_X_FORWARDED_FOR":"127.0.0.1"}},
+                     {"extra":{"HTTP_SEC_FETCH_SITE":"cross-site"}}):
+            self.assertEqual(self.invoke("POST",SA_INVESTIGATION_PATH,payload=req,**args)["status"],403)
+        for args, status in (
+                ({"query":"build=real"},400), ({"content_type":"text/plain"},415),
+                ({"extra":{"CONTENT_LENGTH":""}},411), ({"declared_length":MAX_BODY_BYTES+1},413),
+                ({"declared_length":1000},400), ({"extra":{"HTTP_TRANSFER_ENCODING":"chunked"}},400)):
+            with self.subTest(args=args):
+                self.assertEqual(self.invoke("POST",SA_INVESTIGATION_PATH,payload=req,**args)["status"],status)
+        for raw in (b'{"market":"ZA","market":"US"}', b'{', b'{"x":NaN}', b'{"x":"\\ud800"}', b'\xff'):
+            self.assertEqual(self.invoke("POST",SA_INVESTIGATION_PATH,raw=raw)["status"],400)
+        self.assertEqual(self.invoke(path=SA_INVESTIGATION_PATH)["headers"]["Allow"],"POST")
+        self.assertEqual(self.invoke("OPTIONS",SA_INVESTIGATION_PATH)["status"],405)
+        self.assertEqual(self.invoke(path=SA_INVESTIGATION_PATH+"/saved")["status"],404)
+
+    def test_sa_real_loopback_http(self):
+        self.enable_sa()
+        server = make_server("127.0.0.1", 0, self.app)
+        server.timeout = 5
+        results = []
+        def client():
+            try:
+                conn = http.client.HTTPConnection("127.0.0.1",server.server_port,timeout=5)
+                conn.request("POST",SA_INVESTIGATION_PATH,body=json.dumps(self.sa_request()),
+                             headers={"Content-Type":"application/json"})
+                res = conn.getresponse()
+                results.append((res.status,json.loads(res.read())))
+                conn.close()
+            except Exception as exc:
+                results.append(exc)
+        try:
+            thread = threading.Thread(target=client,daemon=True)
+            thread.start()
+            server.handle_request()
+            thread.join(timeout=5)
+            self.assertEqual(results,[(200,sa.investigate(self.sa_request(),today=TODAY))])
+        finally:
+            server.server_close()
 
     def test_history_is_bounded_read_only_and_preserves_weak_evidence(self):
         path="/v1/investigations/history"

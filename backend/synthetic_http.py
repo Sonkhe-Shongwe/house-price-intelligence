@@ -14,6 +14,7 @@ import sqlite3
 from typing import Any
 
 from backend.investigation_contract import ContractError
+from backend import sa_investigation_v2
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
 from backend.synthetic_map import map_evidence
@@ -23,6 +24,7 @@ from backend.context_archive_http import CONTEXT_PATH, transport_fixture, atlas_
 from backend.context_archive_fixture import ATLAS_FIXTURE_PATH
 
 MAX_BODY_BYTES = 16 * 1024
+SA_INVESTIGATION_PATH = "/v2/fictional/za/investigate"
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
 # The entire UI is a disposable, synthetic-only development preview.
 FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
@@ -101,7 +103,7 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
 
 def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
-               context_transport_fixture: bool = False):
+               context_transport_fixture: bool = False, sa_fixture: bool = False):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -109,6 +111,8 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
     """
     if not isinstance(store, SyntheticInvestigationStore):
         raise TypeError("Only the fixture-backed investigation store may be served")
+    if type(sa_fixture) is not bool:
+        raise ValueError("SA fixture opt-in must be boolean")
     shortlists = SyntheticShortlistService(store)
     if synthetic_map and react_assets is None:
         raise ValueError("Synthetic map requires the React frontend")
@@ -202,7 +206,8 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
 
         shortlist_write = (path == "/v1/shortlists" or members_match is not None
                            or entry_match is not None)
-        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write:
+        sa_request = path == SA_INVESTIGATION_PATH and sa_fixture
+        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request:
             if not shortlist_write and method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
@@ -230,6 +235,14 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if sa_request:
+                try:
+                    return _response(start_response, 200, sa_investigation_v2.investigate(payload, today=today))
+                except sa_investigation_v2.ContractError:
+                    # Fixed error: never reflect a request or internal fixture detail.
+                    return _response(start_response, 422, {"error": "invalid_sa_fixture_request"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
             if shortlist_write:
                 try:
                     if path == "/v1/shortlists":
