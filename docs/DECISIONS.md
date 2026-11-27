@@ -204,3 +204,7 @@ Owner explicitly approves HPI-DATA-011 private offline registration, data cleani
 ## HPI-DATA-010/011 strict corroboration authority (27 November 2026)
 
 Owner explicitly approves the [bounded strict-region, erf and address corroboration proposal](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d01d02-documentary-cadastral-corroboration): existing pinned registered 010/011 only, private offline Windows, aggregate results, R0, unchanged retention deadlines, no persistent joins, new acquisition, publication or application activation. Implementation, synthetic tests and checkpoint updates delegated. Both integrity audits and exact implementation CI required before owner execution; no identity promotion, model, retention extension or phase credit.
+
+## HPI-DATA-010/011 address mismatch diagnosis authority (27 November 2026)
+
+Owner explicitly approves the [bounded private offline mismatch diagnosis](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-strict-corroboration-milestone-27-november-2026) for existing pinned 010/011, 138 mismatches and five unsupported formats; preserve existing baseline, aggregate output only, R0, unchanged retention deadlines, no new acquisition, persistent joins, identity promotion or application activation. Implementation/testing/checkpoint delegated. Same Windows workspace, both audits, exact implementation CI first; no aliases, new matches, private record output, retention extension, valuation or phase credit.

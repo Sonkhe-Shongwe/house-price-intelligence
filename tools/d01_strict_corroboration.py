@@ -23,6 +23,53 @@ ADDRESS_STATES = ("agree", "mismatch", "missing", "ambiguous", "unsupported")
 FIELDS = ("ADR_NO", "ADR_NO_SFX", "STR_NAME", "LU_STR_NAME_TYPE", "OFC_SBRB_NAME")
 
 
+MISMATCH_REASONS = ("house_number_only", "street_name_tokens_only", "street_type_token_only",
+                    "multiple_components", "unknown_component_boundary")
+UNSUPPORTED_REASONS = ("sale_structure_only", "parcel_structure_only", "both_structures", "unknown")
+DIAGNOSTIC_BASELINE = {
+    "screened_sale_rows": 420, "parcel_features": 3442,
+    "legacy": {"unique": 409, "ambiguous": 1, "unmatched": 10},
+    "strict": {"unique": 409, "ambiguous": 1, "unmatched": 10},
+    "legacy_to_strict": {k: {j: n if k == j else 0 for j in STATES}
+                         for k, n in zip(STATES, (409, 1, 10))},
+    "parcel_region_quality": {"malformed": 87, "wrong_region": 8,
+                              "nonzero_portion_or_suffix": 13, "eligible": 3334},
+    "legacy_method_conflicts": 0, "strict_exact_reference_conflicts": 0,
+    "strict_unique_spatial_candidates": 409, "address_schema": "available",
+    "address_assessed_denominator": 409,
+    "address_outcomes": {"agree": 266, "mismatch": 138, "missing": 0, "ambiguous": 0, "unsupported": 5},
+    "region_and_address_corroborated": 266, "region_and_address_spatial_candidates": 266,
+}
+
+
+def mismatch_reason(left, right, parcel_type):
+    """Lexical component diagnosis only, never a new identity or alias rule."""
+    if not left or not right or not parcel_type or len(parcel_type.split()) != 1:
+        return "unknown_component_boundary"
+    l, r = left.split(), right.split()
+    if (len(l) < 4 or len(r) < 4 or l[-1] != r[-1] or
+            l[-1] != "pinelands" or r[-2] != parcel_type):
+        return "unknown_component_boundary"
+    # Sales address is unstructured: last pre-suburb token is a type
+    # hypothesis, not an independently verified street type.
+    differences = (l[0] != r[0], l[1:-2] != r[1:-2], l[-2] != r[-2])
+    if sum(differences) > 1:
+        return "multiple_components"
+    if sum(differences) == 1:
+        return MISMATCH_REASONS[differences.index(True)]
+    return "unknown_component_boundary"
+
+
+def unsupported_reason(left, right):
+    if left == right == "unsupported":
+        return "both_structures"
+    if left == "unsupported" and right == "comparable":
+        return "sale_structure_only"
+    if right == "unsupported" and left == "comparable":
+        return "parcel_structure_only"
+    return "unknown"
+
+
 def parse(raw):
     return json.loads(raw.decode("utf-8-sig"), object_pairs_hook=unique,
                       parse_constant=reject_constant)
@@ -76,7 +123,7 @@ def parcel_address(p, schema, fields):
     return simple_address(f"{number} {street} {kind} {suburb}")
 
 
-def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
+def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False):
     cohort = [row for row in rows if row["quality_flags"]["screened_candidate"]]
     baseline = sales.match(rows, parcel)["screened_cohort"]
     if expected is not None and tuple(baseline[k] for k in
@@ -94,6 +141,7 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
     old_erf, strict_erf = defaultdict(set), defaultdict(set)
     exact = {k: defaultdict(set) for k in sales.KEYS}
     flags, raw_address, address_index = {}, {}, defaultdict(set)
+    parcel_types = {}
     region = Counter(dict.fromkeys(("malformed", "wrong_region", "nonzero_portion_or_suffix", "eligible"), 0))
     for feature, raw_feature in zip(parcel["features"], raw_features):
         p, rp = feature["properties"], raw_feature["properties"]
@@ -117,6 +165,8 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
             strict_erf[int(sg.group(1))].add(oid)
         state, key = parcel_address(rp, schema, fields)
         raw_address[oid] = state, key
+        if diagnose and state == "comparable":
+            parcel_types[oid] = norm(rp[fields["LU_STR_NAME_TYPE"]])
         if key is not None:
             address_index[key].add(oid)
 
@@ -141,6 +191,8 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
     transitions = {k: dict.fromkeys(STATES, 0) for k in STATES}
     strict = Counter(dict.fromkeys(STATES, 0))
     addr = Counter(dict.fromkeys(ADDRESS_STATES, 0))
+    mismatch_counts = Counter(dict.fromkeys(MISMATCH_REASONS, 0))
+    unsupported_counts = Counter(dict.fromkeys(UNSUPPORTED_REASONS, 0))
     spatial = agreed_spatial = exact_conflicts = legacy_conflicts = 0
     for row in cohort:
         e = sales.ERF.fullmatch(row["registered_description"].strip())
@@ -176,12 +228,16 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
         else:
             outcome = "agree"
         addr[outcome] += 1
+        if diagnose and outcome == "mismatch":
+            mismatch_counts[mismatch_reason(lk, rk, parcel_types.get(oid))] += 1
+        elif diagnose and outcome == "unsupported":
+            unsupported_counts[unsupported_reason(left, right)] += 1
         agreed_spatial += outcome == "agree" and is_spatial
     if any(sum(transitions[k].values()) != baseline["candidate_" + k] for k in STATES):
         raise ValueError("LEGACY_ACCOUNTING")
     if sum(strict.values()) != len(cohort) or sum(addr.values()) != strict["unique"]:
         raise ValueError("COHORT_ACCOUNTING")
-    return {"status": "CANDIDATE_CORROBORATION_ONLY", "screened_sale_rows": len(cohort),
+    result = {"status": "CANDIDATE_CORROBORATION_ONLY", "screened_sale_rows": len(cohort),
             "parcel_features": len(flags), "legacy": {k: baseline["candidate_" + k] for k in STATES},
             "legacy_to_strict": transitions, "strict_region": REGION,
             "parcel_region_quality": dict(region), "strict": dict(strict),
@@ -194,8 +250,25 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE):
             "network_requests": 0, "files_modified": False,
             "limitation": "Current snapshot candidates only; no legal identity, temporal continuity, sale eligibility or buyer-use qualification."}
 
+    if diagnose:
+        if any(result[k] != v for k, v in DIAGNOSTIC_BASELINE.items()):
+            raise ValueError("ADDRESS_DIAGNOSTIC_BASELINE_MISMATCH")
+        if (sum(mismatch_counts.values()) != addr["mismatch"] or
+                sum(unsupported_counts.values()) != addr["unsupported"]):
+            raise ValueError("ADDRESS_DIAGNOSTIC_ACCOUNTING")
+        result["mismatch_diagnosis"] = {
+            "status": "AGGREGATE_LEXICAL_DIAGNOSIS_ONLY",
+            "mismatch_denominator": addr["mismatch"],
+            "mismatch_reasons": dict(mismatch_counts),
+            "unsupported_denominator": addr["unsupported"],
+            "unsupported_reasons": dict(unsupported_counts),
+            "baseline_reproduced": True,
+            "new_matches": 0,
+            "limitations": "Lexical differences, not causes; sales terminal token is a type hypothesis. No aliases, fuzzy matching, historical address inference or identity promotion."}
+    return result
 
-def run(root, today=None, expected=BASELINE):
+
+def run(root, today=None, expected=BASELINE, diagnose=False):
     root = dm.workspace(root)
     today = today or date.today()
     if not sf.INTAKE <= today < sf.REVIEW:
@@ -219,7 +292,7 @@ def run(root, today=None, expected=BASELINE):
     reader = csv.reader(io.StringIO(s_raw.decode("utf-8-sig"), newline=""), strict=True)
     if tuple(next(reader)) != sf.HEADERS:
         raise ValueError("HEADER_MISMATCH")
-    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected)
+    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose)
     result["registered_audits"] = {"HPI-DATA-010": "passed", "HPI-DATA-011": "passed"}
     return result
 
@@ -227,12 +300,13 @@ def run(root, today=None, expected=BASELINE):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--diagnose-mismatches", action="store_true", help="Approved bounded aggregate lexical diagnosis only")
     args = parser.parse_args()
     if os.name != "nt" or os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
         print("STOP: owner-local Windows only.")
         return 1
     try:
-        print(json.dumps(run(args.root), indent=2))
+        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches), indent=2))
         return 0
     except Exception:
         print("STOP: local audit, retention, snapshot, projection or cohort precondition failed; no private values emitted.")
