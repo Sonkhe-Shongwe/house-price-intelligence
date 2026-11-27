@@ -171,6 +171,18 @@ class CollectorTests(unittest.TestCase):
                 with self.assertRaisesRegex(QualificationError, reason):
                     self.run_collect()
 
+    def test_reviewed_source_pin_precedes_record_requests(self):
+        plan = replace(self.plan, mode=CURRENT_SNAPSHOT, historical_area_verified=False)
+        pins = Collector(self.src.transport).metadata_summary()
+        self.assertEqual(set(pins), set(FIELDS))
+        self.assertNotIn("INVENTED SUBJECT", str(pins))
+        pins["64uk-42ks"]["revision"] = "2:2"
+        self.src.calls.clear()
+        with self.assertRaisesRegex(QualificationError, "reviewed_source_changed"):
+            Collector(self.src.transport)._run(plan, reviewed_sources=pins)
+        self.assertEqual(len(self.src.calls), 4)
+        self.assertTrue(all("/api/views/" in p for p in self.src.calls))
+
     def test_one_attempt(self):
         c = Collector(self.src.transport)
         c.run_fixture(self.plan)

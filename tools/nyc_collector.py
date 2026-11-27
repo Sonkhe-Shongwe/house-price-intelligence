@@ -1,9 +1,8 @@
 """P0 NYC bounded acquisition: executable against an injected response transport.
 
-No live entrypoint, credentials, file persistence, or runtime switch. The HTTP
-adapter is not activated here. Actual source notices, schema/version, temporal
-semantics, protected processing and hard external watchdog must pass before
-one authorised live attempt; tests use invented responses only.
+No application runtime switch, credentials or record persistence. The local
+launcher owns the operational protection and one-attempt boundary; ordinary
+tests use invented responses only.
 """
 from collections import Counter
 from contextlib import contextmanager
@@ -222,7 +221,17 @@ class Collector:
         except Exception:
             raise QualificationError("normalisation_failure") from None
 
-    def _run(self, plan):
+    def metadata_summary(self):
+        """Return only exact projected field types/revisions, never cached examples."""
+        result = {}
+        for dataset in FIELDS:
+            metadata, types = self._metadata(dataset)
+            result[dataset] = {"revision": metadata["revision"],
+                               "types": {name: types[name] for name in projection(
+                                   dataset, subject=dataset == "64uk-42ks")}}
+        return result
+
+    def _run(self, plan, reviewed_sources=None):
         require(all(type(x) is date for x in (plan.cutoff, plan.covered_from,
                     plan.covered_through, plan.snapshot))
                 and plan.snapshot <= plan.cutoff and isinstance(plan.version, str)
@@ -231,6 +240,15 @@ class Collector:
         require(plan.mode != CURRENT_SNAPSHOT or plan.historical_area_verified is False,
                 "mixed_temporal_evidence")
         before = {d: self._metadata(d) for d in FIELDS}
+        if reviewed_sources is not None:
+            require(plan.mode == CURRENT_SNAPSHOT and plan.historical_area_verified is False
+                    and isinstance(reviewed_sources, dict)
+                    and set(reviewed_sources) == set(FIELDS), "invalid_reviewed_sources")
+            for d, (metadata, types) in before.items():
+                expected = {"revision": metadata["revision"],
+                            "types": {name: types[name] for name in projection(
+                                d, subject=d == "64uk-42ks")}}
+                require(reviewed_sources[d] == expected, "reviewed_source_changed")
         # Published PLUTO ZIP and BBL are Number; rolling borough is Text.
         require(before["64uk-42ks"][1].get("zipcode") == "number"
                 and before["64uk-42ks"][1].get("bbl") == "number"
@@ -366,7 +384,7 @@ class Collector:
                          covered_from=plan.covered_from, covered_through=plan.covered_through,
                          frame_complete=True, source_complete=True, source_versions_stable=True,
                          mode=plan.mode)
-        result.update(fixture_only=True, frame_count=n,
+        result.update(fixture_only=reviewed_sources is None, frame_count=n,
                       evaluation_cutoff=plan.cutoff.isoformat(),
                       sales_covered_from=plan.covered_from.isoformat(),
                       sales_covered_through=plan.covered_through.isoformat(),
