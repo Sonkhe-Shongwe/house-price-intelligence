@@ -180,6 +180,119 @@ class SouthAfricanBrowserTests(unittest.TestCase):
             self.page.get_by_role("button",name="Remove "+iid).click()
             expect(self.page.get_by_role("button",name="Remove "+iid)).to_have_count(0)
 
+    def prepare_recovery_shortlist(self):
+        import uuid
+        path=self.base+"/v2/fictional/za/shortlist"
+        for row in self.page.request.get(path).json()["investigations"]:
+            self.assertEqual(self.page.request.post(path,data={"action":"remove",
+                "investigation_id":row["investigation_id"]}).status,200)
+        saved=[]
+        for token,price in [("000001","2500000.03"),("000010","1.02"),("000015",None)]:
+            iid=str(uuid.uuid4())
+            req={"contract_version":"hpi-investigation-v2-fictional","market":"ZA","currency":"ZAR","area_unit":"m2",
+                 "subject_key":{"namespace":"za-fictional-erf","value":"fictional-erf-"+token},
+                 "analysis_date":"2025-07-01","mode":"as_of","asking_price":price}
+            res=self.page.request.post(self.base+"/v2/fictional/za/saved",data={"retry_id":iid,"request":req})
+            self.assertEqual(res.status,200)
+            saved.append(res.json())
+        self.page.reload()
+        expect(self.page.get_by_test_id("za-shortlist-count")).to_have_text("0 of 3 properties")
+        return path,saved
+
+    def test_shortlist_lost_add_and_remove_response_reconciles_once(self):
+        path,saved=self.prepare_recovery_shortlist()
+        ids=[r["investigation_id"] for r in saved]
+        select=self.page.get_by_label("Saved investigation to shortlist")
+        add=self.page.get_by_test_id("za-shortlist-add")
+        count=self.page.get_by_test_id("za-shortlist-count")
+        select.select_option(ids[0]);add.click()
+        expect(count).to_have_text("1 of 3 properties")
+        requests=[]
+        def lose_write(route):
+            requests.append(route.request.method)
+            if route.request.method=="POST":
+                self.assertEqual(route.fetch().status,200)
+                route.abort()
+            else:
+                route.continue_()
+        self.page.route(path,lose_write)
+        select.select_option(ids[1]);add.click()
+        expect(self.page.get_by_text("Change response not confirmed.",exact=False)).to_be_visible()
+        expect(count).to_have_text("2 of 3 properties")
+        expect(add).to_be_disabled()
+        self.assertEqual(requests,["POST","GET"])
+        self.assertEqual(self.page.request.get(path).json()["investigations"],saved[:2])
+        comparison=self.page.get_by_test_id("za-comparison")
+        expect(comparison).to_contain_text("R 2 500 000.03")
+        expect(comparison).to_contain_text("No comparable sale amounts")
+        self.assertEqual(self.page.request.get(self.base+"/v2/fictional/za/saved/"+ids[0]).json(),saved[0])
+        requests.clear()
+        self.page.get_by_role("button",name="Remove "+ids[1]).click()
+        expect(count).to_have_text("1 of 3 properties")
+        expect(self.page.get_by_text("Change response not confirmed.",exact=False)).to_be_visible()
+        expect(comparison).to_have_count(0)
+        self.assertEqual(requests,["POST","GET"])
+        self.assertEqual(self.page.request.get(path).json()["investigations"],saved[:1])
+        self.page.unroute(path,lose_write)
+        self.page.get_by_role("button",name="Remove "+ids[0]).click()
+        expect(count).to_have_text("0 of 3 properties")
+        self.assertEqual(self.page.request.get(path).json()["investigations"],[])
+        self.assertEqual(self.page.request.get(self.base+"/v1/investigations/history").json()["investigations"],[])
+
+    def test_shortlist_failed_reconciliation_and_corrupt_refresh_fail_closed(self):
+        path,saved=self.prepare_recovery_shortlist()
+        ids=[r["investigation_id"] for r in saved]
+        select=self.page.get_by_label("Saved investigation to shortlist")
+        add=self.page.get_by_test_id("za-shortlist-add")
+        count=self.page.get_by_test_id("za-shortlist-count")
+        comparison=self.page.get_by_test_id("za-comparison")
+        refresh=self.page.get_by_role("button",name="Refresh shortlist")
+        for i in range(2):
+            select.select_option(ids[i]);add.click()
+            expect(count).to_have_text(f"{i+1} of 3 properties")
+        expect(comparison).to_be_visible()
+        requests=[]
+        def lose_write_and_read(route):
+            requests.append(route.request.method)
+            if route.request.method=="POST":
+                self.assertEqual(route.fetch().status,200)
+            route.abort()
+        self.page.route(path,lose_write_and_read)
+        select.select_option(ids[2]);add.click()
+        expect(self.page.get_by_text("Shortlist unavailable. Refresh before retrying.")).to_be_visible()
+        expect(comparison).to_have_count(0)
+        expect(self.page.get_by_test_id("za-shortlist-member")).to_have_count(0)
+        expect(add).to_be_disabled()
+        expect(select).to_be_disabled()
+        self.assertEqual(requests,["POST","GET"])
+        self.assertEqual(self.page.request.get(path).json()["investigations"],saved)
+        refresh.click()
+        expect(self.page.get_by_text("Shortlist unavailable. Refresh to try again.")).to_be_visible()
+        expect(add).to_be_disabled()
+        self.assertEqual(requests,["POST","GET","GET"])
+        self.page.unroute(path,lose_write_and_read)
+        def wrong_market(route):
+            res=route.fetch()
+            body=res.json();body["market"]="US"
+            route.fulfill(response=res,json=body)
+        self.page.route(path,wrong_market)
+        refresh.click()
+        expect(self.page.get_by_text("Shortlist unavailable. Refresh to try again.")).to_be_visible()
+        expect(comparison).to_have_count(0)
+        expect(add).to_be_disabled()
+        self.page.unroute(path,wrong_market)
+        refresh.click()
+        expect(count).to_have_text("3 of 3 properties")
+        expect(comparison).to_contain_text("R 2 500 000.03")
+        expect(comparison).to_contain_text("R 1.02")
+        expect(comparison).to_contain_text("No comparable sale amounts")
+        expect(add).to_be_disabled()
+        self.assertEqual(self.page.request.get(path).json()["investigations"],saved)
+        self.assertEqual(self.page.request.get(self.base+"/v1/shortlists").json()["shortlists"],[])
+        for i,iid in enumerate(ids):
+            self.page.get_by_role("button",name="Remove "+iid).click()
+            expect(count).to_have_text(f"{2-i} of 3 properties")
+
     def test_mobile_reflow(self):
         for width in (768,375,320):
             self.page.set_viewport_size({"width":width,"height":850})
