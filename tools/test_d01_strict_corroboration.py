@@ -1,5 +1,5 @@
 """Invented fixtures only."""
-from datetime import date
+from datetime import date, timedelta
 import json
 from pathlib import Path
 import tempfile
@@ -28,11 +28,11 @@ def inputs():
     return raw, rows
 
 
-def assess(raw, original, diagnose=False, alias_feasibility=False):
+def assess(raw, original, diagnose=False, alias_feasibility=False, transaction_availability=False):
     with patch.object(sf, "EXPECTED", len(original)):
         rows, _ = s.derive(csv_bytes(original))
     derived, _ = p.derive(dm.json_bytes(raw))
-    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose, alias_feasibility=alias_feasibility)
+    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability)
 
 
 def alias_test(raw, rows):
@@ -51,6 +51,67 @@ def alias_test(raw, rows):
 
 
 class StrictTests(unittest.TestCase):
+    def test_transaction_windows_self_future_repeat_and_boundary(self):
+        day = date(2025, 1, 1)
+        subject = (1, day, "exact")
+        pool = [(1, day - timedelta(days=1), "exact"),
+                (2, day - timedelta(days=365), "exact"),
+                (2, day - timedelta(days=20), "exact"),
+                (3, day - timedelta(days=366), "alias_only"),
+                (4, day - timedelta(days=730), "alias_only"),
+                (5, day - timedelta(days=731), "exact"),
+                (6, day, "exact"), (7, day + timedelta(days=1), "exact")]
+        self.assertEqual(c.transaction.earlier_count(subject, pool, 365), 1)
+        self.assertEqual(c.transaction.earlier_count(subject, pool, 730), 3)
+        q = c.transaction.coverage([subject], pool)
+        self.assertEqual(q["365"]["exclusive_counts"]["one_to_two"], 1)
+        self.assertEqual(q["730"]["at_least_three"], 1)
+        self.assertEqual(q["730"]["insufficient_for_five"], 1)
+        self.assertEqual(c.transaction.coverage([subject], [])["365"]["exclusive_counts"]["zero"], 1)
+
+    def test_transaction_conflicts_strata_and_repeat_groups(self):
+        d = date(2025, 1, 1)
+        early = d - timedelta(days=10)
+        events = [(1, d, "exact"), (1, early, "exact"), (2, early, "alias_only"),
+                  (3, early, "exact"), (3, early, "alias_only"), (4, early, "exact")]
+        # Cross-stratum same-day conflict plus a screened strict row outside
+        # the corroborated cohorts at the same parcel and day.
+        strict = [e[:2] for e in events] + [(4, early)]
+        q = c.transaction.assess_availability(events, strict, [])
+        self.assertEqual(q["strict_unique_screened_same_parcel_day_groups"], 2)
+        self.assertEqual(q["strata"]["combined"]["same_candidate_parcel_day_excluded_rows"], 3)
+        self.assertEqual(q["strata"]["combined"]["distinct_candidate_parcels"], 4)
+        self.assertEqual(q["strata"]["combined"]["repeat_candidate_parcels_distinct_reported_dates"], 1)
+        primary = q["strata"]["exact"]
+        self.assertEqual(primary["earlier_exact_pool"]["365"]["at_least_one"], 0)
+        self.assertEqual(primary["earlier_combined_sensitivity_pool"]["365"]["at_least_one"], 1)
+        self.assertEqual(q["strata"]["alias_only"]["availability_eligible_subject_rows"], 1)
+        self.assertFalse(q["historical_as_of_availability_verified"])
+        self.assertEqual(q["verified_completed_sales"], 0)
+
+    def test_transaction_full_baseline_and_default_equivalence(self):
+        raw, rows = inputs()
+        rows[0][1] = "11 Fictional STR PINELANDS"
+        base = assess(raw, rows)
+        with patch.object(c, "DIAGNOSTIC_BASELINE", base):
+            diag = assess(raw, rows, diagnose=True)["mismatch_diagnosis"]
+            with patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+                k: diag[k] for k in ("mismatch_reasons", "unsupported_reasons")
+            }):
+                prior = assess(raw, rows, alias_feasibility=True)
+                with self.assertRaisesRegex(ValueError, "TRANSACTION_ALIAS_BASELINE_MISMATCH"):
+                    assess(raw, rows, transaction_availability=True)
+                with patch.object(c, "TRANSACTION_ALIAS_BASELINE", prior["alias_feasibility"]):
+                    result = assess(raw, rows, transaction_availability=True)
+        q = result.pop("transaction_availability")
+        self.assertEqual(result, prior)
+        self.assertEqual(q["strata"]["exact"]["reported_sale_rows"], 1)
+        self.assertEqual(q["strata"]["alias_only"]["reported_sale_rows"], 1)
+        self.assertEqual(q["strata"]["combined"]["distinct_candidate_parcels"], 1)
+        self.assertNotIn("FICTIONAL", json.dumps(q).upper())
+        self.assertNotIn("INVENTED", json.dumps(q).upper())
+
+
     def test_alias_pairs_only(self):
         self.assertEqual(len(c.ALIASES), 11)
         for full, short in c.ALIASES:
@@ -227,14 +288,19 @@ class StrictTests(unittest.TestCase):
                 alias = c.run(root, today=day, expected=(2, 2, 0, 0), alias_feasibility=True)
             self.assertEqual(alias["alias_feasibility"]["exact_baseline_preserved"], 2)
             self.assertEqual(alias["alias_feasibility"]["additional_corroboration_candidates"], 0)
+            with patch.object(c, "DIAGNOSTIC_BASELINE", {k: v for k, v in q.items() if k != "registered_audits"}), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+                k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
+            }), patch.object(c, "TRANSACTION_ALIAS_BASELINE", alias["alias_feasibility"]):
+                availability = c.run(root, today=day, expected=(2, 2, 0, 0), transaction_availability=True)
+            self.assertEqual(availability["transaction_availability"]["strata"]["exact"]["reported_sale_rows"], 2)
             self.assertEqual(snapshot, {f.relative_to(root): f.read_bytes() for f in root.rglob("*") if f.is_file()})
             with self.assertRaisesRegex(ValueError, "LEGACY_BASELINE_MISMATCH"):
                 c.run(root, today=day)
             with self.assertRaisesRegex(ValueError, "RETENTION_WINDOW"):
-                c.run(root, today=sf.REVIEW, expected=None, alias_feasibility=True)
+                c.run(root, today=sf.REVIEW, expected=None, transaction_availability=True)
             (root / dm.SALE_RAW).write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "checksum"):
-                c.run(root, today=day, expected=None, alias_feasibility=True)
+                c.run(root, today=day, expected=None, transaction_availability=True)
 
 
 if __name__ == "__main__":
