@@ -139,8 +139,10 @@ class SyntheticHttpTests(unittest.TestCase):
             self.assertEqual(note(a,"Fictional <b>question</b>\nCheck extent")["status"],200)
             self.assertEqual(command(a)["body"]["notes"][aid],"Fictional <b>question</b>\nCheck extent")
             self.assertEqual(note(d,"\U0001f3e0"*800)["status"],200)
-            for bad in ("x"*801, "bad\x00", "bad\x7f", "bad\ud800", 42, None):
-                self.assertEqual(note(a,bad)["status"],422)
+            for bad in ("x"*801, "bad\x00", "bad\x7f", 42, None):
+                with self.subTest(bad=repr(bad)):
+                    self.assertEqual(note(a,bad)["status"],422)
+            self.assertEqual(note(a,"bad\ud800")["status"],400)
             self.assertEqual(note(b,"not a member")["status"],409)
             self.assertEqual(note(a,"forbidden",origin="https://evil.invalid")["status"],403)
             self.assertEqual(self.invoke("POST",path,payload={"action":"note","investigation_id":aid,"note_text":"x","owner":"fictional-bob"})["status"],422)
