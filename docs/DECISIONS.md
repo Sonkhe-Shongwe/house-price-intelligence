@@ -228,3 +228,7 @@ Owner explicitly approves the [bounded spatial feasibility assessment](engineeri
 ## Owner direction: park Windows troubleshooting (27 November 2026)
 
 Owner reports computer secured and directs continuation without the Windows troubleshooting restriction. Treat as owner assurance, not independent verification. Prior observed Security UI installed, three named security services unavailable after restart, DISM/SFC clean, BitLocker commands unavailable; encryption/access/sync evidence not established. Do not repeat OS repair or request Windows commands for ordinary project development. Resume scoped R0 work autonomously. Actual source permissions, retention, proposal commitments, real protected storage, privacy and release requirements remain separately unresolved; no new acquisition, private processing, production or phase acceptance specifically authorised by this direction.
+
+## Fictional South African integration exception (27 November 2026)
+
+Owner explicitly approves parallel fictional-only South African application integration while P0 remains open, versioned market-aware investigation contract, local identifiers, ZAR, m2 and Pinelands-informed methodology. Preserve existing application, R0, no real import or deployment. Implementation/tests/checkpoint delegated. First slice isolated contract/fixture; later additive synthetic integration within approved scope only, no production architecture or market/class acceptance, real data, live provider or main integration inferred.
