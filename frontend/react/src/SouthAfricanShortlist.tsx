@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {ActionButton,EmptyState,ScrollRegion,StatusMessage} from './UI';
+import {evidenceExplanation,evidenceModeLimit} from './saEvidenceExplanation';
 import {decodeShortlist,formatZar,SHORTLIST_PATH,validDecisionNote,type Saved,type ShortlistMember} from './saInvestigationContract';
 
 export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];disabled:boolean}){
@@ -61,6 +62,9 @@ export default function SouthAfricanShortlist({saved,disabled}:{saved:Saved[];di
           <tr><th scope="row">Dwelling / land (m²)</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.subject.dwelling_extent??'Unknown'} / {r.evidence.subject.land_extent??'Unknown'}</td>)}</tr>
           <tr><th scope="row">Comparable evidence</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.status==='fictional_supported'?r.evidence.selected_count+' fictional sales · '+r.evidence.window_days+' days':'Insufficient or unsupported evidence'}</td>)}</tr>
           <tr><th scope="row">Invented registered-sale consideration</th>{rows.map(r=><td key={r.investigation_id}>{r.evidence.comparables.length?r.evidence.comparables.map(s=><div key={s.event_id}>{s.reported_sale_date} · {formatZar(s.sale_consideration)}</div>):'No comparable sale amounts'}</td>)}</tr>
+          <tr><th scope="row">Evidence qualification</th>{rows.map(r=><td className="za-explanation-cell" key={r.investigation_id}>{evidenceExplanation(r.evidence).reason} {evidenceModeLimit(r.evidence)}</td>)}</tr>
+          <tr><th scope="row">Source build / matching policy</th>{rows.map(r=><td className="za-explanation-cell" key={r.investigation_id}>{r.evidence.data_build}<br/>{r.evidence.policy_version}</td>)}</tr>
+          <tr><th scope="row">Suggested next step</th>{rows.map(r=><td className="za-explanation-cell" key={r.investigation_id}>{evidenceExplanation(r.evidence).next}</td>)}</tr>
           <tr><th scope="row">Saved decision notes</th>{rows.map(r=><td className="za-note-cell" key={r.investigation_id}>{r.note_text||'No note'}</td>)}</tr>
         </tbody></table></ScrollRegion>}
     </>}

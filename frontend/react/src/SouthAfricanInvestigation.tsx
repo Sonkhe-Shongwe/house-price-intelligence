@@ -3,11 +3,7 @@ import {ActionButton,Field,PageHeading,StatusMessage,LoadingState,EmptyState,Scr
 import {decode,decodeSaved,decodeHistory,formatZar,VERSION,PATH,SAVED_PATH,NAMESPACE,type Request,type Result,type Mode,type Saved} from './saInvestigationContract';
 import './saInvestigation.css';
 import SouthAfricanShortlist from './SouthAfricanShortlist';
-
-const reasons:Record<string,string>={subject_identity_unresolved:'The selected fictional parcel cannot be resolved exactly.',
-  subject_attributes_or_location_unqualified:'Dated extent or location evidence is insufficient.',
-  unsupported_fixture_class_or_locality:'The property is outside this fictional study scope.',
-  fewer_than_three_qualified_fixture_parcels:'Fewer than three distinct earlier properties qualify.'};
+import {evidenceExplanation,comparableDifferences,evidenceModeLimit} from './saEvidenceExplanation';
 export default function SouthAfricanInvestigation(){
   const [subject,setSubject]=useState('fictional-erf-000001'),[day,setDay]=useState('2025-07-01'),[mode,setMode]=useState<Mode>('as_of'),[price,setPrice]=useState('2500000.01');
   const [result,setResult]=useState<Result|null>(null),[pending,setPending]=useState(false),[error,setError]=useState('');
@@ -99,14 +95,22 @@ export default function SouthAfricanInvestigation(){
             <StatusMessage tone="success">{result.selected_count} fictional comparable properties</StatusMessage>
             <dl className="za-metrics"><div><dt>Asking price</dt><dd>{result.subject.asking_price?formatZar(result.subject.asking_price):'Not provided'}</dd></div><div><dt>Dwelling / land</dt><dd>{result.subject.dwelling_extent} / {result.subject.land_extent} m²</dd></div><div><dt>Selected window</dt><dd>{result.window_days} days</dd></div><div><dt>Eligible, 365 / 730 days</dt><dd>{result.eligible_unique_by_window['365']} / {result.eligible_unique_by_window['730']}</dd></div></dl>
             <p>{result.fictional_as_of_qualified?'Fictional as-of qualification only.':'Retrospective only; historical availability is not established.'}</p>
-            <ScrollRegion label="Fictional comparable sales" className="za-table-scroll"><table><caption>Invented registered-sale consideration, not estimated value</caption><thead><tr><th scope="col">Erf</th><th scope="col">Sale date</th><th scope="col">Consideration (ZAR)</th><th scope="col">Dwelling / land (m²)</th><th scope="col">Grid distance (m)</th><th scope="col">Available</th></tr></thead><tbody>{result.comparables.map(s=><tr key={s.event_id} data-testid="za-comparable"><td>{s.property_key.value.slice(-6)}</td><td>{s.reported_sale_date}</td><td>{formatZar(s.sale_consideration)}</td><td>{s.dwelling_extent} / {s.land_extent}</td><td>{Math.sqrt(s.distance_squared_metres).toFixed(1)}</td><td>{s.availability_date??'Unknown'}</td></tr>)}</tbody></table></ScrollRegion>
-          </>:<StatusMessage>{reasons[result.reason]??'Insufficient fictional evidence.'} No comparable sale amounts are shown.</StatusMessage>}
-          <p className="za-muted">No real property identity, geographic distance or historical availability verified. No valuation.</p>
+            <ScrollRegion label="Fictional comparable sales" className="za-table-scroll"><table><caption>Invented registered-sale consideration, not estimated value</caption><thead><tr><th scope="col">Erf</th><th scope="col">Sale date</th><th scope="col">Consideration (ZAR)</th><th scope="col">Dwelling / land (m²)</th><th scope="col">Grid distance (m)</th><th scope="col">Available</th><th scope="col">Difference from subject</th><th scope="col">Evidence age</th></tr></thead><tbody>{result.comparables.map(s=><tr key={s.event_id} data-testid="za-comparable"><td>{s.property_key.value.slice(-6)}</td><td>{s.reported_sale_date}</td><td>{formatZar(s.sale_consideration)}</td><td>{s.dwelling_extent} / {s.land_extent}</td><td>{Math.sqrt(s.distance_squared_metres).toFixed(1)}</td><td className="za-explanation-cell">{s.availability_date??'Unknown'}</td><td className="za-explanation-cell" data-testid="za-comparable-differences">{comparableDifferences(result,s)}</td><td>{s.age_days} days</td></tr>)}</tbody></table></ScrollRegion>
+          </>:<StatusMessage>{evidenceExplanation(result).reason} No comparable sale amounts are shown.</StatusMessage>}
+          <section className="za-explanation" aria-labelledby="za-explanation-heading" data-testid="za-explanation">
+            <h3 id="za-explanation-heading">What this evidence establishes</h3>
+            {result.status==='fictional_supported'&&<p>{evidenceExplanation(result).reason} Each selected sale passed fictional identity, class, locality, earlier-date, extent and grid-distance rules; ranking excludes prices.</p>}
+            {result.status!=='fictional_supported'&&<p>{evidenceExplanation(result).reason} No estimate can be derived from this result.</p>}
+            <dl className="za-provenance"><div><dt>Analysis date</dt><dd>{result.analysis_date}</dd></div><div><dt>Source build (invented)</dt><dd>{result.data_build}</dd></div><div><dt>Matching policy</dt><dd>{result.policy_version}</dd></div></dl>
+            <p>{evidenceModeLimit(result)}</p>
+            <h3>Suggested next step</h3><p data-testid="za-next-action">{evidenceExplanation(result).next}</p>
+            <p className="za-muted">No real property identity, geographic distance or historical availability verified. No valuation.</p>
+          </section>
         </div>}
       </section>
     </div>
     {savingEnabled&&<section className="za-panel za-method" aria-labelledby="za-history-heading"><h2 id="za-history-heading">Saved South African investigations</h2>
-      <p className="za-muted">Fictional workspace only. Not saved after server restart. {truncated?'History limited to 30 records.':''}</p>
+      <p className="za-muted">Temporary fictional workspace only. Recovery after ending the rehearsal is not guaranteed. {truncated?'History limited to 30 records.':''}</p>
       {saved.length===0?<EmptyState>No saved investigations.</EmptyState>:<div className="za-history">{saved.map(row=><div key={row.investigation_id} className="za-history-item"><div><strong>Erf {row.request.subject_key.value.slice(-6)}</strong><p>{row.request.analysis_date} · {row.evidence.selected_count} fictional comparables</p><p>{row.evidence.subject.asking_price?formatZar(row.evidence.subject.asking_price):'No asking price'}</p></div><ActionButton icon="open" disabled={pending} onClick={()=>reopen(row.investigation_id)} data-testid="za-reopen" aria-label={'Reopen '+row.investigation_id}>Reopen</ActionButton></div>)}</div>}
     </section>}
     {savingEnabled&&<SouthAfricanShortlist saved={saved} disabled={pending}/>}

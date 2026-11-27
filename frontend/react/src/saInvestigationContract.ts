@@ -5,8 +5,8 @@ export const NAMESPACE='za-fictional-erf';
 export type Mode='as_of'|'retrospective';
 export type Request={contract_version:typeof VERSION;market:'ZA';currency:'ZAR';area_unit:'m2';subject_key:{namespace:typeof NAMESPACE;value:string};analysis_date:string;mode:Mode;asking_price:string|null};
 type Money={currency:'ZAR';minor_units:number;decimal:string};
-type Comparable={property_key:{namespace:typeof NAMESPACE;value:string};event_id:string;reported_sale_date:string;registration_date:string;availability_date:string|null;sale_consideration:Money;dwelling_extent:string;land_extent:string;attribute_observed_date:string;attribute_effective_from:string;attribute_available_date:string|null;age_days:number;distance_squared_metres:number};
-export type Result={status:'fictional_supported'|'insufficient_data'|'out_of_coverage';reason:string;mode:Mode;analysis_date:string;subject:{property_key:{namespace:typeof NAMESPACE;value:string};asking_price:Money|null;dwelling_extent?:string;land_extent?:string};selected_count:number;window_days:365|730|null;eligible_unique_by_window:{'365':number;'730':number};comparables:Comparable[];warnings:string[];fictional_as_of_qualified:boolean};
+export type Comparable={property_key:{namespace:typeof NAMESPACE;value:string};event_id:string;reported_sale_date:string;registration_date:string;availability_date:string|null;sale_consideration:Money;dwelling_extent:string;land_extent:string;attribute_observed_date:string;attribute_effective_from:string;attribute_available_date:string|null;age_days:number;distance_squared_metres:number};
+export type Result={data_build:'za-fictional-build-v1';policy_version:'za-fictional-pinelands-v1';status:'fictional_supported'|'insufficient_data'|'out_of_coverage';reason:string;mode:Mode;analysis_date:string;subject:{property_key:{namespace:typeof NAMESPACE;value:string};asking_price:Money|null;dwelling_extent?:string;land_extent?:string};selected_count:number;window_days:365|730|null;eligible_unique_by_window:{'365':number;'730':number};comparables:Comparable[];warnings:string[];fictional_as_of_qualified:boolean};
 function fail():never{throw Error('Invalid fictional ZA response');}
 function record(x:unknown):Record<string,unknown>{if(!x||typeof x!=='object'||Array.isArray(x))return fail();return x as Record<string,unknown>;}
 function day(x:unknown):x is string{
@@ -47,7 +47,8 @@ export function decode(x:unknown,request:Request):Result{
       ||(r.window_days===365?counts['365']<3:counts['365']>=3||counts['730']<3)
       ||r.selected_count!==Math.min(5,counts[String(r.window_days)] as number)
       ||r.fictional_as_of_qualified!==(request.mode==='as_of'))return fail();
-  }else if(!['insufficient_data','out_of_coverage'].includes(String(r.status))||r.window_days!==null||r.selected_count!==0||r.fictional_as_of_qualified!==false||counts['730']>=3)return fail();
+   }else if(!['insufficient_data','out_of_coverage'].includes(String(r.status))||r.window_days!==null||r.selected_count!==0||r.fictional_as_of_qualified!==false||counts['730']>=3
+    ||(r.status==='out_of_coverage'?r.reason!=='unsupported_fixture_class_or_locality':!['subject_identity_unresolved','subject_attributes_or_location_unqualified','fewer_than_three_qualified_fixture_parcels'].includes(String(r.reason))))return fail();
   if(s.dwelling_extent!==undefined&&!extent(s.dwelling_extent)||s.land_extent!==undefined&&!extent(s.land_extent))return fail();
   const seen=new Set<string>(),events=new Set<string>();
   for(const item of r.comparables){

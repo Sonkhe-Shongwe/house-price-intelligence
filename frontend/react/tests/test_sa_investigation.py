@@ -121,6 +121,23 @@ class SouthAfricanBrowserTests(unittest.TestCase):
             ids.append(iid)
             snapshot=self.page.request.get(saved_path+"/"+iid).json()
             snapshots.append(snapshot)
+            explanation=self.page.get_by_test_id("za-explanation")
+            expect(explanation).to_contain_text(snapshot["evidence"]["data_build"])
+            expect(explanation).to_contain_text(snapshot["evidence"]["policy_version"])
+            expect(explanation).to_contain_text(snapshot["evidence"]["analysis_date"])
+            if i==0:
+                from decimal import Decimal
+                def difference(a,b):
+                    d=Decimal(b)-Decimal(a)
+                    return "Same extent" if not d else format(abs(d).normalize(),"f")+" m² "+("larger" if d>0 else "smaller")
+                evidence=snapshot["evidence"]
+                cells=self.page.get_by_test_id("za-comparable-differences")
+                expect(cells).to_have_count(5)
+                for n,sale in enumerate(evidence["comparables"]):
+                    expect(cells.nth(n)).to_have_text("Dwelling: "+difference(evidence["subject"]["dwelling_extent"],sale["dwelling_extent"])+"; land: "+difference(evidence["subject"]["land_extent"],sale["land_extent"])+".")
+                expect(explanation).to_contain_text("ranking excludes prices")
+            else:
+                expect(self.page.get_by_test_id("za-next-action")).to_have_text("Confirm the parcel identity before comparing sale evidence.")
             self.assertEqual(snapshot["request"]["subject_key"]["value"],"fictional-erf-"+token)
             self.assertEqual(snapshot["request"]["asking_price"],amount)
             self.assertEqual(snapshot["evidence"]["subject"]["asking_price"]["minor_units"],
@@ -138,6 +155,8 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         expect(comparison).to_contain_text("No comparable sale amounts")
         expect(comparison).to_contain_text("Invented registered-sale consideration")
         expect(comparison).to_contain_text("User-reported asking price")
+        expect(comparison).to_contain_text("Confirm the parcel identity before comparing sale evidence.")
+        expect(comparison).to_contain_text("za-fictional-pinelands-v1")
         frozen_text=comparison.inner_text()
         self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],snapshots)
         self.page.reload()
@@ -150,6 +169,9 @@ class SouthAfricanBrowserTests(unittest.TestCase):
             expect(price).to_have_value(("2750000.07","1850000.09")[i])
             expect(self.page.get_by_test_id("za-comparable")).to_have_count(5 if i==0 else 0)
             self.assertEqual(self.page.request.get(saved_path+"/"+iid).json(),snapshots[i])
+            expect(self.page.get_by_test_id("za-explanation")).to_contain_text(snapshots[i]["evidence"]["data_build"])
+            if i==1:
+                expect(self.page.get_by_test_id("za-next-action")).to_contain_text("Confirm the parcel identity")
         self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],snapshots)
         for i,iid in enumerate(ids):
             self.page.get_by_role("button",name="Remove "+iid).click()
@@ -163,6 +185,24 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         self.assertEqual(self.page.request.get(self.base+"/v1/shortlists").json()["shortlists"],[])
         self.page.get_by_role("link",name="US fictional buyer workspace").click()
         expect(self.page.get_by_test_id("buyer-workflow")).to_be_visible()
+
+    def test_explanation_unsupported_and_corrupt_reason(self):
+        self.page.get_by_label("Fictional erf").select_option("fictional-erf-000015")
+        self.submit()
+        expect(self.page.get_by_test_id("za-next-action")).to_contain_text("relevant property class and locality")
+        expect(self.page.get_by_test_id("za-comparable")).to_have_count(0)
+        path="**/v2/fictional/za/investigate"
+        def corrupt(route):
+            response=route.fetch()
+            value=response.json();value["reason"]="primary_window"
+            route.fulfill(response=response,json=value)
+        self.page.route(path,corrupt)
+        self.page.get_by_test_id("za-submit").click()
+        expect(self.page.get_by_role("alert")).to_contain_text("Investigation unavailable")
+        expect(self.page.get_by_test_id("za-explanation")).to_have_count(0)
+        self.page.unroute(path,corrupt)
+        self.submit()
+        expect(self.page.get_by_test_id("za-next-action")).to_contain_text("relevant property class and locality")
 
     def test_cross_market_response_refused_and_retry(self):
         path="**/v2/fictional/za/investigate"
