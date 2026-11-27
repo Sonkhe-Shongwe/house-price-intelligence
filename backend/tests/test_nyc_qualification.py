@@ -6,7 +6,7 @@ from tools.nyc_qualification import (
     Budget, QualificationError, Subject, Sale, Master, Legal, bbl, batches,
     complete_rows, projection, validate_projection, qualify, MAX_BYTES,
     MAX_REQUESTS, subject_query, sales_query, master_query, legal_query,
-    comparable_attribute_query, verify_metadata,
+    comparable_attribute_query, verify_metadata, CURRENT_SNAPSHOT,
 )
 
 
@@ -151,6 +151,29 @@ class NYCQualificationTests(unittest.TestCase):
             verify_metadata("64uk-42ks", m, dict(m, revision="different"), subject=True)
         with self.assertRaisesRegex(QualificationError, "source_schema_unverified"):
             verify_metadata("64uk-42ks", m, dict(m, fields=[]), subject=True)
+
+    def test_current_snapshot_core(self):
+        subjects = [replace(s, area_source="2") for s in self.subjects]
+        sales = [replace(s, dated_area=False, snapshot_area=s.area,
+                         snapshot_date=self.cutoff, snapshot_version="fixture",
+                         area_source="2") for s in self.sales]
+        r = self.q(subjects=subjects, sales=sales, mode=CURRENT_SNAPSHOT)
+        self.assertEqual(r["subject_statuses"], {"supported": 30})
+        self.assertEqual(r["area_basis"], "same_release_pluto_gross_area")
+        self.assertFalse(r["sale_time_area_verified"])
+        self.assertFalse(r["price_per_sqft_supported"])
+        self.assertEqual(self.q(subjects=subjects, sales=sales)["qualified_sales"], 0)
+        for bad in (dict(snapshot_area=999), dict(area_source="7"),
+                    dict(snapshot_version="other"), dict(snapshot_date=self.day),
+                    dict(dated_area=True)):
+            r = self.q(subjects=subjects, sales=[replace(sales[0], **bad), *sales[1:]],
+                       mode=CURRENT_SNAPSHOT)
+            self.assertEqual(r["sale_exclusions"], {"snapshot_area_unqualified": 1})
+        with self.assertRaisesRegex(QualificationError, "snapshot_frame_conflict"):
+            self.q(subjects=[replace(subjects[0], area_source="5"), *subjects[1:]],
+                   sales=sales, mode=CURRENT_SNAPSHOT)
+        self.assertIn("areasource = '2'", subject_query(CURRENT_SNAPSHOT).where)
+        self.assertNotIn("areasource = '2'", subject_query().where)
 
     def test_budget(self):
         budget = Budget()

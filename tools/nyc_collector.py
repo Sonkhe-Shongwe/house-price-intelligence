@@ -7,7 +7,7 @@ one authorised live attempt; tests use invented responses only.
 """
 from collections import Counter
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 import http.client
@@ -23,6 +23,7 @@ from tools.nyc_qualification import (
     bbl, valid_key, batches, require, complete_rows, projection,
     validate_projection, subject_query, sales_query, master_query, legal_query,
     comparable_attribute_query, verify_metadata, qualify, doc_value,
+    HISTORICAL, CURRENT_SNAPSHOT, AREA_METHOD,
 )
 
 HOST = "data.cityofnewyork.us"
@@ -113,6 +114,7 @@ class FixturePlan:
     version: str
     # Explicit fixture evidence, never inferred from DOF row presence.
     historical_area_verified: bool = False
+    mode: str = HISTORICAL
 
 
 class Collector:
@@ -225,13 +227,19 @@ class Collector:
                     plan.covered_through, plan.snapshot))
                 and plan.snapshot <= plan.cutoff and isinstance(plan.version, str)
                 and bool(plan.version), "invalid_plan")
+        require(plan.mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
+        require(plan.mode != CURRENT_SNAPSHOT or plan.historical_area_verified is False,
+                "mixed_temporal_evidence")
         before = {d: self._metadata(d) for d in FIELDS}
         # Published PLUTO ZIP and BBL are Number; rolling borough is Text.
         require(before["64uk-42ks"][1].get("zipcode") == "number"
                 and before["64uk-42ks"][1].get("bbl") == "number"
                 and before["usep-8jbt"][1].get("borough") == "text",
                 "source_type_unverified")
-        sq = subject_query()
+        if plan.mode == CURRENT_SNAPSHOT:
+            require(before["64uk-42ks"][1].get("areasource") == "text",
+                    "source_type_unverified")
+        sq = subject_query(plan.mode)
         n, keys, addresses = self._count(sq,
             "count(*) as n,count(distinct bbl) as keys,count(distinct address) as addresses",
             ("n", "keys", "addresses"))
@@ -248,9 +256,11 @@ class Collector:
                     and uint(row["unitsres"]) == uint(row["unitstotal"]) == 1
                     and uint(row["bldgarea"]) > 0 and row["version"] == plan.version,
                     "subject_scope_conflict")
+            if plan.mode == CURRENT_SNAPSHOT:
+                require(row.get("areasource") == AREA_METHOD, "subject_area_method_conflict")
             labels.append(" ".join(label.upper().split()))
             subjects.append(Subject(key, uint(row["bldgarea"]), plan.snapshot,
-                                    plan.version, True, True))
+                                    plan.version, True, True, row.get("areasource")))
         require(len(set(labels)) == MAX_SUBJECTS
                 and [s.key for s in subjects] == sorted({s.key for s in subjects}),
                 "ambiguous_subject_frame")
@@ -277,7 +287,7 @@ class Collector:
             except (QualificationError, KeyError):
                 price, area, eligible = 0, 0, False
             sales.append(Sale(key, sold, price, area, eligible,
-                              plan.historical_area_verified is True))
+                              plan.mode == HISTORICAL and plan.historical_area_verified is True))
         del raw_sales
         all_keys = {s.key for s in subjects} | {s.key for s in sales}
         require(len(all_keys) <= MAX_KEYS, "key_limit")
@@ -299,11 +309,21 @@ class Collector:
                                  == uint(a["unitstotal"]) == 1 and uint(a["bldgarea"]) > 0)
             except (KeyError, QualificationError):
                 current_shape = False
-            checked.append(Sale(s.key, s.day, s.cents, s.area,
-                                s.eligible and current_shape, s.dated_area))
+            if plan.mode == CURRENT_SNAPSHOT and current_shape:
+                checked.append(replace(s, eligible=s.eligible and current_shape,
+                                       snapshot_area=uint(a["bldgarea"]),
+                                       snapshot_date=plan.snapshot,
+                                       snapshot_version=plan.version,
+                                       area_source=a.get("areasource")))
+            else:
+                checked.append(replace(s, eligible=s.eligible and current_shape))
         sales = checked
         # No ACRIS requests for already unqualified events.
-        events = [s for s in sales if s.eligible and s.dated_area]
+        events = [s for s in sales if s.eligible and (
+            s.dated_area if plan.mode == HISTORICAL else
+            s.snapshot_area == s.area and s.area_source == AREA_METHOD)]
+        # Avoid repeating the same instrument search across batches.
+        events = list({(s.day, s.cents): s for s in events}.values())
         masters = []
         seen_docs = set()
         for i in range(0, len(events), MAX_BATCH):
@@ -344,8 +364,12 @@ class Collector:
             require(before[d][1] == after[d][1], "source_type_changed")
         result = qualify(subjects, sales, masters, legals, cutoff=plan.cutoff,
                          covered_from=plan.covered_from, covered_through=plan.covered_through,
-                         frame_complete=True, source_complete=True, source_versions_stable=True)
+                         frame_complete=True, source_complete=True, source_versions_stable=True,
+                         mode=plan.mode)
         result.update(fixture_only=True, frame_count=n,
+                      evaluation_cutoff=plan.cutoff.isoformat(),
+                      sales_covered_from=plan.covered_from.isoformat(),
+                      sales_covered_through=plan.covered_through.isoformat(),
                       requests=self.budget.requests, bytes_received=self.budget.bytes_received,
                       auxiliary_rows=self.budget.aux_rows,
                       source_revisions={d: before[d][0]["revision"] for d in FIELDS})

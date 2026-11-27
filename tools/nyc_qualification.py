@@ -18,6 +18,9 @@ MAX_BATCH = 35
 MAX_REQUESTS = 100
 MAX_BYTES = 20 * 1024 * 1024
 MAX_SECONDS = 1800
+HISTORICAL = "historical"
+CURRENT_SNAPSHOT = "current_snapshot"
+AREA_METHOD = "2"
 
 # Candidate projections; exact API schema and type preflight still required.
 FIELDS = {
@@ -26,7 +29,7 @@ FIELDS = {
                   "residential_units", "commercial_units", "total_units",
                   "sale_date", "sale_price"),
     "64uk-42ks": ("bbl", "borough", "zipcode", "bldgclass", "numbldgs",
-                  "unitsres", "unitstotal", "bldgarea", "version"),
+                  "unitsres", "unitstotal", "bldgarea", "version", "areasource"),
     "bnx9-e6tj": ("document_id", "doc_type", "document_date", "document_amt",
                   "recorded_datetime", "percent_trans", "good_through_date"),
     "8h5j-fqxa": ("document_id", "borough", "block", "lot", "partial_lot",
@@ -131,6 +134,7 @@ class Subject:
     # Candidate must be verified against the fixed, sales-independent scope.
     eligible: bool
     unique_address: bool
+    area_source: str | None = None
 
 
 @dataclass(frozen=True)
@@ -142,6 +146,10 @@ class Sale:
     eligible: bool
     # Requires documentary proof of historical area applicability, not current PLUTO.
     dated_area: bool
+    snapshot_area: int | None = None
+    snapshot_date: date | None = None
+    snapshot_version: str | None = None
+    area_source: str | None = None
 
 
 @dataclass(frozen=True)
@@ -178,7 +186,7 @@ def doc_value(value):
 
 def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
             covered_through, frame_complete=False, source_complete=False,
-            source_versions_stable=False):
+            source_versions_stable=False, mode=HISTORICAL):
     """Aggregate-only proof core; normalised inputs, no I/O or public display.
 
     subjects must be the first 30 eligible unique candidates in stable BBL
@@ -188,6 +196,7 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
     candidate document (not only the matching lot). A DEED match is not
     independent arm's-length certification.
     """
+    require(mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
     subjects, sales, masters, legals = map(tuple, (subjects, sales, masters, legals))
     require(frame_complete is True and source_complete is True
             and source_versions_stable is True, "incomplete_source_evidence")
@@ -200,6 +209,14 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
             and all(isinstance(x, Sale) for x in sales)
             and all(isinstance(x, Master) for x in masters)
             and all(isinstance(x, Legal) for x in legals), "invalid_input_type")
+    snapshot = version = None
+    if mode == CURRENT_SNAPSHOT:
+        snapshot, version = subjects[0].snapshot, subjects[0].version
+        require(day_value(snapshot) and snapshot <= cutoff
+                and isinstance(version, str) and bool(version.strip())
+                and all(x.snapshot == snapshot and x.version == version
+                        and x.area_source == AREA_METHOD for x in subjects),
+                "snapshot_frame_conflict")
     keys = [x.key for x in subjects]
     require(all(valid_key(x) for x in keys) and keys == sorted(set(keys)),
             "subject_frame_identity")
@@ -233,8 +250,14 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
                 <= covered_through and s.day < cutoff):
             rejected["outside_earlier_window"] += 1
             continue
-        if s.dated_area is not True:
+        if mode == HISTORICAL and s.dated_area is not True:
             rejected["dated_area_unqualified"] += 1
+            continue
+        if mode == CURRENT_SNAPSHOT and not (
+                s.dated_area is False and positive_int(s.snapshot_area)
+                and s.snapshot_area == s.area and s.snapshot_date == snapshot
+                and s.snapshot_version == version and s.area_source == AREA_METHOD):
+            rejected["snapshot_area_unqualified"] += 1
             continue
         if event_counts[(s.key, s.day, s.cents)] != 1:
             rejected["duplicate_sale"] += 1
@@ -274,10 +297,11 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
                 and bool(subject.version.strip())):
             statuses["unresolved_subject"] += 1
             continue
-        # Rank without price; distinct other BBL, area difference, newest, BBL.
+        # Use current PLUTO area for both sides in snapshot mode.
+        area = (lambda s: s.snapshot_area) if mode == CURRENT_SNAPSHOT else (lambda s: s.area)
         ordered = sorted((s for s in qualified if s.key != subject.key
-                          and 4*abs(s.area-subject.area) <= subject.area),
-                         key=lambda s: (abs(s.area-subject.area), -s.day.toordinal(), s.key))
+                          and 4*abs(area(s)-subject.area) <= subject.area),
+                         key=lambda s: (abs(area(s)-subject.area), -s.day.toordinal(), s.key))
         distinct = set()
         for s in ordered:
             distinct.add(s.key)
@@ -291,6 +315,14 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
         "engineering_floor_met": statuses["supported"] >= 10,
         "lookback_fully_covered": covered_from <= cutoff-timedelta(days=365)
         and covered_through >= cutoff-timedelta(days=1),
+        "comparison_mode": mode,
+        "area_basis": ("same_release_pluto_gross_area" if mode == CURRENT_SNAPSHOT
+                       else "dated_historical_area"),
+        "snapshot_date": snapshot.isoformat() if snapshot else None,
+        "snapshot_version": version,
+        "area_source": AREA_METHOD if mode == CURRENT_SNAPSHOT else None,
+        "sale_time_area_verified": False,
+        "price_per_sqft_supported": False,
         "historical_asof_verified": False,
         "representative_coverage_verified": False,
         "market_approved": False,
@@ -318,12 +350,14 @@ class Query:
         return result
 
 
-def subject_query():
+def subject_query(mode=HISTORICAL):
     """First 30 candidates; uniqueness and independent frame proof still required."""
+    require(mode in (HISTORICAL, CURRENT_SNAPSHOT), "unknown_comparison_mode")
+    method = " AND areasource = '2'" if mode == CURRENT_SNAPSHOT else ""
     return Query("64uk-42ks", SUBJECT_FIELDS,
                  "borough = 'QN' AND zipcode = 11361 AND bldgclass = 'A2' "
                  "AND numbldgs = 1 AND unitsres = 1 AND unitstotal = 1 "
-                 "AND bldgarea > 0 AND address IS NOT NULL AND address != ''",
+                 "AND bldgarea > 0 AND address IS NOT NULL AND address != ''" + method,
                  MAX_SUBJECTS, "bbl ASC")
 
 

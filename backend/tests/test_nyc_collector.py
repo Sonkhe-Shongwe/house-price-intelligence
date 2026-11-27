@@ -8,7 +8,7 @@ import unittest
 from urllib.parse import urlsplit, parse_qs
 
 from tools.nyc_collector import Collector, FixturePlan
-from tools.nyc_qualification import FIELDS, projection, bbl, QualificationError
+from tools.nyc_qualification import FIELDS, projection, bbl, QualificationError, CURRENT_SNAPSHOT
 
 
 class Response:
@@ -35,7 +35,7 @@ class SourceFixture:
         self.subjects = [
             dict(bbl=bbl(4, 1, i), borough="QN", zipcode="11361", bldgclass="A2",
                  numbldgs="1", unitsres="1", unitstotal="1", bldgarea="1000",
-                 version="fixture", address=f"INVENTED SUBJECT {i}") for i in range(1, 31)]
+                 version="fixture", areasource="2", address=f"INVENTED SUBJECT {i}") for i in range(1, 31)]
         self.sales = [
             dict(borough="4", block="2", lot=str(i), neighborhood="BAYSIDE",
                  zip_code="11361", building_class_at_time_of_sale="A2",
@@ -128,6 +128,35 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(r["sale_exclusions"], {"dated_area_unqualified": 4})
         self.assertFalse(r["engineering_floor_met"])
         self.assertFalse(any("/resource/bnx9" in p for p in self.src.calls))
+
+    def test_snapshot_success_and_distinct_dates(self):
+        self.plan = replace(self.plan, mode=CURRENT_SNAPSHOT, historical_area_verified=False)
+        result = self.run_collect()
+        self.assertEqual(result["qualified_sales"], 4)
+        self.assertEqual(result["comparison_mode"], CURRENT_SNAPSHOT)
+        self.assertEqual(result["snapshot_version"], "fixture")
+        self.assertFalse(result["historical_asof_verified"])
+        self.assertFalse(result["sale_time_area_verified"])
+        self.assertEqual(result["sales_covered_through"], "2026-10-31")
+        self.assertEqual(result["snapshot_date"], "2026-11-01")
+
+    def test_snapshot_rejects_mixed_area_and_wrong_subject(self):
+        self.plan = replace(self.plan, mode=CURRENT_SNAPSHOT, historical_area_verified=False)
+        self.src.attrs[0]["areasource"] = "7"
+        self.src.attrs[1]["bldgarea"] = "1100"
+        r = self.run_collect()
+        self.assertEqual(r["sale_exclusions"], {"snapshot_area_unqualified": 2})
+        self.assertFalse(r["engineering_floor_met"])
+        self.src = SourceFixture()
+        self.src.subjects[0]["areasource"] = "5"
+        with self.assertRaisesRegex(QualificationError, "subject_area_method_conflict"):
+            self.run_collect()
+
+    def test_snapshot_cannot_claim_historical_evidence(self):
+        self.plan = replace(self.plan, mode=CURRENT_SNAPSHOT)
+        with self.assertRaisesRegex(QualificationError, "mixed_temporal_evidence"):
+            self.run_collect()
+        self.assertEqual(self.src.calls, [])
 
     def test_failure_modes(self):
         for mode, reason in (("drift", "source_revision_changed"),
