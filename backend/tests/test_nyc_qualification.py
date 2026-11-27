@@ -5,7 +5,8 @@ from decimal import Decimal
 from tools.nyc_qualification import (
     Budget, QualificationError, Subject, Sale, Master, Legal, bbl, batches,
     complete_rows, projection, validate_projection, qualify, MAX_BYTES,
-    MAX_REQUESTS,
+    MAX_REQUESTS, subject_query, sales_query, master_query, legal_query,
+    comparable_attribute_query, verify_metadata,
 )
 
 
@@ -113,6 +114,43 @@ class NYCQualificationTests(unittest.TestCase):
             validate_projection("8h5j-fqxa", [{"street_name":"fictional"}])
         with self.assertRaises(QualificationError):
             projection("parties")
+
+    def test_fixed_query_templates(self):
+        q = subject_query()
+        self.assertEqual(q.limit, 30)
+        self.assertEqual(q.order, "bbl ASC")
+        self.assertIn("zipcode = '11361'", q.where)
+        self.assertIn("address", q.fields)
+        self.assertEqual(q.parameters(count=True)["$select"], "count(*) as n")
+        q = sales_query(self.cutoff-timedelta(days=400),
+                        self.cutoff-timedelta(days=1), self.cutoff)
+        self.assertIn("2025-11-01T00:00:00", q.where)
+        self.assertIn("2026-11-01T00:00:00", q.where)
+        self.assertIn("BAYSIDE", q.where)
+        self.assertNotIn("address", q.fields)
+        q = master_query(self.sales)
+        self.assertIn("123456.78", q.where)
+        self.assertNotIn("recorded_borough", q.where)
+        q = legal_query([m.doc for m in self.masters])
+        self.assertNotIn("borough", q.where)
+        self.assertNotIn("street_name", q.fields)
+        self.assertNotIn("address", comparable_attribute_query(
+            [s.key for s in self.sales]).fields)
+        with self.assertRaises(QualificationError):
+            legal_query(["bad' OR 1=1"])
+        with self.assertRaises(QualificationError):
+            master_query([replace(self.sales[0], cents=True)])
+        with self.assertRaises(QualificationError):
+            comparable_attribute_query(["bad"])
+
+    def test_metadata_stability(self):
+        m = {"id":"64uk-42ks", "revision":"fictional-version",
+             "fields":list(projection("64uk-42ks", subject=True))}
+        verify_metadata("64uk-42ks", m, m, subject=True)
+        with self.assertRaisesRegex(QualificationError, "source_revision_changed"):
+            verify_metadata("64uk-42ks", m, dict(m, revision="different"), subject=True)
+        with self.assertRaisesRegex(QualificationError, "source_schema_unverified"):
+            verify_metadata("64uk-42ks", m, dict(m, fields=[]), subject=True)
 
     def test_budget(self):
         budget = Budget()

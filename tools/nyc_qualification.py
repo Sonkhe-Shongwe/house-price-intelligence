@@ -295,3 +295,108 @@ def qualify(subjects, sales, masters, legals, *, cutoff, covered_from,
         "representative_coverage_verified": False,
         "market_approved": False,
     }
+
+
+
+# Offline query templates only; transport is intentionally absent. No free-form
+# predicates, arbitrary dataset, account/token, raw comparable address or parties.
+@dataclass(frozen=True, repr=False)
+class Query:
+    dataset: str
+    fields: tuple
+    where: str
+    limit: int
+    order: str = ""
+
+    def parameters(self, count=False):
+        if count:
+            return {"$select": "count(*) as n", "$where": self.where, "$limit": "1"}
+        result = {"$select": ",".join(self.fields), "$where": self.where,
+                  "$limit": str(self.limit)}
+        if self.order:
+            result["$order"] = self.order
+        return result
+
+
+def subject_query():
+    """First 30 candidates; uniqueness and independent frame proof still required."""
+    return Query("64uk-42ks", SUBJECT_FIELDS,
+                 "borough = 'QN' AND zipcode = '11361' AND bldgclass = 'A2' "
+                 "AND numbldgs = 1 AND unitsres = 1 AND unitstotal = 1 "
+                 "AND bldgarea > 0 AND address IS NOT NULL AND address != ''",
+                 MAX_SUBJECTS, "bbl ASC")
+
+
+def sales_query(covered_from, covered_through, cutoff):
+    require(all(day_value(x) for x in (covered_from, covered_through, cutoff))
+            and covered_from <= covered_through <= cutoff, "invalid_coverage")
+    lo = max(covered_from, cutoff-timedelta(days=365))
+    hi = min(covered_through+timedelta(days=1), cutoff)
+    require(lo < hi, "empty_earlier_window")
+    return Query("usep-8jbt", FIELDS["usep-8jbt"],
+                 "borough in ('4','QUEENS') AND neighborhood = 'BAYSIDE' "
+                 "AND zip_code = '11361' AND building_class_at_time_of_sale = 'A2' "
+                 f"AND sale_date >= '{lo.isoformat()}T00:00:00' "
+                 f"AND sale_date < '{hi.isoformat()}T00:00:00'",
+                 MAX_SALES)
+
+
+def master_query(events):
+    """Find potential instruments by exact reported day and amount.
+
+    No assumption that document recording borough equals property borough.
+    All matching document types retained for ambiguity screening. Full legal
+    rows must subsequently be obtained by document ID, never just the target lot.
+    """
+    events = tuple(events)
+    require(0 < len(events) <= MAX_BATCH, "invalid_event_batch")
+    require(all(isinstance(s, Sale) and valid_key(s.key) and day_value(s.day)
+                and positive_int(s.cents) and s.cents <= 99999999999999
+                and s.day < date.max for s in events), "invalid_event")
+    pairs = sorted(set((s.day, s.cents) for s in events))
+    clauses = []
+    for day, cents in pairs:
+        amount = f"{cents//100}.{cents%100:02d}"
+        clauses.append(f"(document_date >= '{day.isoformat()}T00:00:00' AND "
+                       f"document_date < '{(day+timedelta(days=1)).isoformat()}T00:00:00' "
+                       f"AND document_amt = {amount})")
+    return Query("bnx9-e6tj", FIELDS["bnx9-e6tj"], " OR ".join(clauses),
+                 MAX_AUX_ROWS)
+
+
+def legal_query(documents):
+    documents = tuple(documents)
+    require(0 < len(documents) <= MAX_BATCH
+            and all(doc_value(x) for x in documents)
+            and len(set(documents)) == len(documents), "invalid_document_batch")
+    literal = ",".join("'" + x + "'" for x in sorted(documents))
+    return Query("8h5j-fqxa", FIELDS["8h5j-fqxa"],
+                 f"document_id in ({literal})", MAX_AUX_ROWS)
+
+
+def comparable_attribute_query(keys):
+    keys = tuple(keys)
+    require(0 < len(keys) <= MAX_BATCH and all(valid_key(x) for x in keys)
+            and len(set(keys)) == len(keys), "invalid_key_batch")
+    # Current attributes only; never set Sale.dated_area from this query.
+    return Query("64uk-42ks", FIELDS["64uk-42ks"],
+                 "bbl in (" + ",".join(sorted(keys)) + ")", MAX_BATCH)
+
+
+def verify_metadata(dataset, before, after, *, subject=False):
+    """Validate expected field availability and pinned update identity.
+
+    Accept only the narrow metadata projection prepared by a future collector,
+    not whole source metadata (which may contain cached address examples).
+    Source types, date/class semantics and notices must be checked separately.
+    """
+    def valid(m):
+        return (isinstance(m, dict) and set(m) == {"id", "revision", "fields"}
+                and m["id"] == dataset and isinstance(m["revision"], str)
+                and bool(m["revision"].strip())
+                and isinstance(m["fields"], (tuple, list))
+                and all(isinstance(x, str) for x in m["fields"])
+                and set(projection(dataset, subject=subject)) <= set(m["fields"]))
+    require(valid(before) and valid(after), "source_schema_unverified")
+    require(before["revision"] == after["revision"]
+            and set(before["fields"]) == set(after["fields"]), "source_revision_changed")
