@@ -2932,6 +2932,7 @@ def main():
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--d02-pilot",action="store_true",help="Consumed D02-P1; no replay")
     p.add_argument("--d02-p2",action="store_true",help="Consumed D02-P2; no replay")
+    p.add_argument("--d01-f1-profile",action="store_true",help="Private read-only GV2025 sales aggregate profile")
     p.add_argument("--d02-f1-profile",action="store_true",help="Private read-only Pinelands GeoJSON aggregate profile")
     p.add_argument("--dbe-preflight",action="store_true",help="Private read-only 009 aggregate text-gate diagnosis")
     p.add_argument("--context-proof",action="store_true",help="Private read-only independent 006/008 contextual reports")
@@ -2951,6 +2952,17 @@ def main():
             raise ValueError("D02-P1 authority consumed; no replay.")
         if args.d02_p2:
             raise ValueError("D02-P2 authority consumed; no replay.")
+        if args.d01_f1_profile:
+            if (args.dataset!="HPI-DATA-002" or args.self_test or args.d02_f1_profile or
+                    args.dbe_preflight or args.context_proof or args.acquire_treasury or
+                    args.recover_treasury or args.status or args.audit_workspace or args.geo_crosswalk or
+                    args.geo_alias or args.remove_internal_deadlines or args.init_only or
+                    args.intake_date is not None or args.retain_until is not None or args.terms_reviewed):
+                raise ValueError("D01-F1 profile must be standalone.")
+            if not __package__:
+                raise ValueError("Use python -m tools.hpi_data_manager --d01-f1-profile.")
+            from tools.d01_file_profile import owner_profile
+            return owner_profile(args.root)
         if args.dataset=="HPI-DATA-010":
             if (args.self_test or args.d02_f1_profile or args.dbe_preflight or args.context_proof or
                     args.acquire_treasury or args.recover_treasury or args.audit_workspace or
