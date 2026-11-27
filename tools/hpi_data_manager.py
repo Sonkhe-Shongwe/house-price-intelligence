@@ -26,6 +26,14 @@ OUTPUT = "03_Processed_Data/HPI-DATA-002/rppi_monthly.csv"
 REPORT = "07_Reports/HPI-DATA-002_quality.json"
 RAW = "02_Raw_Data/" + ARCHIVE
 MIB = 1024 * 1024
+PARCEL_RAW = "02_Raw_Data/CapeTown_LandParcels_Pinelands_2026.geojson"
+PARCEL_MANIFEST = "01_Source_Catalogue/HPI-DATA-010.json"
+PARCEL_OUTPUT = "03_Processed_Data/HPI-DATA-010/parcels.geojson"
+PARCEL_REPORT = "07_Reports/HPI-DATA-010_quality.json"
+PARCEL_SHA = "c31d68a489cb11ff4fd0ad0b5ee768bbf5a8e48339f40243e699b751c229d327"
+PARCEL_LIMIT = 25*MIB
+PARCEL_POLICY = "cape-town-private-reference-v1"
+PARCEL_RETENTION = "Private reference only; review before 2026-12-27 or earlier applicable terms; no automatic disposal or renewal."
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -1041,6 +1049,17 @@ def code_self_test():
 
 
 # Live inventory is derived from manifests, not the historical starter CSV.
+def parcel_spec():
+    return ("HPI-DATA-010",PARCEL_MANIFEST,PARCEL_RAW,PARCEL_OUTPUT,PARCEL_REPORT,PARCEL_LIMIT,PARCEL_SHA)
+
+def parcel_status(root):
+    path=root/PARCEL_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-010","registered":False}
+    manifest=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-010","registered":True,**retention_status(manifest),
+            "known_local_paths":[x for x in (PARCEL_RAW,PARCEL_OUTPUT,PARCEL_REPORT,PARCEL_MANIFEST) if (root/x).exists()]}
+
 def audit_registered(root, spec, today=None):
     sid, manifest_path, raw_path, output_path, report_path, raw_limit, pinned = spec
     today = today or date.today()
@@ -1052,14 +1071,21 @@ def audit_registered(root, spec, today=None):
     m = json.loads(read_bounded(path))
     if (m["dataset_id"] != sid or m["raw_path"] != raw_path or
             m["processed_path"] != output_path or m["quality_report"] != report_path or
-            m["terms_reviewed_by_owner"] is not True):
+            (m.get("private_scope_approved_by_owner") is not True if sid=="HPI-DATA-010" else
+             m["terms_reviewed_by_owner"] is not True)):
         raise ValueError("Manifest identity, path or terms attestation differs.")
     intake = date.fromisoformat(m["first_intake_date"])
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION,"HPI-DATA-009":OPEN_RETENTION}[sid]
-    if sid == "HPI-DATA-009":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION,"HPI-DATA-009":OPEN_RETENTION,"HPI-DATA-010":PARCEL_RETENTION}[sid]
+    if sid == "HPI-DATA-010":
+        if (m.get("retention_policy")!=PARCEL_POLICY or m["retention"]!=PARCEL_RETENTION
+                or intake!=date(2026,11,27) or deadline is None or deadline>date(2026,12,27)
+                or m.get("terms_status")!="Portal research exemption; exact reuse terms not independently verified"
+                or m.get("source_url")!="https://odp-cctegis.opendata.arcgis.com/datasets/cctegis::land-parcels/about"):
+            raise ValueError("Unexpected parcel reference policy.")
+    elif sid == "HPI-DATA-009":
         if m.get("retention_policy")!=OPEN_POLICY or m["retention"]!=OPEN_RETENTION:
             raise ValueError("Unexpected DBE retention policy.")
     elif sid == "HPI-DATA-008":
@@ -1123,6 +1149,7 @@ def audit_workspace(root):
         treasury_spec(),
         census_spec(),
         dbe_spec(),
+        parcel_spec(),
     ]
     results = []
     for spec in specs:
@@ -2900,7 +2927,7 @@ def dbe_self_test():
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009","HPI-DATA-010"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--d02-pilot",action="store_true",help="Consumed D02-P1; no replay")
@@ -2924,6 +2951,20 @@ def main():
             raise ValueError("D02-P1 authority consumed; no replay.")
         if args.d02_p2:
             raise ValueError("D02-P2 authority consumed; no replay.")
+        if args.dataset=="HPI-DATA-010":
+            if (args.self_test or args.d02_f1_profile or args.dbe_preflight or args.context_proof or
+                    args.acquire_treasury or args.recover_treasury or args.audit_workspace or
+                    args.geo_crosswalk or args.geo_alias or args.remove_internal_deadlines or
+                    args.init_only or args.intake_date is not None or args.terms_reviewed or
+                    (args.status and args.retain_until is not None)):
+                raise ValueError("010 registration/status must be standalone.")
+            if args.status:
+                print(json.dumps(parcel_status(workspace(args.root)),indent=2))
+                return 0
+            if not __package__:
+                raise ValueError("Use python -m tools.hpi_data_manager --dataset HPI-DATA-010.")
+            from tools.d02_register import owner_register
+            return owner_register(args.root,args.retain_until)
         if args.d02_f1_profile:
             if (args.dataset!="HPI-DATA-002" or args.self_test or args.dbe_preflight or
                     args.context_proof or args.acquire_treasury or args.recover_treasury or

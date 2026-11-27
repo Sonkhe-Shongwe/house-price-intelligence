@@ -69,6 +69,8 @@ jobs:
         run: python -m unittest tools.test_d02_parcel_pilot -v
       - name: Test offline D02-F1 file profiling (invented data only)
         run: python -m unittest tools.test_d02_file_profile -v
+      - name: Test offline HPI-DATA-010 registration (invented data only)
+        run: python -m unittest tools.test_d02_register -v
       - name: Test offline HPI Data Manager (invented data only)
         run: python tools/hpi_data_manager.py --self-test
       - name: Validate documentation links and phase percentages
