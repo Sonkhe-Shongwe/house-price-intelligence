@@ -272,3 +272,7 @@ Owner terminal evidence shows successful --context-proof on private workspace af
 ## HPI-DATA-009 approved DBE Q3 2023 adapter (27 November 2026)
 
 See [approved scope and local command](ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--d11-approved-hpi-data-009-local-import). Exact supplied archive in 02_Raw_Data; no additional download. Manager supports --dataset HPI-DATA-009, --status, --audit-workspace and fixture self-test. Historical institutional projection only, no Q2/Stata extraction, no property joins or release. Local execution and registration pending.
+
+### HPI-DATA-009 actual local import result (27 November 2026)
+
+[Owner-observed registration evidence](ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--d11-hpi-data-009-actual-local-registration): 25,505 institutions, 19,412 plausible mapped candidates, 6,093 unmapped, one optional Suburb withheld, zero duplicate/invalid EMIS, null retention deadline. Private bytes and full workspace audit not independently verified; no property join or current-location claim. Seven maintained registrations now owner-observed.

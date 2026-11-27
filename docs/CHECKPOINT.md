@@ -10,11 +10,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
   "active_phase": "P0",
   "phase_gate": "blocked",
   "task": {
-    "id": "P0-D11-DBE-LOCAL-IMPORT",
-    "status": "blocked",
-    "objective": "Verify optional text withholding and observe DBE local registration.",
-    "scope": "Exact approved Q3 offline import in Windows.",
-    "acceptance": "Focused CI and actual local import with quality report.",
+    "id": "P0-D11-DBE-INTEGRITY-REVIEW",
+    "status": "ready",
+    "objective": "Verify 009 integrity and assess geographic quality limits.",
+    "scope": "Existing private offline quality/audit only.",
+    "acceptance": "Local integrity evidence and explicit limits.",
     "read": [
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
       "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
@@ -31,7 +31,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
       "docs/engineering/DATA_MANAGER_V1.md",
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
     ],
-    "stop": "Await focused CI and local import; no joins or P1.",
+    "stop": "Stop before material join, app use or acquisition.",
     "read_ranges": {
       "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
         [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
@@ -70,8 +70,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
         [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
       ],
       "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [270,274,"## 27 November 2026 | D11 approved","After focused CI succeeds"],
-        [288,292,"## 27 November 2026 | D11 observed preflight","Scoped correction:"]
+        [294,298,"## 27 November 2026 | D11 HPI-DATA-009 actual","Next bounded task:"]
       ]
     }
   },
@@ -112,12 +111,13 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 | HPI-DATA-005 | 52 official district/metro codes, visual match confirmed | Census 2022; 0 unmatched, noncommercial |
 | HPI-DATA-006 | Two metros, six RPPI observations, four growth checks | June 2026 fixed release, no merge or valuation |
 | HPI-DATA-008 | 16 household service percentages, two metros | 2011/2022 aggregate, no property reliability inference |
+| HPI-DATA-009 | 25,505 institutions; 19,412 plausible mapped candidates | Q3 2023; 6,093 unmapped; no verified locations |
 
-002-006 and 008 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 local integrity/re-extraction passed; private bytes not independently inspected. D03/D07/D08/D09 partial; eleven other families lack retained qualified data. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Windows sibling checkout/workspace; local state and file integrity not independently verified.
+002-006, 008 and 009 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 local integrity/re-extraction passed; private bytes not independently inspected. D03/D07/D08/D09/D11 partial; other families unresolved. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Windows sibling checkout/workspace; local state and file integrity not independently verified.
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. c83ef4e 7/7 passed; requery text correction CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. 8fd12f2 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -137,7 +137,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 preflight 25,505 identities/19,412 mapped candidates; one flagged Suburb; bounded correction pending CI/local run. No new intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 registered; integrity review next. No new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
