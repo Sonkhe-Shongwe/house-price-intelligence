@@ -220,3 +220,7 @@ Owner explicitly approves the [bounded transaction and earlier-sale candidate av
 ## HPI-DATA-010/011 reported-extent similarity authority (27 November 2026)
 
 Owner explicitly approves the [bounded reported-extent similarity assessment](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-retrospective-availability-milestone-27-november-2026), pinned existing 010/011 only, full baseline, exact/alias separation, 365/730-day earlier-only windows, +/-25% dwelling and combined dwelling/erf filters, aggregate results, R0 and unchanged retention. Implementation, testing and checkpoint delegated. No persistent joins, new acquisition, identity promotion, valuation, model training or application activation. Both audits and exact CI before Windows execution.
+
+## HPI-DATA-010/011 spatial feasibility authority (27 November 2026)
+
+Owner explicitly approves the [bounded spatial feasibility assessment](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-reported-extent-similarity-milestone-and-spatial-proposal-27-november-2026), existing pinned 010/011 only, conditional CRS, geometry, representative points, WGS84 geodesic 1/2 km, existing +/-25% extents and 365/730-day windows, full baseline, exact/alias separation, aggregates, R0, unchanged retention. Implementation/tests/checkpoint delegated. No persistent joins, new acquisition, identity promotion, valuation, model training or application activation. Both audits and exact CI before Windows execution.

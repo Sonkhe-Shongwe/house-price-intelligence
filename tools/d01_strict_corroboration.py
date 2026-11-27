@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 
+from tools import d01_spatial_feasibility as spatial_check
 from tools import d01_extent_similarity as extent
 from tools import d01_transaction_availability as transaction
 from tools import d01_register as sales
@@ -189,7 +190,8 @@ def parcel_address(p, schema, fields):
     return simple_address(f"{number} {street} {kind} {suburb}")
 
 
-def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False):
+def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False, spatial_feasibility=False):
+    extent_similarity = extent_similarity or spatial_feasibility
     transaction_availability = transaction_availability or extent_similarity
     alias_feasibility = alias_feasibility or transaction_availability
     diagnose = diagnose or alias_feasibility
@@ -411,10 +413,13 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
     if extent_similarity:
         result["extent_similarity"] = extent.assess_similarity(
             transaction_events, strict_events, reported_extents, result["transaction_availability"])
+    if spatial_feasibility:
+        result["spatial_feasibility"] = spatial_check.assess_spatial(
+            transaction_events, strict_events, reported_extents, raw_parcel, parcel, result["extent_similarity"])
     return result
 
 
-def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False):
+def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=False, transaction_availability=False, extent_similarity=False, spatial_feasibility=False):
     root = dm.workspace(root)
     today = today or date.today()
     if not sf.INTAKE <= today < sf.REVIEW:
@@ -438,7 +443,7 @@ def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=F
     reader = csv.reader(io.StringIO(s_raw.decode("utf-8-sig"), newline=""), strict=True)
     if tuple(next(reader)) != sf.HEADERS:
         raise ValueError("HEADER_MISMATCH")
-    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability, extent_similarity=extent_similarity)
+    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose, alias_feasibility=alias_feasibility, transaction_availability=transaction_availability, extent_similarity=extent_similarity, spatial_feasibility=spatial_feasibility)
     result["registered_audits"] = {"HPI-DATA-010": "passed", "HPI-DATA-011": "passed"}
     return result
 
@@ -450,12 +455,13 @@ def main():
     parser.add_argument("--alias-feasibility", action="store_true", help="Approved bounded documented street-type candidate assessment")
     parser.add_argument("--transaction-availability", action="store_true", help="Approved bounded retrospective reported-date availability assessment")
     parser.add_argument("--extent-similarity", action="store_true", help="Approved bounded reported-extent sensitivity assessment")
+    parser.add_argument("--spatial-feasibility", action="store_true", help="Approved bounded spatial sensitivity assessment")
     args = parser.parse_args()
     if os.name != "nt" or os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
         print("STOP: owner-local Windows only.")
         return 1
     try:
-        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches, alias_feasibility=args.alias_feasibility, transaction_availability=args.transaction_availability, extent_similarity=args.extent_similarity), indent=2))
+        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches, alias_feasibility=args.alias_feasibility, transaction_availability=args.transaction_availability, extent_similarity=args.extent_similarity, spatial_feasibility=args.spatial_feasibility), indent=2))
         return 0
     except Exception:
         print("STOP: local audit, retention, snapshot, projection or cohort precondition failed; no private values emitted.")

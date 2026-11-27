@@ -51,6 +51,70 @@ def alias_test(raw, rows):
 
 
 class StrictTests(unittest.TestCase):
+    def test_spatial_crs_geometry_and_coincident(self):
+        sp=c.spatial_check
+        raw={"features":[]}
+        self.assertEqual(sp.crs_status(raw),"conditional_absent_geojson_declaration")
+        raw["crs"]={"type":"name","properties":{"name":"EPSG:4326"}}
+        self.assertEqual(sp.crs_status(raw),"explicit_supported_wgs84")
+        raw["crs"]["properties"]["name"]="EPSG:3857"
+        self.assertEqual(sp.crs_status(raw),"unsupported_or_conflicting")
+        raw.pop("crs")
+        raw["features"]=[{"crs":None}]
+        self.assertEqual(sp.crs_status(raw),"unsupported_or_conflicting")
+        raw["features"]=[]
+        ring=[[18.5,-33.9],[18.51,-33.9],[18.51,-33.91],[18.5,-33.91],[18.5,-33.9]]
+        g={"type":"Polygon","coordinates":[ring]}
+        self.assertEqual(sp.representative(g)[0],"valid")
+        concave={"type":"Polygon","coordinates":[[ring[0],ring[1],ring[2],[18.505,-33.905],ring[3],ring[0]]]}
+        from shapely.geometry import shape, Point
+        self.assertTrue(shape(concave).contains(Point(sp.representative(concave)[1])))
+        multi={"type":"MultiPolygon","coordinates":[[ring],[[[x+0.02,y] for x,y in ring]]]}
+        self.assertTrue(shape(multi).contains(Point(sp.representative(multi)[1])))
+        self.assertEqual(sp.representative({"type":"Polygon","coordinates":[[[y,x] for x,y in ring]]})[0],"outside_envelope")
+        self.assertEqual(sp.representative({"type":"Polygon","coordinates":[ring[:-1]]})[0],"invalid_geometry")
+        self.assertEqual(sp.representative({"type":"Polygon","coordinates":[[[x,y,0] for x,y in ring]]})[0],"unsupported_geometry")
+        self.assertEqual(sp.representative({"type":"Polygon","coordinates":[[ring[0],ring[2],ring[1],ring[3],ring[0]]]})[0],"invalid_geometry")
+        projection={"features":[{"properties":{"OBJECTID":i,"quality_flags":{"spatial_candidate":True}},"geometry":g} for i in (1,2)]}
+        points,q=sp.qualify(raw,projection,{1,2})
+        self.assertFalse(points)
+        self.assertEqual(q["coincident_point_parcels"],2)
+        self.assertEqual(q["coincident_point_groups"],1)
+        raw["crs"]=None
+        points,q=sp.qualify(raw,projection,{1,2})
+        self.assertEqual(q["parcel_outcomes"]["crs_abstention"],2)
+
+    def test_spatial_thresholds_and_coverage(self):
+        sp=c.spatial_check
+        for r in sp.RADII:
+            self.assertTrue(sp.within(r,r))
+            self.assertFalse(sp.within(r+0.0001,r))
+            self.assertFalse(sp.within(0,r))
+            self.assertFalse(sp.within(None,r))
+        from pyproj import Geod
+        a=(18.5,-33.9)
+        x,y,_=Geod(ellps="WGS84").fwd(*a,90,1500)
+        distance=sp.distance_lookup({1:a,2:(x,y)})
+        self.assertAlmostEqual(distance(1,2),1500,places=6)
+        self.assertIsNone(distance(1,1))
+        d=date(2025,1,1)
+        subject=(1,d,"exact")
+        pool=[(1,d-timedelta(days=1),"exact"),(2,d-timedelta(days=1),"alias_only"),
+              (2,d-timedelta(days=2),"alias_only"),(3,d-timedelta(days=365),"exact"),
+              (4,d,"exact"),(5,d+timedelta(days=1),"exact")]
+        sizes={e:(100,100) for e in [subject,*pool]}
+        prior=c.extent.coverage([subject],pool,sizes,365)["dwelling_and_erf_25pct"]
+        q=sp.coverage([subject],pool,sizes,{1:a,2:(x,y)},distance,365,prior)
+        self.assertEqual(q["radius_metres"]["2000"]["at_least_one"],1)
+        self.assertEqual(q["radius_metres"]["1000"]["at_least_one"],0)
+        self.assertEqual(q["extent_eligible_subject_candidate_pairs_missing_pool_point"],1)
+        q=sp.coverage([subject],pool,sizes,{},distance,365,prior)
+        self.assertEqual(q["radius_metres"]["2000"]["subject_coordinate_abstentions"],1)
+        self.assertEqual(q["radius_metres"]["2000"]["exclusive_counts"]["zero"],0)
+        with self.assertRaisesRegex(ValueError,"SPATIAL_EXTENT_BASELINE_MISMATCH"):
+            sp.assess_spatial([],[],{}, {},{}, {})
+
+
     def test_extent_exact_boundaries_and_invalid(self):
         extent = c.extent
         a = extent.positive_extent("100.00000000000000000000000000001")
@@ -346,16 +410,25 @@ class StrictTests(unittest.TestCase):
                 k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
             }), patch.object(c, "TRANSACTION_ALIAS_BASELINE", alias["alias_feasibility"]), patch.object(c.extent, "AVAILABILITY_BASELINE", availability["transaction_availability"]):
                 similarity = c.run(root, today=day, expected=(2, 2, 0, 0), extent_similarity=True)
+            prior_extent=similarity["extent_similarity"]
+            with patch.object(c, "DIAGNOSTIC_BASELINE", {k: v for k, v in q.items() if k != "registered_audits"}), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+                k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
+            }), patch.object(c, "TRANSACTION_ALIAS_BASELINE", alias["alias_feasibility"]), patch.object(c.extent, "AVAILABILITY_BASELINE", availability["transaction_availability"]), patch.object(c.spatial_check,"EXTENT_BASELINE",prior_extent):
+                spatial=c.run(root,today=day,expected=(2,2,0,0),spatial_feasibility=True)
+            spatial_result=spatial.pop("spatial_feasibility")
+            self.assertEqual(spatial_result["geometry"]["usable_candidate_parcels"],1)
+            self.assertEqual(spatial,similarity)
+            self.assertNotIn("18.5",json.dumps(spatial_result))
             self.assertTrue(similarity.pop("extent_similarity")["baseline_reproduced"])
             self.assertEqual(similarity, availability)
             self.assertEqual(snapshot, {f.relative_to(root): f.read_bytes() for f in root.rglob("*") if f.is_file()})
             with self.assertRaisesRegex(ValueError, "LEGACY_BASELINE_MISMATCH"):
                 c.run(root, today=day)
             with self.assertRaisesRegex(ValueError, "RETENTION_WINDOW"):
-                c.run(root, today=sf.REVIEW, expected=None, extent_similarity=True)
+                c.run(root, today=sf.REVIEW, expected=None, spatial_feasibility=True)
             (root / dm.SALE_RAW).write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "checksum"):
-                c.run(root, today=day, expected=None, extent_similarity=True)
+                c.run(root, today=day, expected=None, spatial_feasibility=True)
 
 
 if __name__ == "__main__":
