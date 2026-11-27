@@ -29,7 +29,7 @@ MAX_ROWS = 100
 MAX_PAIRS = 100000
 ATTEMPT = "D02-P1-cape-town-parcels-once"
 MEDIA = ("application/json", "application/geo+json")
-REASONS = {"BODY", "SCHEMA", "FIELDS", "GEOMETRY", "CAP", "EMPTY", "DEADLINE", "TRANSPORT"}
+REASONS = {"BODY", "SCHEMA", "JSON", "API_ERROR", "COLLECTION", "COLLECTION_METADATA", "FEATURE_SCHEMA", "FIELDS", "GEOMETRY", "CAP", "EMPTY", "DEADLINE", "TRANSPORT"}
 
 
 class ParcelRefused(Refused):
@@ -76,13 +76,29 @@ def profile(raw, deadline):
         obj = json.loads(raw.decode("utf-8"), object_pairs_hook=unique,
                          parse_constant=reject_constant)
     except (UnicodeError, ValueError, RecursionError):
-        raise ParcelRefused("SCHEMA") from None
-    allowed = {"type", "features", "exceededTransferLimit", "crs"}
-    if (not isinstance(obj, dict) or set(obj) - allowed or
-            obj.get("type") != "FeatureCollection" or not isinstance(obj.get("features"), list)):
-        raise ParcelRefused("SCHEMA")
-    if "exceededTransferLimit" in obj and type(obj["exceededTransferLimit"]) is not bool:
-        raise ParcelRefused("SCHEMA")
+        raise ParcelRefused("JSON") from None
+    if isinstance(obj,dict) and "error" in obj:
+        raise ParcelRefused("API_ERROR")
+    allowed = {"type", "features", "exceededTransferLimit", "crs", "properties"}
+    if (not isinstance(obj, dict) or obj.get("type") != "FeatureCollection"
+            or not isinstance(obj.get("features"), list)):
+        raise ParcelRefused("COLLECTION")
+    if set(obj) - allowed:
+        raise ParcelRefused("COLLECTION_METADATA")
+    # Esri REST JS handles the GeoJSON transfer flag under collection properties.
+    # Accept only that known boolean; do not accept arbitrary source metadata.
+    flags = []
+    if "exceededTransferLimit" in obj:
+        flags.append(obj["exceededTransferLimit"])
+    if "properties" in obj:
+        meta = obj["properties"]
+        if not isinstance(meta,dict) or set(meta) - {"exceededTransferLimit"}:
+            raise ParcelRefused("COLLECTION_METADATA")
+        if "exceededTransferLimit" in meta:
+            flags.append(meta["exceededTransferLimit"])
+    if any(type(flag) is not bool for flag in flags) or len(set(flags))>1:
+        raise ParcelRefused("COLLECTION_METADATA")
+    transfer_flag = flags[0] if flags else None
     if "crs" in obj and obj["crs"] not in (
             {"type":"name","properties":{"name":"EPSG:4326"}},
             {"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},
@@ -101,7 +117,7 @@ def profile(raw, deadline):
         if (not isinstance(feature, dict) or set(feature) - {"type","id","properties","geometry"}
                 or feature.get("type") != "Feature" or "geometry" not in feature
                 or not isinstance(feature.get("properties"), dict)):
-            raise ParcelRefused("SCHEMA")
+            raise ParcelRefused("FEATURE_SCHEMA")
         props = feature["properties"]
         if set(props) - set(FIELDS):
             raise ParcelRefused("FIELDS")
@@ -164,7 +180,7 @@ def profile(raw, deadline):
             "duplicate_key_groups":{k:sum(n>1 for n in counts.values()) for k,counts in keys.items()},
             "valid_polygons":valid,"invalid_or_missing_polygons":invalid,
             "valid_polygon_bounds_intersect_request":plausible,"coordinate_pairs":pairs,
-            "source_transfer_limit_flag":obj.get("exceededTransferLimit"),
+            "source_transfer_limit_flag":transfer_flag,
             "sample_cap_reached":len(rows)==MAX_ROWS}
 
 

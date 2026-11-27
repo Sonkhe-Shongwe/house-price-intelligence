@@ -41,6 +41,20 @@ class PilotTests(unittest.TestCase):
         self.assertNotIn("FICTIONAL",json.dumps(result))
         self.assertNotIn("18.465",json.dumps(result))
 
+    def test_arcgis_collection_metadata(self):
+        obj=fixture()
+        obj["properties"]={"exceededTransferLimit":True}
+        self.assertIs(self.profile(obj)["source_transfer_limit_flag"],True)
+        obj["exceededTransferLimit"]=False
+        with self.assertRaisesRegex(Refused,"COLLECTION_METADATA"): self.profile(obj)
+        del obj["exceededTransferLimit"]
+        obj["properties"]["owner"]="PRIVATE"
+        with self.assertRaisesRegex(Refused,"COLLECTION_METADATA"): self.profile(obj)
+        with self.assertRaisesRegex(Refused,"API_ERROR"):
+            self.profile({"error":{"message":"PRIVATE"}})
+        with self.assertRaisesRegex(Refused,"JSON"):
+            p.profile(b"not json",time.monotonic()+5)
+
     def test_schema_and_caps(self):
         for change in ("extra","api_error","too_many","empty","geometry","nonfinite"):
             with self.subTest(change=change):
