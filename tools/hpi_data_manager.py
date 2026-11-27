@@ -35,6 +35,16 @@ PARCEL_LIMIT = 25*MIB
 PARCEL_POLICY = "cape-town-private-reference-v1"
 PARCEL_RETENTION = "Private reference only; review before 2026-12-27 or earlier applicable terms; no automatic disposal or renewal."
 
+SALE_RAW = "02_Raw_Data/CapeTown_Pinelands_PropertySales_2026.csv"
+SALE_MANIFEST = "01_Source_Catalogue/HPI-DATA-011.json"
+SALE_OUTPUT = "03_Processed_Data/HPI-DATA-011/sales.json"
+SALE_REPORT = "07_Reports/HPI-DATA-011_quality.json"
+SALE_SHA = "2ad9537ea5d956c2ec46c58bcc25b2c45dc17ba3c0dc540e222c7d2713f883e3"
+SALE_POLICY = "cape-town-private-sales-v1"
+SALE_RETENTION = "Private noncommercial research; review before 2026-12-27 or earlier applicable terms; no automatic disposal or renewal."
+SALE_TERMS = "Private noncommercial scope approved; portal-specific terms not independently verified"
+SALE_URL = "https://web1.capetown.gov.za/web1/gv2025/SearchProperty"
+
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -1060,6 +1070,17 @@ def parcel_status(root):
     return {"dataset_id":"HPI-DATA-010","registered":True,**retention_status(manifest),
             "known_local_paths":[x for x in (PARCEL_RAW,PARCEL_OUTPUT,PARCEL_REPORT,PARCEL_MANIFEST) if (root/x).exists()]}
 
+def sale_spec():
+    return ("HPI-DATA-011",SALE_MANIFEST,SALE_RAW,SALE_OUTPUT,SALE_REPORT,MIB,SALE_SHA)
+
+def sale_status(root):
+    path=root/SALE_MANIFEST
+    if not path.exists():
+        return {"dataset_id":"HPI-DATA-011","registered":False}
+    manifest=json.loads(read_bounded(path))
+    return {"dataset_id":"HPI-DATA-011","registered":True,**retention_status(manifest),
+            "known_local_paths":[x for x in (SALE_RAW,SALE_OUTPUT,SALE_REPORT,SALE_MANIFEST) if (root/x).exists()]}
+
 def audit_registered(root, spec, today=None):
     sid, manifest_path, raw_path, output_path, report_path, raw_limit, pinned = spec
     today = today or date.today()
@@ -1071,15 +1092,20 @@ def audit_registered(root, spec, today=None):
     m = json.loads(read_bounded(path))
     if (m["dataset_id"] != sid or m["raw_path"] != raw_path or
             m["processed_path"] != output_path or m["quality_report"] != report_path or
-            (m.get("private_scope_approved_by_owner") is not True if sid=="HPI-DATA-010" else
+            (m.get("private_scope_approved_by_owner") is not True if sid in ("HPI-DATA-010","HPI-DATA-011") else
              m["terms_reviewed_by_owner"] is not True)):
         raise ValueError("Manifest identity, path or terms attestation differs.")
     intake = date.fromisoformat(m["first_intake_date"])
     deadline = stored_deadline(m)
     if intake > today or (deadline is not None and (deadline <= intake or today >= deadline)):
         raise ValueError("Invalid intake or expired applicable deadline.")
-    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION,"HPI-DATA-009":OPEN_RETENTION,"HPI-DATA-010":PARCEL_RETENTION}[sid]
-    if sid == "HPI-DATA-010":
+    legacy = {"HPI-DATA-002":LEGACY_RPPI,"HPI-DATA-003":LEGACY_GEO,"HPI-DATA-004":LEGACY_BUILD,"HPI-DATA-005":CODE_RETENTION,"HPI-DATA-006":MARKET_RETENTION,"HPI-DATA-007":TREASURY_RETENTION,"HPI-DATA-008":CENSUS_RETENTION,"HPI-DATA-009":OPEN_RETENTION,"HPI-DATA-010":PARCEL_RETENTION,"HPI-DATA-011":SALE_RETENTION}[sid]
+    if sid == "HPI-DATA-011":
+        if (m.get("retention_policy")!=SALE_POLICY or m["retention"]!=SALE_RETENTION
+                or intake!=date(2026,11,27) or deadline is None or deadline>date(2026,12,27)
+                or m.get("terms_status")!=SALE_TERMS or m.get("source_url")!=SALE_URL):
+            raise ValueError("Unexpected sales reference policy.")
+    elif sid == "HPI-DATA-010":
         if (m.get("retention_policy")!=PARCEL_POLICY or m["retention"]!=PARCEL_RETENTION
                 or intake!=date(2026,11,27) or deadline is None or deadline>date(2026,12,27)
                 or m.get("terms_status")!="Portal research exemption; exact reuse terms not independently verified"
@@ -1150,6 +1176,7 @@ def audit_workspace(root):
         census_spec(),
         dbe_spec(),
         parcel_spec(),
+        sale_spec(),
     ]
     results = []
     for spec in specs:
@@ -2927,7 +2954,7 @@ def dbe_self_test():
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--root",type=Path,default=Path.cwd())
-    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009","HPI-DATA-010"),default="HPI-DATA-002")
+    p.add_argument("--dataset",choices=("HPI-DATA-002","HPI-DATA-003","HPI-DATA-004","HPI-DATA-005","HPI-DATA-006","HPI-DATA-007","HPI-DATA-008","HPI-DATA-009","HPI-DATA-010","HPI-DATA-011"),default="HPI-DATA-002")
     p.add_argument("--retain-until",type=date.fromisoformat)
     p.add_argument("--self-test",action="store_true")
     p.add_argument("--d02-pilot",action="store_true",help="Consumed D02-P1; no replay")
@@ -2963,6 +2990,20 @@ def main():
                 raise ValueError("Use python -m tools.hpi_data_manager --d01-f1-profile.")
             from tools.d01_file_profile import owner_profile
             return owner_profile(args.root)
+        if args.dataset=="HPI-DATA-011":
+            if (args.self_test or args.d01_f1_profile or args.d02_f1_profile or args.dbe_preflight or
+                    args.context_proof or args.acquire_treasury or args.recover_treasury or
+                    args.audit_workspace or args.geo_crosswalk or args.geo_alias or
+                    args.remove_internal_deadlines or args.init_only or args.intake_date is not None or
+                    args.terms_reviewed or (args.status and args.retain_until is not None)):
+                raise ValueError("011 registration/status must be standalone.")
+            if args.status:
+                print(json.dumps(sale_status(workspace(args.root)),indent=2))
+                return 0
+            if not __package__:
+                raise ValueError("Use python -m tools.hpi_data_manager --dataset HPI-DATA-011.")
+            from tools.d01_register import owner_register
+            return owner_register(args.root,args.retain_until)
         if args.dataset=="HPI-DATA-010":
             if (args.self_test or args.d02_f1_profile or args.dbe_preflight or args.context_proof or
                     args.acquire_treasury or args.recover_treasury or args.audit_workspace or
