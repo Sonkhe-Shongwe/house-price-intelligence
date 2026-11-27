@@ -208,3 +208,7 @@ Owner explicitly approves the [bounded strict-region, erf and address corroborat
 ## HPI-DATA-010/011 address mismatch diagnosis authority (27 November 2026)
 
 Owner explicitly approves the [bounded private offline mismatch diagnosis](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-strict-corroboration-milestone-27-november-2026) for existing pinned 010/011, 138 mismatches and five unsupported formats; preserve existing baseline, aggregate output only, R0, unchanged retention deadlines, no new acquisition, persistent joins, identity promotion or application activation. Implementation/testing/checkpoint delegated. Same Windows workspace, both audits, exact implementation CI first; no aliases, new matches, private record output, retention extension, valuation or phase credit.
+
+## HPI-DATA-010/011 controlled alias feasibility authority (27 November 2026)
+
+Owner explicitly approves the [bounded alias feasibility assessment](engineering/DATA_MANAGER_V1.md#hpi-data-010011-actual-mismatch-diagnosis-and-alias-proposal-27-november-2026), eleven documented Stats SA pairs only, existing pinned 010/011, private offline Windows, full baseline preservation, collision checks, aggregate output, R0 and unchanged deadlines. Implementation, tests and checkpoint delegated. No persistent joins, identity promotion, new acquisition, application activation, alias adoption or model/release. Both audits and exact implementation CI before local execution.

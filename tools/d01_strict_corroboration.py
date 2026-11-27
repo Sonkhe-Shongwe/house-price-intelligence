@@ -42,6 +42,55 @@ DIAGNOSTIC_BASELINE = {
 }
 
 
+# Exactly the eleven owner-approved Stats SA GHS 2005 pairs.
+ALIASES = (("avenue", "ave"), ("road", "rd"), ("circle", "cr"),
+           ("close", "cl"), ("crescent", "cres"), ("street", "str"),
+           ("drive", "dr"), ("way", "w"), ("grove", "gr"),
+           ("boulevard", "bvr"), ("lane", "ln"))
+TYPE_MAP = {token: full for full, short in ALIASES for token in (full, short)}
+ALIAS_REASONS = ("additional_candidate", "parcel_collision", "sale_erf_collision",
+                 "both_collisions", "unlisted_or_nonequivalent", "unsupported_boundary")
+ALIAS_DIAGNOSTIC_BASELINE = {
+    "mismatch_reasons": dict.fromkeys(MISMATCH_REASONS, 0) | {"street_type_token_only": 138},
+    "unsupported_reasons": dict.fromkeys(UNSUPPORTED_REASONS, 0) | {"both_structures": 5},
+}
+
+
+def canonical_address(key):
+    """Compare whole terminal tokens only; unknown tokens remain unchanged."""
+    if key is None:
+        return None
+    parts = key.split()
+    if len(parts) < 4 or parts[-1] != "pinelands":
+        return None
+    parts[-2] = TYPE_MAP.get(parts[-2], parts[-2])
+    return " ".join(parts)
+
+
+def collision_reason(key, oid, erf, parcel_index, sale_index):
+    parcel_collision = parcel_index.get(key, set()) != {oid}
+    sale_collision = sale_index.get(key, set()) != {erf} or erf is None
+    if parcel_collision and sale_collision:
+        return "both_collisions"
+    if parcel_collision:
+        return "parcel_collision"
+    if sale_collision:
+        return "sale_erf_collision"
+    return "additional_candidate"
+
+
+def alias_reason(left, right, parcel_type, oid, erf, parcel_index, sale_index):
+    if mismatch_reason(left, right, parcel_type) != "street_type_token_only":
+        return "unsupported_boundary"
+    l, r = left.split()[-2], right.split()[-2]
+    if l not in TYPE_MAP or r not in TYPE_MAP or TYPE_MAP[l] != TYPE_MAP[r]:
+        return "unlisted_or_nonequivalent"
+    key = canonical_address(left)
+    if key is None or key != canonical_address(right):
+        return "unsupported_boundary"
+    return collision_reason(key, oid, erf, parcel_index, sale_index)
+
+
 def mismatch_reason(left, right, parcel_type):
     """Lexical component diagnosis only, never a new identity or alias rule."""
     if not left or not right or not parcel_type or len(parcel_type.split()) != 1:
@@ -123,7 +172,8 @@ def parcel_address(p, schema, fields):
     return simple_address(f"{number} {street} {kind} {suburb}")
 
 
-def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False):
+def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=False, alias_feasibility=False):
+    diagnose = diagnose or alias_feasibility
     cohort = [row for row in rows if row["quality_flags"]["screened_candidate"]]
     baseline = sales.match(rows, parcel)["screened_cohort"]
     if expected is not None and tuple(baseline[k] for k in
@@ -188,6 +238,24 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
         if key is not None and e:
             sale_address_erfs[key].add(int(e.group(1)))
 
+    # Index every comparable parcel and every comparable screened sale,
+    # including those excluded from the unique candidate cohort.
+    canonical_parcels, canonical_sales = defaultdict(set), defaultdict(set)
+    if alias_feasibility:
+        for oid, (_, key) in raw_address.items():
+            canonical = canonical_address(key)
+            if canonical is not None:
+                canonical_parcels[canonical].add(oid)
+        for row in cohort:
+            _, key = sale_addresses[row["source_row_ordinal"]]
+            canonical = canonical_address(key)
+            e = sales.ERF.fullmatch(row["registered_description"].strip())
+            if canonical is not None:
+                canonical_sales[canonical].add(int(e.group(1)) if e else None)
+    alias_counts = Counter(dict.fromkeys(ALIAS_REASONS, 0))
+    exact_recheck = Counter(dict.fromkeys(("collision_free", "parcel_collision",
+                                          "sale_erf_collision", "both_collisions"), 0))
+    additional_spatial = 0
     transitions = {k: dict.fromkeys(STATES, 0) for k in STATES}
     strict = Counter(dict.fromkeys(STATES, 0))
     addr = Counter(dict.fromkeys(ADDRESS_STATES, 0))
@@ -232,6 +300,15 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
             mismatch_counts[mismatch_reason(lk, rk, parcel_types.get(oid))] += 1
         elif diagnose and outcome == "unsupported":
             unsupported_counts[unsupported_reason(left, right)] += 1
+        if alias_feasibility and outcome == "mismatch":
+            reason = alias_reason(lk, rk, parcel_types.get(oid), oid, erf,
+                                  canonical_parcels, canonical_sales)
+            alias_counts[reason] += 1
+            additional_spatial += reason == "additional_candidate" and is_spatial
+        elif alias_feasibility and outcome == "agree":
+            reason = collision_reason(canonical_address(lk), oid, erf,
+                                      canonical_parcels, canonical_sales)
+            exact_recheck["collision_free" if reason == "additional_candidate" else reason] += 1
         agreed_spatial += outcome == "agree" and is_spatial
     if any(sum(transitions[k].values()) != baseline["candidate_" + k] for k in STATES):
         raise ValueError("LEGACY_ACCOUNTING")
@@ -265,10 +342,34 @@ def assess(rows, parcel, raw_parcel, addresses, expected=BASELINE, diagnose=Fals
             "baseline_reproduced": True,
             "new_matches": 0,
             "limitations": "Lexical differences, not causes; sales terminal token is a type hypothesis. No aliases, fuzzy matching, historical address inference or identity promotion."}
+    if alias_feasibility:
+        diag = result["mismatch_diagnosis"]
+        if any(diag[k] != v for k, v in ALIAS_DIAGNOSTIC_BASELINE.items()):
+            raise ValueError("ALIAS_DIAGNOSTIC_BASELINE_MISMATCH")
+        if sum(alias_counts.values()) != addr["mismatch"] or sum(exact_recheck.values()) != addr["agree"]:
+            raise ValueError("ALIAS_ACCOUNTING")
+        n = alias_counts["additional_candidate"]
+        threatened = addr["agree"] - exact_recheck["collision_free"]
+        result["alias_feasibility"] = {
+            "status": "DOCUMENTED_ALIAS_CANDIDATES_ONLY",
+            "documented_pair_count": len(ALIASES),
+            "mismatch_denominator": addr["mismatch"],
+            "mismatch_outcomes": dict(alias_counts),
+            "documented_pair_eligible_before_collision_check": n + sum(
+                alias_counts[k] for k in ("parcel_collision", "sale_erf_collision", "both_collisions")),
+            "additional_corroboration_candidates": n,
+            "additional_spatial_candidates": additional_spatial,
+            "exact_baseline_preserved": addr["agree"],
+            "exact_baseline_canonical_recheck": dict(exact_recheck),
+            "exact_baseline_threatened_by_alias_collisions": threatened,
+            "combined_collision_safe_candidate_rows": exact_recheck["collision_free"] + n,
+            "unsupported_not_reassessed": addr["unsupported"],
+            "baseline_reproduced": True, "alias_rule_adopted": False,
+            "limitations": "Stats SA survey coding pairs only; City equivalence unverified. No actual identity promotion, historical continuity, transaction or buyer-use qualification. Collision scope is comparable snapshot parcels and screened sales."}
     return result
 
 
-def run(root, today=None, expected=BASELINE, diagnose=False):
+def run(root, today=None, expected=BASELINE, diagnose=False, alias_feasibility=False):
     root = dm.workspace(root)
     today = today or date.today()
     if not sf.INTAKE <= today < sf.REVIEW:
@@ -292,7 +393,7 @@ def run(root, today=None, expected=BASELINE, diagnose=False):
     reader = csv.reader(io.StringIO(s_raw.decode("utf-8-sig"), newline=""), strict=True)
     if tuple(next(reader)) != sf.HEADERS:
         raise ValueError("HEADER_MISMATCH")
-    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose)
+    result = assess(rows, parse(projection), parse(p_raw), [row[1] for row in reader], expected, diagnose=diagnose, alias_feasibility=alias_feasibility)
     result["registered_audits"] = {"HPI-DATA-010": "passed", "HPI-DATA-011": "passed"}
     return result
 
@@ -301,12 +402,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--diagnose-mismatches", action="store_true", help="Approved bounded aggregate lexical diagnosis only")
+    parser.add_argument("--alias-feasibility", action="store_true", help="Approved bounded documented street-type candidate assessment")
     args = parser.parse_args()
     if os.name != "nt" or os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS"):
         print("STOP: owner-local Windows only.")
         return 1
     try:
-        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches), indent=2))
+        print(json.dumps(run(args.root, diagnose=args.diagnose_mismatches, alias_feasibility=args.alias_feasibility), indent=2))
         return 0
     except Exception:
         print("STOP: local audit, retention, snapshot, projection or cohort precondition failed; no private values emitted.")

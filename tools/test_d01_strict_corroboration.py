@@ -28,14 +28,80 @@ def inputs():
     return raw, rows
 
 
-def assess(raw, original, diagnose=False):
+def assess(raw, original, diagnose=False, alias_feasibility=False):
     with patch.object(sf, "EXPECTED", len(original)):
         rows, _ = s.derive(csv_bytes(original))
     derived, _ = p.derive(dm.json_bytes(raw))
-    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose)
+    return c.assess(rows, json.loads(derived), raw, [r[1] for r in original], expected=None, diagnose=diagnose, alias_feasibility=alias_feasibility)
+
+
+def alias_test(raw, rows):
+    baseline = assess(raw, rows)
+    with patch.object(c, "DIAGNOSTIC_BASELINE", baseline):
+        diag = assess(raw, rows, diagnose=True)["mismatch_diagnosis"]
+        with patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+            k: diag[k] for k in ("mismatch_reasons", "unsupported_reasons")
+        }):
+            result = assess(raw, rows, alias_feasibility=True)
+    alias = result.pop("alias_feasibility")
+    result.pop("mismatch_diagnosis")
+    if result != baseline:
+        raise AssertionError("Default baseline changed")
+    return alias
 
 
 class StrictTests(unittest.TestCase):
+    def test_alias_pairs_only(self):
+        self.assertEqual(len(c.ALIASES), 11)
+        for full, short in c.ALIASES:
+            self.assertEqual(c.canonical_address(f"11 fictional {short} pinelands"),
+                             f"11 fictional {full} pinelands")
+        raw, rows = inputs()
+        rows[0][1] = "11 Fictional STR PINELANDS"
+        q = alias_test(raw, rows)
+        self.assertEqual(q["additional_corroboration_candidates"], 1)
+        self.assertEqual(q["additional_spatial_candidates"], 1)
+        self.assertEqual(q["exact_baseline_preserved"], 1)
+        self.assertEqual(q["combined_collision_safe_candidate_rows"], 2)
+        self.assertFalse(q["alias_rule_adopted"])
+        self.assertNotIn("FICTIONAL", json.dumps(q).upper())
+        for token in ("ST", "ROAD"):
+            rows[0][1] = f"11 Fictional {token} PINELANDS"
+            q = alias_test(raw, rows)
+            self.assertEqual(q["mismatch_outcomes"]["unlisted_or_nonequivalent"], 1)
+            self.assertEqual(q["additional_corroboration_candidates"], 0)
+
+    def test_alias_parcel_collision_threatens_exact(self):
+        raw, rows = inputs()
+        rows[0][1] = "11 Fictional STR PINELANDS"
+        # A non-spatial parcel with a different literal type still blocks.
+        raw["features"][3]["properties"].update(ADR_NO=11, LU_STR_NAME_TYPE="STR")
+        q = alias_test(raw, rows)
+        self.assertEqual(q["mismatch_outcomes"]["parcel_collision"], 1)
+        self.assertEqual(q["exact_baseline_threatened_by_alias_collisions"], 1)
+        self.assertEqual(q["exact_baseline_preserved"], 1)
+        self.assertEqual(q["combined_collision_safe_candidate_rows"], 0)
+
+    def test_alias_sale_collision_and_unsupported(self):
+        raw, rows = inputs()
+        rows[0][1] = "11 Fictional STR PINELANDS"
+        extra = rows[0][:]
+        extra[0], extra[2], extra[1] = "INVENTED-OTHER", "999 PINELANDS", "11 Fictional Street PINELANDS"
+        rows.append(extra)
+        # Use the opposite literal spelling for the exact agreement so it
+        # remains a legacy agreement only in the separate collision test.
+        rows[1][1] = "11A Fictional Street PINELANDS"
+        q = alias_test(raw, rows)
+        self.assertEqual(q["mismatch_outcomes"]["sale_erf_collision"], 1)
+        self.assertEqual(q["unsupported_not_reassessed"], 1)
+        self.assertEqual(q["additional_corroboration_candidates"], 0)
+
+    def test_alias_reject_changed_diagnostic_baseline(self):
+        raw, rows = inputs()
+        with patch.object(c, "DIAGNOSTIC_BASELINE", assess(raw, rows)):
+            with self.assertRaisesRegex(ValueError, "ALIAS_DIAGNOSTIC_BASELINE_MISMATCH"):
+                assess(raw, rows, alias_feasibility=True)
+
     def test_repeat_sales_agreement_privacy(self):
         raw, rows = inputs()
         q = assess(raw, rows)
@@ -155,14 +221,20 @@ class StrictTests(unittest.TestCase):
                 diag = c.run(root, today=day, expected=(2, 2, 0, 0), diagnose=True)
             self.assertEqual(diag["mismatch_diagnosis"]["new_matches"], 0)
             self.assertTrue(diag["mismatch_diagnosis"]["baseline_reproduced"])
+            with patch.object(c, "DIAGNOSTIC_BASELINE", q), patch.object(c, "ALIAS_DIAGNOSTIC_BASELINE", {
+                k: diag["mismatch_diagnosis"][k] for k in ("mismatch_reasons", "unsupported_reasons")
+            }):
+                alias = c.run(root, today=day, expected=(2, 2, 0, 0), alias_feasibility=True)
+            self.assertEqual(alias["alias_feasibility"]["exact_baseline_preserved"], 2)
+            self.assertEqual(alias["alias_feasibility"]["additional_corroboration_candidates"], 0)
             self.assertEqual(snapshot, {f.relative_to(root): f.read_bytes() for f in root.rglob("*") if f.is_file()})
             with self.assertRaisesRegex(ValueError, "LEGACY_BASELINE_MISMATCH"):
                 c.run(root, today=day)
             with self.assertRaisesRegex(ValueError, "RETENTION_WINDOW"):
-                c.run(root, today=sf.REVIEW, expected=None, diagnose=True)
+                c.run(root, today=sf.REVIEW, expected=None, alias_feasibility=True)
             (root / dm.SALE_RAW).write_bytes(b"tampered")
             with self.assertRaisesRegex(ValueError, "checksum"):
-                c.run(root, today=day, expected=None, diagnose=True)
+                c.run(root, today=day, expected=None, alias_feasibility=True)
 
 
 if __name__ == "__main__":
