@@ -4,7 +4,7 @@
 
 ## Working conclusion
 
-**Historical measured benchmark:** Cook County township 17 (Evanston), Class 203, retains the verified retrospective pilot; not an approved public geography/class. NYC and UK Land Registry remain alternative leads. South Africa is the preferred research direction: [27 November Pinelands feasibility](#27-november-2026--pinelands-candidate-feasibility) now demonstrates a bounded R0 sales/cadastre candidate path, not verified completed-market transactions or legal identity. Do not substitute municipal valuations, asking prices or aggregate indices for individual sale records. See [checkpoint](../CHECKPOINT.md) for current routing.
+**Historical measured benchmark:** Cook County township 17 (Evanston), Class 203, retains the verified retrospective pilot; not an approved public geography/class. NYC and UK Land Registry remain alternative leads. The South African-first mission was terminated on 27 November 2026; historical evidence retained: [27 November Pinelands feasibility](#27-november-2026--pinelands-candidate-feasibility) now demonstrates a bounded R0 sales/cadastre candidate path, not verified completed-market transactions or legal identity. Do not substitute municipal valuations, asking prices or aggregate indices for individual sale records. See [checkpoint](../CHECKPOINT.md) and [owner decision](../DECISIONS.md#owner-decision-end-south-african-first-mission-27-november-2026) for current geography-flexible P0-C routing. NYC and England/Wales remain challengers, not selected markets.
 
 ## Primary sources
 

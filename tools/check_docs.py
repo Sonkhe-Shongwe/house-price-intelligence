@@ -102,7 +102,7 @@ def active_handoff_errors(root: Path):
             "## Current synthetic API and data contract on `development`",
             "`p3-draft-v0.3`", "`synthetic_address_candidates`",
         ),
-        "docs/CHECKPOINT.md": ("## Current South African data repertoire", "## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
+        "docs/CHECKPOINT.md": ("## Historical South African data repertoire", "## Current verified implementation on development", "`development`", "`main`", "PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/P_PHASE_ROADMAP.md": ("## Granular deliverable and acceptance matrix", "P3.11", "P8.8", "P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"),
         "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": (
             "P0-A Product foundation", "P0-B Market and competitive intelligence",

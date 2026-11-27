@@ -2,6 +2,8 @@
 
 **Adopted:** 26 November 2026, owner requested documentation integration of the comprehensive P0 research, analysis, planning and implementation strategy. **Active delivery phase:** P0 only. **Active workstream and next task:** consult [checkpoint](../CHECKPOINT.md); initially P0-A.1. This is a subordinate execution directive, not a second roadmap, a new set of phase weights or a change to the [existing P0.1-P0.7 exit criteria](../P_PHASE_ROADMAP.md). The prior approved P0 estimate is 94% and overall 87.1%; both remain unchanged pending an evidence-backed milestone review. Method adoption is not product, market, rights or phase acceptance.
 
+**27 November owner direction:** HPI-SA mission terminated; resume ordinary P0-C. [Decision](../DECISIONS.md#owner-decision-end-south-african-first-mission-27-november-2026) supersedes earlier SA-first dependencies and stop rules as active routing. Prior P0-A/B and C/D/E/F/G evidence remains valid within its original scope. No repeat of completed desk work; select only material unresolved evidence for a geography-flexible first market.
+
 ## 1. Purpose and gold-standard outcome
 
 Establish that House Price Intelligence solves a meaningful homebuyer decision problem, has a defensible first market, viable data, permitted and ethical use, achievable technology, sustainable R0 operation, and an unambiguous testable MVP. P0 should hand P1 an approved strategic blueprint, not a finished backend, UI, deployment, commercial business or valuation model.

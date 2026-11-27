@@ -18,6 +18,8 @@
 | England/Wales EPC data | https://get-energy-performance-data.communities.gov.uk/ | Potential attributes | Licence and linkage |
 | South African DeedsWeb | https://www.gov.za/services/services-residents/place-live/subscribe-deedsweb | Potential local-market lead | Access, transaction granularity and rights |
 
+**Current strategic direction (27 November 2026):** [owner decision](../DECISIONS.md#owner-decision-end-south-african-first-mission-27-november-2026) ends the SA-first mission. The source register retains dated research, permissions and lifecycle obligations; no SA grant or intake is an active project dependency. Restore geography-flexible source qualification.
+
 ## Provenance and control rules
 
 - Pilot dates: sales from **2022-01-01 inclusive to 2025-01-01 exclusive**, Cook County township code `17`; characteristics and geography are linked to the **prior tax year as a proxy**.
