@@ -702,3 +702,7 @@ Owner browser evidence: official GV2025 neighbourhood View Sales table, 839 entr
 ## 27 November 2026 | D01-F1 export observed
 
 Owner-observed client-side export success 839 entries, seven columns; attached CSV size 83,267 bytes, not content-inspected. [Local profiling scope](../engineering/DATA_MANAGER_V1.md#hpi-data-011-browser-export-and-local-profile-27-november-2026). D01 candidate acquired; transaction qualification pending. No registration or joins. Review before 27 December 2026 or earlier applicable terms.
+
+## 27 November 2026 | D01-F1 local sales profile
+
+Local owner-observed profile: 839 reported sales entries, 791 positive prices, 422 preliminary erf-style candidates with both positive extents, 803 distinct references, 35 references with multiple valid dates, one exact duplicate group. [Full aggregate evidence and combined registration/identity feasibility proposal](../engineering/DATA_MANAGER_V1.md#hpi-data-011-actual-sales-profile-and-next-proposal-27-november-2026). D01 acquisition/profile milestone complete, registration and external key compatibility pending; no proven registration status, historical areas, coverage or market-sale eligibility. Review before 27 December 2026 or earlier applicable terms. No new intake or material join authority.
