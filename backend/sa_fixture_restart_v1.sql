@@ -1,4 +1,4 @@
--- Dedicated invented-only restart rehearsal extension; not a production migration.
+-- Dedicated invented-only restart rehearsal extension, not a production migration.
 CREATE TABLE sa_restart_migrations (
     version INTEGER PRIMARY KEY CHECK (version = 1),
     script_sha256 TEXT NOT NULL CHECK (length(script_sha256) = 64)
