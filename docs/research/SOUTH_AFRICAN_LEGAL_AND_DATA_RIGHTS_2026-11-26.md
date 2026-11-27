@@ -1,5 +1,7 @@
 # HPI-SA | SA3 legal, licensing, privacy and ethics
 
+**Historical and lifecycle evidence only.** Retired from active development on 27 November 2026. No instructions, proposed tasks, prior one-time permissions or external response dependency below are live authority. Preserve applicable source restrictions, retention and existing submission commitments; no new intake, contact, processing, withdrawal or disposal inferred. Follow the [current checkpoint](../CHECKPOINT.md).
+
 **Reviewed:** 26 November 2026. SA3.1 legal framework desk review; SA3.2 source/field/operation assessment next. [Mission directive](../engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md), [SA2 acquisition review](SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [source register](SOURCE_REGISTER.md), [private beta](../engineering/PRIVATE_REAL_DATA_BETA_V1.md) and [decisions](../DECISIONS.md). This is bounded engineering research, not professional legal advice, compliance certification or permission. Primary statutory provisions read via reproduced legislative text, official government act/commencement pages and regulator guidance. Source versions and retrieval limitations below; verify operative amendments, regulations, specific licences and actual role/processing circumstances before intake. No personal data, account registration, contact, request, fee or source operation. R0 retained.
 
 ## SA3.1 | Legal framework and practical controls

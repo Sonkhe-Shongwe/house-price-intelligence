@@ -113,7 +113,7 @@ North Star: evidence-informed decision task success. Reuse [M1-M8 and G1-G7](PRO
 
 | Risk | Responsible evidence / decision | Fail-closed outcome |
 | --- | --- | --- |
-| Local source inaccessible, fee or incomplete event history | SA clarification, exact source grant/dictionary, SA4 bounded empirical evidence only after approval; owner selects final market/class after qualification | Keep SA preferred but blocked; no paid acquisition or automatic international fallback. |
+| Source inaccessible, fee or incomplete event history | Applicable source terms/dictionary, bounded empirical evidence only after approval; owner selects final market/class after qualification | Reassess candidate feasibility; no paid acquisition or automatic fallback. |
 | Unsupported current identity or stale evidence | P0.4 independent current unsold frame, freshness and applicable attribute/time evidence; P1/P2 quality and selection audits | Abstain, no current-market claims; revisit product feasibility. |
 | Source restriction, linkage or statutory processing | P0.5/D actual permission/lawful processing/roles/transfer and output review; owner/custodian/legal authority as applicable | No intake, durable evidence, display or publication. |
 | Unqualified real protection, storage, quota or recovery | D/E and P3/P4/P7 operational evidence; owner approval for material protection/service changes; preserve rekey deferral | No real-data operation or deployment; no paid workaround. |

@@ -1,6 +1,6 @@
 # Property data source register
 
-**Updated:** 27 November 2026. Original pilot URLs, extraction evidence and dated rights reviews retained below; see [Pinelands source entries](#27-november-2026--pinelands-local-reference-sources) for the newest measured South African routes. Verified extraction or local audit does not establish time-correctness, legal identity, independent byte inspection or redistribution rights.
+**Updated:** 27 November 2026. Original pilot URLs, extraction evidence and dated rights reviews retained below; active candidates are the measured Cook reference and documented international alternatives. Verified extraction or local audit does not establish time-correctness, legal identity, independent byte inspection or redistribution rights.
 
 | Source | Identifier / URL | Current evidence | Outstanding review |
 | --- | --- | --- | --- |
@@ -16,9 +16,8 @@
 | NYC rolling property sales | https://www.nyc.gov/site/finance/property/property-rolling-sales-data.page | Research lead, not extracted for this MVP | Property types, comparable linkage, rights |
 | HM Land Registry paid-price data | https://www.gov.uk/guidance/about-the-price-paid-data | Alternative source lead | Coverage, joinable attributes and reuse |
 | England/Wales EPC data | https://get-energy-performance-data.communities.gov.uk/ | Potential attributes | Licence and linkage |
-| South African DeedsWeb | https://www.gov.za/services/services-residents/place-live/subscribe-deedsweb | Potential local-market lead | Access, transaction granularity and rights |
 
-**Current strategic direction (27 November 2026):** [owner decision](../DECISIONS.md#owner-decision-end-south-african-first-mission-27-november-2026) ends the SA-first mission. The source register retains dated research, permissions and lifecycle obligations; no SA grant or intake is an active project dependency. Restore geography-flexible source qualification.
+**Current strategic direction:** data-first, geography-flexible qualification; historical retired-source evidence and lifecycle records do not confer new acquisition or product authority.
 
 ## Provenance and control rules
 

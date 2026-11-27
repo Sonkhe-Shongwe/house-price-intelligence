@@ -1,4 +1,6 @@
 # HPI acquisition and intelligence engine | Side directive (AE0)
+
+**Historical and lifecycle evidence only.** Retired from active development on 27 November 2026. No instructions, proposed tasks, prior one-time permissions or external response dependency below are live authority. Preserve applicable source restrictions, retention and existing submission commitments; no new intake, contact, processing, withdrawal or disposal inferred. Follow the [current checkpoint](../CHECKPOINT.md).
  
 26 November 2026. Owner requested recording the proposed direction separately and testing it. This is a bounded P0.4/P0.7 feasibility experiment, not adoption of a new architecture, product scope, market, live acquisition permission or replacement roadmap. Existing P0-G blocker and all P0-P8 gates remain. Strict R0. See [checkpoint](../CHECKPOINT.md), [Data Manager](DATA_MANAGER_V1.md), [lean directive](LEAN_ENGINEERING_DIRECTIVE.md) and [acquisition register](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md).
  

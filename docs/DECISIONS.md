@@ -4,6 +4,8 @@
 
 ## Confirmed direction
 
+Dated retired-market entries below are historical permission and evidence records only. The current market direction is geography-flexible. No old source acquisition, fictional integration, contact or analysis authority may be replayed; existing lifecycle and approval duties survive.
+
 | Topic | Current decision | Evidence or boundary |
 | --- | --- | --- |
 | Product | Build House Price Intelligence as a property investigation and shortlist application | [Product brief](product/PRODUCT_BRIEF.md) |

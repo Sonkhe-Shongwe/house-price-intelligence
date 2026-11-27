@@ -1,5 +1,7 @@
 # HPI-SA | SA2 comprehensive data acquisition research
 
+**Historical and lifecycle evidence only.** Retired from active development on 27 November 2026. No instructions, proposed tasks, prior one-time permissions or external response dependency below are live authority. Preserve applicable source restrictions, retention and existing submission commitments; no new intake, contact, processing, withdrawal or disposal inferred. Follow the [current checkpoint](../CHECKPOINT.md).
+
 **Initial desk review (26 November 2026):** SA2.1 national official sources, followed by municipal and other routes; the initial sections below preserve documented capabilities, candidate inferences and then-unverified access. Subsequent dated records establish actual approved private intake and measured aggregates; see [latest D01/D02 evidence](#27-november-2026--d01-f1-identity-feasibility-result) and [checkpoint](../CHECKPOINT.md) for live status. [Mission directive](../engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md), [minimum field/grain contract](DATA_FEASIBILITY.md), [source register](SOURCE_REGISTER.md), [SA1 buyer research](../product/SOUTH_AFRICAN_ECOSYSTEM_AND_BUYER_RESEARCH_2026-11-26.md). Historical access failures and approvals are not current authority. Source existence is not reuse permission.
 
 ## SA2.1 national official routes
