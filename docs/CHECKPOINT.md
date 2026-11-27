@@ -5,99 +5,7 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 ## Continuation state
 
 ```json
-{
-  "schema_version": 2,
-  "active_phase": "P0",
-  "phase_gate": "blocked",
-  "task": {
-    "id": "P0-D11-DBE-INTEGRITY-REVIEW",
-    "status": "ready",
-    "objective": "Verify 009 integrity and assess geographic quality limits.",
-    "scope": "Existing private offline quality/audit only.",
-    "acceptance": "Local integrity evidence and explicit limits.",
-    "read": [
-      "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
-      "docs/DECISIONS.md",
-      "docs/P_PHASE_ROADMAP.md",
-      "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md",
-      "docs/product/PRODUCT_BRIEF.md",
-      "docs/engineering/DATA_MANAGER_V1.md",
-      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
-    ],
-    "evidence": [
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md",
-      "docs/product/PRODUCT_BRIEF.md",
-      "docs/engineering/DATA_MANAGER_V1.md",
-      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"
-    ],
-    "stop": "Stop before material join, app use or acquisition.",
-    "read_ranges": {
-      "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md": [
-        [11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],
-        [109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]
-      ],
-      "docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md": [
-        [646,660,"## 26 November 2026 | Finer-context access and rights decision","**Stop:** indispensable external evidence/owner decision. Recomm"]
-      ],
-      "docs/DECISIONS.md": [
-        [13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],
-        [24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],
-        [74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],
-        [99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],
-        [144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"],
-        [148,150,"## AE0 World Bank one-time pilot authority","Owner explicitly approves the exact World Bank"],
-        [152,154,"## AE0 Wikidata one-time spatial pilot authority","Owner explicitly approves the exact one-request"],
-        [156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"],
-        [160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"],
-        [164,166,"## AE0 GHSL one-time authority","Owner approves exact GHSL"],
-        [168,170,"## AE0 staged GHSL final authority","Owner approves exact staged"],
-        [172,174,"## HPI-DATA-009 DBE offline authority","Owner confirms exact supplied"]
-      ],
-      "docs/P_PHASE_ROADMAP.md": [
-        [13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],
-        [68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],
-        [227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]
-      ],
-      "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md": [
-        [110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],
-        [162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]
-      ],
-      "docs/product/PRODUCT_BRIEF.md": [
-        [214,216,"### Finer-context access decision (26 November 2026)","[Access qualification](../research/SOUTH_AFRICAN_DATA_ACQUISITIO"]
-      ],
-      "docs/engineering/DATA_MANAGER_V1.md": [
-        [268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]
-      ],
-      "docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md": [
-        [294,298,"## 27 November 2026 | D11 HPI-DATA-009 actual","Next bounded task:"]
-      ]
-    }
-  },
-  "blockers": [
-    "D01/D02 unresolved; 007 parked; 006/008 proof passed; finer-context intake no-go: item rights/size/precision.",
-    "SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.",
-    "P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."
-  ],
-  "parked": [
-    "P1-P8 except indispensable named P0 dependencies",
-    "Real basemap attempt unused/deferred on upstream extractor security",
-    "Cook publisher contact and recovery rekey owner-deferred",
-    "Wikidata pilot consumed; owner parked",
-    "GHSL attempts closed pending material evidence"
-  ],
-  "authority": [
-    "docs/DECISIONS.md",
-    "docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md",
-    "docs/engineering/CLOUD_FIRST_WORKFLOW.md"
-  ],
-  "history": [
-    "docs/archive/CONTINUATION_CHECKPOINT_2026-11-26.md",
-    "docs/archive/CHECKPOINT_EVIDENCE_2026-11-26.md",
-    "docs/archive/DECISION_HISTORY_2026-11-26.md",
-    "docs/archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md"
-  ]
-}
+{"schema_version":2,"active_phase":"P0","phase_gate":"blocked","task":{"id":"P0-D11-DBE-INTEGRITY-REVIEW","status":"complete","objective":"Verify 009 integrity and assess geographic quality limits.","scope":"Existing private offline quality/audit only.","acceptance":"Owner-observed 009 integrity and geographic limits established; other workspace statuses unverified.","read":["docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md","docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md","docs/DECISIONS.md","docs/P_PHASE_ROADMAP.md","docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md","docs/product/PRODUCT_BRIEF.md","docs/engineering/DATA_MANAGER_V1.md","docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"],"evidence":["docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md","docs/product/PRODUCT_BRIEF.md","docs/engineering/DATA_MANAGER_V1.md","docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md"],"stop":"Bounded task complete; resume on material P0 dependency evidence or owner decision; no join, app use or acquisition.","read_ranges":{"docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md":[[11,31,"## 2. Research -> analysis -> planning -> implementation -> verif","Do not turn optional methods (SWOT, persona variants, full commer"],[109,156,"## 26 November 2026 | P0-G independent conditional acceptance aud","The data-first correction has delivered three private local conte"]],"docs/research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md":[[646,660,"## 26 November 2026 | Finer-context access and rights decision","**Stop:** indispensable external evidence/owner decision. Recomm"]],"docs/DECISIONS.md":[[13,16,"| Engineering process (approved 23 Nov) | Eight-step requirements","| Research-driven evolution (26 Nov, owner clarification) | Exist"],[24,60,"| Single active phase (26 Nov, owner direction) | Begin P0 closur","| Boundaries | Do not claim current price prediction, live listin"],[74,87,"## Open decisions, with next acceptance point","| Which buyer entry and property identity? | Address/parcel/build"],[99,106,"## Non-negotiable interpretation rules","- Missing evidence requires an explicit abstention/unsupported st"],[144,146,"## Independent contextual proof authority (26 November 2026)","Owner approves bounded private offline contextual intelligence pr"],[148,150,"## AE0 World Bank one-time pilot authority","Owner explicitly approves the exact World Bank"],[152,154,"## AE0 Wikidata one-time spatial pilot authority","Owner explicitly approves the exact one-request"],[156,158,"## AE0 Wikidata parked","Owner explicitly directs parking"],[160,162,"## AE0 NASA POWER one-time authority","Owner explicitly approves the exact one-request, seven-day"],[164,166,"## AE0 GHSL one-time authority","Owner approves exact GHSL"],[168,170,"## AE0 staged GHSL final authority","Owner approves exact staged"],[172,174,"## HPI-DATA-009 DBE offline authority","Owner confirms exact supplied"]],"docs/P_PHASE_ROADMAP.md":[[13,32,"### Progress methodology","| **Total** | **Bounded flagship MVP** | **100%** | **87.1% weigh"],[68,82,"### P0 | Buyer, market and product feasibility | Weight 6% | Appr","**26 November initial P0 closure audit (preserved baseline; execu"],[227,235,"### P0: Discovery and feasibility — 6% weight; 94% estimated comp","**Exit gate:** Approved bounded product brief, source register, c"]],"docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md":[[110,131,"## 6. Eight-step feature engineering lifecycle (approved 23 Novem","Each substantial change should identify its outcome, affected bou"],[162,169,"## 9. Safe large changes, migrations and CI controls","- Apply the same review to AI-assisted and human code. No LLM out"]],"docs/product/PRODUCT_BRIEF.md":[[214,216,"### Finer-context access decision (26 November 2026)","[Access qualification](../research/SOUTH_AFRICAN_DATA_ACQUISITIO"]],"docs/engineering/DATA_MANAGER_V1.md":[[268,270,"### Actual local contextual proof result (26 November 2026)","Owner terminal evidence shows successful --context-proof on priva"]],"docs/engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md":[[294,298,"## 27 November 2026 | D11 HPI-DATA-009 actual","Next bounded task:"],[300,302,"## 27 November 2026 | D11 offline integrity milestone","Owner PowerShell screenshot shows"]]}},"blockers":["D01/D02 unresolved; 007 parked; 006/008 proof passed; finer-context intake no-go: item rights/size/precision.","SA4 empirical blocked; Cape Town clarification and CSG reply not verified this session.","P0.4/6 partial; P0.5/7 blocked; rights, protected storage, final market and formal phase acceptance unresolved."],"parked":["P1-P8 except indispensable named P0 dependencies","Real basemap attempt unused/deferred on upstream extractor security","Cook publisher contact and recovery rekey owner-deferred","Wikidata pilot consumed; owner parked","GHSL attempts closed pending material evidence"],"authority":["docs/DECISIONS.md","docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md","docs/engineering/CLOUD_FIRST_WORKFLOW.md"],"history":["docs/archive/CONTINUATION_CHECKPOINT_2026-11-26.md","docs/archive/CHECKPOINT_EVIDENCE_2026-11-26.md","docs/archive/DECISION_HISTORY_2026-11-26.md","docs/archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md"]}
 ```
 
 ## Current South African data repertoire
@@ -113,11 +21,11 @@ Reviewed 27 November 2026. Sole live routing ledger. [Roadmap](P_PHASE_ROADMAP.m
 | HPI-DATA-008 | 16 household service percentages, two metros | 2011/2022 aggregate, no property reliability inference |
 | HPI-DATA-009 | 25,505 institutions; 19,412 plausible mapped candidates | Q3 2023; 6,093 unmapped; no verified locations |
 
-002-006, 008 and 009 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 local integrity/re-extraction passed; private bytes not independently inspected. D03/D07/D08/D09/D11 partial; other families unresolved. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Windows sibling checkout/workspace; local state and file integrity not independently verified.
+002-006, 008 and 009 registered, null deadlines owner-observed; 005/006/008 private noncommercial. 007 parked. 006/008 integrity/re-extraction passed; 009 owner-observed integrity passed; private bytes not independently inspected. D03/D07/D08/D09/D11 partial; other families unresolved. Open repertoire source terms/law prevail; restricted real-property beta retains separate 30-day maximum and approval-controlled disposal. No automatic deletion, raw/derived private data in public Git/CI or real buyer activation. [Acquisition register](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [prior audit](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md). Windows sibling checkout/workspace; local state and file integrity not independently verified.
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 8fd12f2 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
+Requery `development` and `main` heads and exact CI. b26e8a4 7/7 passed; requery exact CI. Main 103c854; PR #4 historically draft. No phase credit.
 
 ## Current verified implementation on development
 
@@ -137,7 +45,7 @@ South Africa preferred, not approved final market. Cook County Class 203/Evansto
 
 ## Active work and next acceptance task
 
-P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 registered; integrity review next. No new intake, joins, spend or release.
+P0-A accepted; B complete; C/D/E conditional; F/G not accepted. SA4 blocked; 007 consumed; profiles parked. [AE0 side directive](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md): AE0 World Bank/NASA PASS, unregistered; Wikidata/GHSL STOP, parked. All authorities closed. D01/D02 unresolved; DBE 009 bounded integrity review complete. [Evidence](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md#27-november-2026--d11-offline-integrity-milestone). Other workspace statuses unverified. Resume on material P0 dependency evidence or owner decision. No new intake, joins, spend or release.
 
 ## Detailed engineering evidence and audit trail
 
