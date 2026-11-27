@@ -2645,7 +2645,7 @@ def dbe_profile(raw, expected=DBE_SHA):
         if any(len(v)>512 or any(ord(c)<32 or ord(c)==127 for c in v) for v in values):
             raise ValueError("DBE_FIELD_LENGTH_OR_CONTROL")
         r=dict(zip(DBE_FIELDS,values))
-        if r["DataYear"]!="2023" or r["Quarter"].casefold() not in ("3","q3","quarter 3","3.0"):
+        if r["DataYear"]!="2023" or r["Quarter"].casefold() not in ("3","q3","quarter 3","3.0","3. q3"):
             raise ValueError("DBE_VINTAGE")
         for k in DBE_FIELDS:
             if absent(r[k]):
@@ -2753,7 +2753,7 @@ def dbe_cli(root,args):
 def dbe_self_test():
     def fixture(changes=None, duplicate=False, invalid=False, extra=False):
         base={k:"" for k in DBE_HEADER}
-        base.update({"NatEmis":"012345678","DataYear":"2023","Quarter":"3","Institution_Name":"Invented school",
+        base.update({"NatEmis":"012345678","DataYear":"2023","Quarter":"3. Q3","Institution_Name":"Invented school",
                      "Province":"Fixture","DoE_Status":"Open","GIS_Long":"28.1","GIS_Lat":"-26.2",
                      "PaypointNo":"UNAPPROVED_FIXTURE"})
         rows=[base]
@@ -2790,6 +2790,13 @@ def dbe_self_test():
     raw2=fixture()
     data2,q2=dbe_profile(raw2,sha(raw2))
     assert q2["retained_unmapped_candidates"]==1 and q2["invalid_coordinate_pairs"]==1
+    assert all(r["Quarter"]=="3. Q3" for r in csv.DictReader(io.StringIO(data2.decode("utf-8"))))
+    for label in ("3","q3","quarter 3","3.0"):
+        compatible=fixture({"Quarter":label})
+        assert dbe_profile(compatible,sha(compatible))[1]["rows"]==2
+    for year,quarter in (("2023","2. Q2"),("2023","3. Q2"),("2023",""),("2022","3. Q3"),("2024","3. Q3")):
+        wrong=fixture({"DataYear":year,"Quarter":quarter})
+        reject(lambda:dbe_profile(wrong,sha(wrong)),"VINTAGE")
     reject(lambda:dbe_profile(raw,"bad"),"HASH")
     for changes,code in (({"Quarter":"2"},"VINTAGE"),({"Institution_Name":"=1+1"},"UNSAFE_TEXT")):
         bad=fixture(changes)
