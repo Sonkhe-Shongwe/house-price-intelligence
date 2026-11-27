@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from dataclasses import replace
 from datetime import date, timedelta
 import io
+import http.client
 import json
 import unittest
 from urllib.parse import urlsplit, parse_qs
@@ -182,6 +183,48 @@ class CollectorTests(unittest.TestCase):
             Collector(self.src.transport)._run(plan, reviewed_sources=pins)
         self.assertEqual(len(self.src.calls), 4)
         self.assertTrue(all("/api/views/" in p for p in self.src.calls))
+
+    def test_real_http_parser_framing(self):
+        # In-memory HTTP wire bytes, exercising the actual standard-library
+        # decoder rather than a mock claiming to have parsed a chunk terminator.
+        class Socket:
+            def __init__(self, wire):
+                self.wire = wire
+
+            def makefile(self, *args, **kwargs):
+                return io.BytesIO(self.wire)
+
+        def read(wire, params=None, budget=None):
+            @contextmanager
+            def transport(path, timeout):
+                response = http.client.HTTPResponse(Socket(wire))
+                response.begin()
+                try:
+                    yield response
+                finally:
+                    response.close()
+            collector = Collector(transport)
+            if budget is not None:
+                from tools.nyc_qualification import MAX_BYTES
+                collector.budget.bytes_received = MAX_BYTES-budget
+            return collector._json("64uk-42ks", params)
+
+        head = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+        chunked = head + b"Transfer-Encoding: chunked\r\n\r\n"
+        self.assertEqual(read(chunked+b"3\r\n{\"n\r\n4\r\n\":1}\r\n0\r\n\r\n"), {"n":1})
+        with self.assertRaises(QualificationError):
+            read(chunked+b"7\r\n{\"n\":1}\r\n")  # missing terminal chunk
+        with self.assertRaisesRegex(QualificationError, "invalid_response_framing"):
+            read(head+b"Transfer-Encoding: chunked\r\nContent-Length: 7\r\n\r\n"
+                 b"7\r\n{\"n\":1}\r\n0\r\n\r\n")
+        with self.assertRaisesRegex(QualificationError, "byte_limit"):
+            read(chunked+b"7\r\n{\"n\":1}\r\n0\r\n\r\n", budget=6)
+        closing = head+b"Connection: close\r\n\r\n"
+        self.assertEqual(read(closing+b'{"n":1}'), {"n":1})
+        with self.assertRaisesRegex(QualificationError, "missing_content_length"):
+            read(closing+b'{"n":1}', params={"$select":"count(*) as n"})
+        with self.assertRaises(QualificationError):
+            read(closing+b'{"n":')
 
     def test_one_attempt(self):
         c = Collector(self.src.transport)

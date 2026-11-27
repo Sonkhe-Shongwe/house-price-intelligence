@@ -143,17 +143,42 @@ class Collector:
                 require(response.getheader("Content-Encoding", "identity").lower()
                         == "identity", "unexpected_encoding")
                 length = response.getheader("Content-Length")
-                # Exact boundary and short read validation. No unbounded/chunked
-                # response without independent framing proof in this version.
-                require(length is not None, "missing_content_length")
-                expected = uint(length)
-                require(0 < expected <= remaining, "byte_limit")
-                while len(content) < expected:
-                    self._elapsed()
-                    chunk = response.read1(min(65536, expected-len(content)))
-                    require(type(chunk) is bytes and 0 < len(chunk) <= expected-len(content),
-                            "incomplete_response")
-                    content.extend(chunk)
+                transfer = response.getheader("Transfer-Encoding")
+                # HTTP/1.1 chunked framing is handled by http.client. Reject
+                # conflicting framing and unsupported transfer encodings.
+                if transfer is not None:
+                    require(transfer.strip().lower() == "chunked" and length is None
+                            and getattr(response, "chunked", False),
+                            "invalid_response_framing")
+                if length is not None:
+                    expected = uint(length)
+                    require(0 < expected <= remaining, "byte_limit")
+                    while len(content) < expected:
+                        self._elapsed()
+                        chunk = response.read1(min(65536, expected-len(content)))
+                        require(type(chunk) is bytes and 0 < len(chunk) <= expected-len(content),
+                                "incomplete_response")
+                        content.extend(chunk)
+                else:
+                    # Close-delimited JSON is acceptable for metadata only,
+                    # not a property-record response. No unbounded read.
+                    require(transfer is not None or (params is None
+                            and getattr(response, "will_close", False)),
+                            "missing_content_length")
+                    while True:
+                        self._elapsed()
+                        # At the cap do not probe with an extra payload byte.
+                        # Conservatively stop unless EOF was already observed.
+                        room = remaining-len(content)
+                        require(room > 0, "byte_limit")
+                        chunk = response.read1(min(65536, room))
+                        require(type(chunk) is bytes and len(chunk) <= room,
+                                "incomplete_response")
+                        if not chunk:
+                            require(response.isclosed(), "incomplete_response")
+                            break
+                        content.extend(chunk)
+                    require(bool(content), "incomplete_response")
                 self._elapsed()
             value = json.loads(content, object_pairs_hook=strict_pairs,
                                parse_float=Decimal, parse_constant=invalid_constant)
