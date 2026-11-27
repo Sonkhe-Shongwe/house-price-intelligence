@@ -154,3 +154,7 @@ The owner directed minimal email dependence: prefer verifiable direct downloads,
 ### Current repertoire and retention reconciliation (26 November 2026)
 
 The data-first correction has delivered three private local contextual datasets, not real buyer activation. [Checkpoint](../CHECKPOINT.md) governs current status and next task. [Open retention correction](DATA_MANAGER_V1.md#open-data-retention-policy-26-november-2026) supersedes earlier blanket 30-day wording only for the open repertoire; source terms/law and restricted real-property beta safeguards remain. Continue complementary geography/cadastral/sales discovery using direct access first. The earlier stop at external dependency remains applicable to formal P0-G closure, not separately authorised data-first discovery. No scope, phase or score change.
+
+### Current core-data feasibility update (27 November 2026)
+
+[Pinelands empirical evidence](DATA_MANAGER_V1.md#hpi-data-011-actual-identity-feasibility-milestone-27-november-2026) supersedes earlier acquisition-only blockers: D01 and D02 partial, 409/420 screened sales uniquely candidate-matched, zero verified legal identities. [SA4](SOUTH_AFRICAN_MISSION_DIRECTIVE.md#27-november-2026--sa4-bounded-empirical-progress-and-remaining-gate) has partial empirical results; acceptance blocked. P0.4/6 partial; P0.5/7 blocked. Existing permissions and deadlines are source-specific, no commercial/public buyer use, durable joined store or model approval. Continue documentary corroboration within P0; no phase credit or market/class/scope adoption.

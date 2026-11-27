@@ -2,7 +2,7 @@
 
 **Source:** The pre-existing Project 2 brief in `Sonkhe-Shongwe/sa-tech-grad-playbook.` at `docs/portfolio/house-price-intelligence.md` (reviewed 22 November 2026). This is a standalone adapted copy retaining the prior requirements and unresolved decisions. The original source remains intact.
 
-**Owner decision (24 November 2026):** pursue the original full real-property release. Evanston Township/Class 203 remains the initial candidate pending qualification and source-specific rights. Fictional fixtures remain development/test data; no production display or deployment approved. See [FR1–FR3](../engineering/FULL_RELEASE_QUALIFICATION_V1.md).
+**Owner decision (24 November 2026):** pursue the original full real-property release. Evanston Township/Class 203 was the initial candidate; South Africa subsequently preferred for research, final market/class not accepted. Fictional fixtures remain development/test data; no production display or deployment approved. See [FR1–FR3](../engineering/FULL_RELEASE_QUALIFICATION_V1.md) and [current Pinelands evidence](#27-november-2026--core-comparable-sales-feasibility-update).
 
 ## Problem and buyer
 
@@ -214,3 +214,7 @@ Recommended next bounded task: desk qualification of a finer-than-metro official
 ### Finer-context access decision (26 November 2026)
 
 [Access qualification](../research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#26-november-2026--finer-context-access-and-rights-decision) confirms indexed City website terms for personal noncommercial extracts but not full-profile retention, structured derivatives or app reuse. File size unavailable after header-only DNS failures; profile-specific denominators and uncertainty unverified. No-go for acquisition; park pending item terms/size evidence or an explicit owner route decision. Preserve existing metro-context proof and comparable-sales product; no phase exit or progress change.
+
+### 27 November 2026 | Core comparable-sales feasibility update
+
+The original Investigate / Compare / Decide comparable-sales proposition remains primary. [Measured Pinelands evidence](../research/DATA_FEASIBILITY.md#27-november-2026--pinelands-candidate-feasibility) establishes a potential local transaction/parcel foundation at R0, not a validated comparable-sales product: 409/420 screened sale rows uniquely candidate-matched, zero verified identities. Contextual workspace remains supplementary and unadopted as a pivot. Qualify legal/temporal identity, reported-sale eligibility, prior-only comparable sufficiency and protected permitted use before product-level claims or real activation. Preserve two-to-three-property shortlist and all existing scope/acceptance boundaries. No score, market or phase change.

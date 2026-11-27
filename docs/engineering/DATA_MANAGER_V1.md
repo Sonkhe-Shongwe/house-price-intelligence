@@ -1,14 +1,14 @@
 # HPI Data Manager | Current operations and historical evidence
 
-**Current operating instructions (26 November 2026):** Six owner-observed registrations (HPI-DATA-002/003/004/005/006/008); 007 parked. Use the permanent development checkout and sibling private workspace. Open retention migration completed; no mandatory internal expiry or deadline prompt, actual source conditions and law prevail. Actual acquisition date and terms confirmation remain necessary on first import; existing manifests reused. The chronological sections below record original behaviour at the time, including superseded deadlines and pending tests. They are not current instructions. See [checkpoint](../CHECKPOINT.md) and [repository audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md).
+**Current operating instructions (27 November 2026):** Eight registrations directly owner-observed (HPI-DATA-002/003/004/005/006/008/009/010), plus 011 registration and audit inferred from the successful combined command return; nine maintained references, not a full workspace audit. 001 closed; 007 parked. Use the permanent development checkout and sibling private workspace; run module commands from the checkout, not loose scripts copied into the data workspace. Open repertoire 002–006/008/009 has owner-observed null internal deadlines, subject to source terms/law; 010/011 retain fixed review before 27 December 2026 or earlier applicable terms. No automatic renewal/disposal. Source-specific intake authority and metadata remain required. Historical sections below preserve superseded commands, counts and pending tests; follow [checkpoint](../CHECKPOINT.md) for live routing and [latest matching milestone](#hpi-data-011-actual-identity-feasibility-milestone-27-november-2026) for evidence.
 
 Optional read-only integrity check, from the existing checkout after the next routine pull and passing CI:
 
 ```powershell
-python tools/hpi_data_manager.py --root "..\HPI-Data-Workspace" --audit-workspace
+python -m tools.hpi_data_manager --root "..\HPI-Data-Workspace" --audit-workspace
 ```
 
-Checks all supported dataset IDs (including unregistered/parked 007) against fixed file locations, retention, exact raw and processed hashes and quality reports, without generating or changing any file. Reports missing/unregistered or inconsistent datasets and returns nonzero if any fails. Does not re-run geospatial or RPPI transformation, verify legal rights or enumerate external copies. The starter CSV is historical scaffolding; manifests and live audit are authoritative. No new download, re-import or mandatory user action.
+Checks supported registrations 002–011 against known paths, applicable deadlines, raw sizes/checksums, processed checksums and quality reports without changing files. An unregistered 007 is expected to yield a nonzero overall exit; assess each dataset result separately. Does not independently verify legal rights, source authenticity, ground truth, transformations, backups/sync or full copy inventory. Manifests and local audit are authoritative for local registration; no new download, re-import or mandatory owner action.
 
 ## Original v0.1 design and evidence (historical)
 
