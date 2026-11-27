@@ -86,6 +86,84 @@ class SouthAfricanBrowserTests(unittest.TestCase):
         expect(self.page.get_by_role("alert")).to_contain_text("two decimal places")
         expect(self.page.get_by_test_id("za-result")).to_have_count(0)
 
+    def test_browser_only_two_property_journey(self):
+        # All buyer mutations go through the UI; direct API reads are assertions only.
+        saved_path=self.base+"/v2/fictional/za/saved"
+        shortlist_path=self.base+"/v2/fictional/za/shortlist"
+        count=self.page.get_by_test_id("za-shortlist-count")
+        expect(count).to_have_text("0 of 3 properties")
+        before=self.page.request.get(saved_path).json()["investigations"]
+        self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],[])
+        self.assertLessEqual(len(before),28)
+        writes=[]
+        self.page.on("request",lambda req:writes.append(req.url.removeprefix(self.base))
+                     if req.method=="POST" else None)
+        price=self.page.get_by_label("Fictional asking price (ZAR)")
+        parcel=self.page.get_by_label("Fictional erf")
+        save=self.page.get_by_test_id("za-save")
+        result=self.page.get_by_test_id("za-result")
+        saved_id=self.page.get_by_test_id("za-saved-id")
+        ids=[];snapshots=[]
+        for i,(token,amount) in enumerate([("000001","2750000.07"),("000010","1850000.09")]):
+            parcel.select_option("fictional-erf-"+token)
+            price.fill(amount)
+            self.submit()
+            if i==0:
+                expect(self.page.get_by_test_id("za-comparable")).to_have_count(5)
+                expect(result).to_contain_text("R 2 750 000.07")
+            else:
+                expect(result).to_contain_text("cannot be resolved exactly")
+                expect(self.page.get_by_test_id("za-comparable")).to_have_count(0)
+            self.assertEqual(len(self.page.request.get(saved_path).json()["investigations"]),len(before)+i)
+            save.click()
+            expect(saved_id).to_be_visible()
+            iid=saved_id.inner_text().split(": ",1)[1]
+            ids.append(iid)
+            snapshot=self.page.request.get(saved_path+"/"+iid).json()
+            snapshots.append(snapshot)
+            self.assertEqual(snapshot["request"]["subject_key"]["value"],"fictional-erf-"+token)
+            self.assertEqual(snapshot["request"]["asking_price"],amount)
+            self.assertEqual(snapshot["evidence"]["subject"]["asking_price"]["minor_units"],
+                             (275000007,185000009)[i])
+            expect(save).to_be_disabled()
+            select=self.page.get_by_label("Saved investigation to shortlist")
+            select.select_option(iid)
+            self.page.get_by_test_id("za-shortlist-add").click()
+            expect(count).to_have_text(f"{i+1} of 3 properties")
+        self.assertEqual(len(set(ids)),2)
+        self.assertEqual(len(self.page.request.get(saved_path).json()["investigations"]),len(before)+2)
+        comparison=self.page.get_by_test_id("za-comparison")
+        expect(comparison).to_contain_text("R 2 750 000.07")
+        expect(comparison).to_contain_text("R 1 850 000.09")
+        expect(comparison).to_contain_text("No comparable sale amounts")
+        expect(comparison).to_contain_text("Invented registered-sale consideration")
+        expect(comparison).to_contain_text("User-reported asking price")
+        frozen_text=comparison.inner_text()
+        self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],snapshots)
+        self.page.reload()
+        expect(count).to_have_text("2 of 3 properties")
+        expect(comparison).to_have_text(frozen_text)
+        for i,iid in enumerate(ids):
+            self.page.get_by_role("button",name="Reopen "+iid).click()
+            expect(self.page.get_by_text("Reopened frozen evidence; not recalculated.")).to_be_visible()
+            expect(saved_id).to_have_text("Saved ID: "+iid)
+            expect(price).to_have_value(("2750000.07","1850000.09")[i])
+            expect(self.page.get_by_test_id("za-comparable")).to_have_count(5 if i==0 else 0)
+            self.assertEqual(self.page.request.get(saved_path+"/"+iid).json(),snapshots[i])
+        self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],snapshots)
+        for i,iid in enumerate(ids):
+            self.page.get_by_role("button",name="Remove "+iid).click()
+            expect(count).to_have_text(f"{1-i} of 3 properties")
+            expect(comparison).to_have_count(0)
+        self.assertEqual(self.page.request.get(shortlist_path).json()["investigations"],[])
+        self.assertEqual(len(self.page.request.get(saved_path).json()["investigations"]),len(before)+2)
+        self.assertEqual(writes,["/v2/fictional/za/investigate","/v2/fictional/za/saved",
+                                "/v2/fictional/za/shortlist"]*2+["/v2/fictional/za/shortlist"]*2)
+        self.assertEqual(self.page.request.get(self.base+"/v1/investigations/history").json()["investigations"],[])
+        self.assertEqual(self.page.request.get(self.base+"/v1/shortlists").json()["shortlists"],[])
+        self.page.get_by_role("link",name="US fictional buyer workspace").click()
+        expect(self.page.get_by_test_id("buyer-workflow")).to_be_visible()
+
     def test_cross_market_response_refused_and_retry(self):
         path="**/v2/fictional/za/investigate"
         def corrupt(route):
