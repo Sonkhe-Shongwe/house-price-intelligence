@@ -190,6 +190,11 @@ def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None
         if path == "/context-preview" and context_atlas is not None:
             path = "/"  # existing React entry, explicitly enabled only
 
+        if path == "/nyc-fictional":
+            if not nyc_fixture or react_assets is None:
+                return _response(start_response, 404, {"error": "not_found"})
+            path = "/"
+
         if path == "/za-fictional":
             if not sa_fixture or react_assets is None:
                 return _response(start_response, 404, {"error": "not_found"})
