@@ -49,7 +49,7 @@ def remaining(deadline):
 
 
 def public_addresses(host=HOST):
-    if host not in (HOST, "query-next.wikidata.org", "power.larc.nasa.gov", "jeodpp.jrc.ec.europa.eu", "ghsl.jrc.ec.europa.eu"):
+    if host not in (HOST, "query-next.wikidata.org", "power.larc.nasa.gov", "jeodpp.jrc.ec.europa.eu", "ghsl.jrc.ec.europa.eu", "citymaps.capetown.gov.za"):
         raise Refused("unapproved host")
     entries = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM,
                                  proto=socket.IPPROTO_TCP)
@@ -86,7 +86,7 @@ class PinnedHTTPS(http.client.HTTPSConnection):
             raise
 
 
-def bounded_body(response, media_types=("application/json",)):
+def bounded_body(response, media_types=("application/json",), *, cap=CAP):
     if response.status != 200:
         raise Refused("HTTP status refused; no redirect or retry")
     def single(name, default=None):
@@ -106,14 +106,14 @@ def bounded_body(response, media_types=("application/json",)):
         if not length.isascii() or not length.isdigit() or len(length) > 10:
             raise Refused("invalid response length")
         count = int(length)
-        if not 0 < count <= CAP:
+        if not 0 < count <= cap:
             raise Refused("response byte cap")
         raw = response.read(count)
         if len(raw) != count:
             raise Refused("incomplete response")
     else:
-        raw = response.read(CAP)
-        if len(raw) >= CAP:
+        raw = response.read(cap)
+        if len(raw) >= cap:
             raise Refused("unbounded response reached cap")
     if not raw:
         raise Refused("empty response")
@@ -145,7 +145,7 @@ def network_worker(page, deadline, sender):
         sender.close()
 
 
-def deadline_fetch(page, worker=network_worker, seconds=SECONDS):
+def deadline_fetch(page, worker=network_worker, seconds=SECONDS, *, cap=CAP):
     request_path(page)
     deadline = time.monotonic() + seconds
     context = mp.get_context("spawn")
@@ -154,7 +154,7 @@ def deadline_fetch(page, worker=network_worker, seconds=SECONDS):
     messages = queue.Queue(maxsize=1)
     def read():
         try:
-            messages.put(receiver.recv_bytes(CAP + 1))
+            messages.put(receiver.recv_bytes(cap + 1))
         except (OSError, EOFError):
             messages.put(None)
     started = False
@@ -176,7 +176,7 @@ def deadline_fetch(page, worker=network_worker, seconds=SECONDS):
             raise Refused("request worker failed")
         if msg[:1] == b"E":
             raise Refused("transport refused: " + msg[1:].decode("ascii", errors="replace"))
-        if msg[:1] != b"S" or not 1 < len(msg) <= CAP + 1:
+        if msg[:1] != b"S" or not 1 < len(msg) <= cap + 1:
             raise Refused("invalid worker envelope")
         return msg[1:]
     finally:
