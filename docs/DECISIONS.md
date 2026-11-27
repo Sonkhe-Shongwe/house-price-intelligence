@@ -250,3 +250,7 @@ Owner explicitly approves the [current-snapshot comparison amendment](research/D
 ## Owner local-environment direction (27 November 2026)
 
 Owner confirms the personally managed laptop is acceptable to them and directs that Windows Security troubleshooting remain parked. Continue with the installed Ubuntu WSL2 runtime for invented-only qualification and prepare the existing approved disposable NYC experiment. This is owner attestation, not independent verification of encryption, endpoint or swap protection. Do not reopen general Windows repair or demand another approval of the same acquisition scope. Preserve the original bounded public-source, memory-only, aggregate-only processing requirements and one-attempt guard. No durable real data, cloud processing, public CI real records, release or cost approval inferred.
+
+## NYC bounded qualification consumed (27 November 2026)
+
+Owner-reported actual local result: completed, exit 0, attempt consumed True, 19/30 supported, six qualifying sales. [Outcome and limits](research/DATA_FEASIBILITY.md#27-november-2026--nyc-actual-bounded-qualification-outcome). The original one-time permission is exhausted; retain marker, no replay even if code still exposes the fixed CLI. No market selection, durable real intake, additional collection, valuation, release or phase approval inferred. Owner's disposable-risk acknowledgement is limited to this completed experiment; independent host protection remains unverified.
