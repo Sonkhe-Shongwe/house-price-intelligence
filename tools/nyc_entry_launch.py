@@ -41,8 +41,59 @@ def guest_swap_absent():
         return not bool(stream.read(1))
 
 
+def memory_status():
+    """Return only aggregate Linux memory counters, never the status document."""
+    fields = {}
+    with open("/proc/self/status", encoding="ascii") as stream:
+        for line in stream:
+            name, sep, tail = line.partition(":")
+            if name in ("VmLck", "VmSwap"):
+                require(sep and name not in fields
+                        and re.fullmatch(r"\s*[0-9]+\s+kB\s*", tail) is not None,
+                        "lock_status_unverified")
+                fields[name] = int(tail.split()[0]) * 1024
+    require(set(fields) == {"VmLck", "VmSwap"}, "lock_status_unverified")
+    return fields["VmLck"], fields["VmSwap"]
+
+
+def lock_current_and_future():
+    """Called inside the final worker, never inherited across fork or exec.
+
+    Check the syscall plus a new private anonymous mapping; no unlock of the
+    remaining worker address space, no privilege or resource-limit changes.
+    This is a guest-process control, not a Windows host guarantee.
+    """
+    import ctypes
+    import mmap
+    import resource
+    require(sys.platform.startswith("linux"), "linux_required")
+    libc = ctypes.CDLL(None, use_errno=True)
+    lock = libc.mlockall
+    lock.argtypes = [ctypes.c_int]
+    lock.restype = ctypes.c_int
+    MCL_CURRENT, MCL_FUTURE = 1, 2
+    require(lock(MCL_CURRENT | MCL_FUTURE) == 0, "memory_lock_refused")
+    baseline, swapped = memory_status()
+    require(baseline > 0 and swapped == 0, "lock_status_unverified")
+    # A modest invented allocation verifies that future mappings are locked.
+    # It does not assert that the maximum real response fits in RLIMIT_MEMLOCK.
+    size = 1024 * 1024
+    soft, _ = resource.getrlimit(resource.RLIMIT_MEMLOCK)
+    require(soft == resource.RLIM_INFINITY or soft >= baseline + size,
+            "memory_lock_headroom")
+    with mmap.mmap(-1, size, flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS) as probe:
+        for offset in range(0, size, mmap.PAGESIZE):
+            probe[offset] = 1
+        locked, swapped = memory_status()
+        require(locked >= baseline + size and swapped == 0, "future_lock_unverified")
+    return True
+
+
 def protection_probe():
-    return {**non_dumpable_worker(), "guest_swap_absent": guest_swap_absent()}
+    controls = non_dumpable_worker()
+    absent = guest_swap_absent()
+    locked = False if absent else lock_current_and_future()
+    return {**controls, "guest_swap_absent": absent, "memory_lock_verified": locked}
 
 
 def preflight(directory, commit):
@@ -52,13 +103,14 @@ def preflight(directory, commit):
     require(outcome.get("status") == "completed", "process_protection_unverified")
     controls = outcome["result"]
     require(type(controls) is dict and set(controls) == {
-        "core_dumps_disabled", "process_dumpable", "guest_swap_absent"}
+        "core_dumps_disabled", "process_dumpable", "guest_swap_absent", "memory_lock_verified"}
         and controls["core_dumps_disabled"] is True
         and controls["process_dumpable"] is False
-        and type(controls["guest_swap_absent"]) is bool, "process_protection_unverified")
+        and type(controls["guest_swap_absent"]) is bool
+        and type(controls["memory_lock_verified"]) is bool, "process_protection_unverified")
     return {"authority": AUTHORITY, "reviewed_commit": commit,
             "workspace_owner_only": True, **controls,
-            "preflight_passed": controls["guest_swap_absent"],
+            "preflight_passed": controls["guest_swap_absent"] or controls["memory_lock_verified"],
             "host_protection_independently_verified": False,
             "notice_review_required": True, "attempt_consumed": False,
             "record_requests": 0, "live_enabled": False}
