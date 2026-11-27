@@ -30,3 +30,19 @@ Three of 15 data families partially populated. No individual completed sales, ca
 ## Retention and operational boundaries
 
 All three open imports reported null deadline after owner-authorised metadata migration. Source terms and law prevail; private beta/restricted data controls unchanged. No automatic deletion, raw/processed public upload, new provider, new runner, new spend or new permission. R0. Historical approvals, failed attempts, old deadline values, and the complete pre-audit handoff remain in Git and dated documents. No source or application data removed. CI on the new revision and actual local audit execution remain pending at commit time.
+
+## 27 November 2026 | Proportionate public-data governance audit
+
+Scope: targeted governance and continuity audit at [eb5709a](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/eb5709a342b4d546af2f63b854757a68cb641854), main 103c854. Git tree inventory reports 91 Markdown files under docs, 1,665,823 bytes; not a line-by-line audit of all documents. Five of seven exact-head workflows passed at inspection, including [audit push](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45939209815); [React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45939214833) and [runtime](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45939215001) still running. Windows state inaccessible.
+
+| Finding | Disposition |
+| --- | --- |
+| Master/AGENTS exceptional-intake language can discourage ordinary public research | Clarify delegated public metadata/aggregate research and link single current decision; retain scoped intake/joins. |
+| Cape Town parcel item has blank licence field and terms retrieval failure | Do not infer prohibition; reassess authoritative general policy and notices for intended bounded private use. No automatic acquisition. |
+| Private real beta section defaults real operations to refusal | Applies to identifiable/restricted property processing and buyer evidence, not ordinary public browsing; retain strict actual protection and publication gates. |
+| D01 sources still lack verified R0 event-level path | Prioritise genuinely distinct routes; no listings/valuations as substitutes. |
+| Dated SA/P0/acquisition directives include old next-task text | Checkpoint owns current routing; retain dated evidence, no wholesale rewrite. |
+| Acquisition register 188 KB and side directive 82 KB | Selective ranges and canonical evidence links rather than full-load; preserve history. |
+| Existing checker validates structure/links, not legality or evidence | Keep checks unchanged; avoid claiming policy acceptance from CI. |
+
+[Decision](../DECISIONS.md#proportionate-public-data-research-27-november-2026) records owner direction, not a general grant or new numerical cap. Retain P0.5/P0.7, R0, separate source scopes and historic approvals. Recommend a single proportionate source decision with evidence/limits for low-risk public reference data, escalating only material uncertainty; stronger controls for identifiable property data, persistent app use and publication. No data acquisition, contacts, joins, code, release, main merge, score change or storage alteration. Next task remains core D02 reassessment; D01 blocked. P0 94%, weighted 87.1%.
