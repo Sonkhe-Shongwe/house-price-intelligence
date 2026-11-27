@@ -119,7 +119,7 @@ class NYCQualificationTests(unittest.TestCase):
         q = subject_query()
         self.assertEqual(q.limit, 30)
         self.assertEqual(q.order, "bbl ASC")
-        self.assertIn("zipcode = '11361'", q.where)
+        self.assertIn("zipcode = 11361", q.where)
         self.assertIn("address", q.fields)
         self.assertEqual(q.parameters(count=True)["$select"], "count(*) as n")
         q = sales_query(self.cutoff-timedelta(days=400),

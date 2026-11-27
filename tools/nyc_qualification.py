@@ -321,7 +321,7 @@ class Query:
 def subject_query():
     """First 30 candidates; uniqueness and independent frame proof still required."""
     return Query("64uk-42ks", SUBJECT_FIELDS,
-                 "borough = 'QN' AND zipcode = '11361' AND bldgclass = 'A2' "
+                 "borough = 'QN' AND zipcode = 11361 AND bldgclass = 'A2' "
                  "AND numbldgs = 1 AND unitsres = 1 AND unitstotal = 1 "
                  "AND bldgarea > 0 AND address IS NOT NULL AND address != ''",
                  MAX_SUBJECTS, "bbl ASC")
