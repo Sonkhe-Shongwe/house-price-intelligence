@@ -200,3 +200,7 @@ Owner explicitly approves HPI-DATA-011 automated local browser export of the 839
 ## HPI-DATA-011 combined registration and identity feasibility authority (27 November 2026)
 
 Owner explicitly approves HPI-DATA-011 private offline registration, data cleaning, quality flagging and bounded in-memory identifier matching against HPI-DATA-010 at R0 under the [exact combined proposal](engineering/DATA_MANAGER_V1.md#hpi-data-011-actual-sales-profile-and-next-proposal-27-november-2026). Existing pinned CSV and audited 010 only; preserve all rows and raw bytes, no addresses in sales projection, no persistent joined table or identity promotion. Review before 27 December or earlier applicable terms, no new intake, retention extension, app/model use or publication. No phase credit.
+
+## HPI-DATA-010/011 strict corroboration authority (27 November 2026)
+
+Owner explicitly approves the [bounded strict-region, erf and address corroboration proposal](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md#27-november-2026--d01d02-documentary-cadastral-corroboration): existing pinned registered 010/011 only, private offline Windows, aggregate results, R0, unchanged retention deadlines, no persistent joins, new acquisition, publication or application activation. Implementation, synthetic tests and checkpoint updates delegated. Both integrity audits and exact implementation CI required before owner execution; no identity promotion, model, retention extension or phase credit.

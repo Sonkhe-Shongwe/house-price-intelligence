@@ -74,7 +74,7 @@ jobs:
       - name: Test offline D01-F1 sales profiling (invented data only)
         run: python -m unittest tools.test_d01_file_profile -v
       - name: Test offline HPI-DATA-011 registration and identity feasibility (invented data only)
-        run: python -m unittest tools.test_d01_register -v
+        run: python -m unittest tools.test_d01_register tools.test_d01_strict_corroboration -v
       - name: Test offline HPI Data Manager (invented data only)
         run: python tools/hpi_data_manager.py --self-test
       - name: Validate documentation links and phase percentages
