@@ -2684,6 +2684,7 @@ def dbe_profile(raw, expected=DBE_SHA, *, preflight=False):
     mapped=0
     unsafe_fields={}
     unsafe_rows=0
+    withheld_suburb=0
     for valid,r in records:
         duplicate=valid and seen[r["NatEmis"]]>1
         if duplicate:
@@ -2693,12 +2694,16 @@ def dbe_profile(raw, expected=DBE_SHA, *, preflight=False):
             continue
         if r["GIS_Long"] and r["GIS_Lat"]:
             mapped+=1
-        # Prevent formula interpretation if an institutional text field is opened
-        # in a spreadsheet. Refuse instead of silently changing the source text.
+        # Withhold only the observed optional Suburb prefix class (one cell).
+        # Keep the source archive intact; refuse every other flagged text value.
         flagged=False
         for k in DBE_FIELDS:
             v=r[k]
             if k in ("GIS_Long","GIS_Lat") or not v.startswith(("=","+","-","@")):
+                continue
+            if k=="Suburb" and v.startswith("+") and withheld_suburb==0:
+                r[k]=""
+                withheld_suburb+=1
                 continue
             flagged=True
             counts=unsafe_fields.setdefault(k,{"equals":0,"plus":0,"minus":0,"at":0,
@@ -2716,6 +2721,8 @@ def dbe_profile(raw, expected=DBE_SHA, *, preflight=False):
     quality["retained_mapped_candidates"]=mapped
     quality["retained_unmapped_candidates"]=quality["retained_institutions"]-mapped
     quality["missing_fields"]=missing
+    quality["withheld_optional_text_fields"]={"Suburb":withheld_suburb}
+    quality["text_screening_policy"]="At most one plus-prefixed Suburb withheld in derived output; raw archive unchanged; all other flagged text refuses."
     quality["limitations"]="Historical institutional rows; coordinate envelope only, missing/invalid pairs blanked, ambiguous identities excluded, no current status, admissions, quality, true nearest school or price claim."
     if preflight:
         return None,{"status":"STOP" if unsafe_rows or not mapped else "PASS",
@@ -2730,6 +2737,7 @@ def dbe_profile(raw, expected=DBE_SHA, *, preflight=False):
                      "missing_coordinate_pairs":quality["missing_coordinate_pairs"],
                      "invalid_coordinate_pairs":quality["invalid_coordinate_pairs"],
                      "unsafe_rows":unsafe_rows,"unsafe_fields":unsafe_fields,
+                     "withheld_optional_text_fields":{"Suburb":withheld_suburb},
                      "registered":False,"workspace_writes":0,"network_requests":0}
     if unsafe_rows:
         raise ValueError("DBE_UNSAFE_TEXT")
@@ -2766,7 +2774,7 @@ def import_dbe(root,intake,terms_reviewed,deadline=None,today=None,expected=DBE_
        "source":"Department of Basic Education, Master List of Schools 2023, v1, Q3; UCT DataFirst",
        "source_url":"https://datafirst.uct.ac.za/dataportal/index.php/catalog/985",
        "doi":"10.25828/1f7t-hn28","catalogue_licence":"CC BY; version not specified",
-       "attribution":"Department of Basic Education (DBE), Master List of Schools 2023 v1, UCT DataFirst; HPI field selection and coordinate screening.",
+       "attribution":"Department of Basic Education (DBE), Master List of Schools 2023 v1, UCT DataFirst; HPI field selection, coordinate screening and optional text withholding.",
        "source_identity_evidence":"Owner-supplied snapshot hash, not publisher checksum.",
        "source_bytes":len(raw),"source_sha256":sha(raw),"raw_path":DBE_RAW,
        "first_intake_date":intake.isoformat(),"terms_reviewed_by_owner":True,**retention,
@@ -2788,13 +2796,15 @@ def dbe_cli(root,args):
     return 0
 
 def dbe_self_test():
-    def fixture(changes=None, duplicate=False, invalid=False, extra=False):
+    def fixture(changes=None, duplicate=False, invalid=False, extra=False, second_changes=None):
         base={k:"" for k in DBE_HEADER}
         base.update({"NatEmis":"012345678","DataYear":"2023","Quarter":"3. Q3","Institution_Name":"Invented school",
                      "Province":"Fixture","DoE_Status":"Open","GIS_Long":"28.1","GIS_Lat":"-26.2",
                      "PaypointNo":"UNAPPROVED_FIXTURE"})
         rows=[base]
         second=dict(base,NatEmis="012345679",GIS_Long="0",GIS_Lat="0")
+        if second_changes:
+            second.update(second_changes)
         rows.append(second)
         if duplicate:
             rows.append(dict(second))
@@ -2849,6 +2859,22 @@ def dbe_self_test():
     assert report["mapped_candidates_before_text_gate"]==1
     reject(lambda:dbe_profile(unsafe,sha(unsafe)),"UNSAFE_TEXT")
     assert dbe_profile(raw2,sha(raw2),preflight=True)[1]["status"]=="PASS"
+    withheld=fixture({"Suburb":"+PRIVATE_FIXTURE"})
+    cleaned,quality=dbe_profile(withheld,sha(withheld))
+    assert quality["retained_institutions"]==2 and quality["retained_mapped_candidates"]==1
+    assert quality["withheld_optional_text_fields"]=={"Suburb":1}
+    assert quality["missing_fields"]["Suburb"]==1
+    assert b"PRIVATE_FIXTURE" not in cleaned
+    assert next(csv.DictReader(io.StringIO(cleaned.decode("utf-8"))))["Suburb"]==""
+    _,diagnostic=dbe_profile(withheld,sha(withheld),preflight=True)
+    assert diagnostic["status"]=="PASS" and diagnostic["withheld_optional_text_fields"]=={"Suburb":1}
+    assert diagnostic["unsafe_rows"]==0 and "PRIVATE_FIXTURE" not in json.dumps(diagnostic)
+    for fields,second in (({"Suburb":"=1+1"},None),({"Suburb":"@x"},None),
+                          ({"Suburb":"+x","Institution_Name":"+x"},None),
+                          ({"Town_City":"+x"},None),({"Suburb":"+x"},{"Suburb":"+y"})):
+        bad=fixture(fields,second_changes=second)
+        reject(lambda:dbe_profile(bad,sha(bad)),"UNSAFE_TEXT")
+
     bad=fixture(extra=True)
     reject(lambda:dbe_profile(bad,sha(bad)),"MEMBERS")
     with tempfile.TemporaryDirectory() as tmp:
