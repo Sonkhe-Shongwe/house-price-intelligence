@@ -262,3 +262,7 @@ Owner explicitly states: "I approve the proposed bounded NYC development market.
 ## NYC-ENTRY-P1 conditional authority (28 November 2026)
 
 Owner explicitly states: "I approve NYC-ENTRY-P1 under the proposed acquisition limits, including the residual disposable host risk, subject to passing the required protection, notice and CI checks." Approves the exact [NYC-ENTRY-P1 proposal](research/DATA_FEASIBILITY.md#28-november-2026--pluto-one-time-address-frame-qualification-proposal), PLUTO only, exact revision, five requests/10,000 rows/10 MiB/180 seconds, private disposable WSL2, aggregate-only, R0. New one-time permission unused, conditional; no repeat approval of same scope. Prior NYC marker stays consumed. Necessary launcher/preflight implementation delegated; no actual acquisition before targeted notice and protection evidence, exact CI, and distinct marker. No durable storage, joins, release, OS-wide repair or phase acceptance.
+
+## NYC-ENTRY-P1 consumed (28 November 2026)
+
+Owner-reported completed actual local result at 68c6f2e: attempt_consumed true, recorded_frame_qualified true, 334/334 eligible recorded addresses unique across 6,447 published ZIP lots. [Outcome](research/DATA_FEASIBILITY.md#28-november-2026--nyc-entry-p1-actual-address-frame-outcome). Exact CI now 10/10 passed; execution timestamp/order and rows not independently audited. NYC-ENTRY-P1 exhausted; preserve both markers, no replay/new acquisition, durable storage, actual buyer display, alias/title/unsold claim, release, valuation or phase acceptance inferred.
