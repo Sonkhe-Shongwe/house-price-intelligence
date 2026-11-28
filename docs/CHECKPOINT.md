@@ -14,7 +14,7 @@ Prior research is retired from the active product; preserve its [exact historica
 
 ## Repository and verification
 
-Requery `development` and `main` heads and exact CI. 68c6f2e: 10/10 exact workflows passed; [audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/46120887986), [React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/46120894446). 385 application tests passed. 0490dbf: 7/7 workflows passed. Main 103c854. No phase credit.
+Requery `development` and `main` heads and exact CI. 68c6f2e: 10/10 exact workflows passed; [audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/46120887986), [React](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/46120894446). 385 application tests passed. 42bbba4: 7/7 workflows passed. Main 103c854. No phase credit.
 
 ## Current verified implementation on development
 
@@ -50,4 +50,4 @@ Roadmap estimates are not acceptance scores; no phase credit.
 
 ## Historical continuity and audit record
 
-[Continuation optimisation audit](reviews/CONTINUATION_SYSTEM_AUDIT_2026-11-26.md). Historical snapshots retained.
+[Continuation optimisation audit](reviews/CONTINUATION_SYSTEM_AUDIT_2026-11-26.md); [28 Nov documentation audit](reviews/DOCUMENTATION_AUDIT_2026-11-28.md). Historical snapshots retained.
