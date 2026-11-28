@@ -266,3 +266,7 @@ Owner explicitly states: "I approve NYC-ENTRY-P1 under the proposed acquisition 
 ## NYC-ENTRY-P1 consumed (28 November 2026)
 
 Owner-reported completed actual local result at 68c6f2e: attempt_consumed true, recorded_frame_qualified true, 334/334 eligible recorded addresses unique across 6,447 published ZIP lots. [Outcome](research/DATA_FEASIBILITY.md#28-november-2026--nyc-entry-p1-actual-address-frame-outcome). Exact CI now 10/10 passed; execution timestamp/order and rows not independently audited. NYC-ENTRY-P1 exhausted; preserve both markers, no replay/new acquisition, durable storage, actual buyer display, alias/title/unsold claim, release, valuation or phase acceptance inferred.
+
+## Offline PythonAnywhere compatibility prototype approved (28 November 2026)
+
+Owner explicitly approved the bounded offline invented-only PythonAnywhere compatibility prototype, preserving existing architecture and acceptance gates. No new accounts, live data, deployment or expenditure. Authorises isolated synthetic engineering and CI only, including the proposed proxy, WSGI, storage, isolation, lifecycle and budget experiments in [alternative assessment](engineering/PRODUCTION_READINESS_V1.md#28-november-2026--no-public-database-r0-alternative-qualification). Not provider selection, migration, production security equivalence, real-data activation, credential window, new account or phase acceptance.
