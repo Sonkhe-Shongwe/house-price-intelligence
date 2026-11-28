@@ -1,9 +1,8 @@
-"""PLUTO-only bounded response orchestration, invented transport rehearsal.
+"""PLUTO-only bounded response orchestration shared by isolated launchers.
 
-No live transport constructor, command-line entrypoint, or authority marker.
-The caller supplies an invented response context manager. A separate approved
-local launcher must enforce a hard deadline, host protection and persistent
-one-attempt consumption before any actual requests. Never run real rows in CI.
+FrameRehearsal remains an invented-only public seam. The private session is
+used by the separately guarded local NYC-ENTRY-P1 worker, never by CI live.
+No command-line entrypoint or authority marker in this module.
 """
 import json
 import time
@@ -15,10 +14,9 @@ from tools.nyc_collector import https_response, strict_pairs, invalid_constant, 
 from tools.nyc_qualification import EXPECTED_TYPES, QualificationError, require
 
 
-class FrameRehearsal:
+class _FrameSession:
     def __init__(self, transport, clock=time.monotonic):
-        require(callable(transport) and transport is not https_response,
-                "live_execution_disabled")
+        require(callable(transport), "invalid_transport")
         self._transport = transport
         self._clock = clock
         self._used = False
@@ -96,7 +94,11 @@ class FrameRehearsal:
                 "frame_metadata_revision")
         revision = ":".join(map(str, tokens))
         require(revision == frame.REVISION, "frame_revision_changed")
+        self._review_metadata(raw)
         return revision
+
+    def _review_metadata(self, raw):
+        """Invented seam has no actual publisher notice gate."""
 
     def _count(self):
         raw = self._request(f"/resource/{frame.DATASET}.json", frame.count_parameters())
@@ -130,3 +132,11 @@ class FrameRehearsal:
             # Never pass transport/decoder exceptions or arbitrary source values
             # to stdout, logs or a caller. Failure has no partial result.
             raise QualificationError("frame_rehearsal_refused") from None
+
+
+class FrameRehearsal(_FrameSession):
+    """Invented-only interface; injection is not a security sandbox."""
+    def __init__(self, transport, clock=time.monotonic):
+        require(callable(transport) and transport is not https_response,
+                "live_execution_disabled")
+        super().__init__(transport, clock)

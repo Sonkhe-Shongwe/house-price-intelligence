@@ -41,12 +41,12 @@ class EntryLauncherTests(unittest.TestCase):
             with self.assertRaises(QualificationError):
                 launch.notice_context(bad)
 
-    def test_execute_disabled_before_workspace_or_network(self):
+    def test_execute_requires_ci_review_before_workspace_or_network(self):
         with patch.object(launch,"workspace") as ws, patch.object(launch,"_fetch") as fetch:
             with contextlib.redirect_stdout(io.StringIO()) as stdout:
                 rc=launch.main(["--execute","--reviewed-commit","a"*40])
             self.assertEqual(rc,1)
-            self.assertEqual(json.loads(stdout.getvalue())["reason"],"activation_pending")
+            self.assertEqual(json.loads(stdout.getvalue())["reason"],"exact_ci_review_required")
             ws.assert_not_called()
             fetch.assert_not_called()
 
@@ -162,6 +162,112 @@ class EntryLauncherTests(unittest.TestCase):
         with patch.object(launch.sys,"platform","linux"), patch("ctypes.CDLL",return_value=libc):
             with self.assertRaisesRegex(QualificationError,"memory_lock_refused"):
                 launch.lock_current_and_future()
+
+
+    def test_fixed_transport_refuses_other_source_and_query(self):
+        from urllib.parse import urlencode
+        resource=f"/resource/{frame.DATASET}.json"
+        good=[f"/api/views/{frame.DATASET}.json",
+              resource+"?"+urlencode(frame.count_parameters()),
+              resource+"?"+urlencode(frame.row_parameters(10))]
+        with patch.object(launch,"https_response") as tls:
+            for path in good:
+                launch.fixed_response(path,15)
+            self.assertEqual(tls.call_count,3)
+            for path in ("/api/views/usep-8jbt.json",good[2]+"&x=1",
+                         resource+"?%24select=owner&%24limit=10"):
+                with self.assertRaises(QualificationError):
+                    launch.fixed_response(path,15)
+            self.assertEqual(tls.call_count,3)
+
+    def test_actual_worker_order_and_aggregate_result(self):
+        from backend.tests.test_nyc_address_frame_transport import Script, metadata, row
+        context={"attribution":launch.AGENCY,"attributionLink":launch.AGENCY_LINK,
+                 "description":launch.AGENCY_LINK+" Current version: 26v3",
+                 "metadata":{"custom_fields":{"Dataset Information":{"Agency":launch.AGENCY},
+                    "Update":{"Automation":"Yes","Data Change Frequency":"Quarterly",
+                              "Update Frequency":"Quarterly"}}}}
+        m=metadata(**context)
+        script=Script([m,[{"n":"1"}],[row()],[{"n":"1"}],m])
+        order=[]
+        def guarded(path,timeout):
+            self.assertEqual(order,["locked"])
+            return script(path,timeout)
+        def locked():
+            order.append("locked")
+            return True
+        with patch.object(launch,"non_dumpable_worker",return_value={
+                "core_dumps_disabled":True,"process_dumpable":False}), \
+                patch.object(launch,"guest_swap_absent",return_value=False), \
+                patch.object(launch,"lock_current_and_future",side_effect=locked), \
+                patch.object(launch,"memory_status",return_value=(4096,0)), \
+                patch.object(launch,"https_response",side_effect=guarded):
+            result=launch.actual_worker()
+        self.assertEqual(len(script.calls),5)
+        self.assertTrue(result["recorded_frame_qualified"])
+        self.assertFalse(result["fixture_only"])
+        self.assertFalse(result["actual_entry_verified"])
+        self.assertNotIn("INVENTED",json.dumps(result))
+
+    def test_notice_drift_refuses_before_count(self):
+        from backend.tests.test_nyc_address_frame_transport import Script, metadata
+        script=Script([metadata(termsOfUse="invented restriction")])
+        with patch.object(launch,"https_response",side_effect=script):
+            with self.assertRaisesRegex(QualificationError,"frame_rehearsal_refused"):
+                launch._EntrySession().run()
+        self.assertEqual(len(script.calls),1)
+
+    def test_actual_worker_refuses_lock_failure_before_network(self):
+        with patch.object(launch,"non_dumpable_worker",return_value={
+                "core_dumps_disabled":True,"process_dumpable":False}), \
+                patch.object(launch,"guest_swap_absent",return_value=False), \
+                patch.object(launch,"lock_current_and_future",return_value=False), \
+                patch.object(launch,"https_response") as tls:
+            with self.assertRaisesRegex(QualificationError,"memory_lock_refused"):
+                launch.actual_worker()
+            tls.assert_not_called()
+
+    @unittest.skipUnless(os.name=="posix","POSIX marker")
+    def test_execute_consumes_before_worker_and_retains_on_timeout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            def timeout(task,seconds):
+                self.assertIs(task,launch.actual_worker)
+                self.assertEqual(seconds,180)
+                self.assertTrue((directory/launch.MARKER).exists())
+                raise QualificationError("hard_deadline")
+            with patch.object(launch,"workspace",return_value=directory), \
+                    patch.object(launch,"preflight",return_value={"preflight_passed":True}), \
+                    patch.object(launch,"supervised",side_effect=timeout) as worker:
+                result=launch.execute_reviewed(directory,"a"*40)
+                self.assertEqual(result,{"status":"blocked","reason":"entry_session_refused",
+                                         "attempt_consumed":True})
+                with self.assertRaisesRegex(QualificationError,"attempt_already_consumed"):
+                    launch.execute_reviewed(directory,"a"*40)
+                worker.assert_called_once()
+
+    def test_failed_preflight_never_consumes_or_launches(self):
+        directory=Path("/invented")
+        with patch.object(launch,"workspace",return_value=directory), \
+                patch.object(launch,"preflight",return_value={"preflight_passed":False}), \
+                patch.object(launch,"consume") as marker, \
+                patch.object(launch,"supervised") as worker:
+            with self.assertRaisesRegex(QualificationError,"process_protection_unverified"):
+                launch.execute_reviewed(directory,"a"*40)
+            marker.assert_not_called()
+            worker.assert_not_called()
+
+    def test_completed_zero_unique_is_no_go(self):
+        directory=Path("/invented")
+        with patch.object(launch,"workspace",return_value=directory), \
+                patch.object(launch,"preflight",return_value={"preflight_passed":True}), \
+                patch.object(launch,"consume"), \
+                patch.object(launch,"supervised",return_value={"status":"completed","result":{
+                    "contract":"nyc-address-frame-actual-v1","fixture_only":False,
+                    "recorded_frame_qualified":False}}):
+            result=launch.execute_reviewed(directory,"a"*40)
+            self.assertEqual(result["status"],"no_go")
+            self.assertTrue(result["attempt_consumed"])
 
 
 if __name__=="__main__":
