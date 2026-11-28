@@ -4,7 +4,7 @@
 
 ## Working conclusion
 
-**Historical measured benchmark:** Cook County township 17 (Evanston), Class 203, retains the verified retrospective pilot, not an approved public geography/class. NYC and England/Wales are documentary challengers. Do not substitute municipal valuations, asking prices or aggregate indices for individual sale records. See [checkpoint](../CHECKPOINT.md) for current routing.
+**Current development boundary:** [NYC bounded target](../DECISIONS.md#nyc-bounded-development-market-selected-27-november-2026) approved for development only; [recorded frame](#28-november-2026--nyc-entry-p1-actual-address-frame-outcome) and [earlier-sale sample](#27-november-2026--nyc-actual-bounded-qualification-outcome) qualify bounded research, not actual buyer display or durable intake. Both permissions consumed. Cook County township 17 Class 203 is a historical retrospective benchmark; England/Wales documentary alternative. Do not substitute valuations, asking prices or indices for sale records. Dated findings below are not live instructions; use [checkpoint](../CHECKPOINT.md).
 
 ## Primary sources
 

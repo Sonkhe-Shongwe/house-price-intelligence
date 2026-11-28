@@ -1,8 +1,8 @@
 # P0 Discovery and Feasibility Directive
 
-**Adopted:** 26 November 2026, owner requested documentation integration of the comprehensive P0 research, analysis, planning and implementation strategy. **Active delivery phase:** P0 only. **Active workstream and next task:** consult [checkpoint](../CHECKPOINT.md); initially P0-A.1. This is a subordinate execution directive, not a second roadmap, a new set of phase weights or a change to the [existing P0.1-P0.7 exit criteria](../P_PHASE_ROADMAP.md). The prior approved P0 estimate is 94% and overall 87.1%; both remain unchanged pending an evidence-backed milestone review. Method adoption is not product, market, rights or phase acceptance.
+**Adopted:** 26 November 2026, owner requested documentation integration of the comprehensive P0 research, analysis, planning and implementation strategy. **Active delivery phase:** P0 only. **Active workstream and next task:** consult [checkpoint](../CHECKPOINT.md); initial P0-A.1 sequence historical. This is a subordinate execution directive, not a second roadmap, a new set of phase weights or a change to the [existing P0.1-P0.7 exit criteria](../P_PHASE_ROADMAP.md). The prior approved P0 estimate is 94% and overall 87.1%; both remain unchanged pending an evidence-backed milestone review. Method adoption is not product, market, rights or phase acceptance.
 
-**Current direction:** Geography-flexible P0-C market qualification. Prior P0-A/B and C/D/E/F/G evidence remains valid within its original scope. No repeat of completed desk work; select only material unresolved evidence for a qualified first market.
+**Current direction:** Bounded NYC development target selected; both NYC attempts consumed. Resolve remaining durable-operation rights and protection gaps, then final specification/acceptance through the [checkpoint](../CHECKPOINT.md). Prior A/B and C/D/E/F/G evidence remains valid within original scope; no repeated research, acquisition or phase advance.
 
 ## 1. Purpose and gold-standard outcome
 
@@ -108,7 +108,7 @@ At P0-G verify the approved product brief, supported first market/class and prop
 
 ## Current P0 gate reconciliation
 
-P0.1/2 supported by accepted buyer direction; P0.3 candidate research sufficient at discovery level. P0.4/6 remain partial, P0.5/7 blocked by current subject entry, transaction/temporal identity, final locality/class, permitted fields/operations, verified protection and R0 release feasibility. No P1 transition, no market choice or score change. Reuse the [completed conditional gate audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md#26-november-2026--p0-g-independent-conditional-acceptance-audit), [P0-C feasibility](../research/DATA_FEASIBILITY.md), [source register](../research/SOURCE_REGISTER.md), [privacy controls](PRIVATE_REAL_DATA_BETA_V1.md) and [technical feasibility](PRODUCTION_READINESS_V1.md). Current task and stop rule from [checkpoint](../CHECKPOINT.md); no reliance on retired external application.
+For current P0.1-P0.7 evidence and gaps use the [28 November NYC reconciliation](#28-november-2026--nyc-evidence-based-p0-exit-gap-reconciliation) and [checkpoint](../CHECKPOINT.md). Original [26 November conditional audit](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md#26-november-2026--p0-g-independent-conditional-acceptance-audit) is retained as historical baseline. No P1 transition or score change; no reliance on retired external application.
 
 ## 26 November 2026 | P0-G independent conditional acceptance audit
 

@@ -15,9 +15,9 @@ Navigation catalogue, not a second checkpoint. Every Markdown document under doc
 
 | Need | Start here |
 | --- | --- |
-| Active market feasibility | [P0-C feasibility](research/DATA_FEASIBILITY.md), [source register](research/SOURCE_REGISTER.md), [competitive research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
+| Active market feasibility | [Actual NYC frame](research/DATA_FEASIBILITY.md#28-november-2026--nyc-entry-p1-actual-address-frame-outcome), [earlier-sale study](research/DATA_FEASIBILITY.md#27-november-2026--nyc-actual-bounded-qualification-outcome), [source register](research/SOURCE_REGISTER.md), [competitive research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
 | Data rights and lifecycle | [Source register](research/SOURCE_REGISTER.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [retention policy](engineering/DATA_MANAGER_V1.md#open-data-retention-policy-26-november-2026), [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) |
-| Product and P0 closure | [Product brief](product/PRODUCT_BRIEF.md), [foundation review](reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [P0-G audit](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md#26-november-2026--p0-g-independent-conditional-acceptance-audit), [market research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
+| Product and P0 closure | [Product brief](product/PRODUCT_BRIEF.md), [foundation review](reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [Current NYC P0 reconciliation](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md#28-november-2026--nyc-evidence-based-p0-exit-gap-reconciliation), [market research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
 | Application and storage | [P3 contract](engineering/P3_APPLICATION_CONTRACT.md), [P6 shortlist](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md), [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) |
 | UI and maps | [Frontend directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md), [mapping research](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md), [Atlas study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md), [fictional map contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md), [Atlas prototype](../design-prototypes/hpi-atlas-terminal-study.html), [map study prototype](../design-prototypes/map-evidence-studio.html) |
 | Release | [Release runbook](engineering/RELEASE_RUNBOOK_V1.md), [recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md), [full qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md) |
@@ -67,8 +67,8 @@ For exact counts use original dated source reports and runs. For new work retrie
 - [BUYER WORKSPACE UX V1](engineering/BUYER_WORKSPACE_UX_V1.md)
 - [CLOUD FIRST WORKFLOW](engineering/CLOUD_FIRST_WORKFLOW.md)
 - [CONTROLLED PRODUCT ACTIVATION PREPARATION V1](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md)
-- [ACQUISITION INTELLIGENCE SIDE DIRECTIVE](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md)
-- [DATA MANAGER V1](engineering/DATA_MANAGER_V1.md)
+- [ACQUISITION INTELLIGENCE SIDE DIRECTIVE (retired; historical only)](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md)
+- [DATA MANAGER V1 (legacy integrity/lifecycle, historical evidence)](engineering/DATA_MANAGER_V1.md)
 - [ENGINEERING CONTRACT](engineering/ENGINEERING_CONTRACT.md)
 - [FINAL ACCEPTANCE V1](engineering/FINAL_ACCEPTANCE_V1.md)
 - [FULL RELEASE QUALIFICATION V1](engineering/FULL_RELEASE_QUALIFICATION_V1.md)

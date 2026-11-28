@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from tools.check_docs import catalogue_errors, continuation_errors, progress_errors
+from tools.check_docs import catalogue_errors, continuation_errors, progress_errors, selected_anchor_errors, current_scope_errors
 
 
 class ContinuationRoutingTests(unittest.TestCase):
@@ -85,3 +85,30 @@ class ContinuationRoutingTests(unittest.TestCase):
         self.assertEqual(progress_errors(self.root), [])
         roadmap.write_text(roadmap.read_text(encoding="utf-8").replace("50.0% weighted", "51.0% weighted"), encoding="utf-8")
         self.assertTrue(progress_errors(self.root))
+
+    def test_selected_authority_anchor_requires_heading_and_route(self):
+        src = self.root / "docs/DECISIONS.md"
+        dest = self.root / "docs/history.md"
+        routes = (("docs/DECISIONS.md", "docs/history.md", "prior-authority-consumed"),)
+        dest.write_text("## Prior authority consumed\n", encoding="utf-8")
+        src.write_text("[decision](history.md#prior-authority-consumed)\n", encoding="utf-8")
+        self.assertEqual(selected_anchor_errors(self.root, routes), [])
+        dest.write_text("## Other heading\n", encoding="utf-8")
+        self.assertTrue(selected_anchor_errors(self.root, routes))
+        dest.write_text("## Prior authority consumed\n", encoding="utf-8")
+        src.write_text("[decision](history.md#other-heading)\n", encoding="utf-8")
+        self.assertTrue(selected_anchor_errors(self.root, routes))
+        src.write_text("[decision](history.md#prior-authority-consumed)\n", encoding="utf-8")
+        dest.write_text("## Prior authority consumed\n## Prior authority consumed\n", encoding="utf-8")
+        self.assertTrue(selected_anchor_errors(self.root, routes))
+
+    def test_current_scope_refuses_stale_current_not_history(self):
+        (self.root / "docs/engineering").mkdir()
+        directive = self.root / "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md"
+        directive.write_text("**Current direction:** Use checkpoint\n", encoding="utf-8")
+        decision = self.root / "docs/DECISIONS.md"
+        decision.write_text("Historical: Neither attempt has been consumed\nCurrent operating scope: no replay\n", encoding="utf-8")
+        self.assertEqual(current_scope_errors(self.root), [])
+        decision.write_text("Current operating scope: Neither attempt has been consumed\n", encoding="utf-8")
+        self.assertTrue(current_scope_errors(self.root))
+

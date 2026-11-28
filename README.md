@@ -6,7 +6,7 @@ A buyer-facing historical comparable-sales investigation and shortlist workspace
 
 ## Data and market qualification
 
-Market selection is data-first and geography-flexible. No final first market or real-data release is approved. Keep all private source data outside Git; see [current checkpoint](docs/CHECKPOINT.md), [source register](docs/research/SOURCE_REGISTER.md) and [Data Manager](docs/engineering/DATA_MANAGER_V1.md) for source rights, storage and lifecycle controls.
+Market selection is data-first. NYC Queens ZIP 11361 A2 is the approved bounded development target; Cook County is a historical research benchmark. No final first market or real-data release is approved. Keep all private source data outside Git; see [current checkpoint](docs/CHECKPOINT.md), [source register](docs/research/SOURCE_REGISTER.md) and [Data Manager](docs/engineering/DATA_MANAGER_V1.md) for source rights, storage and lifecycle controls.
 
 ## Historical research evidence, not product claims
 

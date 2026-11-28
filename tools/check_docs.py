@@ -2,7 +2,7 @@
 """Offline Markdown link and P0-P8 percentage consistency check.
 
 Runs on GitHub Actions without downloading private data or consulting the web.
-External links and anchor fragments are not validated here.
+External links and general anchor fragments are not validated; selected authority anchors are checked.
 """
 from __future__ import annotations
 
@@ -245,14 +245,77 @@ def continuation_errors(root: Path):
     return errors
 
 
+
+# Selected current authority links, not a general GitHub Markdown renderer.
+CURRENT_ROUTES = (
+    ("docs/DECISIONS.md", "docs/DECISIONS.md", "nyc-bounded-qualification-consumed-27-november-2026"),
+    ("docs/DECISIONS.md", "docs/DECISIONS.md", "nyc-entry-p1-consumed-28-november-2026"),
+    ("docs/P_PHASE_ROADMAP.md", "docs/DECISIONS.md", "nyc-bounded-development-market-selected-27-november-2026"),
+    ("docs/DOCUMENTATION_INDEX.md", "docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
+     "28-november-2026--nyc-evidence-based-p0-exit-gap-reconciliation"),
+)
+
+
+def selected_anchor_errors(root: Path, routes=CURRENT_ROUTES):
+    """Check selected plain ATX heading anchors and their navigation links.
+
+    Only explicitly selected headings, not arbitrary Markdown/HTML or URLs.
+    These routes preserve access to historical decisions even as tasks change.
+    """
+    errors = []
+    for source, target, anchor in routes:
+        src, dest = root / source, root / target
+        try:
+            headings = re.findall(r"(?m)^#{1,6} +([^\n]+)$",
+                                  dest.read_text(encoding="utf-8"))
+            slugs = [re.sub(r"[^\w -]", "", title.lower()).replace(" ", "-")
+                     for title in headings]
+            if slugs.count(anchor) != 1:
+                errors.append(f"{target}: selected anchor missing or ambiguous: {anchor}")
+            linked = False
+            for token in INLINE_LINK.findall(src.read_text(encoding="utf-8")):
+                parsed = urlsplit(token)
+                if parsed.scheme or parsed.netloc or unquote(parsed.fragment) != anchor:
+                    continue
+                path = (src.parent / unquote(parsed.path)).resolve() if parsed.path else src.resolve()
+                if path == dest.resolve():
+                    linked = True
+                    break
+            if not linked:
+                errors.append(f"{source}: selected authority route missing: {target}#{anchor}")
+        except (OSError, ValueError) as exc:
+            errors.append(str(exc))
+    return errors
+
+
+def current_scope_errors(root: Path):
+    """Guard specific obsolete current-facing phrases, not historical text."""
+    checks = (
+        ("docs/DECISIONS.md", "Current operating scope:", ("Neither attempt has been consumed",)),
+        ("docs/P_PHASE_ROADMAP.md", "1. Execute the", ("beginning P0-A.1",)),
+        ("docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md",
+         "**Current direction:**", ("Geography-flexible P0-C market qualification",)),
+    )
+    errors = []
+    for source, prefix, forbidden in checks:
+        try:
+            lines = (root / source).read_text(encoding="utf-8").splitlines()
+            for line in lines:
+                if line.startswith(prefix) and any(word in line for word in forbidden):
+                    errors.append(f"{source}: obsolete current-scope wording")
+        except OSError as exc:
+            errors.append(str(exc))
+    return errors
+
+
 def main():
-    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT) + continuation_errors(ROOT) + catalogue_errors(ROOT)
+    errors = local_link_errors(ROOT) + progress_errors(ROOT) + active_handoff_errors(ROOT) + continuation_errors(ROOT) + catalogue_errors(ROOT) + selected_anchor_errors(ROOT) + current_scope_errors(ROOT)
     if errors:
         print("Documentation checks failed:")
         for issue in errors:
             print("- " + issue)
         return 1
-    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants, continuation routing, ranges and catalogue agree.")
+    print("Documentation checks passed: local links, P0-P8 arithmetic and current-handoff invariants, continuation routing, ranges, catalogue and selected authority routes agree.")
     print("This is not a semantic audit of all historical reports, external URLs or product acceptance.")
     return 0
 

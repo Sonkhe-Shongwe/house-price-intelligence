@@ -1,6 +1,6 @@
 # Property data source register
 
-**Updated:** 27 November 2026. Original pilot URLs, extraction evidence and dated rights reviews retained below; active candidates are the measured Cook reference and documented international alternatives. Verified extraction or local audit does not establish time-correctness, legal identity, independent byte inspection or redistribution rights.
+**Updated:** 28 November 2026. NYC is the owner-approved bounded development target; [NYC operation matrix](#27-november-2026--nyc-intended-application-use-review) and [PLUTO notice conclusion](#28-november-2026--pluto-exact-metadata-context-and-bounded-research-conclusion) govern current review. Cook retained measured historical benchmark; earlier tables/dated evidence not active permission. Extraction or local audit does not establish time-correctness, legal identity, independent byte inspection or redistribution rights.
 
 | Source | Identifier / URL | Current evidence | Outstanding review |
 | --- | --- | --- | --- |
