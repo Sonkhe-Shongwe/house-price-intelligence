@@ -72,7 +72,7 @@ def validate_request(payload: Mapping[str, Any], *, today: date | None = None) -
     subj = payload.get("subject")
     if not isinstance(subj, dict):
         raise ContractError("subject", "object_required")
-    allowed = {"pin", "building_area_sqft", "asking_price_usd", "label"}
+    allowed = {"pin", "address_id", "building_area_sqft", "asking_price_usd", "label"}
     if set(subj) - allowed:
         # No user-supplied neighbourhood/lat/lon. Those must be resolved from a vetted source.
         raise ContractError("subject", "unknown_fields")
@@ -90,19 +90,26 @@ def validate_request(payload: Mapping[str, Any], *, today: date | None = None) -
     pin = subj.get("pin")
     if pin is not None and (not isinstance(pin, str) or not PIN_PATTERN.fullmatch(pin)):
         raise ContractError("subject.pin", "invalid_pin")
+    address_id = subj.get("address_id")
+    if address_id is not None and (not isinstance(address_id, str)
+                                  or not re.fullmatch(r"[a-z0-9-]{1,40}", address_id)):
+        raise ContractError("subject.address_id", "invalid_address_id")
     area = _area(subj.get("building_area_sqft"), "subject.building_area_sqft")
     label = subj.get("label")
     if label is not None:
         label = _string(label, "subject.label")
+    subject = {
+        "pin": pin, "building_area_sqft": area,
+        "asking_price_usd": _price(subj.get("asking_price_usd"), "subject.asking_price_usd"),
+        "label": label,
+    }
+    if address_id is not None:
+        subject["address_id"] = address_id
     return {
         "township_code": township,
         "class_code": class_code,
         "analysis_date": when.isoformat(),
-        "subject": {
-            "pin": pin, "building_area_sqft": area,
-            "asking_price_usd": _price(subj.get("asking_price_usd"), "subject.asking_price_usd"),
-            "label": label,
-        },
+        "subject": subject,
     }
 
 
@@ -165,11 +172,11 @@ def _validate_candidates(sales: Sequence[Mapping[str, Any]], build_id: str) -> N
             raise ContractError(field, "invalid_sale_or_characteristics_year") from exc
 
 
-def build_investigation(
+def _evaluate_investigation(
     request: Mapping[str, Any], *, resolved_subject: Mapping[str, Any] | None,
     candidate_sales: Sequence[Mapping[str, Any]], data_build: Mapping[str, Any],
     synthetic_demo: bool = False, today: date | None = None,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Produce a safe P3 response using the existing matcher unchanged.
 
     Matching only occurs with a *server-resolved* subject record. The response
@@ -194,20 +201,20 @@ def build_investigation(
     }
     if validated["township_code"] != SCOPE_TOWNSHIP or validated["class_code"] != SCOPE_CLASS:
         response.update(status="out_of_coverage", reason="unsupported_market_or_class")
-        return response
+        return response, []
     if validated["subject"]["pin"] is None:
         response["reason"] = "parcel_identity_not_resolved"
-        return response
+        return response, []
     if not isinstance(resolved_subject, dict):
         response["reason"] = "parcel_not_found_in_curated_build"
-        return response
+        return response, []
     _require_build_membership(resolved_subject, provenance["build_id"], "resolved_subject")
     pin = validated["subject"]["pin"]
     if resolved_subject.get("pin") != pin:
         raise ContractError("resolved_subject.pin", "identity_conflict")
     if resolved_subject.get("class") != SCOPE_CLASS or resolved_subject.get("township_code") != SCOPE_TOWNSHIP:
         response.update(status="out_of_coverage", reason="resolved_property_out_of_scope")
-        return response
+        return response, []
     # The source-resolved location is required for trusted matching. User inputs
     # are only a report of their enquiry; unverified coordinates are forbidden.
     verified = dict(resolved_subject)
@@ -233,4 +240,14 @@ def build_investigation(
     if synthetic_demo:
         # Explicit fixture-only use. No approved pathway to expose real records yet.
         response["comparables"] = result["comparables"]
+    return response, result["comparables"]
+
+def build_investigation(request: Mapping[str, Any], *, resolved_subject: Mapping[str, Any] | None,
+                        candidate_sales: Sequence[Mapping[str, Any]], data_build: Mapping[str, Any],
+                        synthetic_demo: bool = False, today: date | None = None) -> dict[str, Any]:
+    """External response remains redacted for every historical build.
+    Internal selection is not exposed through request fields or HTTP.
+    """
+    response,_ = _evaluate_investigation(request,resolved_subject=resolved_subject,
+        candidate_sales=candidate_sales,data_build=data_build,synthetic_demo=synthetic_demo,today=today)
     return response

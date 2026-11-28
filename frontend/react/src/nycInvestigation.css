@@ -1,0 +1,25 @@
+@import './designTokens.css';
+.nyc-study{max-width:1320px;margin:auto;padding:clamp(16px,4vw,48px);min-height:100vh;color:var(--hpi-atlas-ink);background:var(--hpi-atlas-canvas)}
+.nyc-study nav{display:flex;flex-wrap:wrap;gap:16px;border-bottom:1px solid var(--hpi-atlas-rule);padding-bottom:16px;margin-bottom:24px;font-size:14px}
+.nyc-study nav a{color:var(--hpi-atlas-action);text-decoration:underline}
+.nyc-study nav span{font-weight:650}
+.nyc-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2.5fr);gap:20px;align-items:start;margin-top:24px}
+.nyc-panel{min-width:0;background:var(--hpi-atlas-surface);border:1px solid var(--hpi-atlas-rule);border-radius:12px;padding:clamp(14px,2vw,24px);overflow-wrap:anywhere}
+.nyc-panel h2{font:400 24px var(--hpi-atlas-display);margin:0 0 18px}
+.nyc-panel fieldset{display:grid;gap:10px;margin:0;padding:0;border:0;min-width:0}
+.nyc-panel label{font-size:14px;font-weight:650}
+.nyc-panel input,.nyc-panel select{width:100%;min-width:0;min-height:44px;font:inherit;color:var(--hpi-atlas-ink);border:1px solid var(--hpi-atlas-outline);background:white;padding:8px;border-radius:4px}
+.nyc-panel :focus-visible,.nyc-study a:focus-visible{outline:3px solid var(--hpi-atlas-accent);outline-offset:3px}
+.nyc-muted,.nyc-method{font-size:13px;line-height:1.6;color:var(--hpi-atlas-muted)}
+.nyc-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.nyc-metrics div{padding:12px;border:1px solid var(--hpi-atlas-rule);border-radius:8px}
+.nyc-metrics dt{font-size:13px;color:var(--hpi-atlas-muted)}.nyc-metrics dd{margin:6px 0 0;font-weight:650;font-variant-numeric:tabular-nums}
+.nyc-table-scroll{overflow-x:auto;max-width:100%;min-width:0}
+.nyc-table-scroll table{border-collapse:collapse;width:100%;min-width:550px;font-size:13px;font-variant-numeric:tabular-nums}
+.nyc-table-scroll caption{text-align:left;font-weight:650;padding:8px 0}
+.nyc-table-scroll th,.nyc-table-scroll td{padding:10px;text-align:left;border-bottom:1px solid var(--hpi-atlas-rule);white-space:nowrap}
+.nyc-table-scroll thead{background:var(--hpi-atlas-table-head)}
+.nyc-method{margin-top:20px;padding-top:16px;border-top:1px solid var(--hpi-atlas-rule)}
+.nyc-provenance{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:6px 12px}.nyc-provenance dd{margin:0;color:var(--hpi-atlas-ink)}
+@media(max-width:760px){.nyc-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:380px){.nyc-metrics{grid-template-columns:minmax(0,1fr)}}

@@ -1,8 +1,38 @@
 # P3 application contract and integration review
 
-**Reviewed:** 22 November 2026; **CI evidence addendum:** 23 November 2026. **Status:** Synthetic-only application contract included in the authorised repository integration. Integration and passing tests do **not** constitute final P3 acceptance, external deployment, or connection to publisher records. **Prior verified baseline:** `main` at `cd98592f4b20bd02362ec0802db989ac7e94ee32`.
+**24 November 2026 owner disposition:** P3.1–P3.7 explicitly accepted as the provisional synthetic application contract only. P3.8–P3.11 and production/real source decisions remain open. See [workspace contract](BUYER_WORKSPACE_UX_V1.md), [geographic contract](SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) and [current checkpoint](../CHECKPOINT.md). The pending synthetic approval descriptions below are dated history. The then-recorded P3 10% and weighted MVP 22.8% are historical estimates; current estimates only in [roadmap](../P_PHASE_ROADMAP.md).
 
-This is the **single current P3 application contract for the integrated candidate**. Earlier v0.1–v0.5 notes remain historical local review material and should not become competing current implementation instructions. The [engineering contract](ENGINEERING_CONTRACT.md) and [lean engineering directive](LEAN_ENGINEERING_DIRECTIVE.md) govern correctness and delivery.
+**Historical synthetic-only contract review (reconciled 23 November 2026):** Owner-approved P3/P4/P5/P6 application integration reached [`development` application commit `44e278f`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/44e278f5ff68475616d889d2c7fafd0b5b3c6304) via PRs #5 and #6. **172 Python + 9 real Chromium** tests passed on that merge, with opt-in restart-safe fictional SQLite shortlists. The earlier `5e0a7f3` review is a dated historical P3 milestone, not the current integrated build. **Scope remains strictly fictional-data-only and not an owner-approved production architecture, real address resolver, authenticated database or permitted publisher-data display.** See the [checkpoint](../CHECKPOINT.md) for later code/CI status and the [P6 shortlist contract](P6_SYNTHETIC_SHORTLIST_CONTRACT.md) for the extension.
+
+The **current synthetic contract is stated first below**. Dated implementation-stage notes afterwards explain how the prototype evolved and are **historical**, not competing requirements. Apply the [engineering contract](ENGINEERING_CONTRACT.md), [lean directive](LEAN_ENGINEERING_DIRECTIVE.md) and [P0–P8 acceptance roadmap](../P_PHASE_ROADMAP.md).
+
+## Current synthetic API and data contract on `development`
+
+**Verified integrated code:** [development integration CI 45254283750](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45254283750) and [push CI 45254270906](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45254270906) passed **172 Python, 9 actual Chromium browser journeys**, JavaScript and documentation checks at exact merge SHA `44e278f`. Later documentation-only commits do not change the API. No P3 owner acceptance, public release or permission to use real-property data is implied.
+
+**Identity and journey:**
+
+1. `POST /v1/addresses/search` accepts a bounded JSON `{"query":"Fictional Way"}`, returns invented `address_id` candidates, no PIN and an explicit ambiguity hint when multiple parcels share a fictional street label. A query with no match is not converted into a guessed property.
+2. `GET /v1/addresses/{address_id}` resolves **an explicitly selected candidate** to a fictional 14-digit parcel PIN, `identity_scope=parcel_only` and `building_identity_verified=false`. This does not prove the physical building, legal title or real street address. A PIN-first technical path still exists for synthetic testing.
+3. `POST /v1/investigations` accepts top-level `township_code`, `class_code`, `analysis_date` and `subject`. Subject allows `pin`, optional `address_id`, `building_area_sqft`, optional `asking_price_usd` decimal text and optional `label`. A selected address ID may supply the PIN; if both are sent they must match the server's SQLite mapping. Unknown IDs and conflicts fail HTTP 422 without creating an investigation. Caller-provided source values, coordinates, neighbourhood, comparables and source/build IDs remain forbidden.
+4. The server chooses synthetic curated source snapshots and eligible historical transactions. The existing Phase 2 neighbourhood-first matcher excludes inappropriate future/duplicate/multi-parcel sales and labels 2 km fallback exploratory; no sale price is used for eligibility/rank.
+5. `POST /v1/investigations` responds HTTP 201 with an investigation ID and `Location`; `GET /v1/investigations/{uuid}` reopens the original stored evidence. API statuses: `supported_neighbourhood`, `exploratory_spatial`, `insufficient_data` and `out_of_coverage`. `valuation` is always `null`. Unsupported-but-well-formed enquiries can be saved without fabricated evidence.
+
+**Money and provenance:** The SQLite-backed HTTP response has `contract_version="p3-draft-v0.3"`. Each reported comparable contains fixed-two-decimal USD text `sale_price_usd` (for example `"525000.01"`) derived from trusted integer cents; **no JSON numeric `sale_price`** is disclosed by this HTTP result. Buyer `asking_price_usd` is user-reported, not a verified listing or sale. Direct pure research adapter fixtures still use their earlier v0.2 numeric representation and are **not the current HTTP contract**. Original comparable transaction IDs, source snapshots/roles, cents and response hash are checked on reopen; changed fictional address/parcel mapping also fails closed. These checks are not a production cryptographic attestation.
+
+**Database and lifetime:** Immutable `schema_draft.sql` is fixture v1 (**16 domain tables**); v2 adds query indexes; v3 adds `synthetic_address_candidates` (**17 domain tables**). `schema_migrations` is the control table (**18 total**, excluding SQLite internal metadata). The runner verifies checksums/history and checks foreign keys **before committing** fixture migrations. The default server uses disposable in-memory SQLite; explicit `--fixture-db` opens a validated local fictional database that preserves investigation, shortlist and notes across restarts. The `shortlists` and `shortlist_investigations` tables are pre-existing schema, now used by integrated P6 endpoints. The older `synthetic_address_index` remains migration history; new candidate lookup uses `synthetic_address_candidates`. This remains neither a production DB/migration policy nor a real address provider.
+
+**Safe use boundary:** The WSGI server is explicitly fixture-only and loopback-bound. Research pilot township 17 and Class 203, first-market identity, property-level publication/attribution rights, historical as-of proof, general currency/limits, production storage/auth, final UX and any public deployment remain undecided. Treat the [proposed ERD below](#proposed-domain-erd-and-controlled-fixture-migration) as an implementation candidate, not a signed-off production model.
+
+## P3 acceptance review and unresolved architecture boundary
+
+A per-package P3.1–P3.11 **technical readiness review and proposed owner dispositions** is now recorded in the [decision register](../DECISIONS.md#p31p311-contract-readiness-and-owner-acceptance-review-23-november-2026). The current v3/HTTP-v0.3 synthetic contract is **eligible for fixture-only approval** on P3.1–P3.7, but has **not been signed off**. P3.8 hosting/access and P3.9 final UX/security are partial; P3.10 rights/real-market identity and P3.11 overall acceptance remain unresolved. No public release or real property display is authorised, and P3 remains 10%.
+
+**Technical review caveat (corrected after PR #5):** The current `schema_migrations.py` runner validates deferred foreign-key integrity **before the fixture schema transaction commits**, and rolls back failures. This improves the synthetic migration proof but **does not establish production backup/restore, concurrent access or an authenticated database**. Real-source publication timing and address-to-building identity still require independent evidence, not more invented-fixture test cases.
+
+## Historical P3 baseline and implementation evolution (retained for provenance)
+
+*The following original PIN-first/15-table and interim v0.2 sections describe **older states**; their constraints, field lists, source code and status claims are superseded by the current synthetic contract above. Subsequent dated v0.3/v3 addenda preserve the actual changes and remain design evidence.*
 
 ## Buyer journey implemented with synthetic fixtures
 
@@ -62,6 +92,88 @@ The 15-table proposed SQLite schema separates source snapshots, curated builds, 
 
 The synthetic fixture store refuses non-synthetic builds. A string `synthetic-` marker is an extra safeguard against accidental dataset mixing, not cryptographic evidence that any arbitrary imported dataset is invented. There is no real-data ingestion, trusted public address resolver, authentication model, production migration strategy, independently validated price prediction, or permission to display property-level Cook County records.
 
+## Current `development` experiment: fictional address selection (not final P3 approval)
+
+**Added on 23 November 2026 to permanent `development` branch** at [`07f637b`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/07f637b1f0f9d04972911400381e38bda2687ba9). The stable `main` candidate described in the historical sections above remains a PIN-first contract until a reviewed integration. The P3 schema now includes a **16th synthetic-only index table on `development`**, not a production migration or sourced residential-address database.
+
+| Development-only endpoint | Meaning |
+| --- | --- |
+| `POST /v1/addresses/search` | JSON `{"query":"Fictional Way"}`; matches zero or multiple invented address records, returning **candidate IDs and labels only**, with `source_kind=synthetic_fixture` and no automatic selection |
+| `GET /v1/addresses/{address_id}` | Resolve an explicitly selected synthetic candidate ID to its stored parcel PIN; `identity_status=synthetic_mapping_only`; not a real building/address geocode |
+| Existing `POST /v1/investigations` | Re-validate the user enquiry and independently resolve the chosen PIN against the trusted curated synthetic build; browser labels and client attributes are **never** trusted as publisher evidence |
+| Existing `GET /v1/investigations/{uuid}` | Reopen frozen synthetic evidence with its saved price and source snapshot guards |
+
+The search is a small bounded, parameterised SQLite lookup. It rejects unexpected fields and invalid query strings, returns no plausible address on zero matches, displays several choices without guessing and requires an explicit browser click. Existing origin/remote restrictions and fixture-only safeguards still apply. Four invented "Fictional Way" labels are used purely for integration testing; none represents a confirmed Evanston address or rights-approved consumer service. No real geocoder, external map service, published listing or valuation was added.
+
+**Verification:** [development push CI 45193537292](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45193537292) passed **132 Python tests, JavaScript syntax, docs checks and 5 actual Chromium -> HTTP -> SQLite scenarios** including supported search/select/reopen and no-match safety. It is integrated into the **development working branch only** and included in [draft PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4). P3 exit approval, exact-money API, real identity model and dataset display permissions remain unresolved.
+
+## New `development` refinement: selected-address identity and exact-money v0.3 (provisional)
+
+Added at [`79a7c4d`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/79a7c4dfcb0e1c2e1543b138539c28aa5a118eae) on `development`, verified by [CI 45196929621](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45196929621) (**137 Python + 6 real Chromium tests**, JavaScript and docs checks). These are *draft synthetic-only* endpoint changes, not approved final P3 or production contracts.
+
+**Selected property binding:** `POST /v1/investigations` may include `subject.address_id` with a lowercase, bounded ID. The request may omit `subject.pin` when that ID is provided. SQLite resolves the ID from the invented address index into the canonical synthetic PIN inside the same server-side investigation path. If both PIN and ID are supplied, disagreement returns `422` with `field=subject.address_id, code=identity_conflict`; an unknown ID returns `address_not_found`. Neither condition writes a saved investigation. On a valid selection the saved result includes `subject.address_id`, canonical `subject.pin` and `subject.identity_status=synthetic_mapping_only`. An unselected technical PIN remains allowed in this fixture-only internal demo. The browser discards address selection when the buyer manually edits the PIN or types a different search.
+
+**Fixed-scale response money:** For **synthetic HTTP investigations only**, `contract_version` is `p3-draft-v0.3`. Every disclosed comparable has `sale_price_usd` as canonical two-decimal **text**, such as `"525000.01"`, sourced from exact `price_usd_cents` in SQLite, and no numeric `sale_price` member. The frontend uses text and integer grouping, not floating-point conversion. Saved-result validation binds this string to the same exact cents, transaction, snapshot, sale authorisation and stored response hash. `subject.asking_price_usd` remains buyer-entered decimal text and `valuation` remains `null`.
+
+The **pure Phase 2 matcher** remains numerically unchanged for research. The direct `build_investigation` *research adapter* retains its dated v0.2 fixture and numeric `sale_price` for compatibility; the SQLite-backed HTTP envelope performs the v0.3 conversion. The API is a synthetic demonstration, not an approved general-currency/production money contract. Do not use any of these fictional records as real property evidence.
+
+## Proposed domain ERD and controlled fixture migration
+
+**Source:** `backend/schema_draft.sql` and `backend/schema_migrations.py`, added to permanent `development` at [8ed4269](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/8ed4269af18e42add85726ae0fd45e406b8019c4). This is a *synthetic-only candidate*, not the approved production model. The baseline has 16 application/fixture tables, and the version runner adds an independent `schema_migrations` table.
+
+```mermaid
+erDiagram
+    SOURCE_SNAPSHOTS ||--o{ CURATED_BUILD_SOURCES : supplies
+    CURATED_BUILDS ||--o{ CURATED_BUILD_SOURCES : includes
+    CURATED_BUILDS ||--o{ CURATED_BUILD_TRANSACTIONS : selects
+    SALE_TRANSACTIONS ||--o{ CURATED_BUILD_TRANSACTIONS : belongs_to
+    SOURCE_SNAPSHOTS ||--o{ SALE_TRANSACTIONS : records
+    SALE_TRANSACTIONS ||--o{ SALE_TRANSACTION_PARCELS : links
+    PARCELS ||--o{ SALE_TRANSACTION_PARCELS : participates_in
+    PARCELS ||--o{ BUILDINGS : may_contain
+    PARCELS ||--o{ ASSESSMENT_RECORDS : observed_by
+    BUILDINGS |o--o{ ASSESSMENT_RECORDS : optional_identity
+    SOURCE_SNAPSHOTS ||--o{ ASSESSMENT_RECORDS : supplies
+    PARCELS ||--o{ PARCEL_GEOGRAPHIES : located_by_year
+    SOURCE_SNAPSHOTS ||--o{ PARCEL_GEOGRAPHIES : supplies
+    PARCELS ||--o| SYNTHETIC_ADDRESS_INDEX : legacy_fixture_mapping
+    PARCELS ||--o{ SYNTHETIC_ADDRESS_CANDIDATES : candidate_or_alias_only
+    CURATED_BUILDS ||--o{ INVESTIGATIONS : frozen_build
+    PARCELS |o--o{ INVESTIGATIONS : optional_subject
+    INVESTIGATIONS ||--o{ COMPARABLE_EVIDENCE : preserves
+    SALE_TRANSACTIONS ||--o{ COMPARABLE_EVIDENCE : selected_record
+    INVESTIGATIONS ||--|| INVESTIGATION_RESULTS : frozen_response
+    SHORTLISTS ||--o{ SHORTLIST_INVESTIGATIONS : contains
+    INVESTIGATIONS ||--o{ SHORTLIST_INVESTIGATIONS : belongs_to
+```
+
+| Entity/grain | What it means | What cannot be inferred |
+| --- | --- | --- |
+| Parcel PIN | 14-digit parcel identity, with leading zeroes | The parcel contains one building, or had one residential sale |
+| Building | Optional physical building identity belonging to a parcel | A historical assessment card identifies a verified building |
+| Assessment record | Snapshot, parcel, tax year, card combination | Publisher data were available on the sale date |
+| Sale transaction and transaction-parcel link | One source sale with zero or more parcel links; a transaction can link multiple parcels | A multi-parcel transaction's full price belongs to each parcel |
+| Curated evidence build | Explicit source snapshots and role membership | All sources were independently historically available |
+| Investigation and selected evidence | Buyer enquiry, source-bound transaction and frozen response | An appraisal, live listing, or current valuation |
+| Fictional address index | Deliberately invented one-to-one v1/v2 fixture index; retained for versioned history | Real address-to-building-to-parcel cardinality, coverage or usage rights |
+| Fictional parcel candidates (v3) | One candidate ID maps to exactly one fictional parcel; identical display address may have multiple candidates and a parcel may have several fictional aliases | A building is verified or a real address is resolved from a publisher |
+
+**Provisional SQLite migration contract:** The existing `schema_draft.sql` becomes the immutable v1 fixture script. Numbered `migrations/0002_fixture_query_indexes.sql` adds three relational query indexes. The runner requires foreign keys, contiguous recorded history, valid script SHA-256 hashes and matching SQLite `PRAGMA user_version`. It applies DDL and history updates inside an explicit transaction, rejects unknown existing databases, refuses downgrades and rolls back a failed migration. Existing data and a saved synthetic investigation survive a tested v1-to-v2 upgrade.
+
+[GitHub Actions PR run 45200054027](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200054027) passed **144 Python tests** and **6 real Chromium journeys**, including 7 new fixture migration checks. The corresponding [development push CI 45200038440](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45200038440) also passed.
+
+**P3 acceptance still open:** The team must review the true parcel/building/address relationship for a rights-approved first market, choose the production SQL/migration/backup policy, validate historical availability and provenance, approve the money and endpoint contracts, and review privacy/security. The fixture-only runner is **not** a production migration, backup solution, publicly served dataset or release authorisation.
+
+## Development-only v3: explicit ambiguous-address parcel selection
+
+**Implemented** on permanent `development` at [`25008ee`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/25008ee64f6f6c80c9fb0e31e5df9092d2de9f46), with fixture/CI corrections at [`3793b81`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/3793b814d09ecd16724578df405b691578d5d979).
+
+The **immutable v1 baseline** still contains 16 domain/fixture tables. v2 adds indexes; **v3 adds `synthetic_address_candidates` as the 17th domain/fixture table**. Migration backfills original invented candidate IDs from the legacy `synthetic_address_index`, preserving original parcel mappings. The original v1/v2 index remains in historical schema. The separate `schema_migrations` table tracks script versions and SHA-256 digests. The current disposable runtime seeds a shared invented street address, **105 Fictional Court**, associated with two different parcel candidate IDs.
+
+`POST /v1/addresses/search` returns each matching candidate ID, its fictional display address, `ambiguous_address` and an explicit `parcel_hint` when multiple parcels share a label. No PIN is exposed at the search stage, and identical street labels are never silently deduplicated or auto-resolved. The user selects a specific candidate before `GET /v1/addresses/{address_id}` returns its synthetic PIN. The resolution declares `identity_scope=parcel_only` and `building_identity_verified=false`. The investigation response persists those identity caveats; reopening refuses a formerly selected candidate whose underlying parcel link changes. The browser visibly distinguishes the options and says the building is not verified.
+
+**Scope:** This deliberately invented one-to-many address-to-parcel test is *not* proof of the real address/building/parcel model, nor permission to use a geocoder or publisher records. The real first-market mapping, duplicate handling, historical availability, field rights, buyer privacy and production storage/migration choices still require evidence and owner acceptance. The Phase 2 matching policy and exact two-decimal money output are unchanged.
+
 ## Verification and remaining acceptance
 
 **Verified in the isolated integration workspace before publication:** 12 Phase 0 tests, 12 Phase 1 tests, 14 Phase 2 tests, 4 aggregate-export tests and 83 P3 application tests: **125 Python tests passing locally** on Python 3.13. JavaScript syntax and local HTTP GET/POST/persist/reopen paths passed. The local test report alone was not GitHub CI evidence. Independent inspection now confirms [run 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) passed 125 committed tests plus documentation checks on Python 3.12 at [`e8b8f70`](https://github.com/Sonkhe-Shongwe/house-price-intelligence/commit/e8b8f70de2bb10fd61b9cec9cc1d12aabdc6cfef). It does not include the separately prepared uncommitted reopen-guard patch. Chromium graphical browser execution was blocked by administrator policy and remains unverified.
@@ -71,3 +183,93 @@ The synthetic fixture store refuses non-synthetic builds. A string `synthetic-` 
 **Next acceptance gates:** Owner review of the integrated PIN-first experience and external status contract; full verification of any later reopen-guard patch; actual visual browser acceptance in a permitted environment; then real source rights, as-of availability and release/security review before any publisher data or public service.
 
 The weighted project baseline **22.8%** and P3 **10%** are unchanged pending formal acceptance. Avoid inferring completion from the number of tests or this document.
+
+## 27 November 2026 | Market-neutral migration design candidate
+
+**Proposal only, not an approved schema or phase transition.** [Pre-migration audit](../reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md#27-november-2026--south-african-pre-migration-readiness-audit) establishes that current SQL/API/UI contracts are US-shaped. Prefer retaining React, Python, PostgreSQL, fixture SQLite, existing ownership/auth, saved comparison and immutable historical evidence while introducing a versioned market-aware contract after qualification. Conceptual domain: market/coverage (currency, area unit, locality/class and source validity); source snapshot/build (hash, origin, permitted fields, intake and expiry); internal stable parcel/property keys with typed source identifier namespace and versioned candidate/verified mappings; separately dated buildings/attributes and addresses; sale event with exact integer minor units and currency, distinct reported/registration/availability dates and eligibility; event-to-parcel links with explicit ambiguity; frozen investigation, comparable evidence, shortlist and notes. Never equate parcel, dwelling, address and sale; allow multiple events per property and preserve source records. Candidate mappings do not enter accepted comparables. Currency and area units are native to the qualified market; no hard-coded locality embedded into the general domain. Market-specific comparable policy remains versioned and measured, including time window, area tolerance, minimum support and any geography fallback. No prediction commitment.
+
+Migration sequence: baseline and approved contract; additive versioned migrations on invented disposable copies; adapters and dual-read comparison where applicable; API version and market-aware UI without old-contract weakening; test preserved fixture/reopen/notes and negative cases (ambiguous identity, mixed currency/unit/market, future sales, unsupported scope, expired source, duplicate or cross-owner access, transaction rollback and replay). Verify rollback/recovery separately from Git rollback. After actual data qualification, permitted-use and protected-storage acceptance, and exact owner migration scope only, consider private staged import with checksums, count reconciliation, dependency/expiry and recovery evidence; switch explicitly only after controlled acceptance. No cloud or source operation authorised; no existing SQL changed. P0 remains active; design is not accepted or implemented. Follow checkpoint for next task.
+
+## Retired experimental fixture
+
+The market-specific invented-only route is dormant, opt-in and not part of the active product or release target. Retain its tested code and regression coverage to avoid losing reusable exact-money, abstention, save/reopen, shortlist and restart evidence; no new work or real-data activation. [Exact historical contract and verification](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--approved-fictional-south-african-v2-contract).
+
+## 27 November 2026 | Approved fictional South African v2 contract
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--approved-fictional-south-african-v2-contract). Not active instructions.
+
+## 27 November 2026 | Fictional ZA v2 HTTP slice
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-v2-http-slice). Not active instructions.
+
+## 27 November 2026 | Fictional ZA React investigation slice
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-react-investigation-slice). Not active instructions.
+
+## 27 November 2026 | Fictional ZA additive persistence rehearsal
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-additive-persistence-rehearsal). Not active instructions.
+
+## 27 November 2026 | Fictional ZA save and reopen journey
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-save-and-reopen-journey). Not active instructions.
+
+## 27 November 2026 | Fictional ZA saved journey exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-saved-journey-exact-verification). Not active instructions.
+
+## 27 November 2026 | Fictional ZA shortlist and comparison implementation
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-shortlist-and-comparison-implementation). Not active instructions.
+
+## 27 November 2026 | Fictional ZA shortlist exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-shortlist-exact-verification). Not active instructions.
+
+## 27 November 2026 | Fictional ZA shortlist recovery verification slice
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-shortlist-recovery-verification-slice). Not active instructions.
+
+## 27 November 2026 | Fictional ZA recovery exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-recovery-exact-verification). Not active instructions.
+
+## 27 November 2026 | Consolidated fictional ZA browser journey test
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--consolidated-fictional-za-browser-journey-test). Not active instructions.
+
+## 27 November 2026 | Consolidated fictional ZA journey exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--consolidated-fictional-za-journey-exact-verification). Not active instructions.
+
+## 27 November 2026 | Fictional ZA decision notes implementation
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-decision-notes-implementation). Not active instructions.
+
+## 27 November 2026 | Fictional ZA decision notes exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-decision-notes-exact-verification). Not active instructions.
+
+## 27 November 2026 | Disposable fictional ZA restart storage proof implementation
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--disposable-fictional-za-restart-storage-proof-implementation). Not active instructions.
+
+## 27 November 2026 | Disposable fictional ZA restart exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--disposable-fictional-za-restart-exact-verification). Not active instructions.
+
+## 27 November 2026 | Managed fictional ZA HTTP restart implementation
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--managed-fictional-za-http-restart-implementation). Not active instructions.
+
+## 27 November 2026 | Managed fictional ZA HTTP restart exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--managed-fictional-za-http-restart-exact-verification). Not active instructions.
+
+## 27 November 2026 | Fictional ZA evidence explanation implementation
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-evidence-explanation-implementation). Not active instructions.
+
+## 27 November 2026 | Fictional ZA explanation exact verification
+
+[Archived evidence](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/ff02c39e233c7181cd021337bff45c9e7348c5ed/docs/engineering/P3_APPLICATION_CONTRACT.md#27-november-2026--fictional-za-explanation-exact-verification). Not active instructions.

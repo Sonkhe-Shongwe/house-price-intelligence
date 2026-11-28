@@ -26,6 +26,15 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-journal
+*.db-wal
+*.db-shm
 *.parquet
 *.arrow
 *.feather
@@ -43,3 +52,10 @@ node_modules/
 
 /audit/phase2/output/
 /audit/phase2/outputs/
+
+# React integration build outputs
+frontend/react/node_modules/
+frontend/react/dist/
+
+# Defence in depth: private sibling workspace must never be tracked
+HPI-Data-Workspace/

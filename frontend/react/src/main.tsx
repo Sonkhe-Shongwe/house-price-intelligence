@@ -1,0 +1,14 @@
+import {createRoot} from 'react-dom/client';
+import {lazy,Suspense} from 'react';
+import BuyerWorkflow from './BuyerWorkflow';
+import PrivateBetaRehearsal from './PrivateBetaRehearsal';
+import './style.css';
+import './productRefinement.css';
+import './icons.css';
+import './ui.css';
+import './responsive.css';
+const ContextualAtlasPreview=lazy(()=>import('./GeoVectorMap').then(m=>({default:m.ContextualAtlasPreview})));
+const SouthAfricanInvestigation=lazy(()=>import('./SouthAfricanInvestigation'));
+const NYCInvestigation=lazy(()=>import('./NYCInvestigation'));
+const path=window.location.pathname;
+createRoot(document.getElementById('root')!).render(path==='/nyc-fictional'?<Suspense fallback={<p role="status">Preparing fictional NYC investigation…</p>}><NYCInvestigation/></Suspense>:path==='/za-fictional'?<Suspense fallback={<p role="status">Preparing fictional South African investigation…</p>}><SouthAfricanInvestigation/></Suspense>:path==='/private-beta-rehearsal'?<PrivateBetaRehearsal/>:path==='/context-preview'?<Suspense fallback={<p role="status">Preparing qualification view…</p>}><ContextualAtlasPreview/></Suspense>:<BuyerWorkflow/>);

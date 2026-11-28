@@ -1,50 +1,61 @@
-# GitHub repository setup and cloud-first workflow
+# GitHub repository setup and two-branch workflow
 
-**Repository:** https://github.com/Sonkhe-Shongwe/house-price-intelligence  
-**Branch:** `main`  
-**Reviewed:** 22 November 2026.
+**Current operating method:** 25 November 2026 (two-branch adoption 23 November). The [repository](https://github.com/Sonkhe-Shongwe/house-price-intelligence) exists. Do not create a second repository or re-upload historical ZIPs. The [cloud-first workflow](engineering/CLOUD_FIRST_WORKFLOW.md) is authoritative for approvals and milestone merges.
 
-The repository exists and was populated successfully. **Do not create another repository or repeat the initial upload instructions.** Routine historical data audits now run entirely in GitHub Actions; Windows/PowerShell execution is optional debugging, not the required research workflow.
+## Branch responsibilities
 
-## Recommended workflow: no manual audit ZIP uploads
+Standing authority delegates ordinary scoped source changes and verification; use connected GitHub tools and Neon administrative access before asking for manual Windows operations. Direct application credentials and protected storage remain separate from the administrative integration. The temporary protected Neon preflight environment already exists; its one-time markers validate exact source parents; accepted v8/v3 markers are consumed, not repeatable. See [Neon contract](engineering/NEON_CLOUD_INTEGRATION_V1.md); normal owner approval still required.
 
-1. Code changes are committed to `main` (or a reviewed branch).
-2. [Property audit unit tests](../.github/workflows/audit-tests.yml) run on pushes and pull requests.
-3. A change to audit code or the [data-audit workflow](../.github/workflows/data-audit.yml) triggers a fresh cloud extraction/analysis on `main`; it also supports manual **Run workflow**. There is no daily or weekly schedule.
-4. The workflow saves aggregate-only reports for **14 days**. Verified metrics and methodological caveats are preserved in [dated research summaries](research/PHASE2_CLOUD_AUDIT_RESULTS.md) and the [checkpoint](CHECKPOINT.md).
-5. Before claiming a run succeeded, inspect its conclusion, logs and artifact. The verified three-phase live run is [45046687782](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782), with 42 offline tests and completed Phase 0–2 extraction/evaluation.
+- **`development`:** Permanent working branch. Approved source, tests and documentation updates go here and trigger the offline GitHub Actions application/Chromium suite.
+- **`main`:** Stable owner-reviewed integration branch. Changes arrive from `development` through a milestone pull request, after explicit approval and passing checks. Do not commit routine changes directly to `main`.
+- **[Draft integration PR #4](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/4):** The active review surface, not authority to merge automatically. Preserve ancestry with a normal merge when an approved milestone is ready. New feature branches are exceptional, not the default.
+- **Live research audit:** Separate [data-audit workflow](../.github/workflows/data-audit.yml), running only on its restricted triggers or an explicitly authorised manual dispatch. Routine documentation/feature changes must not cause external downloads.
 
-See [automated audit instructions](AUTOMATED_DATA_AUDIT.md) for operational details, including error handling and privacy restrictions.
+## New optional Windows checkout
 
-## Optional Windows working copy
-
-From the parent folder where you want to work:
+Only if a checkout does not already exist:
 
 ```powershell
 git clone https://github.com/Sonkhe-Shongwe/house-price-intelligence.git
 cd house-price-intelligence
+git fetch origin
+git switch development
 git status
 ```
 
-If you already cloned the repo, **do not clone it again**. Instead open your existing `house-price-intelligence` directory and run:
+A fresh clone may initially select `main` because it is the remote default. Switch deliberately to `development` for ongoing development.
+
+## Existing Windows checkout (preserve uncommitted work)
+
+First inspect rather than reset:
 
 ```powershell
-git pull --ff-only origin main
+cd "C:\path\to\house-price-intelligence"
+git status
+git branch -vv
+git fetch origin
 ```
 
-For optional local regression tests (Python 3.10+):
+If there are **uncommitted or untracked files**, review and preserve them before changing branches or pulling; do not blindly overwrite the known older experimental checkout. With a clean working tree and the desired local branch selected:
 
 ```powershell
-cd audit/phase0
-python -m unittest discover -s tests -v
+git switch development
+git pull --ff-only origin development
 ```
 
-Manual API extraction is documented in [Phase 0 README](../audit/phase0/README.md), but the supported cloud pipeline avoids repeatedly downloading raw datasets on your PC.
+If `git switch development` fails because of local changes, stop and inspect. Do not force-switch, hard-reset, force-push or delete research ZIPs. Local Windows use is optional for platform-specific testing and owner UX review; the cloud repository is the authoritative committed source.
 
-## Historical ZIP warning
+## Verification and safe data handling
 
-The earlier `HousePriceIntelligence_Repository.zip` was created before GitHub publication, with an **independent local Git history**. Do not force-push its `main` over the hosted repository. The published repo is authoritative.
+From the repository root:
 
-## Data security and release boundary
+```powershell
+python tools/dev_check.py
+python -m backend.run_synthetic_api --fixture-only --port 8765
+```
 
-The repository has been reported **public**. Do not commit property-level raw extracts, generated local output, buyer/seller names, user financial details, API keys, environment secrets or research datasets. The `.gitignore` protects known output folders but is not a substitute for reviewing commits. Dataset-specific public-display, attribution, storage and redistribution terms remain **unapproved**. Do not turn research data into a live public property feed on the strength of a successful GitHub Actions run.
+The second command launches a **loopback-only fictional-data app** at http://127.0.0.1:8765/. It is not an approved public application. For current CI checks, follow the [checkpoint](CHECKPOINT.md) rather than repeating a historic test count. The offline [application workflow](../.github/workflows/audit-tests.yml) tests `development` pushes and PRs targeting `main`; never infer browser/production acceptance solely from a green lint job.
+
+For a deliberate new research audit, see [Automated data audit](AUTOMATED_DATA_AUDIT.md). Historical three-phase cloud run: [45046687782](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45046687782), with aggregate-only reports and 14-day artifact retention. Do not put raw source extracts, identifying property records, user data, licence-restricted fields or API credentials into public Git or CI artifacts.
+
+**Historical migration caution:** The old ZIP used independent Git history. Never force-push it over the published repository; see [migration manifest](MIGRATION_MANIFEST.md).

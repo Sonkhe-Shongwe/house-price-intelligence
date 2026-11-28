@@ -41,17 +41,31 @@
 
     <div class="safety-notice" role="note">
       <div class="notice-icon" aria-hidden="true">i</div>
-      <div><strong>This is a synthetic engineering prototype.</strong> Every property and sale displayed here is invented. No live listings, current valuations, real addresses, or financial recommendations are provided. Saved investigations last only while this local server runs.</div>
+      <div><strong>This is a synthetic engineering prototype.</strong> Every property and sale displayed here is invented. No live listings, current valuations, real addresses, or financial recommendations are provided. Saved investigations are temporary by default; an explicitly enabled local fixture database preserves them across restarts. Do not enter personal information.</div>
     </div>
 
     <div class="workspace">
       <section class="input-panel" aria-labelledby="form-heading">
         <div class="section-topline"><span>01 / INVESTIGATION DETAILS</span><span class="stage-tag">P3 CONTRACT TEST</span></div>
-        <div class="panel-heading"><h2 id="form-heading">Start an investigation</h2><p>Use the supplied synthetic parcel identifier to test the complete enquiry workflow.</p></div>
+        <div class="panel-heading"><h2 id="form-heading">Start an investigation</h2><p>Find an invented demonstration address or use a synthetic PIN. Select the property before investigating its evidence.</p></div>
+        <section class="address-finder" aria-labelledby="address-heading">
+          <h3 id="address-heading">Find a fictional address</h3>
+          <form id="address-search-form">
+            <label for="address-query" class="visually-hidden">Search invented addresses</label>
+            <div class="address-search-row">
+              <input id="address-query" name="address-query" type="search" value="Fictional Way" maxlength="80" required placeholder="e.g. Fictional Way" autocomplete="off">
+              <button type="submit" class="secondary-button" id="address-search-button">Search</button>
+            </div>
+          </form>
+          <p class="address-hint">Synthetic index only. Address suggestions are not real property records.</p>
+          <p id="address-search-feedback" role="status" aria-live="polite" class="address-feedback"></p>
+          <div id="address-results" class="address-results" aria-label="Possible invented addresses" hidden></div>
+          <p id="selected-address" class="address-selected" role="status" hidden></p>
+        </section>
         <form id="investigation-form" novalidate>
           <div class="field"><label for="pin">Parcel PIN <span class="required">*</span></label>
             <input id="pin" name="pin" required maxlength="14" pattern="[0-9]{14}" value="00000000000001" autocomplete="off" inputmode="numeric" spellcheck="false" aria-describedby="pin-hint">
-            <div class="field-hint" id="pin-hint">14 digits. Technical lookup key, not an address search.</div>
+            <div class="field-hint" id="pin-hint">14-digit internal synthetic parcel key. Address selection fills this automatically; source attributes remain server-controlled.</div>
           </div>
           <div class="field"><label for="label">Property label <span class="optional">OPTIONAL</span></label>
             <input id="label" name="label" maxlength="120" value="My example property" autocomplete="off" placeholder="e.g. Property A">
@@ -91,12 +105,48 @@
           <div id="comparables" class="comparables"></div>
           <div id="unsupported" class="unsupported" hidden></div>
           <details class="provenance"><summary>Source lineage and limitations <span aria-hidden="true">⌄</span></summary><div id="provenance-content"></div></details>
-          <div class="result-actions"><button type="button" class="secondary-button" id="copy-link">Copy investigation link</button><span class="save-note">Saved in temporary SQLite memory</span></div>
+          <div class="result-actions"><button type="button" class="secondary-button" id="copy-link">Copy investigation link</button><span class="save-note">Local fixture only. Persistence requires --fixture-db.</span></div>
         </div>
       </section>
     </div>
 
-    <section class="reopen-panel" aria-labelledby="reopen-heading"><div><div class="mini-label">CONTINUE WHERE YOU LEFT OFF</div><h2 id="reopen-heading">Open an investigation</h2><p>Reopen a saved result using its ID. Results disappear when the local server stops.</p></div><form id="reopen-form"><label for="reopen-id" class="visually-hidden">Investigation ID</label><input id="reopen-id" name="reopen-id" type="text" placeholder="Paste investigation UUID" autocomplete="off" spellcheck="false" required><button type="submit" class="secondary-button">Open saved result</button></form></section>
+    <section class="reopen-panel" aria-labelledby="reopen-heading"><div><div class="mini-label">CONTINUE WHERE YOU LEFT OFF</div><h2 id="reopen-heading">Open an investigation</h2><p>Reopen a saved result using its ID. Results persist across restarts only in explicit --fixture-db mode.</p></div><form id="reopen-form"><label for="reopen-id" class="visually-hidden">Investigation ID</label><input id="reopen-id" name="reopen-id" type="text" placeholder="Paste investigation UUID" autocomplete="off" spellcheck="false" required><button type="submit" class="secondary-button">Open saved result</button></form></section>
+
+    <section class="shortlist-panel" id="shortlist-workspace" aria-labelledby="shortlist-heading">
+      <div class="section-topline"><span>03 / BUYER SHORTLIST</span><span class="stage-tag">FICTIONAL PROPERTIES ONLY</span></div>
+      <div class="shortlist-heading">
+        <div><h2 id="shortlist-heading">Compare homes, not just prices.</h2>
+          <p>Save up to three different invented properties, keep local demonstration notes, and compare frozen evidence side by side. Unsupported properties remain visible without invented valuations.</p></div>
+      </div>
+      <div class="shortlist-controls">
+        <form id="shortlist-create-form" class="shortlist-form">
+          <label for="shortlist-label">New shortlist name</label>
+          <div class="shortlist-inline"><input id="shortlist-label" maxlength="80" value="My fictional property shortlist" required autocomplete="off"><button type="submit" class="secondary-button">Create shortlist</button></div>
+        </form>
+        <form id="shortlist-open-form" class="shortlist-form">
+          <label for="shortlist-open-id">Reopen saved shortlist UUID</label>
+          <div class="shortlist-inline"><input id="shortlist-open-id" autocomplete="off" spellcheck="false" required placeholder="Paste shortlist UUID"><button type="submit" class="secondary-button">Open shortlist</button></div>
+        </form>
+      </div>
+      <div class="shortlist-discovery"><button id="shortlist-find" type="button" class="secondary-button">Find local shortlists</button><div id="shortlist-found" aria-label="Saved fictional shortlists"></div></div>
+      <p id="shortlist-feedback" role="status" aria-live="polite" class="shortlist-feedback">Create or open a shortlist to begin. Only fictional data belongs here.</p>
+      <div id="shortlist-content" hidden>
+        <div class="shortlist-active">
+          <div><span class="mini-label">CURRENT BUYER WORKSPACE</span><h3 id="shortlist-title"></h3>
+            <p id="shortlist-count"></p><p id="shortlist-id-value" class="shortlist-uuid"></p></div>
+          <button type="button" class="primary-button" id="shortlist-add-current">Add current investigation</button>
+        </div>
+        <div id="shortlist-entries" class="shortlist-entries" aria-label="Shortlisted property notes"></div>
+        <div id="shortlist-compare" class="shortlist-compare" hidden>
+          <h3>Side-by-side evidence</h3>
+          <p>Each column is one saved property. Asking prices are buyer-reported, completed sales are fictional fixtures and no current price estimate is produced.</p>
+          <div class="shortlist-table-scroll" id="shortlist-comparison-wrap" role="region" aria-label="Property evidence comparison" tabindex="0">
+            <table id="shortlist-comparison" class="shortlist-comparison"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <footer><div><strong>HOUSE PRICE INTELLIGENCE</strong><span>Experimental evidence workspace · 2026</span></div><span>Not an appraisal service. Synthetic demonstration only.</span></footer>
   </main>
 </body>

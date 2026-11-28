@@ -1,0 +1,84 @@
+@import './designTokens.css';
+/* Product refinement: keep established interaction contracts; no external assets. */
+.source-shell{color:#19352e;background:#f5f7f3}
+.source-shell .source-topbar{background:#142f2b;min-height:73px}
+.source-shell .hpi-sidebar{background:#edf2ee;border-color:#cddbd3}
+.source-shell .hpi-sidebar nav button[aria-current=page]{background:#d3e7d9;border-color:#a5c2ae;box-shadow:inset 3px 0 #24634d}
+.source-shell .hpi-main{max-width:1440px}
+.source-shell .source-intro h1,.source-shell .hpi-page-heading h1{font-size:clamp(30px,3.4vw,48px);letter-spacing:-.035em;line-height:1.12}
+.source-shell .source-intro{padding-top:10px}
+.source-shell .source-intro p,.source-shell .buyer-pane>p,.source-shell .workspace-shell p{font-size:14px;color:#405b50;line-height:1.6}
+.source-shell .buyer-pane label,.source-shell .workspace-shell label{font-size:13px;color:#294a3b}
+.source-shell .buyer-pane input,.source-shell .workspace-input-line input,.source-shell .workspace-card textarea{font-size:14px;color:#19352e;border-color:#91aa98}
+.source-shell .buyer-pane,.source-shell .buyer-result,.source-shell .workspace-shell,.source-shell .hpi-metric,.source-shell .hpi-history-card{border-color:#cbd9cf;border-radius:12px;box-shadow:0 4px 18px #19352e08}
+.source-shell .buyer-result-title h2{font-size:clamp(25px,2.8vw,34px)}
+.source-shell .buyer-result-title p,.source-shell .buyer-result-title small,.source-shell .buyer-candidates small,.source-shell .buyer-constraint,.source-shell .buyer-provenance small,.source-shell .workspace-card>p,.source-shell .workspace-money small{color:#405b50;font-size:12px}
+.source-shell .buyer-warning{color:#624d2d;font-size:12px;border-left-color:#946c32}
+.source-shell .source-sale-main strong{font-size:14px;color:#173e34}
+.source-shell .source-sale-main small,.source-shell .source-sale-price small{font-size:11px;color:#405b50}
+.source-shell .source-sale-list button[aria-pressed=true]{box-shadow:inset 3px 0 #28614d;background:#e9f3ed}
+.pi-sale-facts{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.pi-sale-facts span{font-size:11px;color:#294b3d;background:#e6eee7;border:1px solid #c5d9ca;padding:2px 6px;border-radius:4px}
+.pi-evidence-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 0}
+.pi-evidence-detail div{padding:8px;background:#f0f4ef;border-radius:5px;min-width:0}
+.pi-evidence-detail dt{font-size:11px;color:#405b50}.pi-evidence-detail dd{font-size:12px;font-weight:700;margin:4px 0 0;overflow-wrap:anywhere}
+.source-shell .hpi-dossier-summary>div{background:#f0f5f0;border:1px solid #cbdacd}
+.source-shell .hpi-dossier-summary strong{font-size:clamp(14px,1.4vw,19px);font-variant-numeric:tabular-nums}
+.source-shell :is(button,a,input,textarea,select,summary,[tabindex]):focus-visible{outline:3px solid #905b12;outline-offset:3px}
+.source-shell .buyer-progress :is(button,input):focus-visible{outline-color:#ffda90}
+.pi-comparison{margin-top:24px;min-width:0}.pi-comparison h3{font:400 27px/1.2 Georgia,serif;color:#173e34;margin:0 0 6px}
+.pi-table-scroll{overflow-x:auto;max-width:100%;border:1px solid #bdcfc1;border-radius:9px}
+.pi-table-scroll table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:560px;font-size:13px;line-height:1.5}
+.pi-table-scroll th,.pi-table-scroll td{text-align:left;padding:12px;border-bottom:1px solid #d8e3db;vertical-align:top;overflow-wrap:anywhere}
+.pi-table-scroll thead th{background:#173e34;color:#fff;font-weight:650}
+.pi-table-scroll tbody th{background:#edf3ed;color:#294a3b;width:22%;font-weight:650}
+.pi-table-scroll tbody td{color:#19352e;background:white}.pi-table-scroll tr:last-child>*{border-bottom:0}
+.pi-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:540px){.source-shell .source-topbar{padding-inline:12px}.source-shell .source-server-badge{font-size:9px;white-space:normal;text-align:center;max-width:130px}.source-shell .buyer-pane,.source-shell .buyer-result,.source-shell .workspace-shell{padding:14px}.source-shell .hpi-main{padding-inline:12px}.pi-sale-facts{gap:3px}.pi-sale-facts span{font-size:10px}.source-shell .buyer-pane>p,.source-shell .workspace-shell p{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.source-shell *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+@media(max-width:540px){.source-shell .hpi-sidebar nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.source-shell .hpi-sidebar nav button{justify-content:center;padding:7px 3px;text-align:center;white-space:normal;line-height:1.25;min-height:40px}.source-shell .source-brand{font-size:16px}}
+
+
+/* Contrast corrections on light surfaces; preserve the dark panel palette. */
+.source-shell .source-footer,.source-shell .source-panel-head small,
+.source-shell .source-sale-detail small,.source-shell .source-empty p,
+.source-shell .source-geo-footer,.source-shell .source-breadcrumb,
+.source-shell .source-toolbar-caption,.source-shell .source-summary p,
+.source-shell .source-money span,.source-shell .source-stat span,
+.source-shell .source-bottom-card dt,.source-shell .source-bottom-card p,
+.source-shell .source-note small,.source-shell .source-shortlist-heading p,
+.source-shell .buyer-section-number,.source-shell .buyer-map-disabled p,
+.source-shell .buyer-map-disabled>span,.source-shell .buyer-map-disabled strong,
+.source-shell .buyer-chosen b,.source-shell .buyer-chosen span,
+.source-shell .workspace-card-top,.source-shell .workspace-card-bottom span,
+.source-shell .workspace-provenance,.source-shell .geo-provenance{color:#3b594a}
+.source-shell .workspace-disclaimer{color:#405b50!important}
+.source-shell .source-empty small{color:#735320}
+.source-shell .buyer-progress .buyer-section-number{color:#f0d2a0}
+.source-shell .buyer-progress>p{color:#d2e3d9}
+.source-shell .workspace-shell h2 em{color:#376849}
+.source-shell .workspace-flag{color:#285b3f}
+.source-shell .source-separator{color:#557064}
+.source-shell .buyer-candidate-select{color:#265f48}
+.source-shell .source-empty>span{color:#735320}
+.source-shell .buyer-disabled-icon{color:#285d46}
+
+.source-shell .buyer-result-title>div:last-child small{color:#405b50}
+
+/* Integrated visual audit: align the fictional shell with the existing Atlas candidate.
+ * Keep layout and all semantic, focus, fixture and evidence contracts unchanged. */
+.source-shell{background:var(--hpi-atlas-canvas);color:var(--hpi-atlas-ink)}
+.source-shell .source-topbar{background:var(--hpi-atlas-ink)}
+.source-shell .hpi-sidebar{background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-shell-rule)}
+.source-shell .hpi-sidebar nav button[aria-current=page]{background:var(--hpi-atlas-table-head);border-color:var(--hpi-atlas-outline);box-shadow:inset 3px 0 var(--hpi-atlas-action)}
+.source-shell .buyer-pane,.source-shell .buyer-result,.source-shell .workspace-shell,.source-shell .hpi-metric,.source-shell .hpi-history-card{border-color:var(--hpi-atlas-shell-rule);border-radius:4px;box-shadow:none;background:var(--hpi-atlas-surface)}
+.source-shell .hpi-dossier-summary>div{background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-shell-rule);border-radius:3px}
+.source-shell .source-intro h1,.source-shell .hpi-page-heading h1{font-family:var(--hpi-atlas-display);font-weight:400}
+.source-shell .source-sale-list button[aria-pressed=true]{background:var(--hpi-atlas-table-head);box-shadow:inset 3px 0 var(--hpi-atlas-accent)}
+.source-shell .pi-sale-facts span{border-radius:3px;background:var(--hpi-atlas-quiet);border-color:var(--hpi-atlas-rule)}
+.source-shell .pi-evidence-detail div{border-radius:3px;background:var(--hpi-atlas-quiet)}
+.source-shell .pi-comparison h3{font-family:var(--hpi-atlas-display);color:var(--hpi-atlas-ink)}
+.source-shell .buyer-pane input,.source-shell .workspace-input-line input,.source-shell .workspace-card textarea{border-color:var(--hpi-atlas-outline)}
+.source-shell :is(button,a,input,textarea,select,summary,[tabindex]):focus-visible{outline-color:var(--hpi-atlas-accent)}
+.source-shell .buyer-progress :is(button,input):focus-visible{outline-color:#ffda90}

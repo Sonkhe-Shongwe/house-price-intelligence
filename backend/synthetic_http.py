@@ -14,9 +14,24 @@ import sqlite3
 from typing import Any
 
 from backend.investigation_contract import ContractError
+from backend import sa_investigation_v2
+from backend.sa_fixture_persistence import sqlite_store, PersistenceError, SaveConflict
+from backend.sa_fixture_shortlist import FictionalShortlist, ShortlistConflict
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
+from backend.synthetic_shortlists import ShortlistError, SyntheticShortlistService
+from backend.synthetic_map import map_evidence
+from backend.buyer_evidence_preview import buyer_evidence_preview
+from backend.nyc_fixture_http import NYC_PATH, LifecycleUnavailable, investigate as investigate_nyc_fixture
+from tools.nyc_qualification import QualificationError
+from backend.centroid_preview import centroid_preview
+from backend.context_archive_http import CONTEXT_PATH, transport_fixture, atlas_fixture
+from backend.context_archive_fixture import ATLAS_FIXTURE_PATH
 
 MAX_BODY_BYTES = 16 * 1024
+SA_INVESTIGATION_PATH = "/v2/fictional/za/investigate"
+SA_SAVED_PATH = "/v2/fictional/za/saved"
+SA_SHORTLIST_PATH = "/v2/fictional/za/shortlist"
+SA_SAVED_ID = re.compile(r"^" + SA_SAVED_PATH + r"/([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$")
 # Exactly three assets are served: no directory traversal, assets from a fixed tree.
 # The entire UI is a disposable, synthetic-only development preview.
 FRONTEND = Path(__file__).resolve().parents[1] / "frontend"
@@ -49,6 +64,15 @@ def _static_response(start_response, asset):
     return [payload]
 
 ID_ROUTE = re.compile(r"^/v1/investigations/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$")
+ADDRESS_ROUTE = re.compile(r"^/v1/addresses/([a-z0-9-]{1,40})$")
+UUID_PART = r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+MAP_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/map$")
+PREVIEW_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/evidence-preview$")
+CENTROID_ROUTE = re.compile(r"^/v1/investigations/" + UUID_PART + r"/centroid-preview$")
+SHORTLIST_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"$")
+SHORTLIST_MEMBERS_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries$")
+SHORTLIST_ENTRY_ROUTE = re.compile(r"^/v1/shortlists/" + UUID_PART + r"/entries/" + UUID_PART + r"$")
+ADDRESS_SEARCH_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 .,\-']{1,79}$")
 ALLOWED_HOST = re.compile(r"^(?:127\.0\.0\.1|localhost|\[::1\])(?::[0-9]{1,5})?$", re.IGNORECASE)
 
 
@@ -71,7 +95,8 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
     status = {200: "200 OK", 201: "201 Created", 400: "400 Bad Request",
               403: "403 Forbidden", 404: "404 Not Found", 405: "405 Method Not Allowed",
               411: "411 Length Required", 413: "413 Content Too Large",
-              415: "415 Unsupported Media Type", 422: "422 Unprocessable Content",
+              415: "415 Unsupported Media Type", 409: "409 Conflict",
+              422: "422 Unprocessable Content",
               503: "503 Service Unavailable", 500: "500 Internal Server Error"}[code]
     headers = [("Content-Type", "application/json; charset=utf-8"),
                ("Content-Length", str(len(payload))), *SECURITY_HEADERS]
@@ -83,7 +108,22 @@ def _response(start_response, code: int, value: Any, *, location: str | None = N
     return [payload]
 
 
-def create_app(store: SyntheticInvestigationStore, *, today: date | None = None):
+def create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
+               react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
+               context_transport_fixture: bool = False, sa_fixture: bool = False,
+               sa_saved_fixture: bool = False, nyc_fixture: bool = False):
+    """Normal launcher: no caller-injected restart storage."""
+    return _create_app(store, today=today, react_assets=react_assets,
+                       synthetic_map=synthetic_map, context_transport_fixture=context_transport_fixture,
+                       sa_fixture=sa_fixture, sa_saved_fixture=sa_saved_fixture,
+                       nyc_fixture=nyc_fixture)
+
+
+def _create_app(store: SyntheticInvestigationStore, *, today: date | None = None,
+                react_assets: dict[str, tuple[bytes, str]] | None = None, synthetic_map: bool = False,
+                context_transport_fixture: bool = False, sa_fixture: bool = False,
+                sa_saved_fixture: bool = False, restart_shortlist=None,
+                nyc_fixture: bool = False):
     """Build a WSGI app against the **server-injected** synthetic evidence store.
 
     Host/remote checks are belt-and-braces protections, not an authentication
@@ -91,6 +131,37 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
     """
     if not isinstance(store, SyntheticInvestigationStore):
         raise TypeError("Only the fixture-backed investigation store may be served")
+    if type(nyc_fixture) is not bool:
+        raise ValueError("NYC fixture opt-in must be boolean")
+    if nyc_fixture and (not isinstance(store.connection, sqlite3.Connection)
+                        or any(row[2] for row in store.connection.execute("PRAGMA database_list"))):
+        raise ValueError("NYC fixture requires disposable in-memory SQLite")
+    if type(sa_fixture) is not bool:
+        raise ValueError("SA fixture opt-in must be boolean")
+    if type(sa_saved_fixture) is not bool or (sa_saved_fixture and not sa_fixture):
+        raise ValueError("ZA saved fixture requires explicit ZA fixture opt-in")
+    # Never select owner from a browser field/header. This is a single fixed
+    # fictional workspace on a disposable single-threaded loopback server.
+    if restart_shortlist is not None:
+        from backend.sa_fixture_restart import RestartShortlist
+        if (not sa_saved_fixture or not isinstance(restart_shortlist, RestartShortlist)
+                or restart_shortlist._store._db is not store.connection
+                or restart_shortlist._store._owner != "fictional-alice"):
+            raise ValueError("Invalid managed fictional restart workspace")
+        sa_shortlist = restart_shortlist
+        sa_saved = restart_shortlist._store
+    else:
+        sa_saved = sqlite_store(store.connection, "fictional-alice") if sa_saved_fixture else None
+        sa_shortlist = FictionalShortlist(sa_saved) if sa_saved is not None else None
+    shortlists = SyntheticShortlistService(store)
+    if synthetic_map and react_assets is None:
+        raise ValueError("Synthetic map requires the React frontend")
+    if context_transport_fixture and react_assets is None:
+        raise ValueError("Context transport fixture requires the React frontend")
+    context_archive = transport_fixture() if context_transport_fixture else None
+    context_atlas = atlas_fixture() if context_transport_fixture else None
+    react_headers = [(key, value + "; worker-src 'self'" if (synthetic_map or context_transport_fixture) and key == "Content-Security-Policy" else value)
+                     for key, value in SECURITY_HEADERS]
 
     def app(environ, start_response):
         method = environ.get("REQUEST_METHOD", "")
@@ -101,7 +172,7 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
         # A browser's same-origin JSON POST sends Origin. Keep those requests
         # working while rejecting unrelated web pages and DNS-rebinding hosts.
         if (remote not in ("127.0.0.1", "::1") or not ALLOWED_HOST.fullmatch(host)
-                or (origin is not None and origin.lower() != "http://" + host.lower())
+                or (origin is not None and origin.lower() != environ.get("wsgi.url_scheme","http") + "://" + host.lower())
                 or environ.get("HTTP_SEC_FETCH_SITE") in ("cross-site", "same-site")
                 or environ.get("HTTP_X_FORWARDED_FOR")
                 or environ.get("HTTP_X_FORWARDED_HOST") or environ.get("HTTP_X_FORWARDED_PROTO")
@@ -111,7 +182,33 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
         if environ.get("QUERY_STRING"):
             return _response(start_response, 400, {"error": "query_parameters_not_supported"})
 
-        if path in STATIC_ASSETS:
+        if path == CONTEXT_PATH and context_archive is not None:
+            return context_archive.serve(environ, start_response, react_headers)
+
+        if path == ATLAS_FIXTURE_PATH and context_atlas is not None:
+            return context_atlas.serve(environ, start_response, react_headers)
+        if path == "/context-preview" and context_atlas is not None:
+            path = "/"  # existing React entry, explicitly enabled only
+
+        if path == "/nyc-fictional":
+            if not nyc_fixture or react_assets is None:
+                return _response(start_response, 404, {"error": "not_found"})
+            path = "/"
+
+        if path == "/za-fictional":
+            if not sa_fixture or react_assets is None:
+                return _response(start_response, 404, {"error": "not_found"})
+            path = "/"  # same compiled entry, only on explicit local opt-in
+
+        if react_assets is not None and path in react_assets:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            payload, content_type = react_assets[path]
+            start_response("200 OK", [("Content-Type", content_type),
+                                      ("Content-Length", str(len(payload))), *react_headers])
+            return [payload]
+
+        if react_assets is None and path in STATIC_ASSETS:
             if method != "GET":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _static_response(start_response, STATIC_ASSETS[path])
@@ -121,8 +218,74 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
             return _response(start_response, 200, {"status": "ok", "mode": "synthetic_fixture_only"})
 
-        if path == "/v1/investigations":
+        if path == "/v1/investigations/history":
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, store.history())
+            except (EvidenceStoreError, sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+
+        sa_saved_id = SA_SAVED_ID.fullmatch(path)
+        if sa_saved is not None and (path == SA_SAVED_PATH and method == "GET" or sa_saved_id):
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                if sa_saved_id:
+                    return _response(start_response, 200, sa_saved.reopen(sa_saved_id.group(1)))
+                return _response(start_response, 200, sa_saved.history())
+            except PersistenceError:
+                return _response(start_response, 404 if sa_saved_id else 503, {"error": "saved_evidence_unavailable"})
+            except (sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
+        if sa_saved is not None and path == SA_SAVED_PATH and method != "POST":
+            return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
+
+        if sa_shortlist is not None and path == SA_SHORTLIST_PATH:
+            if method == "GET":
+                try:
+                    return _response(start_response, 200, sa_shortlist.get())
+                except (PersistenceError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
             if method != "POST":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
+
+        shortlist_match = SHORTLIST_ROUTE.fullmatch(path)
+        members_match = SHORTLIST_MEMBERS_ROUTE.fullmatch(path)
+        entry_match = SHORTLIST_ENTRY_ROUTE.fullmatch(path)
+
+        if (path == "/v1/shortlists" and method == "GET"
+                or shortlist_match and method == "GET"
+                or entry_match and method == "DELETE"):
+            try:
+                if path == "/v1/shortlists":
+                    result = shortlists.list()
+                elif shortlist_match:
+                    result = shortlists.get(shortlist_match.group(1))
+                else:
+                    result = shortlists.remove(entry_match.group(1), entry_match.group(2))
+                return _response(start_response, 200, result)
+            except ShortlistError as exc:
+                return _response(start_response, exc.status, {"error": exc.code})
+            except (EvidenceStoreError, sqlite3.Error):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+
+        if shortlist_match or (entry_match and method != "PATCH"):
+            return _response(start_response, 405, {"error": "method_not_allowed"},
+                             allow="GET" if shortlist_match else "PATCH, DELETE")
+        if members_match and method != "POST":
+            return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
+        if path == "/v1/shortlists" and method not in ("GET", "POST"):
+            return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET, POST")
+
+        shortlist_write = (path == "/v1/shortlists" or members_match is not None
+                           or entry_match is not None)
+        nyc_request = path == NYC_PATH and nyc_fixture
+        sa_request = path == SA_INVESTIGATION_PATH and sa_fixture
+        sa_save = path == SA_SAVED_PATH and sa_saved is not None
+        sa_shortlist_write = path == SA_SHORTLIST_PATH and sa_shortlist is not None
+        if path in ("/v1/investigations", "/v1/addresses/search") or shortlist_write or sa_request or sa_save or sa_shortlist_write or nyc_request:
+            if not shortlist_write and method != "POST":
                 return _response(start_response, 405, {"error": "method_not_allowed"}, allow="POST")
             if environ.get("HTTP_TRANSFER_ENCODING"):
                 return _response(start_response, 400, {"error": "unsupported_transfer_encoding"})
@@ -149,6 +312,80 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 json.dumps(payload, ensure_ascii=False).encode("utf-8", "strict")
             except (KeyError, ValueError, UnicodeError, json.JSONDecodeError, RecursionError):
                 return _response(start_response, 400, {"error": "invalid_json"})
+            if nyc_request:
+                try:
+                    return _response(start_response, 200, investigate_nyc_fixture(payload))
+                except LifecycleUnavailable:
+                    return _response(start_response, 503, {"error": "nyc_evidence_unavailable"})
+                except QualificationError:
+                    return _response(start_response, 422, {"error": "invalid_nyc_fixture_request"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
+            if sa_shortlist_write:
+                try:
+                    return _response(start_response, 200, sa_shortlist.mutate(payload))
+                except ValueError:
+                    return _response(start_response, 422, {"error": "invalid_sa_shortlist_request"})
+                except ShortlistConflict:
+                    return _response(start_response, 409, {"error": "sa_shortlist_conflict"})
+                except (PersistenceError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
+            if sa_save:
+                try:
+                    if not isinstance(payload, dict) or set(payload) != {"retry_id", "request"}:
+                        raise sa_investigation_v2.ContractError("invalid_save_envelope")
+                    if not isinstance(payload["retry_id"], str) or not SA_SAVED_ID.fullmatch(SA_SAVED_PATH + "/" + payload["retry_id"]):
+                        raise sa_investigation_v2.ContractError("invalid_retry_id")
+                    saved = sa_saved.save(payload["request"], today=today, retry_id=payload["retry_id"])
+                    return _response(start_response, 200, saved)
+                except sa_investigation_v2.ContractError:
+                    return _response(start_response, 422, {"error": "invalid_sa_fixture_request"})
+                except SaveConflict:
+                    return _response(start_response, 409, {"error": "save_identifier_unavailable"})
+                except (PersistenceError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "saved_evidence_unavailable"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
+            if sa_request:
+                try:
+                    return _response(start_response, 200, sa_investigation_v2.investigate(payload, today=today))
+                except sa_investigation_v2.ContractError:
+                    # Fixed error: never reflect a request or internal fixture detail.
+                    return _response(start_response, 422, {"error": "invalid_sa_fixture_request"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
+            if shortlist_write:
+                try:
+                    if path == "/v1/shortlists":
+                        result = shortlists.create(payload)
+                        return _response(start_response, 201, result,
+                                         location="/v1/shortlists/" + result["shortlist_id"])
+                    if members_match:
+                        result = shortlists.add(members_match.group(1), payload)
+                        return _response(start_response, 201, result)
+                    result = shortlists.set_note(entry_match.group(1), entry_match.group(2), payload)
+                    return _response(start_response, 200, result)
+                except ShortlistError as exc:
+                    return _response(start_response, exc.status, {"error": exc.code})
+                except (EvidenceStoreError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "evidence_unavailable"})
+                except Exception:
+                    return _response(start_response, 500, {"error": "internal_error"})
+            if path == "/v1/addresses/search":
+                if (not isinstance(payload, dict) or set(payload) != {"query"}
+                        or not isinstance(payload.get("query"), str)):
+                    return _response(start_response, 422,
+                                     {"error": "invalid_request", "field": "query",
+                                      "code": "query_required"})
+                query = payload["query"].strip()
+                if not ADDRESS_SEARCH_PATTERN.fullmatch(query):
+                    return _response(start_response, 422,
+                                     {"error": "invalid_request", "field": "query",
+                                      "code": "invalid_search_query"})
+                try:
+                    return _response(start_response, 200, store.search_synthetic_addresses(query))
+                except (EvidenceStoreError, sqlite3.Error):
+                    return _response(start_response, 503, {"error": "evidence_unavailable"})
             try:
                 result = store.create(payload, today=today)
             except ContractError as exc:
@@ -161,6 +398,48 @@ def create_app(store: SyntheticInvestigationStore, *, today: date | None = None)
                 return _response(start_response, 500, {"error": "internal_error"})
             return _response(start_response, 201, result,
                              location=f"/v1/investigations/{result['investigation_id']}")
+
+        address_match = ADDRESS_ROUTE.fullmatch(path)
+        if address_match:
+            if method != "GET":
+                return _response(start_response, 405,
+                                 {"error": "method_not_allowed"}, allow="GET")
+            try:
+                found = store.resolve_synthetic_address(address_match.group(1))
+            except (EvidenceStoreError, sqlite3.Error):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            if found is None:
+                return _response(start_response, 404, {"error": "address_not_found"})
+            return _response(start_response, 200, found)
+
+        preview_match = PREVIEW_ROUTE.fullmatch(path)
+        centroid_match = CENTROID_ROUTE.fullmatch(path)
+        if preview_match or centroid_match:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, centroid_preview(store, centroid_match.group(1)) if centroid_match
+                                 else buyer_evidence_preview(store, preview_match.group(1)))
+            except EvidenceStoreError as exc:
+                if str(exc) == "Investigation not found":
+                    return _response(start_response, 404, {"error": "investigation_not_found"})
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            except (sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+
+        map_match = MAP_ROUTE.fullmatch(path)
+        if map_match:
+            if method != "GET":
+                return _response(start_response, 405, {"error": "method_not_allowed"}, allow="GET")
+            try:
+                return _response(start_response, 200, map_evidence(
+                    store, map_match.group(1), enabled=synthetic_map))
+            except EvidenceStoreError as exc:
+                if str(exc) == "Investigation not found":
+                    return _response(start_response, 404, {"error": "investigation_not_found"})
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
+            except (sqlite3.Error, ValueError, TypeError, KeyError):
+                return _response(start_response, 503, {"error": "evidence_unavailable"})
 
         match = ID_ROUTE.fullmatch(path)
         if match:

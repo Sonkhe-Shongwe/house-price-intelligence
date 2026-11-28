@@ -1,0 +1,25 @@
+name: Full release aggregate qualification
+on:
+  push:
+    branches: [development]
+    paths: ['audit/source_readiness/full_release_qualification.py','.github/workflows/full-release-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s audit/source_readiness/tests -v
+      - run: python -m audit.source_readiness.full_release_qualification
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-release-qualification-aggregate
+          path: reports/full-release-qualification.json
+          if-no-files-found: warn
+          retention-days: 14

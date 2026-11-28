@@ -1,30 +1,20 @@
 # House Price Intelligence: repository working instructions
 
-This repository builds a buyer-facing historical comparable-sales investigation and shortlist application. **This is not the PilotODIN Windows application.**
+Buyer-facing historical comparable-sales investigation and shortlist application; not PilotODIN.
 
-## Restore context before editing
+## Restore and execute
 
-1. Read [the documentation index](docs/DOCUMENTATION_INDEX.md), [current checkpoint](docs/CHECKPOINT.md), [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md), [decisions](docs/DECISIONS.md) and the relevant engineering/phase documents.
-2. Use [Master Continuation Prompt](docs/MASTER_CONTINUATION_PROMPT.md) for cross-session operating method. Follow newer user directions and verified source evidence when they conflict with older descriptions.
-3. Verify current branch/HEAD, local changes and latest meaningful CI results. A GitHub copy does not expose an uninspected Windows working tree.
-4. Distinguish delivery P0-P8 from audit research phases 0-2.
+- Follow the [Master Continuation Prompt](docs/MASTER_CONTINUATION_PROMPT.md) and [current checkpoint](docs/CHECKPOINT.md). Resolve actual development/main HEAD and exact-head CI first; report unavailable Windows local state. Read task ranges at the pinned revision; expand for relevant dependencies. [Documentation index](docs/DOCUMENTATION_INDEX.md) is navigation, not live status.
+- [Decisions](docs/DECISIONS.md) are approval authority, [P0-P8 roadmap](docs/P_PHASE_ROADMAP.md) governs gates and progress, [Lean Engineering Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md) governs the approved eight-step lifecycle, and [cloud-first workflow](docs/engineering/CLOUD_FIRST_WORKFLOW.md) governs branch and test operations. Audit research phases 0-2 differ from delivery P0-P8.
+- One permanent development branch and stable main. Routine scoped research, edits, commits, synthetic CI and corrections delegated. No force push, rewrite, routine per-fix branch or review ZIP. Pull to Windows only for indispensable testing. No main integration, deployment, repository rules or live-data dispatch without applicable authority.
+- One active primary phase; use checkpoint rather than stale task sequences. Apply [P0 discovery directive](docs/engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) when active, [frontend quality directive](docs/engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) for frontend and [synthetic map contract](docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md) for fictional mapping. No parked work unless directly required by a named acceptance criterion.
+- When requesting owner PowerShell output, capture stdout and stderr with Tee-Object and automatically copy the resulting text with Set-Clipboard; return only necessary non-sensitive evidence.
+- Work product-first, R0, small integrated slices, meaningful negative tests, traceable evidence; no artificial progress. Stop at verified milestone or indispensable blocker. Run python tools/check_docs.py and relevant tests, inspect exact-head Actions. Never claim unattended work.
 
-## Lean delivery policy
+## Non-negotiable boundaries
 
-Follow the [active Lean Engineering and Delivery Directive](docs/engineering/LEAN_ENGINEERING_DIRECTIVE.md), including its approved 23 November eight-step lifecycle and Definition of Done. P4/P5 may be implemented in connected slices after P3 acceptance, but have distinct acceptance gates. Prefer one authoritative implementation and small integrated buyer workflows over repeated standalone candidates. Use focused, fast, automated checks; keep valuable regression tests and add only tests for meaningful risks. Choose frameworks and dependencies by demonstrated simplification, not fashion. Do not convert documentation changes into artificial P-stage progress.
+Apply [proportionate public-data research](docs/DECISIONS.md#proportionate-public-data-research-27-november-2026): avoid treating missing licence metadata as a prohibition or requiring bespoke written permission when applicable terms suffice. Read applicable decisions/contracts before exceptional actions: acquisition, real data, material joins, contact (exact draft approval every email), cost, access/provider changes, destructive operations, schedule changes, scope/market/acceptance changes, valuation/model training, release/main integration. No replay of consumed permissions. Keep private data and secrets out of public Git/CI; open-source terms/law and restricted-beta protection/retention apply. Permanent Windows Downloads/HPI-Project sibling checkout and HPI-Data-Workspace; no private source/derived files in checkout. See [Data Manager](docs/engineering/DATA_MANAGER_V1.md), [source register](docs/research/SOURCE_REGISTER.md), [Neon integration](docs/engineering/NEON_CLOUD_INTEGRATION_V1.md) and [private beta](docs/engineering/PRIVATE_REAL_DATA_BETA_V1.md). Reverify target before scoped development-only administration; no production default, passwords or endpoint identifiers in public Git.
 
-## Cloud-first development station (owner-approved 23 November 2026)
+Separate asking price, completed sales and estimates; exploratory 2 km candidate evidence not valuation. Preserve accepted comparable invariants, fictional and real-data boundaries, historical findings and approved behaviour. No publication or real-data acceptance inferred from synthetic tests or downloads.
 
-Apply the [cloud-first development operations](docs/engineering/CLOUD_FIRST_WORKFLOW.md) alongside the unchanged eight-step directive. Use **one GitHub repository, one active milestone branch/PR and GitHub Actions for routine verifiable tests**. Source changes are authored through authorised GitHub/cloud tools; Actions executes builds and checks rather than automatically writing code. Pull to Windows only for essential platform testing or owner UX acceptance. Never create another active app workspace or serial review ZIP as a substitute for integration. Separate observed manual tests, unmerged patches and committed CI evidence. Do not commit, merge, deploy, change repository rules or dispatch live-data jobs without the relevant owner authorisation.
-
-## Engineering boundaries
-
-- Prioritise traceable data, correct joins, source/time limitations, reproducible tests, clear comparable evidence and a complete buyer workflow.
-- Do not conflate recorded sales with a property listing or user-reported asking price. Never label exploratory 2 km spatial fallback prices as validated valuations.
-- Keep publisher data, user data, property-level raw extracts and credentials out of public commits or artifacts. Publication/display rights have not been approved.
-- No approved production database, backend API, browser UI, deploy or price-prediction model is implied by the existing research pipeline.
-- Preserve dated audit reports; update current handoffs and decisions only with new evidence. Use `python tools/check_docs.py` for internal Markdown links and P-stage arithmetic.
-- Do not automatically publish Git changes, manually dispatch live data audits, change scheduled cloud jobs or deploy without the owner's relevant approval. A specific user instruction to update GitHub permits the bounded changes requested.
-- Never force-push or delete/rewrite uncommitted work or retained evidence.
-
-For current work, follow the latest acceptance gate and its tests. If no local checkout is visible, report that limitation rather than claiming a clean working tree.
+[Pre-consolidation instructions](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/386fd7d7312018ad5bfc5e495cba04eeae78d587/AGENTS.md) retain previous wording; current decisions and contracts remain binding.

@@ -1,0 +1,17 @@
+/* Shared Atlas candidate tokens. No global theme override or approved final identity. */
+:root{
+  --hpi-atlas-canvas:#f5f2e9;
+  --hpi-atlas-surface:#faf8f2;
+  --hpi-atlas-ink:#25382d;
+  --hpi-atlas-muted:#536258;
+  --hpi-atlas-action:#254b3a;
+  --hpi-atlas-accent:#a74429;
+  --hpi-atlas-rule:#c4cfc2;
+  --hpi-atlas-outline:#788b7d;
+  --hpi-atlas-quiet:#f0f0e7;
+  --hpi-atlas-table-head:#e6e9df;
+  --hpi-atlas-track:#e2e5da;
+  --hpi-atlas-shell-rule:#cfd2c5;
+  --hpi-atlas-dossier-rule:#c8cfc2;
+  --hpi-atlas-display:Georgia,serif;
+}

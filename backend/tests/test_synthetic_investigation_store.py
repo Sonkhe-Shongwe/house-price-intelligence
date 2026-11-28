@@ -1,13 +1,12 @@
 """SQLite-to-matcher end-to-end tests using invented transactions only."""
 from datetime import date, datetime, timezone
-from pathlib import Path
 import sqlite3
 import unittest
 
 from backend.investigation_contract import ContractError
+from backend.schema_migrations import migrate_fixture
 from backend.synthetic_investigation_store import EvidenceStoreError, SyntheticInvestigationStore
 
-SCHEMA = Path(__file__).resolve().parents[1] / "schema_draft.sql"
 TODAY = date(2026, 11, 22)
 NOW = datetime(2026, 11, 22, 16, 0, tzinfo=timezone.utc)
 BUILD = "synthetic-build"
@@ -25,8 +24,7 @@ def enquiry(**updates):
 class SyntheticServiceTests(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
-        self.db.executescript(SCHEMA.read_text(encoding="utf-8"))
-        self.db.execute("PRAGMA foreign_keys = ON")
+        migrate_fixture(self.db)
         for src, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                           ("geo-snap", "geography")):
             self.db.execute("INSERT INTO source_snapshots (snapshot_id, dataset_id, extracted_at_utc, source_query) VALUES(?,?,?,?)",
@@ -76,6 +74,16 @@ class SyntheticServiceTests(unittest.TestCase):
         self.assertEqual(self.store.reopen("inv-1"), result)
         self.assertEqual(self.db.execute("SELECT match_policy_version FROM investigations").fetchone()[0],
                          SyntheticInvestigationStore.POLICY_VERSION)
+
+    def test_sqlite_one_cent_amount_roundtrips_as_exact_text(self):
+        self.db.execute("UPDATE sale_transactions SET price_usd_cents=52500001 WHERE transaction_id='txn-2'")
+        created = self.store.create(enquiry(), today=TODAY, investigation_id="cent")
+        self.assertEqual(created["contract_version"], "p3-draft-v0.3")
+        self.assertEqual(created["comparables"][0]["sale_price_usd"], "525000.01")
+        for sale in created["comparables"]:
+            self.assertRegex(sale["sale_price_usd"], r"^[0-9]+\.[0-9]{2}$")
+            self.assertNotIn("sale_price", sale)
+        self.assertEqual(self.store.reopen("cent"), created)
 
     def test_fallback_marked_exploratory(self):
         self.db.execute("UPDATE parcel_geographies SET neighborhood_code = '18', latitude = 42.041, longitude = -87.681 WHERE pin != ?", (SUBJECT,))
@@ -140,6 +148,22 @@ class SyntheticServiceTests(unittest.TestCase):
         with self.assertRaisesRegex(EvidenceStoreError, "non-fixture"):
             self.store.create(enquiry(), today=TODAY)
         self.assertEqual(self.db.execute("SELECT COUNT(*) FROM investigations").fetchone()[0], 0)
+
+    def test_changed_saved_address_mapping_refuses_reopen(self):
+        self.db.execute(
+            "INSERT INTO synthetic_address_candidates VALUES (?,?,?,?,?)",
+            ("fictional-1", "101 Fictional Way, Demonstration District",
+             "101 fictional way demonstration district", SUBJECT, "Synthetic parcel 1"),
+        )
+        created = self.store.create(enquiry(address_id="fictional-1", pin=None),
+                                    today=TODAY, investigation_id="address-drift")
+        self.assertEqual(created["subject"]["pin"], SUBJECT)
+        self.db.execute(
+            "UPDATE synthetic_address_candidates SET pin=? WHERE candidate_id=?",
+            ("00000000000002", "fictional-1"),
+        )
+        with self.assertRaisesRegex(EvidenceStoreError, "address candidate"):
+            self.store.reopen("address-drift")
 
     def test_changed_underlying_sale_price_refuses_reopen(self):
         self.store.create(enquiry(), today=TODAY, investigation_id="price-drift")

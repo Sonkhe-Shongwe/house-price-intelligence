@@ -1,0 +1,4 @@
+# Preserve exact migration bytes used for SHA-256 checks across Windows and Linux.
+backend/postgres_migrations/*.sql text eol=lf
+backend/historical_migrations/*.sql text eol=lf
+backend/postgres_ownership_candidate.sql text eol=lf

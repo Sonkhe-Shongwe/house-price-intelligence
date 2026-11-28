@@ -1,0 +1,16 @@
+# Production Runtime Preparation V1
+
+Offline continuation, 24 November 2026. Owner-approved weighted baseline 87.1%. Geographic implementation ceaa239 and map-column fix 360216c: all ten exact-head workflows passed; runtime 45382271478 job 138404058531 passed 15 scenarios including test_centroid_rehearsal_frozen_build_and_browser. 215 Python tests passed at ceaa239 (15/12/14/4/170); no new extraction. No deployment, hosting, real-data extraction/persistence/display, valuation, live identity provider, or main merge.
+
+## Requirements
+Use the same existing loopback PostgreSQL HTTP launcher, React, canonical matcher and owner-scoped transactions. Do not add a parallel product. Load and validate configuration before opening the pool: explicit loopback DSN, password and port, two distinct fictional login passwords, bounded pool 1–8, only fixture-only mode and 127.0.0.1 bind. No credential values in the settings representation or startup errors. Public/production mode still refused. No TLS/proxy or production DB claim.
+
+Fresh disposable bootstrap grants SELECT to known reviewed relations only (workspace_owners not readable), insert only to buyer tables, DELETE and UPDATE(note_text) only to shortlist membership, USAGE only to its identity sequence; deny TEMP and schema creation. Verify effective privileges at pool configure/reset and request entry, including role membership, current identity, RLS enablement, exact known PostgreSQL 17 policy definitions and relation inventory, column-only grant drift, sequence grants, search path and absence of pooled owner residue. Do not claim a hostile database superuser cannot bypass controls. Verify against a restored known policy after drift, fail closed 503 while drifted. This is not a general production DB permissions framework.
+
+Authenticated GET /health/live returns fixed process liveness without taking a DB connection; existing authenticated /health checks role, source integrity, migration history and activation history via existing service. Reject unauthenticated, query and non-GET probes; do not leak stack trace, identifiers, credentials or source records. Authentication still required; for offline OIDC, session authorization must be available. Existing pool loss and exhaustion tests extended, no external monitoring setup.
+
+## Acceptance
+Hosted PostgreSQL 17: reject unsafe configuration and admin credentials; readiness denied under source column write grant, owner-table column read grant, altered or extra RLS policy and temporary privilege; recover after restoration; liveness during pool exhaustion; preserve existing buyer workflow and all regression tests. Actual production credentials/TLS, external issuer, backup and operational monitoring still require reviewed configuration and separate approval. Record exact-head evidence before credit.
+
+## Verified result
+Runtime hardening f213799 passed all ten exact-head workflows. Runtime push 45382939776 job 138406376512 passed 16 scenarios, including test_runtime_settings_and_effective_privilege_drift and pool exhaustion/connection recovery. 215 Python tests and documentation checks passed. No further extraction.

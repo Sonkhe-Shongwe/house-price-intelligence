@@ -1,48 +1,156 @@
 # Documentation index and source-of-truth rules
 
-**Reviewed:** 23 November 2026. **Purpose:** Reduce documentation drift across research experiments, P0–P8 delivery planning and application implementation.
+Navigation catalogue, not a second checkpoint. Every Markdown document under docs/ has a direct route below. Detailed facts, approvals and progress remain in the source documents; dated reports, archive and prior versions are not current instructions. No source was removed to shorten this index.
 
-## What to read first
+## Bootstrap and authority
 
-| Need | Canonical document | Status |
-| --- | --- | --- |
-| Start a new AI/code session | [Master continuation prompt](MASTER_CONTINUATION_PROMPT.md) and [repository instructions](../AGENTS.md) | **Current operating protocol**, defer to verified status and approvals |
-| Pick up active work | [Current checkpoint](CHECKPOINT.md) | **Current**, factual snapshot and P3 next step |
-| Understand percentages and phase gates | [P0–P8 roadmap](P_PHASE_ROADMAP.md) | **Current planning baseline**, 22.8% estimated |
-| Check open choices | [Decision register](DECISIONS.md) | **Current**, confirmed vs unapproved |
-| Understand the buyer experience | [Product brief](product/PRODUCT_BRIEF.md) | **Current product intent**, not implemented functionality |
-| Review UX research and visual concepts | [UX research and product direction, 23 Nov](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md) | **Exploratory, not approved**; inspiration, palettes, screen architecture, accessibility and design decisions |
-| Apply quality/invariants | [Engineering contract](engineering/ENGINEERING_CONTRACT.md) | **Binding engineering guardrails** |
-| Develop efficiently and consistently | [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md) | **Active eight-step engineering process**, approved 23 Nov |
-| Run the cloud-first development station | [Cloud-first development operations](engineering/CLOUD_FIRST_WORKFLOW.md) | **Owner-approved operating method**; CI enhancements staged, not yet implemented |
-| Inspect integrated P3 app | [P3 application contract](engineering/P3_APPLICATION_CONTRACT.md) | **Synthetic-only code/HTTP/SQL/UI review candidate; acceptance pending** |
-| Interpret source use | [Source register](research/SOURCE_REGISTER.md) | **Current research provenance**, rights still pending |
-| Find verified counts | [Phase 0](research/PHASE0_LIVE_AUDIT_RESULTS.md), [Phase 1](research/PHASE1_CLOUD_AUDIT_RESULTS.md), [Phase 2](research/PHASE2_CLOUD_AUDIT_RESULTS.md) | **Dated immutable experiment summaries** |
-| Re-run research | [Cloud audit operations](AUTOMATED_DATA_AUDIT.md) | **Current operating guide** |
-| See continuity audit and 11 grey areas | [23 Nov continuity/directive audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md) | **Current P3 continuity review**, tested vs committed evidence and open technical risks |
-| See the new development-process audit | [23 Nov cloud-first documentation audit](reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md) | **Dated workflow audit**; does not supersede technical P3 evidence or phase estimates |
-| See earlier process adoption | [23 Nov directive audit](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md) | Historical dated process change, not latest implementation state |
-| See earlier cleanup | [22 Nov documentation audit](reviews/DOCUMENTATION_AUDIT_2026-11-22.md) | **Retained historical audit** |
-| Review old scope/origins | [Pinnacle vision](product/PINNACLE_VISION.md), [Migration manifest](MIGRATION_MANIFEST.md), [archived roadmap](archive/INITIAL_ROADMAP_2026-11-22.md) | **Historical/reference**, not current status |
+- [Repository instructions](../AGENTS.md), [master protocol](MASTER_CONTINUATION_PROMPT.md), [checkpoint](CHECKPOINT.md): bootstrap in that order after exact HEAD/CI verification.
+- [Decisions](DECISIONS.md): approval, exceptions and open questions; read applicable rows and complete governing contracts for exceptional actions.
+- [P0-P8 roadmap](P_PHASE_ROADMAP.md): sole live phase table, weights, progress and exit criteria. [Roadmap overview](ROADMAP.md) is navigation only.
+- [Lean engineering directive](engineering/LEAN_ENGINEERING_DIRECTIVE.md), [engineering contract](engineering/ENGINEERING_CONTRACT.md), [cloud workflow](engineering/CLOUD_FIRST_WORKFLOW.md): method and invariants.
+- [P0 discovery directive](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md), [frontend directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md): applicable workstream rules, current priority from checkpoint.
+- Exact GitHub HEAD and Actions are authority for source and test status. Owner instructions and documented decisions govern permission; proposals and archives cannot authorise work. Audit phases 0-2 are distinct from delivery P0-P8.
 
-## Terminology: two separate kinds of phases
+## Task-oriented routes
 
-- **Data research experiments:** `audit/phase0` = sales/buildings data feasibility; `audit/phase1` = Class 203 neighbourhood enrichment; `audit/phase2` = explainable comparable matcher. All three were executed in the cloud on 22 November 2026.
-- **Portfolio delivery phases:** **P0–P8**, covering discovery through deployed application. The current overall weighted baseline is **22.8%**, with P3 integration review and acceptance next. Passing the three audit experiments does not mean delivery P0/P1/P2 are accepted or finished.
+| Need | Start here |
+| --- | --- |
+| Active market feasibility | [Actual NYC frame](research/DATA_FEASIBILITY.md#28-november-2026--nyc-entry-p1-actual-address-frame-outcome), [earlier-sale study](research/DATA_FEASIBILITY.md#27-november-2026--nyc-actual-bounded-qualification-outcome), [source register](research/SOURCE_REGISTER.md), [competitive research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
+| Data rights and lifecycle | [Source register](research/SOURCE_REGISTER.md), [Data Manager](engineering/DATA_MANAGER_V1.md), [retention policy](engineering/DATA_MANAGER_V1.md#open-data-retention-policy-26-november-2026), [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) |
+| Product and P0 closure | [Product brief](product/PRODUCT_BRIEF.md), [foundation review](reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md), [Current NYC P0 reconciliation](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md#28-november-2026--nyc-evidence-based-p0-exit-gap-reconciliation), [market research](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md) |
+| Application and storage | [P3 contract](engineering/P3_APPLICATION_CONTRACT.md), [P6 shortlist](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md), [Neon integration](engineering/NEON_CLOUD_INTEGRATION_V1.md), [private beta](engineering/PRIVATE_REAL_DATA_BETA_V1.md) |
+| UI and maps | [Frontend directive](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md), [mapping research](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md), [Atlas study](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md), [fictional map contract](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md), [Atlas prototype](../design-prototypes/hpi-atlas-terminal-study.html), [map study prototype](../design-prototypes/map-evidence-studio.html) |
+| Release | [Release runbook](engineering/RELEASE_RUNBOOK_V1.md), [recruiter walkthrough](product/RECRUITER_WALKTHROUGH_V1.md), [full qualification](engineering/FULL_RELEASE_QUALIFICATION_V1.md) |
+| Historical evidence | [Checkpoint archive](archive/CONTINUATION_CHECKPOINT_2026-11-26.md), [checkpoint evidence](archive/CHECKPOINT_EVIDENCE_2026-11-26.md), [decision history](archive/DECISION_HISTORY_2026-11-26.md), [delivery history](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md), [previous detailed index](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/386fd7d7312018ad5bfc5e495cba04eeae78d587/docs/DOCUMENTATION_INDEX.md) |
 
-## Document precedence and maintenance
+For exact counts use original dated source reports and runs. For new work retrieve the task's validated line ranges first, then follow supporting links or read additional sections where uncertainty remains. Never treat the index or a range as exhaustive approval evidence. Keep historical figures and failed experiments; do not rewrite them to fit current conclusions.
 
-1. **Raw historical experiment figures:** cite the original dated findings and GitHub run. Do not overwrite numbers to fit a new narrative; publish a new run report if data or code changes.
-2. **Current project position:** use `CHECKPOINT.md` for the latest verified status, `DECISIONS.md` for decisions requiring owner approval and `P_PHASE_ROADMAP.md` for phase weights/gates.
-3. **Original proposals and old checkpoints:** retain their original wording with a clear dated **historical snapshot** banner, or archive them. Never leave an old "not run" statement presented as current after the run succeeds.
-4. **Changes:** update checklist/status only when evidence supports it. Document changed assumptions, a rejected result and next gate. Do not inflate progress for docs edits. UX concepts, palettes and wireframes are proposals until expressly accepted.
-5. **Public data and privacy:** do not publish raw extracts, property-level records, owner names, API secrets or personal client information. Research artifacts are aggregate-only. Source-specific public display/reuse is unapproved.
-6. **External source documents:** the PilotODIN P0–P8 framing is an **adaptation** of its complexity-last phase-gating method, not a copy of PilotODIN's Windows/AI release requirements. See the [P-stage roadmap](P_PHASE_ROADMAP.md) for methodology and provenance.
+## Complete document catalogue
 
-## Active engineering handoff
+### Core governance and operations
 
-**Execution model updated 23 November 2026:** One authoritative GitHub project, authorised short-lived branch and PR per milestone, GitHub Actions for most automated checks, Windows only when necessary for owner UX or platform acceptance. The current GitHub workflow still lacks enforced JavaScript and automated Chromium/SQLite graphical acceptance. [Operating method](engineering/CLOUD_FIRST_WORKFLOW.md). The owner's 23 November browser screenshots verify supported, reopen and safe unknown-PIN outcomes on the committed synthetic app; these are **manual evidence**, not new CI tests.
+- [AUTOMATED DATA AUDIT](AUTOMATED_DATA_AUDIT.md)
+- [CHECKPOINT](CHECKPOINT.md)
+- [DECISIONS](DECISIONS.md)
+- [GITHUB SETUP](GITHUB_SETUP.md)
+- [MASTER CONTINUATION PROMPT](MASTER_CONTINUATION_PROMPT.md)
+- [MIGRATION MANIFEST](MIGRATION_MANIFEST.md)
+- [P PHASE ROADMAP](P_PHASE_ROADMAP.md)
+- [ROADMAP](ROADMAP.md)
 
-**Next work remains P3 product-contract acceptance and safety-patch integration review:** [Committed CI 45059455620](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45059455620) verifies **125** Python tests. Separate owner Windows screenshots establish **127 tests + 15 Chromium DOM cases + synthetic full browser/database flow** in an **isolated patched checkout**, not `main` CI. Source rights, legitimate consumer input, ERD, evidence versioning, final UX and permanent shortlist are outstanding. Do not mistake the map/colour studies for approved frontend. See [checkpoint](CHECKPOINT.md) and [continuity audit](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md).
+### Product strategy and buyer research
 
-See [latest checkpoint](CHECKPOINT.md).
+- [BUYER PERSONAS 2026-11-26](product/BUYER_PERSONAS_2026-11-26.md)
+- [COMPETITIVE INTELLIGENCE 2026-11-26](product/COMPETITIVE_INTELLIGENCE_2026-11-26.md)
+- [CUSTOMER JOURNEY MAP 2026-11-26](product/CUSTOMER_JOURNEY_MAP_2026-11-26.md)
+- [CUSTOMER SEGMENTATION 2026-11-26](product/CUSTOMER_SEGMENTATION_2026-11-26.md)
+- [HOMEBUYER PROBLEM RESEARCH 2026-11-26](product/HOMEBUYER_PROBLEM_RESEARCH_2026-11-26.md)
+- [JOBS TO BE DONE 2026-11-26](product/JOBS_TO_BE_DONE_2026-11-26.md)
+- [PINNACLE VISION](product/PINNACLE_VISION.md)
+- [PRODUCT BRIEF](product/PRODUCT_BRIEF.md)
+- [PRODUCT PRINCIPLES AND SUCCESS 2026-11-26](product/PRODUCT_PRINCIPLES_AND_SUCCESS_2026-11-26.md)
+- [RECRUITER WALKTHROUGH V1](product/RECRUITER_WALKTHROUGH_V1.md)
+- [RESIDENTIAL PROPERTY INDUSTRY RESEARCH 2026-11-26](product/RESIDENTIAL_PROPERTY_INDUSTRY_RESEARCH_2026-11-26.md)
+- [VALUE PROPOSITION 2026-11-26](product/VALUE_PROPOSITION_2026-11-26.md)
+
+### Data intelligence and source research
+
+- [DATA FEASIBILITY](research/DATA_FEASIBILITY.md)
+- [PHASE0 LIVE AUDIT RESULTS](research/PHASE0_LIVE_AUDIT_RESULTS.md)
+- [PHASE1 CLOUD AUDIT RESULTS](research/PHASE1_CLOUD_AUDIT_RESULTS.md)
+- [PHASE2 CLOUD AUDIT RESULTS](research/PHASE2_CLOUD_AUDIT_RESULTS.md)
+- [SOURCE REGISTER](research/SOURCE_REGISTER.md)
+
+### Engineering contracts and directives
+
+- [BUYER PRODUCT RELEASE PREPARATION V1](engineering/BUYER_PRODUCT_RELEASE_PREPARATION_V1.md)
+- [BUYER WORKSPACE UX V1](engineering/BUYER_WORKSPACE_UX_V1.md)
+- [CLOUD FIRST WORKFLOW](engineering/CLOUD_FIRST_WORKFLOW.md)
+- [CONTROLLED PRODUCT ACTIVATION PREPARATION V1](engineering/CONTROLLED_PRODUCT_ACTIVATION_PREPARATION_V1.md)
+- [ACQUISITION INTELLIGENCE SIDE DIRECTIVE (retired; historical only)](engineering/ACQUISITION_INTELLIGENCE_SIDE_DIRECTIVE.md)
+- [DATA MANAGER V1 (legacy integrity/lifecycle, historical evidence)](engineering/DATA_MANAGER_V1.md)
+- [ENGINEERING CONTRACT](engineering/ENGINEERING_CONTRACT.md)
+- [FINAL ACCEPTANCE V1](engineering/FINAL_ACCEPTANCE_V1.md)
+- [FULL RELEASE QUALIFICATION V1](engineering/FULL_RELEASE_QUALIFICATION_V1.md)
+- [GEOGRAPHIC EVIDENCE INTEGRATION V1](engineering/GEOGRAPHIC_EVIDENCE_INTEGRATION_V1.md)
+- [LEAN ENGINEERING DIRECTIVE](engineering/LEAN_ENGINEERING_DIRECTIVE.md)
+- [NEON CLOUD INTEGRATION V1](engineering/NEON_CLOUD_INTEGRATION_V1.md)
+- [P0 DISCOVERY AND FEASIBILITY DIRECTIVE](engineering/P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md)
+- [P3 APPLICATION CONTRACT](engineering/P3_APPLICATION_CONTRACT.md)
+- [P6 SYNTHETIC SHORTLIST CONTRACT](engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md)
+- [PRIVATE REAL DATA BETA V1](engineering/PRIVATE_REAL_DATA_BETA_V1.md)
+- [PRIVATE REAL REHEARSAL V1](engineering/PRIVATE_REAL_REHEARSAL_V1.md)
+- [PRODUCTION CONSOLIDATION V1](engineering/PRODUCTION_CONSOLIDATION_V1.md)
+- [PRODUCTION DATA ACTIVATION V1](engineering/PRODUCTION_DATA_ACTIVATION_V1.md)
+- [PRODUCTION READINESS V1](engineering/PRODUCTION_READINESS_V1.md)
+- [PRODUCTION RUNTIME PREPARATION V1](engineering/PRODUCTION_RUNTIME_PREPARATION_V1.md)
+- [PRODUCTION RUNTIME V1](engineering/PRODUCTION_RUNTIME_V1.md)
+- [PRODUCT INTELLIGENCE V1](engineering/PRODUCT_INTELLIGENCE_V1.md)
+- [PROFESSIONAL FRONTEND EXCELLENCE DIRECTIVE](engineering/PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md)
+- [REAL DATA INTEGRATION V1](engineering/REAL_DATA_INTEGRATION_V1.md)
+- [REAL DATA READINESS V1](engineering/REAL_DATA_READINESS_V1.md)
+- [RELEASE RUNBOOK V1](engineering/RELEASE_RUNBOOK_V1.md)
+- [SYNTHETIC GEOGRAPHIC EVIDENCE V1](engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md)
+
+### Design research and qualification
+
+- [ART DIRECTION AND DESIGN CRAFT RESEARCH 2026-11-26](design/ART_DIRECTION_AND_DESIGN_CRAFT_RESEARCH_2026-11-26.md)
+- [ATLAS TERMINAL VISUAL STUDY 2026-11-26](design/ATLAS_TERMINAL_VISUAL_STUDY_2026-11-26.md)
+- [BASEMAP ACQUISITION PROPOSAL 2026-11-26](design/BASEMAP_ACQUISITION_PROPOSAL_2026-11-26.md)
+- [BASEMAP QUALIFICATION 2026-11-26](design/BASEMAP_QUALIFICATION_2026-11-26.md)
+- [CUSTOM CARTOGRAPHY QUALIFICATION 2026-11-26](design/CUSTOM_CARTOGRAPHY_QUALIFICATION_2026-11-26.md)
+- [FRONTEND CONVERGENCE AUDIT 2026-11-26](design/FRONTEND_CONVERGENCE_AUDIT_2026-11-26.md)
+- [MAP LINKED VISUAL STUDY V1 REVIEW 2026-11-23](design/MAP_LINKED_VISUAL_STUDY_V1_REVIEW_2026-11-23.md)
+- [PRODUCT UX GEOSPATIAL CONVERGENCE RESEARCH 2026-11-26](design/PRODUCT_UX_GEOSPATIAL_CONVERGENCE_RESEARCH_2026-11-26.md)
+- [PROFESSIONAL UI AND MAPPING RESEARCH 2026-11-23](design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md)
+- [PROFESSIONAL UI ENGINEERING RESEARCH 2026-11-26](design/PROFESSIONAL_UI_ENGINEERING_RESEARCH_2026-11-26.md)
+- [REACT FULL ESM HOSTED VALIDATION 2026-11-24](design/REACT_FULL_ESM_HOSTED_VALIDATION_2026-11-24.md)
+- [REACT FULL UI SOURCE VALIDATION 2026-11-23](design/REACT_FULL_UI_SOURCE_VALIDATION_2026-11-23.md)
+- [REACT MAPLIBRE V6 COMPATIBILITY SPIKE 2026-11-23](design/REACT_MAPLIBRE_V6_COMPATIBILITY_SPIKE_2026-11-23.md)
+- [UX RESEARCH AND PRODUCT DIRECTION 2026-11-23](design/UX_RESEARCH_AND_PRODUCT_DIRECTION_2026-11-23.md)
+- [VISUAL FOUNDATION V1 IMPLEMENTATION PROPOSAL 2026-11-23](design/VISUAL_FOUNDATION_V1_IMPLEMENTATION_PROPOSAL_2026-11-23.md)
+
+### Historical evidence archives
+
+Retired market-specific records (not operating instructions; lifecycle obligations remain binding):
+
+- [SOUTH AFRICAN ECOSYSTEM AND BUYER RESEARCH 2026-11-26](product/SOUTH_AFRICAN_ECOSYSTEM_AND_BUYER_RESEARCH_2026-11-26.md)
+- [SOUTH AFRICAN DATA ACQUISITION 2026-11-26](research/SOUTH_AFRICAN_DATA_ACQUISITION_2026-11-26.md)
+- [SOUTH AFRICAN LEGAL AND DATA RIGHTS 2026-11-26](research/SOUTH_AFRICAN_LEGAL_AND_DATA_RIGHTS_2026-11-26.md)
+- [SOUTH AFRICAN RESEARCH PERMISSION PACKET 2026-11-26](research/SOUTH_AFRICAN_RESEARCH_PERMISSION_PACKET_2026-11-26.md)
+- [SOUTH AFRICAN INDEPENDENT READINESS 2026-11-26](engineering/SOUTH_AFRICAN_INDEPENDENT_READINESS_2026-11-26.md)
+- [SOUTH AFRICAN MISSION DIRECTIVE](engineering/SOUTH_AFRICAN_MISSION_DIRECTIVE.md)
+
+- [CHECKPOINT EVIDENCE 2026-11-26](archive/CHECKPOINT_EVIDENCE_2026-11-26.md)
+- [CONTINUATION CHECKPOINT 2026-11-26](archive/CONTINUATION_CHECKPOINT_2026-11-26.md)
+- [DECISION HISTORY 2026-11-26](archive/DECISION_HISTORY_2026-11-26.md)
+- [DELIVERY MILESTONE HISTORY 2026-11-26](archive/DELIVERY_MILESTONE_HISTORY_2026-11-26.md)
+- [INITIAL ROADMAP 2026-11-22](archive/INITIAL_ROADMAP_2026-11-22.md)
+
+### Audit and review records
+
+- [CLOUD FIRST DELIVERY DOCUMENTATION AUDIT 2026-11-23](reviews/CLOUD_FIRST_DELIVERY_DOCUMENTATION_AUDIT_2026-11-23.md)
+- [CONTINUATION KNOWLEDGE AUDIT 2026-11-26](reviews/CONTINUATION_KNOWLEDGE_AUDIT_2026-11-26.md)
+- [CONTINUATION SYSTEM AUDIT 2026-11-26](reviews/CONTINUATION_SYSTEM_AUDIT_2026-11-26.md)
+- [CONTINUITY AND DIRECTIVE AUDIT 2026-11-23](reviews/CONTINUITY_AND_DIRECTIVE_AUDIT_2026-11-23.md)
+- [DATA FIRST REPOSITORY AUDIT 2026-11-26](reviews/DATA_FIRST_REPOSITORY_AUDIT_2026-11-26.md)
+- [DOCUMENTATION AUDIT 2026-11-22](reviews/DOCUMENTATION_AUDIT_2026-11-22.md)
+- [DOCUMENTATION AUDIT 2026-11-28](reviews/DOCUMENTATION_AUDIT_2026-11-28.md)
+- [ENGINEERING DIRECTIVE AUDIT 2026-11-23](reviews/ENGINEERING_DIRECTIVE_AUDIT_2026-11-23.md)
+- [P0 A PRODUCT FOUNDATION REVIEW 2026-11-26](reviews/P0_A_PRODUCT_FOUNDATION_REVIEW_2026-11-26.md)
+- [P0 DISCOVERY DIRECTIVE AUDIT 2026-11-26](reviews/P0_DISCOVERY_DIRECTIVE_AUDIT_2026-11-26.md)
+- [POST P6 DOCUMENTATION RECONCILIATION AUDIT 2026-11-23](reviews/POST_P6_DOCUMENTATION_RECONCILIATION_AUDIT_2026-11-23.md)
+- [RELEASE READINESS DOCUMENTATION AUDIT 2026-11-26](reviews/RELEASE_READINESS_DOCUMENTATION_AUDIT_2026-11-26.md)
+
+### Source-area operating notes
+
+- [AGENTS.md](../AGENTS.md)
+- [README.md](../README.md)
+- [audit/phase0/PROJECT_CHECKPOINT.md](../audit/phase0/PROJECT_CHECKPOINT.md)
+- [audit/phase0/README.md](../audit/phase0/README.md)
+- [audit/phase1/README.md](../audit/phase1/README.md)
+- [audit/phase2/README.md](../audit/phase2/README.md)
+- [backend/README.md](../backend/README.md)
+- [data/README.md](../data/README.md)
+- [frontend/README.md](../frontend/README.md)
+- [frontend/react/README.md](../frontend/react/README.md)

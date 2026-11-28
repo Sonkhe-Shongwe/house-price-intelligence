@@ -91,6 +91,14 @@ class InvestigationContractTests(unittest.TestCase):
             validate_request({**request(lat=42.04)}, today=TODAY)
         self.assertEqual(cm.exception.code, "unknown_fields")
 
+    def test_optional_address_id_must_have_safe_syntax(self):
+        valid = validate_request(request(address_id="fictional-1"), today=TODAY)
+        self.assertEqual(valid["subject"]["address_id"], "fictional-1")
+        self.assertNotIn("address_id", validate_request(request(), today=TODAY)["subject"])
+        for bad in ("", "BAD-1", "x" * 41, "path/1", 42, True, []):
+            with self.subTest(bad=bad), self.assertRaises(ContractError):
+                validate_request(request(address_id=bad), today=TODAY)
+
     def test_strict_decimal_user_price(self):
         for bad in (-1, 600000.0, "1.234", "NaN", "-1", "0", "100000000000", "R500"):
             with self.subTest(bad=bad), self.assertRaises(ContractError):

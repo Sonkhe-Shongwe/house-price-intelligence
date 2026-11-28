@@ -1,0 +1,15 @@
+# Continuation system optimisation | 26 November 2026
+
+Baseline [9577b9f](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/CHECKPOINT.md); seven exact-head Actions successful (audit push 45879683114, audit PR 45879692372, React 45879692267, release 45879692264, PostgreSQL compatibility 45879692325, runtime 45879692253, identity 45879692269). Main 103c854; local checkout inaccessible. Scope continuation-only, no acquisition, provider, product, expenditure, score or acceptance change.
+
+## Findings and alternatives
+
+Seven former core reads total ~224 KB before additional directives. Checkpoint ~70.5 KB and master ~25.5 KB repeat state, approvals, old CI and task sequences. Existing checker freezes version wording and duplicated progress. Plain Markdown is simple but not structurally validated; a separate JSON state plus Markdown handoff risks competing state. Selected one JSON block inside existing checkpoint, compact human context, conditional retrieval, immutable archives. GitHub is live head/run authority; roadmap is planning authority; decisions are approval authority. No machine-state approval. Reuse existing offline checker and push/PR CI, no new scheduler, service, dependencies, issue mirroring or vector database. Validate routing shape, duplicate keys, status, phase, references and size. Structural checks do not prove factual accuracy, legal rights or owner consent.
+
+## Preservation and restoration
+
+Original [master](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/MASTER_CONTINUATION_PROMPT.md), [checkpoint](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/CHECKPOINT.md), [AGENTS](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/AGENTS.md), [index](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/docs/DOCUMENTATION_INDEX.md) and [validator](https://github.com/Sonkhe-Shongwe/house-price-intelligence/blob/9577b9f7ce5712001106bc0c94da3927aacd5abc/tools/check_docs.py) remain in immutable Git history. [Complete archived checkpoint](../archive/CONTINUATION_CHECKPOINT_2026-11-26.md) retains detailed evidence. Other archives, decisions, roadmap, requirements and product source unchanged.
+
+Fresh-session rehearsal: resolve exact heads and CI, read AGENTS/master/checkpoint, then P0 directive and acquisition register selectively, applicable decision rows and P0 criteria. P0-DATA-COMPLEMENT ready for read-only research while formal P0 exit blocked; stop before intake/contact or when no useful lawful lead remains. No local pull, service login, inbox check or recovery replay needed merely to restore context. This is a routing walkthrough, not independent fresh-chat execution.
+
+Inspect actual Actions for the implementation commit; no post-change pass claimed here. No progress change (87.1% overall, P0 94%, all full gates open).

@@ -5,7 +5,13 @@
 **Scope:** All delivery stages (P0–P8), including research, database, Python services, browser UI, testing, CI, documentation and handoffs.  
 **Authority:** Complements the [engineering contract](ENGINEERING_CONTRACT.md), [P-stage roadmap](../P_PHASE_ROADMAP.md) and [master continuation instructions](../MASTER_CONTINUATION_PROMPT.md). Correctness, owner approvals and source-data protections take precedence over speed.
 
-**Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md) to perform source work in the one GitHub repository and most automated checks in GitHub Actions, with Windows pulls reserved for indispensable human or platform tests. This *implements* the existing lifecycle; it does not alter its eight steps, approval requirements or phase gates.
+**Execution addendum (23 November 2026):** The owner adopted a [cloud-first development station](CLOUD_FIRST_WORKFLOW.md), later refined to one continuing `development` branch plus stable `main`, with GitHub Actions for routine tests and Windows only for indispensable human/platform checks. This implements the existing lifecycle without changing its eight steps, approvals or phase gates.
+
+**Frontend execution addendum (26 November 2026):** [Professional Frontend Excellence directive](PROFESSIONAL_FRONTEND_EXCELLENCE_DIRECTIVE.md) defines the retained subordinate FE1–FE7 quality standard; core engineering qualified and Atlas approved. Current priority follows the checkpoint (P0 closure; prior P4/P7 real-intake readiness and P8 downstream parked). It reuses the current React/MapLibre implementation and preserves the eight-step lifecycle, risk-focused verification, R0 and P-stage gates. Historical technology defaults below are evaluation history, not instructions to replace integrated React/PostgreSQL.
+
+**Single-phase closure addendum (26 November 2026):** owner directed P0 as the single active delivery phase. Use existing phase requirements and exit gates, freeze unrelated work, retain verified implementation, and allow only a bounded named dependency required for closure. Stop at indispensable approval/rights blockers rather than creating speculative work. Existing lean lifecycle, scope, R0 and all acceptance boundaries remain binding. Apply [P0 Discovery and Feasibility Directive](P0_DISCOVERY_AND_FEASIBILITY_DIRECTIVE.md) for sequential discovery workstreams and their research/analysis/planning/implementation/verification; no mandatory new software or duplicate reports. See [P-stage roadmap](../P_PHASE_ROADMAP.md).
+
+**Research-driven evolution and technology neutrality (26 November owner clarification):** Existing code, design, architecture, algorithms, stack and candidate market are assets, not constraints. Challenge them against new evidence; evaluate retain/refactor/replace options on measurable buyer value, correctness, security, licensing, sustainable R0, complexity and migration cost/risk. Preserve proven behaviour and historical evidence; validate changed contracts and regressions before replacing a component. Do not protect completion estimates from a justified rebaseline. Routine scoped engineering remains autonomous; major product, architectural or market changes require evidence-backed impact assessment and applicable owner approval. This principle neither mandates rebuilding nor authorises a specific migration or bypass of sequential phase gates.
 
 ## 1. Core operating principle
 
@@ -30,12 +36,12 @@
 **Required approach going forward:**
 
 1. Inspect the latest remote repository **and** the actual local working tree when accessible; never assume they match.
-2. Stop making indefinitely numbered copies of the same developing app. Select one reviewed source workspace or short-lived branch, preserve other work as history/patches, and integrate compatible changes in small units when publication is authorised.
+2. Stop making indefinitely numbered copies of the same app. Develop approved work in the permanent `development` branch, preserving `main` for stable accepted releases. Preserve earlier work as history/patches and reconcile exact changes carefully. Create exceptional branches only when specifically justified and approved.
 3. Keep the Phase 2 matching engine's documented selection invariants unchanged unless a separate acceptance decision requires and verifies a change.
 4. Before extracting abstractions, establish at least two real uses or a measured need. Avoid speculative plugin systems, provider adapters, event queues or service layers that do not simplify the current feature.
 5. Preserve a single current handoff and existing phase-gate records; do not grow a parallel family of authoritative progress files.
 
-**Integration is not permission-free:** "continue" alone is not blanket authorisation to commit, push, install dependencies, deploy or publish sensitive data. An explicit request to update GitHub permits the requested bounded change, subject to preserving concurrent work.
+**Standing authority (25 November):** "continue" or "next" delegates ordinary scoped engineering, routine dependencies, commits and synthetic CI on permanent `development`. It is not blanket authority for deployment, main integration, spending, destructive action, access changes, real-data collection or disclosure. Follow [master prompt](../MASTER_CONTINUATION_PROMPT.md) and checkpoint; preserve concurrent work.
 
 ## 3. Proposed architecture and technology selection
 
@@ -97,7 +103,7 @@ The matcher does not import HTTP, SQL, frontend code or source-download utilitie
 - Do not add trivial tests for getters, internal variable names or behaviour already protected at a lower level.
 - Test at the lowest reasonable layer; reserve graphical/end-to-end tests for real user journeys and cross-layer risks.
 - Diagnose a failed check before rerunning it. Do not suppress evidence, rewrite a failing test to match bad code, or equate the absence of errors with full acceptance.
-- The reported 83 passing local P3 v0.5 tests are fixture/HTTP evidence **only**. A prior Chromium graphical check was blocked by the environment; browser acceptance stays open.
+- Historical 83-test P3 v0.5 evidence covered fixtures/HTTP only; the early graphical check was blocked. Later synthetic Chromium and React evidence is in the current checkpoint; full real/hosted buyer acceptance remains open.
 
 **Feedback-time targets (aspirations, not verified SLAs):** coding checks in seconds, focused suite plus contract checks approximately under one minute on a normal runner, few browser tests only when pertinent. Measure actual times, and only optimise meaningful bottlenecks.
 
@@ -137,7 +143,9 @@ Track useful signals rather than code volume:
 
 No arbitrary 100% test coverage requirement, 100% lint cleanliness on untouched historical code, forced test-count reduction, or KPI used to justify weakening safety checks.
 
-## 8. Current priorities and boundaries (23 November 2026)
+## 8. Historical priorities and boundaries (23 November 2026)
+
+Historical planning baseline below, not current work instructions. For present priorities, scores, integrated evidence and remaining approval gates, use [checkpoint](../CHECKPOINT.md) and [roadmap](../P_PHASE_ROADMAP.md).
 
 1. **Accept P3 before expanding:** Review the already-integrated synthetic PIN-first API, 15-table draft ERD, error/abstention states and genuine graphical browser journey. CI is verified but P3 acceptance remains open.
 2. **Review-only evidence integrity guard:** A separate sale-price/sales-snapshot reopen-guard patch exists outside GitHub. Do not claim it is integrated or tested by the 125-test CI. Reconcile the Windows checkout and rerun the full suite before any authorised integration.
@@ -149,7 +157,7 @@ No arbitrary 100% test coverage requirement, 100% lint cleanliness on untouched 
 
 **Historical baseline:** The original 22 Nov adoption referred to `708239eb2451e379981767136186ab5010057fed`, 42 published research tests and 83 local isolated P3 tests. This was a dated baseline and remains preserved for continuity.
 
-**Planning estimate unchanged:** P3 **10%**; weighted MVP **22.8%**.
+**Historical estimate at adoption:** P3 **10%**; weighted MVP **22.8%**. Superseded by the current approved roadmap.
 
 ## 9. Safe large changes, migrations and CI controls
 

@@ -111,6 +111,35 @@ class AuditTests(unittest.TestCase):
         self.assertIsNone(wrong)
         self.assertEqual(reason, "no_prior_building")
 
+    def test_exact_assessment_year_encodings(self):
+        sale = sample_sale(date_="2025-06-01T00:00:00")
+        for year in (2024, 2024.0, "2024", "2024.0", "2024.000"):
+            with self.subTest(year=year):
+                building = sample_building(year=year)
+                original = dict(building)
+                record, reason = join_sale_to_prior_building(sale, building_rows_by_key([building]))
+                self.assertIsNone(reason)
+                self.assertEqual(record["sqft"], 1600)
+                self.assertEqual(building, original)
+
+    def test_invalid_assessment_years_never_join(self):
+        sale = sample_sale(date_="2025-06-01T00:00:00")
+        for year in (2024.5, "2024.5", "NaN", "Infinity", float("inf"), True,
+                     None, "", "bad", "2023.0", "2025.0"):
+            with self.subTest(year=year):
+                record, reason = join_sale_to_prior_building(
+                    sale, building_rows_by_key([sample_building(year=year)]))
+                self.assertIsNone(record)
+                self.assertEqual(reason, "no_prior_building")
+
+    def test_equivalent_year_encodings_do_not_hide_ambiguous_buildings(self):
+        sale = sample_sale(date_="2025-06-01T00:00:00")
+        rows = [sample_building(year="2024", card="1"),
+                sample_building(year="2024.0", card="2")]
+        record, reason = join_sale_to_prior_building(sale, building_rows_by_key(rows))
+        self.assertIsNone(record)
+        self.assertEqual(reason, "multiple_prior_buildings")
+
     def test_multibuilding_exclusion(self):
         b1 = sample_building(card="1")
         b2 = sample_building(card="2")

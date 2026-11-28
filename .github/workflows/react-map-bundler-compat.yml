@@ -1,0 +1,117 @@
+name: Isolated React and MapLibre bundler compatibility
+
+on:
+  push:
+    branches: [development]
+    paths: ['.github/workflows/react-map-bundler-compat.yml']
+  pull_request:
+    branches: [development]
+    paths: ['.github/workflows/react-map-bundler-compat.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-toolchain-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build disposable React/MapLibre compatibility fixture
+        run: |
+          mkdir -p toolchain-proof/src
+          cat > toolchain-proof/package.json <<'JSON'
+          {"name":"hpi-maplibre-compat","version":"0.0.0","private":true,"type":"module","scripts":{"build":"tsc --noEmit && vite build","preview":"vite preview --host 127.0.0.1 --port 4173"},"dependencies":{"react":"19.3.1","react-dom":"19.3.1","maplibre-gl":"6.19.0"},"devDependencies":{"vite":"8.3.8","typescript":"7.0.2","@types/react":"19.3.0","@types/react-dom":"19.2.0"}}
+          JSON
+          cat > toolchain-proof/tsconfig.json <<'JSON'
+          {"compilerOptions":{"target":"ES2022","lib":["ES2022","DOM","DOM.Iterable"],"module":"ESNext","moduleResolution":"Bundler","strict":true,"jsx":"react-jsx","skipLibCheck":true,"noEmit":true,"types":["vite/client"]},"include":["src"]}
+          JSON
+          cat > toolchain-proof/index.html <<'HTML'
+          <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HPI map bundler compatibility</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+          HTML
+          cat > toolchain-proof/src/main.tsx <<'TSX'
+          import React, {useEffect, useRef, useState} from 'react';
+          import {createRoot} from 'react-dom/client';
+          import * as maplibregl from 'maplibre-gl';
+          import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+          import 'maplibre-gl/dist/maplibre-gl.css';
+          maplibregl.setWorkerUrl(workerUrl);
+          const pointData = {type:'FeatureCollection' as const, features:[{type:'Feature' as const, id:1, geometry:{type:'Point' as const, coordinates:[0,0]}, properties:{kind:'fictional_sale'}}]};
+          const inlineStyle: maplibregl.StyleSpecification = {version:8,sources:{fake:{type:'geojson',data:pointData}}, layers:[{id:'bg',type:'background',paint:{'background-color':'#e7ece6'}},{id:'fake-sale',type:'circle',source:'fake',paint:{'circle-radius':16,'circle-color':'#235947'}}]};
+          function App(){
+            const [selected,setSelected]=useState(false);const [vector,setVector]=useState(false);const [status,setStatus]=useState('svg');const mapElement=useRef<HTMLDivElement>(null);
+            useEffect(()=>{
+              if(!vector)return;
+              if(!mapElement.current){setStatus('fallback');return;}
+              let map:maplibregl.Map;
+              try{map=new maplibregl.Map({container:mapElement.current,style:inlineStyle,center:[0,0],zoom:12,scrollZoom:false,dragRotate:false,attributionControl:false});map.on('load',()=>setStatus('ready'));map.on('error',()=>setStatus('fallback'));}
+              catch{setStatus('fallback');return;}
+              return()=>{map.remove()};
+            },[vector]);
+            return <main style={{fontFamily:'system-ui',maxWidth:960,margin:'auto',padding:28}}><h1>HPI isolated React + MapLibre compatibility</h1><p>Only fictional evidence and inline map geometry. No real parcels, valuation or third-party map assets.</p><button data-testid="switch-vector" onClick={()=>{setVector(v=>!v);setStatus('mounting')}}>Switch map renderer</button><button data-testid="select-sale" onClick={()=>setSelected(v=>!v)}>Select fictional sale</button><p data-testid="selection">{selected?'Selected fictional comparable':'No selection'}</p>{vector?<><div data-testid="vector-map" ref={mapElement} style={{height:340,border:'1px solid #ccd'}}/><p data-testid="map-state">{status}</p></>:<svg data-testid="svg-map" viewBox="0 0 440 260" style={{width:'100%',background:'#e7ece6'}} role="img" aria-label="Fictional schematic diagram"><rect x="0" y="0" width="440" height="260" fill="#e7ece6"/><circle cx="220" cy="130" r="15" fill="#235947"/></svg>}<p>Approximate illustration, not verified geography.</p></main>;
+          }
+          createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
+          TSX
+          cd toolchain-proof
+          npm install --no-fund --no-audit
+          npm run build
+          find dist -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+          if ! find dist -type f -name '*.js' -size +50k | grep -q .; then echo 'Expected bundled MapLibre or worker JS not found'; exit 1; fi
+      - name: Test built app and local map worker in Chromium
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+          cd toolchain-proof
+          npm run preview > preview.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          python - <<'PY'
+          import time
+          from playwright.sync_api import sync_playwright, expect
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True)
+              page=browser.new_page(viewport={'width':1280,'height':800})
+              remote=[]; errors=[]
+              page.on('request',lambda req:remote.append(req.url) if not req.url.startswith('http://127.0.0.1:4173/') else None)
+              page.on('pageerror',lambda err:errors.append(str(err)))
+              for _ in range(25):
+                  try:
+                      page.goto('http://127.0.0.1:4173/',timeout=2500);break
+                  except Exception:time.sleep(.25)
+              expect(page.get_by_test_id('svg-map')).to_be_visible()
+              page.get_by_test_id('select-sale').click()
+              expect(page.get_by_test_id('selection')).to_have_text('Selected fictional comparable')
+              page.get_by_test_id('switch-vector').click()
+              expect(page.get_by_test_id('vector-map')).to_be_visible(timeout=10000)
+              page.wait_for_function("['ready','fallback'].includes(document.querySelector('[data-testid=map-state]').textContent)",timeout=15000)
+              page.screenshot(path='react-maplibre-compat.png',full_page=True)
+              assert not remote, f'Unexpected remote requests: {remote}'
+              assert not errors, f'Page errors: {errors}'
+              browser.close()
+          PY
+      - name: Archive verified dependencies for isolated full-source validation
+        if: always()
+        run: |
+          if [ -d toolchain-proof/node_modules ]; then
+            tar -C toolchain-proof -czf toolchain-proof/node_modules-ci-linux-x64.tgz node_modules
+            ls -lh toolchain-proof/node_modules-ci-linux-x64.tgz
+          fi
+      - name: Attach build, lockfile and visual smoke result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpi-maplibre-toolchain-${{ github.run_id }}
+          path: |
+            toolchain-proof/package-lock.json
+            toolchain-proof/node_modules-ci-linux-x64.tgz
+            toolchain-proof/dist/**
+            toolchain-proof/react-maplibre-compat.png
+            toolchain-proof/preview.log
+          if-no-files-found: warn
+          retention-days: 7

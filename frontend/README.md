@@ -1,11 +1,32 @@
-# Frontend: synthetic-only property investigation browser
+# Frontend: fictional property-investigation browser
 
-**Status (22 November 2026):** A plain HTML/CSS/JavaScript *demonstration* is included with the P3 fixture-only HTTP service. It is not a deployed consumer product, validated address search or proof of browser graphical acceptance.
+**Verified synthetic-only browser baseline (23 November 2026):** The existing HTML/CSS/JavaScript is served by a local Python WSGI API backed by fictional SQLite records. Owner-approved [PR #6](https://github.com/Sonkhe-Shongwe/house-price-intelligence/pull/6) integrated shortlist and comparison into `development`. The unchanged application merge passed [172 Python and 9 hosted Chromium tests](https://github.com/Sonkhe-Shongwe/house-price-intelligence/actions/runs/45254283750). This describes the historical legacy baseline. React/TypeScript and fictional MapLibre were subsequently integrated on development; see [current checkpoint](../docs/CHECKPOINT.md) and [React guide](react/README.md). Atlas direction subsequently owner-approved; final real-buyer acceptance and real-map qualification remain open.
 
-The page accepts an invented 14-digit parcel PIN, user-reported asking price and investigation date. It presents synthetic comparable-sale evidence, source-build details, neighbourhood versus exploratory fallback warnings, insufficient/out-of-coverage states, and reopens saved fixture results by investigation ID. No numeric property valuation is generated.
+## Implemented browser journey (legacy and integrated React foundation)
 
-Start with `python -m backend.run_synthetic_api --fixture-only --port 8765` from the repository root, then visit `http://127.0.0.1:8765/`. HTTP and asset tests passed on the committed synthetic baseline. The original blocked Chromium attempt is historical: later owner-provided Windows screenshots show **15 Chromium DOM scenarios and a successful full synthetic browser-to-Python-to-SQLite journey** on a **separate isolated patched checkout**, not on the committed `main` frontend or CI.
+1. Enter an **invented** street-address query, such as `Fictional Way` or `105 Fictional Court`. The browser sends `POST /v1/addresses/search` and displays candidate IDs/labels without silently selecting a parcel.
+2. Two parcels can share `105 Fictional Court`. Each option has an explicit fictional parcel hint. A click calls `GET /v1/addresses/{address_id}`, returning one server-owned parcel key with `identity_scope=parcel_only` and `building_identity_verified=false`. The selection is not a verified physical building. The internal synthetic 14-digit PIN remains available as an alternative technical entry.
+3. Enter building area, optional **user-reported** asking price, optional label and analysis date. `POST /v1/investigations` binds the selected address ID to its server-side parcel; inconsistent or unknown choices return validation errors. Changing the PIN/search clears stale selection.
+4. See the four supported/unsupported evidence states, source provenance, explanatory comparable cards, exact fixed-two-decimal `sale_price_usd` strings, and honest exploratory/insufficient warnings. **No current appraisal, prediction or price estimate is generated.**
+5. Reopen one saved synthetic investigation using its UUID. Saved evidence is verified against original transactions, source snapshots/roles and original integer cents.
+6. Create or reopen a named fictional shortlist, add **up to three distinct properties** (including insufficient-evidence properties), edit local notes, and compare asking price, evidence status, matching tier, selected sales, source snapshots and limitations side by side. Removing a property from a shortlist does not delete its frozen investigation.
+7. Reopen shortlist, evidence and notes across a real process restart **only when `--fixture-db` was explicitly enabled**. Default in-memory runs disappear on shutdown. Notes are local demo content, not account-private.
 
-**Not implemented:** trusted address search, map-based lookup, user accounts, shortlist/side-by-side user workflow, publisher-data display rights, current prices or production deployment.
+## Run and verify
 
-See the [P3 application contract](../docs/engineering/P3_APPLICATION_CONTRACT.md), [product brief](../docs/product/PRODUCT_BRIEF.md) and [current checkpoint](../docs/CHECKPOINT.md).
+The commands below run the retained **legacy** frontend. For the current Atlas React application, follow the [React guide](react/README.md). From the repository root:
+
+```bash
+python -m backend.run_synthetic_api --fixture-only --port 8765
+python tools/dev_check.py
+# Optional: run server with restart-safe fictional SQLite instead:
+# python -m backend.run_synthetic_api --fixture-only --port 8765 --fixture-db ./local-fictional-demo.sqlite
+```
+
+Open http://127.0.0.1:8765/ locally. The original P6 application merge passed **9 actual Chromium browser journeys** and 172 Python tests. See the [current checkpoint](../docs/CHECKPOINT.md) for newer exact-SHA verification; documentation changes do not add functionality.
+
+## Current boundaries
+
+React/TypeScript workspace and Atlas visual direction are integrated and approved for the fictional application; PostgreSQL split-role persistence, actual Auth0/Neon invented buyer integration, fictional geographic and generated contextual PMTiles renderer are verified. Still open: licensed real address-to-parcel/building resolution, protected real-data storage and permitted fields, actual combined lifecycle gaps, final manual accessibility/real-device and buyer acceptance, actual regional map, public deployment and production security. Valuations and live listings are outside the accepted MVP. The original legacy fixture had overlapping dummy coordinates; the later integrated fictional MapLibre display is documented in the [synthetic map contract](../docs/engineering/SYNTHETIC_GEOGRAPHIC_EVIDENCE_V1.md). Real geography and tile/data rights remain unapproved. See the [mapping research and grey-area review](../docs/design/PROFESSIONAL_UI_AND_MAPPING_RESEARCH_2026-11-23.md) and the [P6 synthetic shortlist contract](../docs/engineering/P6_SYNTHETIC_SHORTLIST_CONTRACT.md).
+
+For the provisional source/API/schema meaning see the [P3 contract and proposed ERD](../docs/engineering/P3_APPLICATION_CONTRACT.md). For deliverables and stage gates see the [80-package roadmap](../docs/P_PHASE_ROADMAP.md).

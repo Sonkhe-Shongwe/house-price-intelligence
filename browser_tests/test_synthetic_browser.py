@@ -176,6 +176,115 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
         self.assertEqual(reopened.value.status, 200)
         self.assertEqual(reopened.value.json(), result)
 
+    def test_address_search_selection_investigation_and_reopen(self):
+        self.page.goto(self.base_url + "/")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+            and response.request.method == "POST"
+        ) as search:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(search.value.status, 200)
+        self.assertEqual(len(search.value.json()["candidates"]), 4)
+        expect(self.page.locator("#address-results .address-option")).to_have_count(4)
+        expect(self.page.locator("#pin")).to_have_value("")
+        with self.page.expect_response(
+            lambda response: "/v1/addresses/fictional-1" in response.url
+        ) as choice:
+            self.page.get_by_role("button", name="101 Fictional Way, Demonstration District").click()
+        self.assertEqual(choice.value.status, 200)
+        expect(self.page.locator("#pin")).to_have_value("00000000000001")
+        expect(self.page.locator("#selected-address")).to_contain_text("101 Fictional Way")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+            and response.request.method == "POST"
+        ) as saved:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(saved.value.status, 201)
+        self.assertEqual(saved.value.json()["selected_count"], 3)
+        self.assertEqual(saved.value.json()["subject"]["address_id"], "fictional-1")
+        self.assertEqual(saved.value.json()["subject"]["identity_status"], "synthetic_mapping_only")
+        self.assertEqual(saved.value.json()["comparables"][0]["sale_price_usd"], "525000.00")
+        self.assertNotIn("sale_price", saved.value.json()["comparables"][0])
+        expect(self.page.locator("#comparables .comp")).to_have_count(3)
+        expect(self.page.locator(".comp-price").first).to_have_text("$525,000.00")
+        investigation_id = saved.value.json()["investigation_id"]
+        reopened = self.context.new_page()
+        with reopened.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations/" + investigation_id
+        ) as original:
+            reopened.goto(self.base_url + "/#investigation/" + investigation_id)
+        self.assertEqual(original.value.json(), saved.value.json())
+
+    def test_identical_fictional_address_requires_explicit_parcel_choice(self):
+        self.page.goto(self.base_url + "/")
+        self.page.locator("#address-query").fill("105 Fictional Court")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ) as searched:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(len(searched.value.json()["candidates"]), 2)
+        expect(self.page.locator("#address-search-feedback")).to_contain_text(
+            "One address has multiple parcels"
+        )
+        expect(self.page.locator("#address-results .address-option")).to_have_count(2)
+        expect(self.page.locator("#pin")).to_have_value("")
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/addresses/fictional-6")
+        ) as selected:
+            self.page.get_by_role("button", name="105 Fictional Court, Demonstration District · Synthetic parcel option B").click()
+        self.assertEqual(selected.value.json()["pin"], "00000000000006")
+        expect(self.page.locator("#pin")).to_have_value("00000000000006")
+        expect(self.page.locator("#selected-address")).to_contain_text("building unverified")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+        ) as created:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(created.value.status, 201)
+        self.assertEqual(created.value.json()["subject"]["address_id"], "fictional-6")
+        self.assertEqual(created.value.json()["subject"]["pin"], "00000000000006")
+        self.assertEqual(created.value.json()["subject"]["identity_scope"], "parcel_only")
+        self.assertIs(created.value.json()["subject"]["building_identity_verified"], False)
+
+    def test_manual_pin_edit_clears_address_selection(self):
+        self.page.goto(self.base_url + "/")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ):
+            self.page.locator("#address-search-button").click()
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/addresses/fictional-1")
+        ):
+            self.page.get_by_role("button", name="101 Fictional Way, Demonstration District").click()
+        expect(self.page.locator("#selected-address")).to_be_visible()
+        self.page.locator("#pin").fill("00000000000099")
+        expect(self.page.locator("#selected-address")).to_be_hidden()
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+        ) as created:
+            self.page.locator("#submit-button").click()
+        self.assertEqual(created.value.status, 201)
+        self.assertEqual(created.value.json()["status"], "insufficient_data")
+        self.assertNotIn("address_id", created.value.json()["subject"])
+
+    def test_no_address_match_does_not_guess_or_investigate_old_pin(self):
+        self.page.goto(self.base_url + "/")
+        self.page.locator("#address-query").fill("Nonexistent Imaginary Road")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/addresses/search"
+        ) as search:
+            self.page.locator("#address-search-button").click()
+        self.assertEqual(search.value.json()["status"], "no_match")
+        expect(self.page.locator("#address-search-feedback")).to_contain_text("No invented address matched")
+        expect(self.page.locator("#address-results .address-option")).to_have_count(0)
+        expect(self.page.locator("#pin")).to_have_value("")
+        posted = []
+        self.page.on("request", lambda request: posted.append(request.url)
+                     if request.url == self.base_url + "/v1/investigations"
+                     and request.method == "POST" else None)
+        self.page.locator("#submit-button").click()
+        self.assertEqual(posted, [])
+        expect(self.page.locator("#result-state")).to_have_text("AWAITING INVESTIGATION")
+
     def test_invalid_asking_price_does_not_send_a_request(self):
         self.page.goto(self.base_url + "/")
         self.page.locator("#price").fill("not-a-price")
@@ -190,6 +299,188 @@ class SyntheticBrowserAcceptanceTests(unittest.TestCase):
         )
         self.assertEqual(posted, [])
         expect(self.page.locator("#result-state")).to_have_text("AWAITING INVESTIGATION")
+
+    def test_two_property_shortlist_notes_and_side_by_side_browser(self):
+        """Real Chromium exercises add, abstention, notes, comparison and reopen."""
+        self.page.goto(self.base_url + "/")
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+            and response.request.method == "POST"
+        ) as first_response:
+            self.page.locator("#submit-button").click()
+        first = first_response.value.json()
+        self.assertEqual(first["selected_count"], 3)
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/shortlists"
+            and response.request.method == "POST"
+        ) as shortlist_response:
+            self.page.locator("#shortlist-create-form button").click()
+        sid = shortlist_response.value.json()["shortlist_id"]
+        self.assertTrue(UUID_PATTERN.fullmatch(sid))
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/shortlists/" + sid + "/entries")
+            and response.request.method == "POST"
+        ) as added:
+            self.page.locator("#shortlist-add-current").click()
+        self.assertEqual(added.value.status, 201)
+        expect(self.page.locator("#shortlist-entries .shortlist-entry")).to_have_count(1)
+
+        self.page.locator("#example-unknown").click()
+        with self.page.expect_response(
+            lambda response: response.url == self.base_url + "/v1/investigations"
+            and response.request.method == "POST"
+        ) as unknown_response:
+            self.page.locator("#submit-button").click()
+        unknown = unknown_response.value.json()
+        self.assertEqual(unknown["status"], "insufficient_data")
+        self.assertEqual(unknown["selected_count"], 0)
+        self.assertIsNone(unknown["valuation"])
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/v1/shortlists/" + sid + "/entries")
+            and response.request.method == "POST"
+        ) as second_add:
+            self.page.locator("#shortlist-add-current").click()
+        self.assertEqual(second_add.value.status, 201)
+        expect(self.page.locator("#shortlist-entries .shortlist-entry")).to_have_count(2)
+        expect(self.page.locator("#shortlist-compare")).to_be_visible()
+        expect(self.page.locator("#shortlist-comparison thead th")).to_have_count(3)
+        expect(self.page.locator("#shortlist-comparison")).to_contain_text("Insufficient evidence")
+        expect(self.page.locator("#shortlist-comparison")).to_contain_text("Not produced")
+
+        first_card = self.page.locator("#shortlist-entries .shortlist-entry").nth(0)
+        first_card.locator("textarea").fill("Check roof and school commute")
+        with self.page.expect_response(
+            lambda response: response.url.endswith("/entries/" + first["investigation_id"])
+            and response.request.method == "PATCH"
+        ) as saved_note:
+            first_card.get_by_role("button", name="Save notes").click()
+        self.assertEqual(saved_note.value.status, 200)
+        expect(self.page.locator("#shortlist-entries .shortlist-entry").nth(0).locator("textarea")).to_have_value(
+            "Check roof and school commute"
+        )
+        other = self.context.new_page()
+        other.goto(self.base_url + "/#shortlist/" + sid)
+        expect(other.locator("#shortlist-entries .shortlist-entry")).to_have_count(2)
+        expect(other.locator("#shortlist-compare")).to_be_visible()
+        expect(other.locator("#shortlist-entries .shortlist-entry").nth(0).locator("textarea")).to_have_value(
+            "Check roof and school commute"
+        )
+        self.assertEqual(other.locator("#shortlist-comparison tbody tr").count(), 11)
+        with other.expect_response(
+            lambda response: response.url.endswith("/entries/" + unknown["investigation_id"])
+            and response.request.method == "DELETE"
+        ) as removal:
+            other.locator("#shortlist-entries .shortlist-entry").nth(1).get_by_role(
+                "button", name="Remove"
+            ).click()
+        self.assertEqual(removal.value.status, 200)
+        expect(other.locator("#shortlist-entries .shortlist-entry")).to_have_count(1)
+        expect(other.locator("#shortlist-compare")).to_be_hidden()
+
+    def test_durable_fixture_reopens_after_real_server_restart(self):
+        """Chromium -> HTTP -> file-backed SQLite -> server restart -> reopen."""
+        with tempfile.TemporaryDirectory() as folder:
+            fixture_path = Path(folder) / "browser-fictional.sqlite"
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind(("127.0.0.1", 0))
+                port = sock.getsockname()[1]
+            base = f"http://127.0.0.1:{port}"
+            restarted_server = None
+
+            def launch():
+                process = subprocess.Popen(
+                    [sys.executable, "-m", "backend.run_synthetic_api",
+                     "--fixture-only", "--port", str(port),
+                     "--fixture-db", str(fixture_path)],
+                    cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT,
+                )
+                for _ in range(80):
+                    if process.poll() is not None:
+                        raise RuntimeError("Durable synthetic server exited unexpectedly")
+                    try:
+                        with urlopen(base + "/health", timeout=0.4) as response:
+                            if response.status == 200:
+                                return process
+                    except (OSError, URLError):
+                        time.sleep(0.15)
+                process.terminate()
+                process.wait(timeout=5)
+                raise RuntimeError("Durable synthetic server did not become healthy")
+
+            try:
+                restarted_server = launch()
+                self.page.goto(base + "/")
+                with self.page.expect_response(
+                    lambda response: response.url == base + "/v1/investigations"
+                    and response.request.method == "POST"
+                ) as creation:
+                    self.page.locator("#submit-button").click()
+                saved = creation.value.json()
+                self.assertEqual(creation.value.status, 201)
+                self.assertEqual(saved["selected_count"], 3)
+                self.assertIsNone(saved["valuation"])
+                self.assertEqual(saved["comparables"][0]["sale_price_usd"], "525000.00")
+                with self.page.expect_response(
+                    lambda response: response.url == base + "/v1/shortlists"
+                    and response.request.method == "POST"
+                ) as list_creation:
+                    self.page.locator("#shortlist-create-form button").click()
+                sid = list_creation.value.json()["shortlist_id"]
+                with self.page.expect_response(
+                    lambda response: response.url.endswith("/v1/shortlists/" + sid + "/entries")
+                    and response.request.method == "POST"
+                ):
+                    self.page.locator("#shortlist-add-current").click()
+                self.page.locator("#example-unknown").click()
+                with self.page.expect_response(
+                    lambda response: response.url == base + "/v1/investigations"
+                    and response.request.method == "POST"
+                ) as unsupported:
+                    self.page.locator("#submit-button").click()
+                self.assertEqual(unsupported.value.json()["status"], "insufficient_data")
+                with self.page.expect_response(
+                    lambda response: response.url.endswith("/v1/shortlists/" + sid + "/entries")
+                    and response.request.method == "POST"
+                ):
+                    self.page.locator("#shortlist-add-current").click()
+                self.page.locator("#shortlist-entries .shortlist-entry").nth(0).locator("textarea").fill(
+                    "Return after a second viewing"
+                )
+                with self.page.expect_response(
+                    lambda response: response.request.method == "PATCH"
+                    and response.url.endswith("/entries/" + saved["investigation_id"])
+                ):
+                    self.page.locator("#shortlist-entries .shortlist-entry").nth(0).get_by_role(
+                        "button", name="Save notes"
+                    ).click()
+                restarted_server.terminate()
+                restarted_server.wait(timeout=5)
+                restarted_server = None
+
+                restarted_server = launch()
+                later = self.context.new_page()
+                with later.expect_response(
+                    lambda response: response.url == base + "/v1/investigations/"
+                    + saved["investigation_id"]
+                ) as reopened:
+                    later.goto(base + "/#investigation/" + saved["investigation_id"])
+                self.assertEqual(reopened.value.status, 200)
+                self.assertEqual(reopened.value.json(), saved)
+                expect(later.locator("#comparables .comp")).to_have_count(3)
+                expect(later.locator("#stat-count")).to_have_text("3")
+                returning_buyer = self.context.new_page()
+                returning_buyer.goto(base + "/#shortlist/" + sid)
+                expect(returning_buyer.locator("#shortlist-entries .shortlist-entry")).to_have_count(2)
+                expect(returning_buyer.locator("#shortlist-compare")).to_be_visible()
+                expect(returning_buyer.locator("#shortlist-comparison")).to_contain_text("Insufficient evidence")
+                expect(returning_buyer.locator("#shortlist-entries .shortlist-entry").nth(0).locator(
+                    "textarea")).to_have_value("Return after a second viewing")
+                self.assertEqual(returning_buyer.locator("#shortlist-comparison thead th").count(), 3)
+            finally:
+                if restarted_server is not None and restarted_server.poll() is None:
+                    restarted_server.terminate()
+                    restarted_server.wait(timeout=5)
+
 
 
 if __name__ == "__main__":

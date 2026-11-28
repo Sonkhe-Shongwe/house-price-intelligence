@@ -5,21 +5,19 @@ addresses, user identities or sale records in this fixture.
 """
 from __future__ import annotations
 
-from pathlib import Path
 import sqlite3
 
+from backend.schema_migrations import CURRENT_SCHEMA_VERSION, migrate_fixture
 from backend.synthetic_investigation_store import SyntheticInvestigationStore
 
 SUBJECT_PIN = "00000000000001"
 BUILD_ID = "synthetic-build"
-SCHEMA = Path(__file__).with_name("schema_draft.sql")
 
 
-def in_memory_demo() -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
+def in_memory_demo(*, schema_version: int = CURRENT_SCHEMA_VERSION) -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
     conn = sqlite3.connect(":memory:")
     try:
-        conn.executescript(SCHEMA.read_text(encoding="utf-8"))
-        conn.execute("PRAGMA foreign_keys = ON")
+        migrate_fixture(conn, target_version=schema_version)
         for snapshot, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                                ("geo-snap", "geography")):
             conn.execute(
@@ -31,19 +29,49 @@ def in_memory_demo() -> tuple[sqlite3.Connection, SyntheticInvestigationStore]:
         for snapshot, role in (("sale-snap", "sales"), ("assess-snap", "assessment"),
                                ("geo-snap", "geography")):
             conn.execute("INSERT INTO curated_build_sources VALUES (?,?,?)", (BUILD_ID, snapshot, role))
-        for idx in range(1, 5):
+        for idx in range(1, 7):
             pin = f"{idx:014d}"
             conn.execute("INSERT INTO parcels VALUES (?,?)", (pin, "17"))
             conn.execute("INSERT INTO assessment_records VALUES (?,?,?,?,?,?,?,?)",
                          (f"assessment-{pin}", "assess-snap", pin, 2023, "1", None, "203", 1600))
             conn.execute("INSERT INTO parcel_geographies VALUES (?,?,?,?,?,?,?)",
                          ("geo-snap", pin, 2023, "17", 42.04, -87.68, 1))
-            if idx != 1:
+            if idx in (2, 3, 4):
                 txn = f"txn-{idx}"
                 conn.execute("INSERT INTO sale_transactions VALUES (?,?,?,?,?,?)",
                              (txn, "sale-snap", f"row-{idx}", f"DOC-{idx}", "2024-02-01", 52500000))
                 conn.execute("INSERT INTO sale_transaction_parcels VALUES(?,?)", (txn, pin))
                 conn.execute("INSERT INTO curated_build_transactions VALUES (?,?)", (BUILD_ID, txn))
+        # Every label below is fictional. The index is populated only inside
+        # the disposable in-memory fixture, never from a publisher dataset.
+        for idx in range(1, 5):
+            conn.execute(
+                "INSERT INTO synthetic_address_index VALUES (?,?,?,?)",
+                (f"fictional-{idx}", f"{idx:014d}",
+                 f"{100 + idx} Fictional Way, Demonstration District",
+                 f"{100 + idx} fictional way demonstration district"),
+            )
+        if schema_version >= 3:
+            # v3 is installed before the demo data are inserted. Replicate the
+            # synthetic v1 addresses as candidates after the fixture seed.
+            conn.execute(
+                """INSERT INTO synthetic_address_candidates
+                   (candidate_id, display_address, search_key, pin, parcel_hint)
+                   SELECT address_id, display_address, search_key, pin,
+                          'Synthetic parcel ' || CAST(pin AS INTEGER)
+                   FROM synthetic_address_index"""
+            )
+            # Same invented address, two distinct parcel candidates.
+            for idx, hint in ((5, "Synthetic parcel option A"),
+                              (6, "Synthetic parcel option B")):
+                conn.execute(
+                    """INSERT INTO synthetic_address_candidates
+                       (candidate_id, display_address, search_key, pin, parcel_hint)
+                       VALUES (?,?,?,?,?)""",
+                    (f"fictional-{idx}", "105 Fictional Court, Demonstration District",
+                     "105 fictional court demonstration district",
+                     f"{idx:014d}", hint),
+                )
         conn.commit()
         return conn, SyntheticInvestigationStore(conn, build_id=BUILD_ID)
     except Exception:

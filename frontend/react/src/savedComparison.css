@@ -1,0 +1,56 @@
+.workspace-shell{background:#fff;border:1px solid #dce6dc;border-radius:15px;padding:28px;margin-top:19px;box-shadow:0 12px 42px #263f3410;color:#294c39;min-width:0}
+.workspace-shell h2{font:normal clamp(30px,3.1vw,43px)/1.1 Georgia,serif;letter-spacing:-.045em;margin:0 0 13px;color:#1b4535}
+.workspace-shell h2 em{color:#4c8865}
+.workspace-shell p{font-size:12px;line-height:1.65;color:#708277}
+.workspace-header{display:flex;gap:20px;justify-content:space-between;align-items:flex-start;margin-bottom:21px}
+.workspace-header>div{max-width:650px}
+.workspace-flag{font-size:10px;font-weight:800;letter-spacing:.09em;color:#3b7b57;background:#ecf6ee;border:1px solid #c4ddca;border-radius:24px;padding:10px 13px;white-space:nowrap}
+.workspace-shell label{display:block;font-size:11px;font-weight:800;color:#44634e;margin-bottom:8px}
+.workspace-input-line{display:flex;gap:9px;min-width:0;align-items:stretch}
+.workspace-input-line input,.workspace-card textarea{min-width:0;border:1px solid #d2e0d2;border-radius:8px;background:#fbfcf9;color:#2e493a;padding:11px;font:inherit;font-size:12px;width:100%}
+.workspace-input-line input:focus,.workspace-card textarea:focus{outline:3px solid #daa75f;outline-offset:1px}
+.workspace-shell button{border:1px solid #285f48;border-radius:8px;background:#296b50;color:#fff;font-weight:780;font-size:11px;min-height:40px;padding:9px 15px;white-space:nowrap}
+.workspace-shell button:disabled{background:#e2e7e2;color:#809184;border-color:#d2ddd2;cursor:not-allowed}
+.workspace-shell button:not(:disabled):hover{background:#1d4e3a}
+.workspace-new-form{margin-bottom:18px;padding:15px;background:#f5f9f5;border:1px solid #dfeadd;border-radius:10px}
+.workspace-reopen{margin-bottom:18px}
+.workspace-summary{padding:18px 20px;background:#1c4b39;border-radius:12px;color:#fff;display:flex;justify-content:space-between;gap:12px;margin-bottom:20px}
+.workspace-summary small{font-size:10px;letter-spacing:.045em;color:#c1d9c9;display:block}
+.workspace-summary h3{font:normal 25px Georgia,serif;letter-spacing:-.03em;margin:5px 0}
+.workspace-summary span{font-size:10px;overflow-wrap:anywhere;color:#bcd6c7;display:block}
+.workspace-summary>div:last-child{text-align:right;flex-shrink:0}
+.workspace-summary strong{font-size:25px;display:block;color:#f6e1bc}
+.workspace-add{display:grid;grid-template-columns:1fr 1.4fr;align-items:end;gap:15px;margin-bottom:19px}
+.workspace-add>button{width:100%;min-height:43px}
+.workspace-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.workspace-card{min-width:0;border:1px solid #dce6dc;border-radius:12px;background:#fbfdf9;padding:19px;display:flex;flex-direction:column}
+.workspace-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:10px;font-weight:810;letter-spacing:.09em;color:#508668}
+.workspace-evidence-badge{background:#e7f1e6;border-radius:20px;padding:5px 9px;letter-spacing:0;color:#34694f;font-size:9px}
+.workspace-card h3{font:normal 23px/1.15 Georgia,serif;letter-spacing:-.03em;margin:17px 0 6px;overflow-wrap:anywhere}
+.workspace-card>p{font-size:11px;color:#789081;margin:0 0 10px;overflow-wrap:anywhere}
+.workspace-money{font-size:22px;font-weight:800;letter-spacing:-.045em;color:#214d3b;margin:9px 0 23px}
+.workspace-money small{display:block;font-size:10px;font-weight:500;letter-spacing:0;color:#859589;margin-top:4px}
+.workspace-card textarea{resize:vertical;line-height:1.6;min-height:85px}
+.workspace-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.workspace-card-bottom span{color:#6c806d;font-size:10px}
+.workspace-provenance{display:flex;flex-direction:column;gap:4px;border-top:1px solid #e2eae0;margin-top:14px;padding-top:11px;font-size:9px;color:#849888;overflow-wrap:anywhere}
+.workspace-disclaimer{margin:21px 0 0!important;font-size:11px!important;color:#879687!important}
+.workspace-empty{background:#f6f9f4;border:1px dashed #b2ceb6;border-radius:9px;padding:17px;margin:0 0 17px}
+.workspace-success{border:1px solid #bddbc3;border-radius:9px;background:#eff8ee;color:#306846!important;font-weight:650;padding:12px 16px;margin-top:14px}
+@media(max-width:1120px){.workspace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.workspace-shell{padding:18px}.workspace-header{flex-direction:column;gap:9px}.workspace-flag{white-space:normal}.workspace-add{grid-template-columns:1fr}.workspace-grid{grid-template-columns:1fr}.workspace-input-line{flex-direction:column}.workspace-input-line button{white-space:normal}.workspace-summary{flex-direction:column}.workspace-summary>div:last-child{text-align:left}}
+@media(max-width:360px){.workspace-summary h3{font-size:21px}.workspace-card-bottom{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.workspace-shell *, .workspace-shell *::before, .workspace-shell *::after{animation:none!important;transition:none!important}}
+
+/* Recent labels and source comparison values are untrusted variable-length text. */
+.workspace-shell [aria-label="Recent saved shortlists"]{min-width:0;margin-bottom:18px}
+.workspace-shell [data-testid="workspace-recent"]{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;max-height:240px;overflow-y:auto}
+.workspace-shell [data-testid="workspace-recent"] li{min-width:0}
+.workspace-shell [data-testid="workspace-recent"] button{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left}
+.workspace-summary>div:first-child{min-width:0;overflow-wrap:anywhere}
+.workspace-grid[data-testid="workspace-comparison"]{margin-top:14px}
+.workspace-grid[data-testid="workspace-comparison"] dl{min-width:0;margin:8px 0 0;font-size:12px;line-height:1.6}
+.workspace-grid[data-testid="workspace-comparison"] dt{font-weight:750;margin-top:10px;color:#48674f}
+.workspace-grid[data-testid="workspace-comparison"] dd{margin:2px 0 0;overflow-wrap:anywhere}
+.workspace-shell button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.workspace-card,.workspace-money,.workspace-card-bottom span{overflow-wrap:anywhere}
